@@ -150,6 +150,7 @@ class EditInvoiceTour extends AbstractServices {
         invoice_note,
         invoice_combined_id,
         invoice_total_profit: totalProfit,
+        invoice_total_vendor_price: totalCost,
         invoice_client_previous_due,
         invoice_reference,
       };

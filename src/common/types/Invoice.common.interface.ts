@@ -25,7 +25,7 @@ export interface IInvoiceInfoReq {
 }
 
 export interface IInvoiceVisaReq
-  extends Omit<IInvoiceInfoReq, 'invoice_created_by'> {}
+  extends Omit<IInvoiceInfoReq, 'invoice_created_by'> { }
 
 export interface IExistingInvoiceEdit {
   invoice_client_id?: number;
@@ -57,7 +57,7 @@ export interface IInvoiceInfoDb {
   invoice_total_vendor_price?: number;
   invoice_cltrxn_id: number | null;
   invoice_walking_customer_name?: string;
-  invoice_reference: string;
+  invoice_reference?: string;
 }
 
 export interface IUpdateInvoiceInfoDb

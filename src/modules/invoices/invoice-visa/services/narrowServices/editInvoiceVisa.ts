@@ -39,14 +39,11 @@ class EditInvoiceVisa extends AbstractServices {
       invoice_sales_date,
       invoice_due_date,
       invoice_note,
-      billing_comvendor,
       billing_information,
       invoice_no,
       invoice_reference,
       passport_information,
     } = req.body as InvoiceVisaReq;
-
-    await ValidateClientAndVendor(billing_comvendor, invoice_combclient_id);
 
     const { invoice_client_id, invoice_combined_id } = await getClientOrCombId(
       invoice_combclient_id
@@ -55,6 +52,16 @@ class EditInvoiceVisa extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
+
+
+      let invoice_total_profit = 0;
+      let invoice_total_vendor_price = 0;
+
+      for (const item of billing_information) {
+        invoice_total_profit += item.billing_profit;
+        invoice_total_vendor_price += (item.billing_cost_price * item.billing_quantity);
+
+      }
 
       let ctrxn_pax_name = null;
 
@@ -141,6 +148,8 @@ class EditInvoiceVisa extends AbstractServices {
         invoice_note,
         invoice_combined_id,
         invoice_reference,
+        invoice_total_profit,
+        invoice_total_vendor_price
       };
       await common_conn.updateInvoiceInformation(
         invoice_id,

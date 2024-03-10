@@ -32,7 +32,7 @@ class ReIssueAirticketRoutes extends AbstractRouter {
     );
 
     this.routers.patch(
-      '/post/existing-edit/:invoice_id',
+      '/existing-edit/:invoice_id',
       this.controllers.editExistingCl
     );
 

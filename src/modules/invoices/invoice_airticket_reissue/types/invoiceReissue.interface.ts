@@ -27,19 +27,31 @@ export interface IReissueTicketDetails {
   airticket_fare_difference?: number;
 }
 
-export interface IReissueTicketDetailsDb
-  extends Omit<
-    IReissueTicketDetails,
-    'airticket_route_or_sector' | 'airticket_comvendor'
-  > {
-  airticket_invoice_id: number;
+export interface IReissueTicketDetailsDb {
   airticket_client_id: number | null;
   airticket_combined_id: number | null;
   airticket_vendor_id: number | null;
+  airticket_pnr?: string;
+  airticket_pax_name?: string;
   airticket_vendor_combine_id: number | null;
+  airticket_invoice_id: number;
   airticket_sales_date: string;
-  airticket_vtrxn_id: number | null;
-  airticket_existing_invoiceid?: number;
+  airticket_profit: number;
+  airticket_journey_date: string;
+  airticket_return_date: string;
+  airticket_purchase_price: number;
+  airticket_client_price: number;
+  airticket_ticket_no: string;
+  airticket_vtrxn_id?: number | null;
+  airticket_penalties: number;
+  airticket_fare_difference: number;
+  airticket_commission_percent: number;
+  airticket_ait: string;
+  airticket_issue_date: string;
+  airticket_classes: string;
+  airticket_existing_invoiceid: number;
+  airticket_existing_airticket_id: number;
+
 }
 
 export interface ITicketInfo {
@@ -55,24 +67,29 @@ export interface InvoiceAirticketReissueReq {
 }
 
 export interface IExistingReissueReq {
-  invoice_combclient_id: string;
-  invoice_sales_man_id: number;
-  invoice_sales_date: string;
-  invoice_due_date: string;
-  airticket_profit: number;
-  invoice_no: string;
-  invoice_created_by: number;
-  airticket_journey_date: string;
-  airticket_return_date: string;
-  airticket_vendor_charge: number;
-  airticket_client_charge: number;
-  airticket_service_charge: number;
-  invoice_note: string;
-  airticket_comvendor: string;
-  airticket_ticket_no: string;
-  airticket_existing_invoiceid: number;
-  invoice_reference: string;
+  invoice_combclient_id: string
+  invoice_sales_man_id: number
+  invoice_sales_date: string
+  invoice_due_date: string
+  airticket_ticket_no: string
+  airticket_penalties: number
+  airticket_fare_difference: number
+  airticket_commission_percent: number
+  airticket_ait: string
+  airticket_client_price: number
+  airticket_purchase_price: number
+  airticket_profit: number
+  airticket_issue_date: string
+  airticket_journey_date: string
+  airticket_return_date: string
+  airticket_classes: string
+  invoice_note: string
+  airticket_existing_airticket_id: number,
+  airticket_existing_invoiceid: number,
+  comb_vendor: string
+  invoice_no: string
 }
+
 
 export interface IReissueReturnBody {
   comb_client: string;

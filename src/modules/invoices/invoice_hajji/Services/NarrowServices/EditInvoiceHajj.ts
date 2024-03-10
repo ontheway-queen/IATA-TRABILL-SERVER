@@ -1,19 +1,19 @@
 import { Request } from 'express';
 
-import { IInvoiceHajjReq } from '../../Type/InvoiceHajj.Interfaces';
-import CommonHajjDetailsInsert from '../commonServices/CommonHajjDetailsInsert';
 import AbstractServices from '../../../../../abstracts/abstract.services';
+import Trxns from '../../../../../common/helpers/Trxns';
 import InvoiceHelpers, {
   InvoiceClientAndVendorValidate,
   getClientOrCombId,
 } from '../../../../../common/helpers/invoice.helpers';
-import Trxns from '../../../../../common/helpers/Trxns';
 import { IClTrxnUpdate } from '../../../../../common/interfaces/Trxn.interfaces';
 import {
   IUpdateInvoiceInfoDb,
   InvoiceExtraAmount,
 } from '../../../../../common/types/Invoice.common.interface';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
+import { IInvoiceHajjReq } from '../../Type/InvoiceHajj.Interfaces';
+import CommonHajjDetailsInsert from '../commonServices/CommonHajjDetailsInsert';
 
 class EditInvoiceHajj extends AbstractServices {
   constructor() {
@@ -45,11 +45,13 @@ class EditInvoiceHajj extends AbstractServices {
       invoice_reference,
     } = req.body as IInvoiceHajjReq;
 
+
     // VALIDATE CLIENT AND VENDOR
-    await InvoiceClientAndVendorValidate(
-      billing_information,
-      invoice_combclient_id
-    );
+    const { invoice_total_profit, invoice_total_vendor_price } =
+      await InvoiceClientAndVendorValidate(
+        billing_information,
+        invoice_combclient_id
+      );
 
     // CLIENT AND COMBINED CLIENT
     const { invoice_client_id, invoice_combined_id } = await getClientOrCombId(
@@ -117,6 +119,8 @@ class EditInvoiceHajj extends AbstractServices {
         invoice_note,
         invoice_combined_id,
         invoice_reference,
+        invoice_total_profit,
+        invoice_total_vendor_price,
       };
       await common_conn.updateInvoiceInformation(
         invoice_id,

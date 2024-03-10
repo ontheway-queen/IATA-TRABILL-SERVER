@@ -9,6 +9,9 @@ class AuthChecker extends AbstractServices {
     const bearerToken = req.headers.authorization?.split(' ')[1];
     const session_id = req.headers.sessionid as string;
 
+    console.log({ session_id });
+
+
     if (bearerToken && session_id) {
       try {
         const authConn = this.models.adminAuthModel(req);

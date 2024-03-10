@@ -152,10 +152,10 @@ class EditInvoiceOther extends AbstractServices {
         invoice_due_date,
         invoice_sales_man_id,
         invoice_sub_total,
-        invoice_total_profit,
         invoice_updated_by: invoice_created_by,
         invoice_reference,
 
+        invoice_total_profit,
         invoice_total_vendor_price,
       };
 

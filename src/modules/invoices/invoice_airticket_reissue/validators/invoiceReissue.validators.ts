@@ -12,35 +12,26 @@ class ReissueAirticket extends AbstractValidator {
 
   addExistingClient = [
     this.permissions.check(this.resources.invoice_reissue, 'create'),
-
     check('invoice_combclient_id').notEmpty(),
     check('invoice_sales_man_id').isInt(),
-    check('invoice_sales_date').toDate(),
     check('invoice_due_date').optional().toDate(),
     check('airticket_profit').isNumeric(),
-    check('invoice_no').notEmpty(),
-    check('invoice_created_by').isInt(),
-    check('airticket_journey_date').isISO8601().toDate(),
-    check('airticket_return_date').toDate(),
-    check('airticket_vendor_charge')
-      .optional()
-      .customSanitizer((value) => {
-        return value === null ? undefined : value;
-      })
-      .isNumeric(),
-    check('airticket_client_charge')
-      .optional()
-      .customSanitizer((value) => {
-        return value === null ? undefined : value;
-      })
-      .isNumeric(),
-    check('airticket_service_charge')
-      .optional()
-      .customSanitizer((value) => {
-        return value === null ? undefined : value;
-      })
-      .isNumeric(),
+    check('airticket_journey_date').optional().isISO8601().toDate(),
+    check('airticket_return_date').optional().toDate(),
+    check('invoice_sales_date').optional().isDate().toDate(),
+    check('airticket_ticket_no').notEmpty(),
+    check('airticket_penalties').isNumeric(),
+    check('airticket_fare_difference').isNumeric(),
+    check('airticket_commission_percent').isNumeric(),
+    check('airticket_ait').isNumeric(),
+    check('airticket_client_price').isNumeric(),
+    check('airticket_purchase_price').isNumeric(),
+    check('airticket_issue_date').optional().isISO8601().toDate(),
+    check('airticket_classes').notEmpty(),
     check('invoice_note').optional().isString(),
+    check('airticket_existing_airticket_id').optional().isInt(),
+
+
   ];
   addReissueAirticket = [
     this.permissions.check(this.resources.invoice_reissue, 'create'),
@@ -253,6 +244,8 @@ class ReissueAirticket extends AbstractValidator {
       .toDate(),
   ];
 
+
+
   reissueRefundCreate = [
     check('comb_client').isString(),
     check('invoice_id').isInt(),
@@ -276,6 +269,11 @@ class ReissueAirticket extends AbstractValidator {
     check('refund_date').isString().toDate(),
     check('created_by').isInt(),
   ];
+
+
+
+
+
 }
 
 export default ReissueAirticket;

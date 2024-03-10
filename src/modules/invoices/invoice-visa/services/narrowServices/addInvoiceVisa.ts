@@ -2,6 +2,7 @@ import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import InvoiceHelpers, {
   getClientOrCombId,
+  InvoiceClientAndVendorValidate,
   MoneyReceiptAmountIsValid,
   ValidateClientAndVendor,
 } from '../../../../../common/helpers/invoice.helpers';
@@ -44,14 +45,16 @@ class AddInvoiceVisa extends AbstractServices {
       invoice_sales_date,
       invoice_due_date,
       invoice_note,
-      billing_comvendor,
-      billing_information,
       money_receipt,
       passport_information,
       invoice_reference,
+      billing_information
     } = req.body as InvoiceVisaReq;
 
-    await ValidateClientAndVendor(billing_comvendor, invoice_combclient_id);
+
+
+
+
 
     MoneyReceiptAmountIsValid(money_receipt, invoice_net_total);
 
@@ -63,6 +66,18 @@ class AddInvoiceVisa extends AbstractServices {
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
       let ctrxn_pax_name = null;
+
+
+      let invoice_total_profit = 0;
+      let invoice_total_vendor_price = 0;
+
+      for (const item of billing_information) {
+        invoice_total_profit += item.billing_profit;
+        invoice_total_vendor_price += (item.billing_cost_price * item.billing_quantity);
+
+      }
+
+
 
       if (passport_information.length) {
         const passport_id = passport_information.map(
@@ -118,6 +133,8 @@ class AddInvoiceVisa extends AbstractServices {
         invoice_note,
         invoice_cltrxn_id,
         invoice_reference,
+        invoice_total_profit,
+        invoice_total_vendor_price
 
       };
 

@@ -450,9 +450,8 @@ class CommonInvoiceModel extends AbstractModels {
           "CASE WHEN invoice_client_id IS NOT NULL THEN CONCAT('client-',invoice_client_id) ELSE CONCAT('combined-',invoice_combined_id) END AS invoice_combclient_id"
         ),
         this.db.raw(
-          'COALESCE(cl.client_name, ccl.combine_name, company_name) AS client_name'
+          'COALESCE(cl.client_name, ccl.combine_name) AS client_name'
         ),
-        'company_name',
         this.db.raw(
           `COALESCE(cl.client_mobile, ccl.combine_mobile) AS client_mobile`
         ),
@@ -474,9 +473,6 @@ class CommonInvoiceModel extends AbstractModels {
         airticket_invoice_id: 'invoice_id',
       })
       .leftJoin('trabill_agents_profile', { agent_id: 'invoice_agent_id' })
-      .leftJoin('trabill_client_company_information ', {
-        company_client_id: 'invoice_client_id',
-      })
       .leftJoin('trabill_employees', { employee_id: 'invoice_sales_man_id' })
       .leftJoin('trabill_users', { user_id: 'invoice_created_by' })
       .leftJoin('trabill_clients as cl', { invoice_client_id: 'cl.client_id' })
@@ -488,7 +484,7 @@ class CommonInvoiceModel extends AbstractModels {
 
     if (isEmpty(data)) {
       throw new CustomError(
-        'Pleace provide a valid invoice id',
+        'Please provide a valid invoice id',
         400,
         'Invalid Invoice Id'
       );
@@ -778,8 +774,8 @@ class CommonInvoiceModel extends AbstractModels {
           .select('airline_iata_code')
           .from('trabill_airports')
           .where('trabill_airports.airline_id', id)) as {
-          airline_iata_code: string;
-        }[];
+            airline_iata_code: string;
+          }[];
         newRoute.push(route);
       }
     }

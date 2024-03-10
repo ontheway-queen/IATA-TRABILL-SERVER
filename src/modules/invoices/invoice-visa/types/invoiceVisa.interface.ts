@@ -47,7 +47,6 @@ export interface IVisaBillingDb {
 export interface InvoiceVisaReq {
   invoice_combclient_id: string;
   invoice_sales_man_id: number;
-  billing_comvendor: string;
   invoice_note: string;
   invoice_no: string;
   invoice_sales_date: string;

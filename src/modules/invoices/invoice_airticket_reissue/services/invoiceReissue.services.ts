@@ -107,43 +107,25 @@ class ReissueAirticket extends AbstractServices {
     );
 
     if (invoice_info.invoice_reissue_client_type === 'EXISTING') {
-      const {
-        airticket_comvendor,
-        airticket_profit,
-        airticket_journey_date,
-        airticket_return_date,
-        airticket_purchase_price,
-        airticket_client_price,
-        airticket_ticket_no,
-        airticket_classes,
-      } = await conn.getExistingClTicketInfo(invoice_id);
+      const airTicketInfo = await conn.getExistingClTicketInfo(invoice_id);
 
       const {
         invoice_combclient_id,
         invoice_sales_man_id,
         invoice_sales_date,
         invoice_no,
-        invoice_net_total,
-        invoice_sub_total,
         invoice_note,
+        invoice_due_date
       } = invoice_info;
 
       const data = {
+        ...airTicketInfo,
         invoice_combclient_id,
-        airticket_comvendor,
         invoice_sales_man_id,
         invoice_sales_date,
-        airticket_profit,
         invoice_no,
-        airticket_journey_date,
-        airticket_return_date,
-        airticket_vendor_charge: airticket_purchase_price,
-        airticket_client_charge: airticket_client_price,
-        airticket_service_charge:
-          Number(invoice_net_total) - Number(invoice_sub_total),
         invoice_note,
-        airticket_ticket_no,
-        airticket_classes,
+        invoice_due_date,
       };
 
       return {

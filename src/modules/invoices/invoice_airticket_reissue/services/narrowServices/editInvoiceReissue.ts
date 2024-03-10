@@ -163,7 +163,6 @@ class EditReissueAirticket extends AbstractServices {
         invoice_note,
         invoice_updated_by: invoice_created_by,
         invoice_reference,
-
         invoice_total_profit,
         invoice_total_vendor_price,
       };
@@ -281,7 +280,7 @@ class EditReissueAirticket extends AbstractServices {
 
         const airticket_vtrxn_id = await trxns.VTrxnInsert(VTrxnBody);
 
-        const invoiceNonComAirticketItems: IReissueTicketDetailsDb = {
+        const invoiceNonComAirticketItems = {
           ...restAirticketItems,
           airticket_pnr,
           airticket_pax_name,
@@ -294,10 +293,12 @@ class EditReissueAirticket extends AbstractServices {
           airticket_vendor_combine_id: combined_id,
           airticket_vtrxn_id,
           airticket_ticket_no,
+
+
         };
 
-        airticketId = await conn.insertReissueAirticketItems(
-          invoiceNonComAirticketItems
+        airticketId = await conn.insertReissueAirTicketItems(
+          invoiceNonComAirticketItems as any
         );
 
         // INSERT PAX PASSPORT INFO

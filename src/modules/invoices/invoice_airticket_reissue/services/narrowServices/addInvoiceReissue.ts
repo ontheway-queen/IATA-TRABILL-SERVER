@@ -26,8 +26,7 @@ import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
 import { InvoiceAirticketPreType } from '../../../invoice-air-ticket/types/invoiceAirticket.interface';
 import {
-  InvoiceAirticketReissueReq,
-  IReissueTicketDetailsDb,
+  InvoiceAirticketReissueReq
 } from '../../types/invoiceReissue.interface';
 
 class AddReissueAirticket extends AbstractServices {
@@ -263,7 +262,7 @@ class AddReissueAirticket extends AbstractServices {
 
         const airticket_vtrxn_id = await trxns.VTrxnInsert(VTrxnBody);
 
-        const invoiceNonComAirticketItems: IReissueTicketDetailsDb = {
+        const invoiceNonComAirticketItems = {
           ...restAirticketItems,
           airticket_purchase_price,
           airticket_client_id: invoice_client_id,
@@ -278,8 +277,8 @@ class AddReissueAirticket extends AbstractServices {
           airticket_pnr,
         };
 
-        const airticket_id = await conn.insertReissueAirticketItems(
-          invoiceNonComAirticketItems
+        const airticket_id = await conn.insertReissueAirTicketItems(
+          invoiceNonComAirticketItems as any
         );
 
         // INSERT PAX PASSPORT INFO

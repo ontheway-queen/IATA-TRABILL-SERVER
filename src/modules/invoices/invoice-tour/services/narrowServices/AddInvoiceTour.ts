@@ -103,7 +103,7 @@ class AddInvoiceTour extends AbstractServices {
 
       const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
 
-      const { totalProfit } = tourBilling.reduce(
+      const { totalProfit, totalCost } = tourBilling.reduce(
         (acc, billing) => {
           const { totalCost, totalSales, totalProfit } = acc;
           return {
@@ -131,6 +131,7 @@ class AddInvoiceTour extends AbstractServices {
         invoice_note,
         invoice_cltrxn_id,
         invoice_reference,
+        invoice_total_vendor_price: totalCost
       };
 
       const invoice_id = await common_conn.insertInvoicesInfo(invoiceData);

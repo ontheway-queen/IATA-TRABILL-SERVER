@@ -11,7 +11,7 @@ import {
 } from '../types/invoiceReissue.interface';
 
 class ReIssueAirticket extends AbstractModels {
-  public async insertReissueAirticketItems(data: IReissueTicketDetailsDb) {
+  public async insertReissueAirTicketItems(data: IReissueTicketDetailsDb) {
     const id = await this.query()
       .insert({ ...data, airticket_org_agency: this.org_agency })
       .into('trabill_invoice_reissue_airticket_items');
@@ -190,7 +190,6 @@ class ReIssueAirticket extends AbstractModels {
 
   public async getExistingClientAirticket(
     client: string,
-
     table_name: 'trabill_invoice' | 'trabill_invoice_noncom'
   ) {
     const { client_id, combined_id } = separateCombClientToId(client);
@@ -199,8 +198,12 @@ class ReIssueAirticket extends AbstractModels {
       .from(`${table_name}_airticket_items`)
       .select(
         'airticket_id',
+        'airticket_invoice_id',
         this.db.raw(
           "CASE WHEN airticket_client_id IS NOT NULL THEN CONCAT('client-',airticket_client_id) ELSE CONCAT('combined-',airticket_combined_id) END AS airticket_client_id"
+        ),
+        this.db.raw(
+          "coalesce(concat('vendor-',airticket_vendor_id), concat('combined-',airticket_vendor_combine_id)) as comb_client"
         ),
         'passport_name',
         'airticket_ticket_no',
@@ -272,31 +275,33 @@ class ReIssueAirticket extends AbstractModels {
     const data = await this.query()
       .select(
         this.db.raw(
-          "CASE WHEN airticket_vendor_id IS NOT NULL THEN CONCAT('vendor-',airticket_vendor_id) ELSE CONCAT('combined-',airticket_vendor_combine_id) END AS airticket_comvendor"
+          "CASE WHEN airticket_vendor_id IS NOT NULL THEN CONCAT('vendor-',airticket_vendor_id) ELSE CONCAT('combined-',airticket_vendor_combine_id) END AS comb_vendor"
         ),
-        'airticket_pax_name',
-        'airticket_reissue_ticket_no',
-        'airticket_pnr',
-        this.db.raw(
-          "DATE_FORMAT(airticket_journey_date, '%Y-%c-%e') as airticket_journey_date"
-        ),
-        this.db.raw(
-          "DATE_FORMAT(airticket_return_date, '%Y-%c-%e') as airticket_return_date"
-        ),
-        'airticket_classes',
-        'airticket_client_price',
-        'airticket_purchase_price',
-        'airticket_extra_fee',
+        'airticket_client_id',
+        'airticket_combined_id',
+        'airticket_vendor_id',
+        'airticket_vendor_combine_id',
+        'airticket_invoice_id',
+        'airticket_sales_date',
         'airticket_profit',
-        'passport_name as passport_name',
-        'airticket_ticket_no'
+        'airticket_journey_date',
+        'airticket_return_date',
+        'airticket_purchase_price',
+        'airticket_client_price',
+        'airticket_ticket_no',
+        'airticket_vtrxn_id',
+        'airticket_existing_invoiceid',
+        'airticket_penalties',
+        'airticket_fare_difference',
+        'airticket_commission_percent',
+        'airticket_ait',
+        'airticket_issue_date',
+        'airticket_classes',
+        'airticket_existing_airticket_id',
       )
       .from('trabill_invoice_reissue_airticket_items')
       .where('airticket_invoice_id', invoice_id)
       .andWhereNot('airticket_is_deleted', 1)
-      .leftJoin('trabill_passport_details', {
-        passport_id: 'airticket_passport_id',
-      });
 
     return data[0];
   }

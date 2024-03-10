@@ -29,7 +29,6 @@ import {
   IOtherBillingInfoDb,
   IOtherInvoiceReq,
 } from '../../types/invoiceOther.interface';
-import CustomError from '../../../../../common/utils/errors/customError';
 
 class AddInvoiceOther extends AbstractServices {
   constructor() {

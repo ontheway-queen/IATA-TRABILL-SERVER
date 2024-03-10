@@ -54,10 +54,12 @@ class EditInvoiceUmmrah extends AbstractServices {
     } = req.body as IInvoiceUmmrahReq;
 
     // VALIDATE CLIENT AND VENDOR
-    await InvoiceClientAndVendorValidate(
-      billing_information,
-      invoice_combclient_id
-    );
+    const { invoice_total_profit, invoice_total_vendor_price } =
+      await InvoiceClientAndVendorValidate(
+        billing_information,
+        invoice_combclient_id
+      );
+
 
     // CLIENT AND COMBINED CLIENT
 
@@ -127,7 +129,7 @@ class EditInvoiceUmmrah extends AbstractServices {
         invoice_due_date,
         invoice_updated_by: invoice_created_by,
         invoice_note,
-        invoice_reference,
+        invoice_reference, invoice_total_profit, invoice_total_vendor_price
       };
 
       await common_conn.updateInvoiceInformation(

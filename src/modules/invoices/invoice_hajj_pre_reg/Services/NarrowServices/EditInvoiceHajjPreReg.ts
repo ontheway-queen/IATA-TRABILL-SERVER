@@ -49,10 +49,12 @@ class EditInvoiceHajjpre extends AbstractServices {
       invoice_reference,
     } = req.body as IInvoiceHajjPreReg;
 
-    await InvoiceClientAndVendorValidate(
-      billing_information,
-      invoice_combclient_id
-    );
+    // VALIDATE CLIENT AND VENDOR
+    const { invoice_total_profit, invoice_total_vendor_price } =
+      await InvoiceClientAndVendorValidate(
+        billing_information,
+        invoice_combclient_id
+      );
 
     const { invoice_client_id, invoice_combined_id } = await getClientOrCombId(
       invoice_combclient_id
@@ -98,6 +100,7 @@ class EditInvoiceHajjpre extends AbstractServices {
         invoice_combined_id,
         invoice_haji_group_id,
         invoice_reference,
+        invoice_total_profit, invoice_total_vendor_price
       };
 
       await common_conn.updateInvoiceInformation(
@@ -105,8 +108,8 @@ class EditInvoiceHajjpre extends AbstractServices {
         invoice_information
       );
 
+      // AGENT TRANSACTION
       if (invoice_agent_id) {
-        // AGENT TRANSACTION
         await InvoiceHelpers.invoiceAgentTransactions(
           this.models.agentProfileModel(req, trx),
           req.agency_id,

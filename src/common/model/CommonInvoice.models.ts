@@ -1,7 +1,12 @@
 import moment from 'moment';
 import AbstractModels from '../../abstracts/abstract.models';
 
+import {
+  IAirticketRoutes,
+  InvoiceAirticketPreType,
+} from '../../modules/invoices/invoice-air-ticket/types/invoiceAirticket.interface';
 import { isEmpty, isNotEmpty } from '../helpers/invoice.helpers';
+import { IInvoiceVoidDetails } from '../interfaces/commonInterfaces';
 import {
   IInvoiceInfoDb,
   IInvoiceVoidInfo,
@@ -14,11 +19,6 @@ import {
   idType,
 } from '../types/common.types';
 import CustomError from '../utils/errors/customError';
-import {
-  IAirticketRoutes,
-  InvoiceAirticketPreType,
-} from '../../modules/invoices/invoice-air-ticket/types/invoiceAirticket.interface';
-import { IInvoiceVoidDetails } from '../interfaces/commonInterfaces';
 
 class CommonInvoiceModel extends AbstractModels {
   checkCreditLimit = async (
@@ -351,7 +351,6 @@ class CommonInvoiceModel extends AbstractModels {
       );
     }
 
-    console.log({ invoiceId, invoice_has_deleted_by });
 
     await this.db.raw(`CALL ${this.database}.delete_invoice(?,?);`, [
       invoiceId,
@@ -840,6 +839,40 @@ class CommonInvoiceModel extends AbstractModels {
 
     return id;
   }
+
+
+  getReissuedItemByInvId = async (invoiceId: idType) => {
+    return await this.query()
+      .select(
+
+        this.db.raw('COALESCE(vendor_name, combine_name) vendor_name'),
+        'airticket_sales_date',
+        'airticket_profit',
+        'airticket_journey_date',
+        'airticket_return_date',
+        'airticket_purchase_price',
+        'airticket_client_price',
+        'airticket_ticket_no',
+        'airticket_existing_invoiceid',
+        'airticket_existing_airticket_id',
+        'airticket_penalties',
+        'airticket_fare_difference',
+        'airticket_commission_percent',
+        'airticket_ait',
+        'airticket_issue_date',
+        'airticket_classes',
+
+      )
+      .from("trabill_invoice_reissue_airticket_items")
+      .leftJoin('trabill_vendors', { vendor_id: 'airticket_vendor_id' })
+      .leftJoin('trabill_combined_clients', {
+        combine_id: 'airticket_vendor_combine_id',
+      })
+      .where("airticket_invoice_id", invoiceId)
+      .andWhereNot("airticket_is_deleted", 1)
+
+  }
+
 }
 
 export default CommonInvoiceModel;

@@ -357,8 +357,6 @@ class AdminPanelServices extends AbstractServices {
       expired: 'true';
     };
 
-    console.log({ search });
-
     const trashParm = trash ? 1 : 0;
 
     const data = await this.models
@@ -407,9 +405,8 @@ class AdminPanelServices extends AbstractServices {
 
     return {
       success: true,
-      message: `Agency ${
-        org_subscription_expired ? 'expired date' : 'activity status'
-      }  has been changed`,
+      message: `Agency ${org_subscription_expired ? 'expired date' : 'activity status'
+        }  has been changed`,
     };
   };
 

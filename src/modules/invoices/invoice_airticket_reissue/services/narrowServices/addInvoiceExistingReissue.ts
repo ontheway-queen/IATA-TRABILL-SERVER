@@ -33,13 +33,13 @@ class AddExistingClient extends AbstractServices {
       airticket_ait,
       airticket_issue_date,
       airticket_classes,
-      airticket_existing_airticket_id,
       airticket_client_price,
       airticket_purchase_price,
       airticket_profit,
       airticket_journey_date,
       airticket_return_date,
       invoice_note,
+      airticket_existing_airticket_id,
       comb_vendor, airticket_existing_invoiceid
     } = req.body as IExistingReissueReq;
 
@@ -135,6 +135,12 @@ class AddExistingClient extends AbstractServices {
       await conn.insertReissueAirTicketItems(
         reissueAirTicketItem
       );
+
+      // UPDATE IS REISSUED
+      const existingInvCateId = await conn.getExistingInvCateId(airticket_existing_invoiceid)
+
+      await conn.updateInvoiceIsReissued(airticket_existing_invoiceid);
+      await conn.updateAirTicketIsReissued(existingInvCateId, airticket_existing_airticket_id);
 
 
       // NEW HISTORY

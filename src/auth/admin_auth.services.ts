@@ -584,7 +584,6 @@ class AdminAuthServices extends AbstractServices {
 
     let message = 'Please provide all info in body';
 
-    console.log({ secret3 });
 
     if (username && password && user_id && secret3 == dev_secret) {
       const authConn = this.models.adminAuthModel(req);

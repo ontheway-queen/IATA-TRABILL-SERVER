@@ -4,7 +4,7 @@ import CustomError from '../../utils/errors/customError';
 type Func = (req: Request, res: Response, next: NextFunction) => Promise<void>;
 
 class FuncWrapper {
-  // CONTROLLER ASYNCWRAPPER
+  // CONTROLLER ASYNC WRAPPER
   public wrap(cb: Func) {
     return async (req: Request, res: Response, next: NextFunction) => {
       try {

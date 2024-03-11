@@ -117,8 +117,6 @@ class AgentProfileServices extends AbstractServices {
   public getLocation = async (req: Request) => {
     const fetch_data = await fetch(`https://ipapi.co/${req.ip}/json/`);
 
-    console.log({ fetch_data: fetch_data.body });
-
     return fetch_data.body;
   };
 

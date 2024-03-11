@@ -89,7 +89,6 @@ class AddInvoiceOther extends AbstractServices {
         productName = await conn.getProductsName(productsIds);
       }
 
-      console.log({ productName });
 
       // PAX PASSPORT NAME
       const passportName = passport_information
@@ -118,7 +117,6 @@ class AddInvoiceOther extends AbstractServices {
           ' \n Journey date: ' + moment(journey_date).format('DD MMM YYYY');
       }
 
-      console.log({ ctrxn_particular_type });
 
       const clTrxnBody: IClTrxnBody = {
         ctrxn_type: 'DEBIT',

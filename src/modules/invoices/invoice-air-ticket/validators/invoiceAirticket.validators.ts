@@ -19,7 +19,7 @@ class InvoiceAirticketValidators extends AbstractValidator {
     check('invoice_has_deleted_by')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace enter admin or user id'),
+      .withMessage('Please enter admin or user id'),
   ];
 
   readEditData = [
@@ -35,7 +35,7 @@ class InvoiceAirticketValidators extends AbstractValidator {
       .exists()
       .withMessage('search_type is required')
       .isIn(['invoice_no', 'ticket_no', 'money_receipt', 'PNR'])
-      .withMessage('Pleace provide right search type'),
+      .withMessage('Please provide right search type'),
     check('search_text')
       .exists()
       .withMessage('search_text is required')

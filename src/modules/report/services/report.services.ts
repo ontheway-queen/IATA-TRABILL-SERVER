@@ -1338,7 +1338,6 @@ class ReportServices extends AbstractServices {
       client
     );
 
-    console.log({ data: data.data });
 
     return { success: true, message: 'Air ticket total report', ...data };
   };

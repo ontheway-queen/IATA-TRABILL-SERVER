@@ -4,7 +4,7 @@ import fs from 'fs';
 import config from '../../../config/config';
 
 class DeleteFile {
-  constructor() {}
+  constructor() { }
 
   public delete_image = async (
     blobUrl: string,
@@ -30,7 +30,6 @@ class DeleteFile {
 
       if (blobExists) {
         await blobClient.delete();
-        console.log({ msg: 'DELETE:' }, blobName);
       } else {
         console.log({ msg: 'Image not found on storage' });
       }
@@ -52,7 +51,7 @@ class DeleteFile {
         return;
       }
     } catch (err) {
-      console.log({ from: 'deletefile', err });
+      console.log({ from: 'deleteFile', err });
     }
   };
 }

@@ -114,6 +114,7 @@ class InvoiceAirticketService extends AbstractServices {
     const taxes_commission = await conn.selectAirTicketAirlineCommissions(
       invoice_id
     );
+    const reissued = await common_conn.getReissuedItemByInvId(invoice_id);
 
     const refunds = await this.models
       .refundModel(req)
@@ -125,6 +126,7 @@ class InvoiceAirticketService extends AbstractServices {
       success: true,
       data: {
         ...data,
+        reissued,
         refunds,
         pax_details,
         flights,

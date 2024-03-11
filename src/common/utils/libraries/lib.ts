@@ -103,7 +103,6 @@ class Lib {
         const url = `${otpUrl}SendSMS?ApiKey=${apiKey}&ClientId=${clientId}&SenderId=${senderId}&Message=${encodedMsg}&MobileNumbers=${phone}&Is_Unicode=true`;
 
         const response = await axios.get(url);
-        console.log({ ssss: response.statusText });
 
         if (response.statusText === 'OK') {
           return true;

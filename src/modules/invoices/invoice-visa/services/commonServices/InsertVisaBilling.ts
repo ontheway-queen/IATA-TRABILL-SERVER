@@ -42,7 +42,6 @@ class InsertVisaBilling extends AbstractServices {
       const trxns = new Trxns(req, trx);
 
       for (const billing_info of billing_information) {
-        console.log({ billing_info });
 
         const {
           billing_id,
@@ -88,11 +87,11 @@ class InsertVisaBilling extends AbstractServices {
         const billingExist:
           | undefined
           | {
-              billing_invoice_id: number;
-              prevComvendor: string;
-              prevTrxnId: number;
-              billing_status: string;
-            } = await conn.billingIsExist(billing_id as number);
+            billing_invoice_id: number;
+            prevComvendor: string;
+            prevTrxnId: number;
+            billing_status: string;
+          } = await conn.billingIsExist(billing_id as number);
 
         // IF VENDOR AND COST PRICE EXIST
         if (billing_cost_price && billing_comvendor) {

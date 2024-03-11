@@ -361,8 +361,6 @@ class EditInvoiceNonCommission extends AbstractServices {
           for (const item of flight_details) {
             const { fltdetails_id, is_deleted, ...restFlightsData } = item;
 
-            console.log({ item });
-
             const flightsData = {
               ...restFlightsData,
               fltdetails_airticket_id: airticketId as number,

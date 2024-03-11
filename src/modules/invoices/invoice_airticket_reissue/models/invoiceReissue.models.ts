@@ -190,7 +190,7 @@ class ReIssueAirticket extends AbstractModels {
 
   public async getExistingClientAirticket(
     client: string,
-    table_name: 'trabill_invoice' | 'trabill_invoice_noncom'
+    table_name: 'trabill_invoice' | 'trabill_invoice_noncom' | 'trabill_invoice_reissue'
   ) {
     const { client_id, combined_id } = separateCombClientToId(client);
 
@@ -232,7 +232,10 @@ class ReIssueAirticket extends AbstractModels {
       .leftJoin('trabill_vendors', { vendor_id: 'airticket_vendor_id' })
       .leftJoin('trabill_airlines', { airline_id: 'airticket_airline_id' })
       .where('airticket_client_id', client_id)
-      .andWhere('airticket_combined_id', combined_id);
+      .andWhere('airticket_combined_id', combined_id)
+      .andWhereNot("airticket_is_deleted", 1)
+      .andWhereNot("airticket_is_refund", 1)
+      .andWhereNot("airticket_is_reissued", 1)
 
     return data1;
   }
@@ -515,8 +518,7 @@ class ReIssueAirticket extends AbstractModels {
       .select("invoice_category_id")
       .from("trabill_invoices")
       .where("invoice_id", invoiceId);
-
-    return data.invoice_category_id as number;
+    return data as { invoice_category_id: number };
 
   }
 
@@ -531,6 +533,12 @@ class ReIssueAirticket extends AbstractModels {
       await this.query()
         .update("airticket_is_reissued", 1)
         .from("trabill_invoice_noncom_airticket_items")
+        .where("airticket_id", airTicketId)
+    }
+    else if (categoryId === 3) {
+      await this.query()
+        .update("airticket_is_reissued", 1)
+        .from("trabill_invoice_reissue_airticket_items")
         .where("airticket_id", airTicketId)
     }
 

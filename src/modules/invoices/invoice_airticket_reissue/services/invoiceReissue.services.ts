@@ -86,12 +86,17 @@ class ReissueAirticket extends AbstractServices {
       client,
       'trabill_invoice_noncom'
     );
+    const data3 = await conn.getExistingClientAirticket(
+      client,
+      'trabill_invoice_reissue'
+    );
 
-    const data = [...data1, ...data2];
+    const data = [...data1, ...data2, ...data3];
+
 
     return {
       success: true,
-      data: data,
+      data,
     };
   };
 

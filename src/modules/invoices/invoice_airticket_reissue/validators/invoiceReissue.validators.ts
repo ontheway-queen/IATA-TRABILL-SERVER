@@ -29,8 +29,11 @@ class ReissueAirticket extends AbstractValidator {
     check('airticket_purchase_price').isNumeric(),
     check('airticket_issue_date').optional().toDate(),
     check('airticket_classes').notEmpty(),
-    check('invoice_note').optional().isString(),
+    check('invoice_note').optional().customSanitizer((item) => {
+      item === undefined ? null : item
+    }).isString(),
     check('airticket_existing_airticket_id').optional().isInt(),
+    check('airticket_existing_invoiceid').notEmpty(),
 
 
   ];

@@ -208,10 +208,10 @@ class RefundModel extends AbstractModels {
       )
       .where('trabill_invoices.invoice_id', invoice_id)
       .groupBy('invoice_id', 'invoice_net_total')) as {
-      invoice_net_total: number;
-      total_payment: number;
-      invoice_category_id: number;
-    }[];
+        invoice_net_total: number;
+        total_payment: number;
+        invoice_category_id: number;
+      }[];
 
     return Number(data.invoice_category_id);
   }
@@ -252,21 +252,21 @@ class RefundModel extends AbstractModels {
         combine_id: 'vrefund_vendor_combined_id',
       })
       .where('atrefund_id', refundId)) as {
-      atrefund_vouchar_number: string;
-      vendor_name: string;
-      comb_vendor: string;
-      vrefund_total_amount: number;
-      vrefund_charge_amount: number;
-      vrefund_return_amount: number;
-      vrefund_payment_type: string;
-      vrefund_moneyreturn_type: 'ADJUST' | 'MONEY_RETURN';
-      vrefund_account_id: number;
-      vrefund_vtrxn_id: number;
-      vrefund_charge_vtrxn_id: number;
-      vrefund_acctrxn_id: number;
-      vrefund_airticket_id: number;
-      vrefund_category_id: number;
-    }[];
+        atrefund_vouchar_number: string;
+        vendor_name: string;
+        comb_vendor: string;
+        vrefund_total_amount: number;
+        vrefund_charge_amount: number;
+        vrefund_return_amount: number;
+        vrefund_payment_type: string;
+        vrefund_moneyreturn_type: 'ADJUST' | 'MONEY_RETURN';
+        vrefund_account_id: number;
+        vrefund_vtrxn_id: number;
+        vrefund_charge_vtrxn_id: number;
+        vrefund_acctrxn_id: number;
+        vrefund_airticket_id: number;
+        vrefund_category_id: number;
+      }[];
 
     return vendor_info;
   }
@@ -434,11 +434,11 @@ class RefundModel extends AbstractModels {
       .from('view_all_airticket_details')
       .where('invoice_category_id', category_id)
       .andWhere('airticket_id', airticket_id)) as {
-      airticket_routes: string;
-      passport_name: string;
-      airticket_pnr: string;
-      airticket_ticket_no: string;
-    }[];
+        airticket_routes: string;
+        passport_name: string;
+        airticket_pnr: string;
+        airticket_ticket_no: string;
+      }[];
 
     return data;
   }
@@ -455,7 +455,8 @@ class RefundModel extends AbstractModels {
         'airticket_ticket_no as ticket_no'
       )
       .from('view_all_airticket_details')
-      .where('airticket_is_refund', 0)
+      .whereNot('airticket_is_refund', 1)
+      .whereNull('airticket_is_reissued')
       .andWhere('airticket_client_id', client_id)
       .andWhere('airticket_combined_id', combined_id);
 
@@ -622,9 +623,9 @@ class RefundModel extends AbstractModels {
       .select('atrefund_invoice_id', 'atrefund_trxn_charge_id')
       .from('trabill_airticket_refunds')
       .where('atrefund_id', refund_id)) as {
-      atrefund_invoice_id: number;
-      atrefund_trxn_charge_id: number;
-    }[];
+        atrefund_invoice_id: number;
+        atrefund_trxn_charge_id: number;
+      }[];
 
     return data;
   };
@@ -839,11 +840,11 @@ class RefundModel extends AbstractModels {
       .select('pax_name', 'ticket_pnr', 'ticket_no', 'airticket_route')
       .from('view_otr_info_for_refund')
       .where('billing_invoice_id', invoice_id)) as {
-      pax_name: string;
-      ticket_pnr: string;
-      ticket_no: string;
-      airticket_route: string;
-    }[];
+        pax_name: string;
+        ticket_pnr: string;
+        ticket_no: string;
+        airticket_route: string;
+      }[];
 
     return data;
   }
@@ -1516,11 +1517,11 @@ class RefundModel extends AbstractModels {
       .select('pax_name', 'ticket_pnr', 'ticket_no', 'airticket_route')
       .from('view_tour_info_for_refund')
       .where('billing_invoice_id', invoice_id)) as {
-      pax_name: string;
-      ticket_pnr: string;
-      ticket_no: string;
-      airticket_route: string;
-    }[];
+        pax_name: string;
+        ticket_pnr: string;
+        ticket_no: string;
+        airticket_route: string;
+      }[];
 
     return data;
   }
@@ -1586,12 +1587,12 @@ class RefundModel extends AbstractModels {
           this.andWhere('invoice_combined_id', combine_id);
         }
       })) as {
-      invoice_no: string;
-      invoice_id: number;
-      invoice_net_total: number;
-      airticket_no: string;
-      airticket_price: number;
-    }[];
+        invoice_no: string;
+        invoice_id: number;
+        invoice_net_total: number;
+        airticket_no: string;
+        airticket_price: number;
+      }[];
 
     let data: any[] = [];
 
@@ -1605,8 +1606,8 @@ class RefundModel extends AbstractModels {
         .from('trabill_invoice_client_payments')
         .where('invclientpayment_invoice_id', inv.invoice_id)
         .andWhere('invclientpayment_is_deleted', 0)) as {
-        total_payment: number;
-      }[];
+          total_payment: number;
+        }[];
 
       const [{ total_ticket_payment }] = (await this.query()
         .select(
@@ -1618,8 +1619,8 @@ class RefundModel extends AbstractModels {
         .where('invclientpayment_invoice_id', inv.invoice_id)
         .andWhere('invclientpayment_ticket_number', inv.airticket_no)
         .andWhere('invclientpayment_is_deleted', 0)) as {
-        total_ticket_payment: number;
-      }[];
+          total_ticket_payment: number;
+        }[];
 
       if (
         (inv.invoice_net_total == total_payment && inv.airticket_no != null) ||
@@ -1668,12 +1669,12 @@ class RefundModel extends AbstractModels {
       .where('invoice_org_agency', this.org_agency)
       .whereIn('invoice_category_id', [1, 2, 3])
       .andWhere('invoice_id', invoice_id)) as {
-      invoice_no: string;
-      invoice_id: number;
-      invoice_net_total: number;
-      airticket_no: string;
-      airticket_price: number;
-    }[];
+        invoice_no: string;
+        invoice_id: number;
+        invoice_net_total: number;
+        airticket_no: string;
+        airticket_price: number;
+      }[];
 
     let data: any[] = [];
 
@@ -1687,8 +1688,8 @@ class RefundModel extends AbstractModels {
         .from('trabill_invoice_client_payments')
         .where('invclientpayment_invoice_id', inv.invoice_id)
         .andWhere('invclientpayment_is_deleted', 0)) as {
-        total_payment: number;
-      }[];
+          total_payment: number;
+        }[];
 
       const [{ total_ticket_payment }] = (await this.query()
         .select(
@@ -1700,8 +1701,8 @@ class RefundModel extends AbstractModels {
         .where('invclientpayment_invoice_id', inv.invoice_id)
         .andWhere('invclientpayment_ticket_number', inv.airticket_no)
         .andWhere('invclientpayment_is_deleted', 0)) as {
-        total_ticket_payment: number;
-      }[];
+          total_ticket_payment: number;
+        }[];
 
       if (
         inv.invoice_net_total == total_payment ||
@@ -1719,9 +1720,9 @@ class RefundModel extends AbstractModels {
       .select('prfnd_invoice_id', 'prfnd_vouchar_number')
       .from('trabill_pershial_refund')
       .where('prfnd_id', refund_id)) as {
-      prfnd_invoice_id: number;
-      prfnd_vouchar_number: string;
-    }[];
+        prfnd_invoice_id: number;
+        prfnd_vouchar_number: string;
+      }[];
 
     return data;
   };
@@ -1738,11 +1739,11 @@ class RefundModel extends AbstractModels {
       )
       .from('trabill_pershial_refund')
       .where('prfnd_id', refund_id)) as {
-      comb_client: string;
-      prfnd_trxn_id: number;
-      prfnd_charge_trxn_id: number;
-      prfnd_actrxn_id: number;
-    }[];
+        comb_client: string;
+        prfnd_trxn_id: number;
+        prfnd_charge_trxn_id: number;
+        prfnd_actrxn_id: number;
+      }[];
 
     return data;
   };
@@ -1761,12 +1762,12 @@ class RefundModel extends AbstractModels {
       .from('trabill_pershial_vendor_refund')
       .where('vprfnd_refund_id', refund_id)
       .andWhere('vprfnd_is_deleted', 0)) as {
-      comb_vendor: string;
-      vprfnd_trxn_id: number;
-      vprfnd_charge_trxn_id: number;
-      vprfnd_actrxn_id: number;
-      vprfnd_airticket_id: number;
-    }[];
+        comb_vendor: string;
+        vprfnd_trxn_id: number;
+        vprfnd_charge_trxn_id: number;
+        vprfnd_actrxn_id: number;
+        vprfnd_airticket_id: number;
+      }[];
 
     return data;
   };

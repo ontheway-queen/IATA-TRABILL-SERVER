@@ -841,10 +841,9 @@ class CommonInvoiceModel extends AbstractModels {
   }
 
 
-  getReissuedItemByInvId = async (invoiceId: idType) => {
+  getReissuedItemByInvId = async (existingInvoiceId: idType) => {
     return await this.query()
       .select(
-
         this.db.raw('COALESCE(vendor_name, combine_name) vendor_name'),
         'airticket_sales_date',
         'airticket_profit',
@@ -868,7 +867,7 @@ class CommonInvoiceModel extends AbstractModels {
       .leftJoin('trabill_combined_clients', {
         combine_id: 'airticket_vendor_combine_id',
       })
-      .where("airticket_invoice_id", invoiceId)
+      .where("airticket_existing_invoiceid", existingInvoiceId)
       .andWhereNot("airticket_is_deleted", 1)
 
   }

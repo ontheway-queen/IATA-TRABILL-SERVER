@@ -68,7 +68,7 @@ class RefundServices extends AbstractServices {
 
       return {
         success: true,
-        message: 'All Airticket refund',
+        message: 'All air ticket refund',
         count: count.row_count,
         data,
       };

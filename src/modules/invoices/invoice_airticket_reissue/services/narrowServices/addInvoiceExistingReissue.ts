@@ -136,11 +136,12 @@ class AddExistingClient extends AbstractServices {
         reissueAirTicketItem
       );
 
+
       // UPDATE IS REISSUED
-      const existingInvCateId = await conn.getExistingInvCateId(airticket_existing_invoiceid)
+      const { invoice_category_id } = await conn.getExistingInvCateId(airticket_existing_invoiceid);
 
       await conn.updateInvoiceIsReissued(airticket_existing_invoiceid);
-      await conn.updateAirTicketIsReissued(existingInvCateId, airticket_existing_airticket_id);
+      await conn.updateAirTicketIsReissued(invoice_category_id, airticket_existing_airticket_id);
 
 
       // NEW HISTORY

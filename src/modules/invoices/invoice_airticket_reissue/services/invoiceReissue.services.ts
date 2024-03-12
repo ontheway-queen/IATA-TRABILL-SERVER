@@ -93,7 +93,6 @@ class ReissueAirticket extends AbstractServices {
 
     const data = [...data1, ...data2, ...data3];
 
-
     return {
       success: true,
       data,
@@ -120,7 +119,7 @@ class ReissueAirticket extends AbstractServices {
         invoice_sales_date,
         invoice_no,
         invoice_note,
-        invoice_due_date
+        invoice_due_date,
       } = invoice_info;
 
       const data = {

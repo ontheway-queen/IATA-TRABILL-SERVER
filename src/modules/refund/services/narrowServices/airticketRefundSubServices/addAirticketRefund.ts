@@ -127,12 +127,12 @@ class AddAirTicketRefund extends AbstractServices {
 
         const clTrxnBody: IClTrxnBody = {
           ctrxn_type: 'CREDIT',
-          ctrxn_amount: crefund_return_amount,
+          ctrxn_amount: crefund_total_amount,
           ctrxn_cl: comb_client,
           ctrxn_voucher: voucher_number,
           ctrxn_particular_id: 108,
           ctrxn_created_at: date,
-          ctrxn_note: clientRefundTrxnNote,
+          ctrxn_note: '', //clientRefundTrxnNote,
           ctrxn_particular_type: 'AIR TICKET REFUND(ADJUST)',
           ctrxn_user_id: created_by,
           ctrxn_pnr: airtickerPnr.join(', '),
@@ -140,8 +140,26 @@ class AddAirTicketRefund extends AbstractServices {
           ctrxn_pax: passportName.join(', '),
           ctrxn_route: airticketRoute.join(', '),
         };
-
         crefund_ctrxnid = await trxns.clTrxnInsert(clTrxnBody);
+
+        const clRefundChargeTrxnBody: IClTrxnBody = {
+          ctrxn_type: 'DEBIT',
+          ctrxn_amount: crefund_charge_amount,
+          ctrxn_cl: comb_client,
+          ctrxn_voucher: voucher_number,
+          ctrxn_particular_id: 108,
+          ctrxn_created_at: date,
+          ctrxn_note: '', // clientRefundTrxnNote,
+          ctrxn_particular_type: 'AIR TICKET REFUND(CHARGE)',
+          ctrxn_user_id: created_by,
+          ctrxn_pnr: airtickerPnr.join(', '),
+          ctrxn_airticket_no: airticketNo.join(', '),
+          ctrxn_pax: passportName.join(', '),
+          ctrxn_route: airticketRoute.join(', '),
+        };
+        crefund_charge_ctrxnid = await trxns.clTrxnInsert(
+          clRefundChargeTrxnBody
+        );
       }
 
       // MONEY RETURN
@@ -181,15 +199,13 @@ class AddAirTicketRefund extends AbstractServices {
               acctrxn_created_by: created_by,
               acctrxn_note: clientRefundTrxnNote || crefund_note,
               acctrxn_particular_id: 108,
-              acctrxn_particular_type: 'Air Ticket Refund to Client(MONEY RETURN)',
+              acctrxn_particular_type:
+                'Air Ticket Refund to Client(MONEY RETURN)',
               acctrxn_pay_type: accPayType,
-
             };
 
             crefund_actransaction_id = await trxns.AccTrxnInsert(ACTrxnBody);
           }
-
-
 
           const clTrxnBody: IClTrxnBody = {
             ctrxn_type: 'CREDIT',
@@ -274,9 +290,9 @@ class AddAirTicketRefund extends AbstractServices {
 
           const VTrxnBody: IVTrxn = {
             comb_vendor: airticket_combvendor,
-            vtrxn_amount: vrefund_return_amount,
+            vtrxn_amount: vrefund_total_amount,
             vtrxn_created_at: date,
-            vtrxn_note: vendorRefundTrxnNote,
+            vtrxn_note: '', // vendorRefundTrxnNote,
             vtrxn_particular_id: 108,
             vtrxn_particular_type: 'AIR TICKET REFUND(ADJUST)',
             vtrxn_type: 'CREDIT',
@@ -289,6 +305,24 @@ class AddAirTicketRefund extends AbstractServices {
           };
 
           vrefund_vtrxn_id = await trxns.VTrxnInsert(VTrxnBody);
+
+          const vRefundChargeTrxnBody: IVTrxn = {
+            comb_vendor: airticket_combvendor,
+            vtrxn_amount: vrefund_charge_amount,
+            vtrxn_created_at: date,
+            vtrxn_note: '', //vendorRefundTrxnNote,
+            vtrxn_particular_id: 108,
+            vtrxn_particular_type: 'AIR TICKET REFUND(CHARGE)',
+            vtrxn_type: 'DEBIT',
+            vtrxn_user_id: created_by,
+            vtrxn_voucher: voucher_number,
+            vtrxn_airticket_no: airticket_ticket_no,
+            vtrxn_pax: passport_name,
+            vtrxn_pnr: airticket_pnr,
+            vtrxn_route: airticket_routes,
+          };
+
+          vrefund_vtrxn_id = await trxns.VTrxnInsert(vRefundChargeTrxnBody);
         }
 
         // VENDOR MONEY RETURN
@@ -333,12 +367,12 @@ class AddAirTicketRefund extends AbstractServices {
               acctrxn_created_by: created_by,
               acctrxn_note: vendorRefundTrxnNote,
               acctrxn_particular_id: 108,
-              acctrxn_particular_type: 'Air Ticket Refund from Vendor(MONEY RETURN)',
+              acctrxn_particular_type:
+                'Air Ticket Refund from Vendor(MONEY RETURN)',
               acctrxn_pay_type: accPayType,
             };
 
             vrefund_acctrxn_id = await trxns.AccTrxnInsert(ACTrxnBody);
-
 
             const VTrxnBody: IVTrxn = {
               comb_vendor: airticket_combvendor,

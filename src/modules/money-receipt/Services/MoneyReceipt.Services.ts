@@ -228,7 +228,6 @@ class MoneyReceiptServices extends AbstractServices {
         await new Trxns(req, trx).deleteAccTrxn(
           previousData?.prevAccTrxnId as number
         );
-
       }
 
       const history_data: InvoiceHistory = {

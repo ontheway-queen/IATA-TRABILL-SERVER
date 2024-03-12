@@ -37,9 +37,28 @@ CHANGE COLUMN `airticket_is_reissued` `airticket_is_reissued` TINYINT NULL DEFAU
 
 
 
+ALTER TABLE `trabill`.`trabill_invoice_reissue_airticket_items` 
+ADD COLUMN `airticket_after_reissue_client_price` DECIMAL(15,2) NULL AFTER `airticket_profit`,
+ADD COLUMN `airticket_after_reissue_purchase_price` DECIMAL(15,2) NULL AFTER `airticket_after_reissue_client_price`,
+ADD COLUMN `airticket_after_reissue_profit` DECIMAL(15,2) NULL AFTER `airticket_after_reissue_purchase_price`,
+ADD COLUMN `airticket_after_reissue_taxes` DECIMAL(15,2) NULL AFTER `airticket_after_reissue_profit`,
+CHANGE COLUMN `airticket_invoice_id` `airticket_invoice_id` INT NULL DEFAULT NULL AFTER `airticket_org_agency`,
+CHANGE COLUMN `airticket_airline_id` `airticket_airline_id` INT NULL DEFAULT NULL AFTER `airticket_passport_id`;
 
 
 
+
+
+set sql_safe_updates  =0;
+update trabill.trabill_invoice_airticket_items
+set airticket_is_reissued = 0
+where airticket_is_reissued is null;
+update trabill.trabill_invoice_noncom_airticket_items
+set airticket_is_reissued = 0
+where airticket_is_reissued is null;
+update trabill.trabill_invoice_reissue_airticket_items
+set airticket_is_reissued = 0
+where airticket_is_reissued is null;
 
 
 

@@ -1,6 +1,6 @@
 import moment from 'moment';
 import AbstractModels from '../../../abstracts/abstract.models';
-import { idType, InvoiceHistory } from '../../../common/types/common.types';
+import { idType } from '../../../common/types/common.types';
 import CustomError from '../../../common/utils/errors/customError';
 
 import {
@@ -256,49 +256,34 @@ class MoneyReceiptModels extends AbstractModels {
 
   // ========================== INVOICE DUE
   public getInvoiceDue = async (invoiceId: idType) => {
-    const [{ invoice_category_id }] = await this.query()
-      .select('invoice_category_id')
-      .from('trabill_invoices')
+    const [data] = await this.query()
+      .select('invoice_id')
+      .select(
+        this.db.raw(
+          "COALESCE(CONCAT('client-', invoice_client_id), CONCAT('combined-', invoice_combined_id)) AS invoice_combclient_id"
+        ),
+        'invoice_net_total',
+        this.db.raw('COALESCE(invoice_pay, 0) AS invoice_pay'),
+        this.db.raw('invoice_net_total - invoice_pay AS invoice_due')
+      )
+      .from('trabill.trabill_invoices')
+      .leftJoin(
+        this.db
+          .select(this.db.raw('SUM(invclientpayment_amount) AS invoice_pay'))
+          .select('invclientpayment_invoice_id')
+          .from('trabill.trabill_invoice_client_payments')
+          .whereNot('invclientpayment_is_deleted', 1)
+          .groupBy('invclientpayment_invoice_id')
+          .as('inv_pay'),
+        'inv_pay.invclientpayment_invoice_id',
+        '=',
+        'invoice_id'
+      )
+      .whereNot('invoice_is_deleted', 1)
+      .whereNot('invoice_is_refund', 1)
       .where('invoice_id', invoiceId);
 
-    let data: {
-      invoice_net_total: number;
-      invoice_pay: number;
-      invoice_combclient_id: number;
-      invoice_due: number;
-    };
-    if (invoice_category_id === 10) {
-      [data] = (await this.query()
-        .select(
-          'approve_amount as invoice_net_total',
-          'invclientpayment_amount as invoice_pay',
-          'comb_client as invoice_combclient_id',
-          this.db.raw('approve_amount - invclientpayment_amount as invoice_due')
-        )
-        .from('view_invoice_visalist')
-        .where('invoice_id', invoiceId)) as {
-        invoice_net_total: number;
-        invoice_pay: number;
-        invoice_combclient_id: number;
-        invoice_due: number;
-      }[];
-    } else {
-      [data] = (await this.query()
-        .select(
-          'net_total as invoice_net_total',
-          'invclientpayment_amount as invoice_pay',
-          'comb_client as invoice_combclient_id',
-          this.db.raw('net_total - invclientpayment_amount as invoice_due')
-        )
-        .from('v_all_inv')
-        .where('invoice_id', invoiceId)) as {
-        invoice_net_total: number;
-        invoice_pay: number;
-        invoice_combclient_id: number;
-        invoice_due: number;
-      }[];
-    }
-    return data;
+    return { ...data, invoice_due: data.invoice_due || data.invoice_net_total };
   };
 
   public async updateAgentAmountPaid(invoiceId: idType, is_paid: 0 | 1) {

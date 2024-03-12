@@ -58,6 +58,7 @@ export interface IInvoiceInfoDb {
   invoice_cltrxn_id: number | null;
   invoice_walking_customer_name?: string;
   invoice_reference?: string;
+
 }
 
 export interface IUpdateInvoiceInfoDb

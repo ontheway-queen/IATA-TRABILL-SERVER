@@ -1,6 +1,5 @@
 import AbstractModels from '../../../../abstracts/abstract.models';
 import { separateCombClientToId } from '../../../../common/helpers/common.helper';
-import { IDeletePreviousVendor } from '../../../../common/interfaces/commonInterfaces';
 import { idType } from '../../../../common/types/common.types';
 import { IFlightDetailsDb } from '../../invoice-air-ticket/types/invoiceAirticket.interface';
 
@@ -54,12 +53,21 @@ class ReIssueAirticket extends AbstractModels {
         'airticket_vendor_id as vendor_id',
         'airticket_vendor_combine_id as combined_id',
         'airticket_purchase_price as prev_cost_price',
-        'airticket_vtrxn_id as prevTrxnId'
+        'airticket_vtrxn_id as prevTrxnId',
+        'airticket_existing_airticket_id as ex_airticket_id',
+        'airticket_existing_invoiceid as ex_inv_id'
       )
       .where('airticket_invoice_id', invoice_id)
       .andWhereNot('airticket_is_deleted', 1);
 
-    return data as IDeletePreviousVendor[];
+    return data as {
+      vendor_id: number | null;
+      combined_id: number | null;
+      prev_cost_price: number;
+      prevTrxnId: number;
+      ex_airticket_id: number;
+      ex_inv_id: number;
+    }[];
   }
 
   public async updateInvoiceReissueAirticket(
@@ -120,10 +128,10 @@ class ReIssueAirticket extends AbstractModels {
     return await this.query()
       .select(
         'airticket_penalties',
+        'airticket_classes',
         'airticket_commission_percent',
         'airticket_fare_difference',
         'airticket_id',
-        'airticket_classes',
         'airticket_ticket_no',
         'airticket_pnr',
         'airticket_client_price',
@@ -133,6 +141,15 @@ class ReIssueAirticket extends AbstractModels {
         'airticket_journey_date',
         'airticket_return_date',
         'airticket_issue_date',
+        'airticket_sales_date',
+        'airticket_existing_invoiceid',
+        'airticket_existing_airticket_id',
+        'airticket_after_reissue_client_price',
+        'airticket_after_reissue_purchase_price',
+        'airticket_after_reissue_profit',
+        'airticket_after_reissue_taxes',
+        'airticket_ait',
+        'airticket_tax',
         this.db.raw('COALESCE(vendor_name, combine_name) vendor_name'),
         'airline_name',
         'passport_name',
@@ -190,7 +207,10 @@ class ReIssueAirticket extends AbstractModels {
 
   public async getExistingClientAirticket(
     client: string,
-    table_name: 'trabill_invoice' | 'trabill_invoice_noncom' | 'trabill_invoice_reissue'
+    table_name:
+      | 'trabill_invoice'
+      | 'trabill_invoice_noncom'
+      | 'trabill_invoice_reissue'
   ) {
     const { client_id, combined_id } = separateCombClientToId(client);
 
@@ -205,7 +225,9 @@ class ReIssueAirticket extends AbstractModels {
         this.db.raw(
           "coalesce(concat('vendor-',airticket_vendor_id), concat('combined-',airticket_vendor_combine_id)) as comb_vendor"
         ),
-        this.db.raw("COALESCE(passport_name, p_passport_name) AS passport_name"),
+        this.db.raw(
+          'COALESCE(passport_name, p_passport_name) AS passport_name'
+        ),
         'airticket_ticket_no',
         'vendor_name',
         'airticket_purchase_price',
@@ -225,7 +247,7 @@ class ReIssueAirticket extends AbstractModels {
       )
       .leftJoin('trabill_invoice_airticket_pax', {
         p_airticket_id: 'airticket_id',
-        airticket_invoice_id: 'p_invoice_id'
+        airticket_invoice_id: 'p_invoice_id',
       })
 
       .leftJoin('trabill_passport_details', { passport_id: 'p_passport_id' })
@@ -233,9 +255,9 @@ class ReIssueAirticket extends AbstractModels {
       .leftJoin('trabill_airlines', { airline_id: 'airticket_airline_id' })
       .where('airticket_client_id', client_id)
       .andWhere('airticket_combined_id', combined_id)
-      .andWhereNot("airticket_is_deleted", 1)
-      .andWhereNot("airticket_is_refund", 1)
-      .andWhereNot("airticket_is_reissued", 1)
+      .andWhereNot('airticket_is_deleted', 1)
+      .andWhereNot('airticket_is_refund', 1)
+      .andWhereNot('airticket_is_reissued', 1);
 
     return data1;
   }
@@ -297,10 +319,12 @@ class ReIssueAirticket extends AbstractModels {
         'airticket_ait',
         'airticket_issue_date',
         'airticket_classes',
+        'airticket_tax',
+        'airticket_extra_fee'
       )
       .from('trabill_invoice_reissue_airticket_items')
       .where('airticket_invoice_id', invoice_id)
-      .andWhereNot('airticket_is_deleted', 1)
+      .andWhereNot('airticket_is_deleted', 1);
 
     return data[0];
   }
@@ -503,53 +527,96 @@ class ReIssueAirticket extends AbstractModels {
       .andWhereNot('ritem_is_deleted', 1);
   };
 
-
-
-  updateInvoiceIsReissued = async (invoiceId: idType) => {
+  updateInvoiceIsReissued = async (invoiceId: idType, is_reissued: 1 | 0) => {
     await this.query()
-      .update("invoice_is_reissued", 1)
-      .from("trabill_invoices")
-      .where("invoice_id", invoiceId)
-
-  }
+      .update('invoice_is_reissued', is_reissued)
+      .from('trabill_invoices')
+      .where('invoice_id', invoiceId);
+  };
 
   getExistingInvCateId = async (invoiceId: idType) => {
     const [data] = await this.query()
-      .select("invoice_category_id")
-      .from("trabill_invoices")
-      .where("invoice_id", invoiceId);
-    return data as { invoice_category_id: number };
+      .select('invoice_category_id')
+      .from('trabill_invoices')
+      .where('invoice_id', invoiceId);
+    return data?.invoice_category_id as number;
+  };
 
-  }
-
-  updateAirTicketIsReissued = async (categoryId: number, airTicketId: idType) => {
+  updateAirTicketIsReissued = async (
+    categoryId: number,
+    airTicketId: idType,
+    is_reissued: 1 | 0
+  ) => {
     if (categoryId === 1) {
       await this.query()
-        .update("airticket_is_reissued", 1)
-        .from("trabill_invoice_airticket_items")
-        .where("airticket_id", airTicketId)
-    }
-    else if (categoryId === 2) {
+        .update('airticket_is_reissued', is_reissued)
+        .from('trabill_invoice_airticket_items')
+        .where('airticket_id', airTicketId);
+    } else if (categoryId === 2) {
       await this.query()
-        .update("airticket_is_reissued", 1)
-        .from("trabill_invoice_noncom_airticket_items")
-        .where("airticket_id", airTicketId)
-    }
-    else if (categoryId === 3) {
+        .update('airticket_is_reissued', is_reissued)
+        .from('trabill_invoice_noncom_airticket_items')
+        .where('airticket_id', airTicketId);
+    } else if (categoryId === 3) {
       await this.query()
-        .update("airticket_is_reissued", 1)
-        .from("trabill_invoice_reissue_airticket_items")
-        .where("airticket_id", airTicketId)
+        .update('airticket_is_reissued', is_reissued)
+        .from('trabill_invoice_reissue_airticket_items')
+        .where('airticket_id', airTicketId);
+    }
+  };
+
+  getPreviousAirTicketData = async (
+    categoryId: number,
+    airTicketId: idType
+  ) => {
+    let data: any[] = [];
+    if (categoryId === 1) {
+      data = await this.query()
+        .select(
+          'airticket_client_price as cl_price',
+          'airticket_purchase_price as purchase',
+          'airticket_profit',
+          'airticket_tax as taxes'
+        )
+        .from('trabill_invoice_airticket_items')
+        .where('airticket_id', airTicketId);
+    } else if (categoryId === 2) {
+      data = await this.query()
+        .select(
+          'airticket_after_reissue_client_price as cl_price',
+          'airticket_after_reissue_purchase_price as purchase',
+          'airticket_after_reissue_profit as airticket_profit',
+          'airticket_after_reissue_taxes as taxes'
+        )
+        .from('trabill_invoice_noncom_airticket_items')
+        .where('airticket_id', airTicketId);
+    } else if (categoryId === 3) {
+      data = await this.query()
+        .select(
+          'airticket_client_price as cl_price',
+          'airticket_purchase_price as purchase',
+          'airticket_profit',
+          'airticket_tax as taxes'
+        )
+        .from('trabill_invoice_reissue_airticket_items')
+        .where('airticket_id', airTicketId);
     }
 
-  }
-
-
-
-
-
-
-
+    if (data.length) {
+      return data[0] as {
+        cl_price: number;
+        purchase: number;
+        airticket_profit: number;
+        taxes: number;
+      };
+    }
+    return {
+      cl_price: 0,
+      purchase: 0,
+      airticket_profit: 0,
+      taxes: 0,
+    };
+  };
 }
 
 export default ReIssueAirticket;

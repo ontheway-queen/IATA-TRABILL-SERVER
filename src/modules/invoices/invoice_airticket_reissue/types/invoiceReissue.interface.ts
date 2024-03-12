@@ -51,7 +51,12 @@ export interface IReissueTicketDetailsDb {
   airticket_classes: string;
   airticket_existing_invoiceid: number;
   airticket_existing_airticket_id: number;
-
+  airticket_after_reissue_client_price: number;
+  airticket_after_reissue_purchase_price: number;
+  airticket_after_reissue_profit: number;
+  airticket_after_reissue_taxes: number;
+  airticket_tax: number;
+  airticket_extra_fee: number;
 }
 
 export interface ITicketInfo {
@@ -67,29 +72,30 @@ export interface InvoiceAirticketReissueReq {
 }
 
 export interface IExistingReissueReq {
-  invoice_combclient_id: string
-  invoice_sales_man_id: number
-  invoice_sales_date: string
-  invoice_due_date: string
-  airticket_ticket_no: string
-  airticket_penalties: number
-  airticket_fare_difference: number
-  airticket_commission_percent: number
-  airticket_ait: string
-  airticket_client_price: number
-  airticket_purchase_price: number
-  airticket_profit: number
-  airticket_issue_date: string
-  airticket_journey_date: string
-  airticket_return_date: string
-  airticket_classes: string
-  invoice_note: string
-  airticket_existing_airticket_id: number,
-  airticket_existing_invoiceid: number,
-  comb_vendor: string
-  invoice_no: string
+  invoice_combclient_id: string;
+  invoice_sales_man_id: number;
+  invoice_sales_date: string;
+  invoice_due_date: string;
+  airticket_ticket_no: string;
+  airticket_penalties: number;
+  airticket_fare_difference: number;
+  airticket_commission_percent: number;
+  airticket_ait: string;
+  airticket_client_price: number;
+  airticket_purchase_price: number;
+  airticket_profit: number;
+  airticket_issue_date: string;
+  airticket_journey_date: string;
+  airticket_return_date: string;
+  airticket_classes: string;
+  invoice_note: string;
+  airticket_existing_airticket_id: number;
+  airticket_existing_invoiceid: number;
+  comb_vendor: string;
+  invoice_no: string;
+  airticket_tax: number;
+  airticket_extra_fee: number;
 }
-
 
 export interface IReissueReturnBody {
   comb_client: string;

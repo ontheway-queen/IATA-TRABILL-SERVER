@@ -1,9 +1,9 @@
-import { Request } from 'express';
-import AbstractServices from '../../../../../abstracts/abstract.services';
-import { IClTrxnBody } from '../../../../../common/interfaces/Trxn.interfaces';
 import dayjs from 'dayjs';
-import Trxns from '../../../../../common/helpers/Trxns';
+import { Request } from 'express';
 import { Knex } from 'knex';
+import AbstractServices from '../../../../../abstracts/abstract.services';
+import Trxns from '../../../../../common/helpers/Trxns';
+import { IClTrxnBody } from '../../../../../common/interfaces/Trxn.interfaces';
 import CustomError from '../../../../../common/utils/errors/customError';
 
 class DeleteReissue extends AbstractServices {
@@ -16,8 +16,6 @@ class DeleteReissue extends AbstractServices {
     voidTran?: Knex.Transaction<any, any[]>
   ) => {
     const invoice_id = Number(req.params.invoice_id);
-    const { invoice_has_deleted_by } = req.body;
-
     return await this.models.db.transaction(async (trx) => {
       const common_conn = this.models.CommonInvoiceModel(req, voidTran || trx);
       const conn = this.models.reissueAirticket(req, voidTran || trx);
@@ -28,15 +26,27 @@ class DeleteReissue extends AbstractServices {
 
       await conn.deleteReissueFlightDetails(invoice_id, req.user_id);
       await conn.deleteAirticketReissue(invoice_id, req.user_id);
+      await common_conn.deleteInvoices(invoice_id, req.user_id);
       await new Trxns(req, voidTran || trx).deleteInvVTrxn(
         previousVendorBilling
       );
-      await common_conn.deleteInvoices(invoice_id, req.user_id);
+
+      // UPDATE PREVIOUS INVOICE IS NOT REISSUED
+      for (const item of previousVendorBilling) {
+        const prevInvCateId = await conn.getExistingInvCateId(item.ex_inv_id);
+
+        await conn.updateInvoiceIsReissued(item.ex_inv_id, 0);
+        await conn.updateAirTicketIsReissued(
+          prevInvCateId,
+          item.ex_airticket_id,
+          0
+        );
+      }
 
       await this.insertAudit(
         req,
         'delete',
-        `Invoice air ticket reissue has been deleted`,
+        `Air ticket reissue has been deleted!`,
         req.user_id,
         'INVOICES'
       );

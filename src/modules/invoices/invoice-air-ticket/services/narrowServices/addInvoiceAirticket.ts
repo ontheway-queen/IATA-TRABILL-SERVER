@@ -29,7 +29,7 @@ import {
   IAirTicketDb,
   IFlightDetailsDb,
   InvoiceAirticketPreType,
-  InvoiceAirTicketReqType
+  InvoiceAirTicketReqType,
 } from '../../types/invoiceAirticket.interface';
 
 class AddInvoiceAirticket extends AbstractServices {
@@ -211,7 +211,13 @@ class AddInvoiceAirticket extends AbstractServices {
       await common_conn.insertInvoicePreData(invoicePreData);
 
       for (const ticket of ticketInfo) {
-        const { flight_details, pax_passports, ticket_details, taxes_commission, total_taxes_commission } = ticket;
+        const {
+          flight_details,
+          pax_passports,
+          ticket_details,
+          taxes_commission,
+          total_taxes_commission,
+        } = ticket;
 
         const pax_names = pax_passports
           ?.map((item) => item?.passport_name)
@@ -336,15 +342,13 @@ class AddInvoiceAirticket extends AbstractServices {
 
         // TAXES COMMISSION
         if (taxes_commission && isNotEmpty(taxes_commission[0])) {
-          const taxesCommission = taxes_commission?.map(
-            (item) => {
-              return {
-                ...item,
-                airline_airticket_id: airticket_id,
-                airline_invoice_id: invoice_id,
-              };
-            }
-          );
+          const taxesCommission = taxes_commission?.map((item) => {
+            return {
+              ...item,
+              airline_airticket_id: airticket_id,
+              airline_invoice_id: invoice_id,
+            };
+          });
 
           await conn.insertAirTicketAirlineCommissions(taxesCommission);
         }

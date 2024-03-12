@@ -6,9 +6,7 @@ import {
   IClTrxnBody,
   IVTrxn,
 } from '../../../../../common/interfaces/Trxn.interfaces';
-import {
-  IInvoiceInfoDb
-} from '../../../../../common/types/Invoice.common.interface';
+import { IInvoiceInfoDb } from '../../../../../common/types/Invoice.common.interface';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
 import {
   IExistingReissueReq,
@@ -40,17 +38,27 @@ class AddExistingClient extends AbstractServices {
       airticket_return_date,
       invoice_note,
       airticket_existing_airticket_id,
-      comb_vendor, airticket_existing_invoiceid
+      comb_vendor,
+      airticket_existing_invoiceid,
+      airticket_tax,
+      airticket_extra_fee,
     } = req.body as IExistingReissueReq;
-
-
-
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.reissueAirticket(req, trx);
       const trxns = new Trxns(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const invoice_no = await this.generateVoucher(req, 'ARI');
+
+      // TOOLS
+      const prevInvCateId = await conn.getExistingInvCateId(
+        airticket_existing_invoiceid
+      );
+
+      const previousData = await conn.getPreviousAirTicketData(
+        prevInvCateId,
+        airticket_existing_airticket_id
+      );
 
       // CLIENT COMBINED TRANSACTIONS
       const clTrxnBody: IClTrxnBody = {
@@ -63,11 +71,14 @@ class AddExistingClient extends AbstractServices {
         ctrxn_note: invoice_note as string,
         ctrxn_particular_type: 'Reissue Air Ticket',
         ctrxn_user_id: req.user_id,
+        ctrxn_airticket_no: airticket_ticket_no,
       };
 
       const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
 
-      const { client_id, combined_id } = separateCombClientToId(invoice_combclient_id)
+      const { client_id, combined_id } = separateCombClientToId(
+        invoice_combclient_id
+      );
 
       const invoice_information: IInvoiceInfoDb = {
         invoice_combined_id: combined_id,
@@ -84,14 +95,16 @@ class AddExistingClient extends AbstractServices {
         invoice_reissue_client_type: 'EXISTING',
         invoice_cltrxn_id,
         invoice_total_profit: airticket_profit,
-        invoice_total_vendor_price: airticket_purchase_price
+        invoice_total_vendor_price: airticket_purchase_price,
       };
       const invoice_id = await common_conn.insertInvoicesInfo(
         invoice_information
       );
 
-      const { combined_id: airticket_vendor_combine_id, vendor_id: airticket_vendor_id } =
-        separateCombClientToId(comb_vendor);
+      const {
+        combined_id: airticket_vendor_combine_id,
+        vendor_id: airticket_vendor_id,
+      } = separateCombClientToId(comb_vendor);
 
       // VENDOR TRANSACTIONS
       const VTrxnBody: IVTrxn = {
@@ -104,6 +117,7 @@ class AddExistingClient extends AbstractServices {
         vtrxn_type: 'DEBIT',
         vtrxn_user_id: req.user_id,
         vtrxn_voucher: invoice_no,
+        vtrxn_airticket_no: airticket_ticket_no,
       };
       const airticket_vtrxn_id = await trxns.VTrxnInsert(VTrxnBody);
 
@@ -129,30 +143,39 @@ class AddExistingClient extends AbstractServices {
         airticket_issue_date,
         airticket_classes,
         airticket_existing_airticket_id,
+        airticket_tax,
+        airticket_extra_fee,
 
+        airticket_after_reissue_client_price:
+          Number(airticket_client_price || 0) +
+          Number(previousData.cl_price || 0),
+        airticket_after_reissue_purchase_price:
+          Number(airticket_purchase_price || 0) +
+          Number(previousData.purchase || 0),
+        airticket_after_reissue_taxes:
+          Number(airticket_tax || 0) + Number(previousData.taxes || 0),
+        airticket_after_reissue_profit:
+          Number(airticket_profit || 0) +
+          Number(previousData.airticket_profit || 0),
       };
 
-      await conn.insertReissueAirTicketItems(
-        reissueAirTicketItem
-      );
-
+      await conn.insertReissueAirTicketItems(reissueAirTicketItem);
 
       // UPDATE IS REISSUED
-      const { invoice_category_id } = await conn.getExistingInvCateId(airticket_existing_invoiceid);
-
-      await conn.updateInvoiceIsReissued(airticket_existing_invoiceid);
-      await conn.updateAirTicketIsReissued(invoice_category_id, airticket_existing_airticket_id);
-
+      await conn.updateInvoiceIsReissued(airticket_existing_invoiceid, 1);
+      await conn.updateAirTicketIsReissued(
+        prevInvCateId,
+        airticket_existing_airticket_id,
+        1
+      );
 
       // NEW HISTORY
       const new_history_data: InvoiceHistory = {
         history_activity_type: 'INVOICE_CREATED',
         history_created_by: req.user_id,
         history_invoice_id: invoice_id,
-        invoicelog_content:
-          'Existing Air Ticket Reissued!',
-        history_invoice_payment_amount: airticket_client_price
-
+        invoicelog_content: 'Existing Air Ticket Reissued!',
+        history_invoice_payment_amount: airticket_client_price,
       };
 
       await common_conn.insertInvoiceHistory(new_history_data);
@@ -163,8 +186,7 @@ class AddExistingClient extends AbstractServices {
         history_activity_type: 'INVOICE_CREATED',
         history_created_by: req.user_id,
         history_invoice_id: airticket_existing_invoiceid,
-        invoicelog_content:
-          'Air Ticket Reissued!'
+        invoicelog_content: 'Air Ticket Reissued!',
       };
 
       await common_conn.insertInvoiceHistory(existing_history_data);

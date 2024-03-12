@@ -39,7 +39,10 @@ class EditExistingCl extends AbstractServices {
       airticket_return_date,
       invoice_note,
       invoice_no,
-      comb_vendor, airticket_existing_invoiceid
+      comb_vendor,
+      airticket_existing_invoiceid,
+      airticket_tax,
+      airticket_extra_fee,
     } = req.body as IExistingReissueReq;
 
     const invoice_id = Number(req.params.invoice_id);
@@ -48,6 +51,16 @@ class EditExistingCl extends AbstractServices {
       const conn = this.models.reissueAirticket(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
+
+      // TOOLS
+      const prevInvCateId = await conn.getExistingInvCateId(
+        airticket_existing_invoiceid
+      );
+
+      const previousData = await conn.getPreviousAirTicketData(
+        prevInvCateId,
+        airticket_existing_airticket_id
+      );
 
       const { prevCtrxnId } = await common_conn.getPreviousInvoices(invoice_id);
 
@@ -62,13 +75,13 @@ class EditExistingCl extends AbstractServices {
         ctrxn_voucher: invoice_no,
         ctrxn_created_at: invoice_sales_date,
         ctrxn_particular_type: 'Reissue Air Ticket',
-
       };
 
       await trxns.clTrxnUpdate(clTrxnBody);
 
-
-      const { client_id, combined_id } = separateCombClientToId(invoice_combclient_id)
+      const { client_id, combined_id } = separateCombClientToId(
+        invoice_combclient_id
+      );
       const invoice_information: IUpdateInvoiceInfoDb = {
         invoice_updated_by: req.user_id,
         invoice_combined_id: combined_id,
@@ -80,7 +93,7 @@ class EditExistingCl extends AbstractServices {
         invoice_sub_total: airticket_client_price,
         invoice_note,
         invoice_total_profit: airticket_profit,
-        invoice_total_vendor_price: airticket_purchase_price
+        invoice_total_vendor_price: airticket_purchase_price,
       };
 
       common_conn.updateInvoiceInformation(invoice_id, invoice_information);
@@ -90,7 +103,6 @@ class EditExistingCl extends AbstractServices {
       );
 
       await trxns.deleteInvVTrxn(previousVendorBilling);
-
 
       // VENDOR TRANSACTIONS
 
@@ -109,13 +121,13 @@ class EditExistingCl extends AbstractServices {
 
       await trxns.VTrxnInsert(VTrxnBody);
 
-
-      const { combined_id: airticket_vendor_combine_id, vendor_id: airticket_vendor_id } =
-        separateCombClientToId(comb_vendor);
-
-
+      const {
+        combined_id: airticket_vendor_combine_id,
+        vendor_id: airticket_vendor_id,
+      } = separateCombClientToId(comb_vendor);
 
       const reissueAirTicketItem: IReissueTicketDetailsDb = {
+        airticket_tax,
         airticket_client_id: client_id,
         airticket_combined_id: combined_id,
         airticket_vendor_id,
@@ -136,21 +148,37 @@ class EditExistingCl extends AbstractServices {
         airticket_issue_date,
         airticket_classes,
         airticket_existing_airticket_id,
+        airticket_extra_fee,
 
+        airticket_after_reissue_client_price:
+          Number(airticket_client_price || 0) + previousData.cl_price,
+        airticket_after_reissue_purchase_price:
+          Number(airticket_purchase_price || 0) + previousData.purchase,
+        airticket_after_reissue_taxes:
+          Number(airticket_tax || 0) + previousData.taxes,
+        airticket_after_reissue_profit:
+          Number(airticket_profit || 0) + previousData.airticket_profit,
       };
       await conn.updateInvoiceReissueAirticket(
         invoice_id,
         reissueAirTicketItem
       );
 
+      // UPDATE IS REISSUED
+      await conn.updateInvoiceIsReissued(airticket_existing_invoiceid, 1);
+      await conn.updateAirTicketIsReissued(
+        prevInvCateId,
+        airticket_existing_airticket_id,
+        1
+      );
+
+      // NEW HISTORY
       const new_history_data: InvoiceHistory = {
         history_activity_type: 'INVOICE_UPDATED',
         history_created_by: req.user_id,
         history_invoice_id: invoice_id,
-        invoicelog_content:
-          'Existing Air Ticket Reissued Updated!',
-        history_invoice_payment_amount: airticket_client_price
-
+        invoicelog_content: 'Existing Air Ticket Reissued Updated!',
+        history_invoice_payment_amount: airticket_client_price,
       };
 
       await common_conn.insertInvoiceHistory(new_history_data);
@@ -161,23 +189,14 @@ class EditExistingCl extends AbstractServices {
         history_activity_type: 'INVOICE_UPDATED',
         history_created_by: req.user_id,
         history_invoice_id: airticket_existing_invoiceid,
-        invoicelog_content:
-          'Reissue Updated!'
+        invoicelog_content: 'Reissue Updated!',
       };
 
       await common_conn.insertInvoiceHistory(existing_history_data);
 
-
       const content = `Existing client invoice reissue has been updated, Voucher - ${invoice_no}, Net - ${airticket_client_price}/-`;
 
-
-      await this.insertAudit(
-        req,
-        'update',
-        content,
-        req.user_id,
-        'INVOICES'
-      );
+      await this.insertAudit(req, 'update', content, req.user_id, 'INVOICES');
 
       return {
         success: true,

@@ -809,12 +809,12 @@ class ReportModel extends AbstractModels {
       .modify((event) => {
         type === 'daily'
           ? event.andWhereRaw(
-            `DATE_FORMAT(invoice_sales_date, '%Y-%m-%d') = ?`,
-            [date]
-          )
+              `DATE_FORMAT(invoice_sales_date, '%Y-%m-%d') = ?`,
+              [date]
+            )
           : event.andWhereRaw(`DATE_FORMAT(invoice_sales_date, '%Y-%m') = ?`, [
-            date,
-          ]);
+              date,
+            ]);
       });
 
     return data;
@@ -886,13 +886,13 @@ class ReportModel extends AbstractModels {
       .modify((event) => {
         type === 'daily'
           ? event.andWhereRaw(
-            `DATE_FORMAT(trabill_vendor_payments.payment_date, '%Y-%m-%d') = ?`,
-            [date]
-          )
+              `DATE_FORMAT(trabill_vendor_payments.payment_date, '%Y-%m-%d') = ?`,
+              [date]
+            )
           : event.andWhereRaw(
-            'DATE_FORMAT(trabill_vendor_payments.payment_date,"%Y-%m") = ?',
-            [date]
-          );
+              'DATE_FORMAT(trabill_vendor_payments.payment_date,"%Y-%m") = ?',
+              [date]
+            );
       });
 
     return data;
@@ -954,11 +954,12 @@ class ReportModel extends AbstractModels {
       .from('trabill_expense_details')
       .leftJoin('trabill_expense_head', { head_id: 'expdetails_head_id' })
       .leftJoin('trabill_expenses', { expense_id: 'expdetails_expense_id' })
+      .where('expense_org_agency', this.org_agency)
       .modify((event) => {
         type === 'daily'
           ? event.andWhereRaw(`DATE_FORMAT(expense_date, '%Y-%m-%d') = ?`, [
-            date,
-          ])
+              date,
+            ])
           : event.andWhereRaw('DATE_FORMAT(expense_date, "%Y-%m") = ?', [date]);
       });
 
@@ -978,12 +979,12 @@ class ReportModel extends AbstractModels {
       .modify((event) => {
         type === 'daily'
           ? event.andWhereRaw(
-            `DATE_FORMAT(payroll_create_date, '%Y-%m-%d') = ?`,
-            [date]
-          )
+              `DATE_FORMAT(payroll_create_date, '%Y-%m-%d') = ?`,
+              [date]
+            )
           : event.andWhereRaw('DATE_FORMAT(payroll_create_date, "%Y-%m") = ?', [
-            date,
-          ]);
+              date,
+            ]);
       });
 
     return data;
@@ -1046,13 +1047,13 @@ class ReportModel extends AbstractModels {
       .modify((event) => {
         type === 'daily'
           ? event.andWhereRaw(
-            `DATE_FORMAT(${this.trxn}.acc_trxn.acctrxn_created_at, '%Y-%m-%d') = ?`,
-            [date]
-          )
+              `DATE_FORMAT(${this.trxn}.acc_trxn.acctrxn_created_at, '%Y-%m-%d') = ?`,
+              [date]
+            )
           : event.andWhereRaw(
-            `DATE_FORMAT(${this.trxn}.acc_trxn.acctrxn_created_at, '%Y-%m') = ?`,
-            [date]
-          );
+              `DATE_FORMAT(${this.trxn}.acc_trxn.acctrxn_created_at, '%Y-%m') = ?`,
+              [date]
+            );
       })
       .where('acctrxn_type', 'CREDIT')
       .andWhere('acctrxn_agency_id', this.org_agency)
@@ -1080,13 +1081,13 @@ class ReportModel extends AbstractModels {
       .modify((event) => {
         type === 'daily'
           ? event.andWhereRaw(
-            'DATE_FORMAT(receipt_payment_date, "%Y-%m-%d") = ?',
-            [date]
-          )
+              'DATE_FORMAT(receipt_payment_date, "%Y-%m-%d") = ?',
+              [date]
+            )
           : event.andWhereRaw(
-            `DATE_FORMAT(receipt_payment_date, '%Y-%m') = ?`,
-            [date]
-          );
+              `DATE_FORMAT(receipt_payment_date, '%Y-%m') = ?`,
+              [date]
+            );
       })) as { agent_payment: number }[];
 
     return Number(data.agent_payment);
@@ -1133,13 +1134,13 @@ class ReportModel extends AbstractModels {
       .modify((event) => {
         type === 'daily'
           ? event.andWhereRaw(
-            `DATE_FORMAT(view_clients_refunds.crefund_create_date, '%Y-%m-%d') = ?`,
-            [date]
-          )
+              `DATE_FORMAT(view_clients_refunds.crefund_create_date, '%Y-%m-%d') = ?`,
+              [date]
+            )
           : event.andWhereRaw(
-            'DATE_FORMAT(view_clients_refunds.crefund_create_date, "%Y-%m") = ?',
-            [date]
-          );
+              'DATE_FORMAT(view_clients_refunds.crefund_create_date, "%Y-%m") = ?',
+              [date]
+            );
       });
 
     return data;
@@ -1157,13 +1158,13 @@ class ReportModel extends AbstractModels {
       .modify((event) => {
         type === 'daily'
           ? event.andWhereRaw(
-            `DATE_FORMAT(view_vendors_refunds.vrefund_create_date, '%Y-%m-%d') = ?`,
-            [date]
-          )
+              `DATE_FORMAT(view_vendors_refunds.vrefund_create_date, '%Y-%m-%d') = ?`,
+              [date]
+            )
           : event.andWhereRaw(
-            'DATE_FORMAT(view_vendors_refunds.vrefund_create_date, "%Y-%m") = ?',
-            [date]
-          );
+              'DATE_FORMAT(view_vendors_refunds.vrefund_create_date, "%Y-%m") = ?',
+              [date]
+            );
       });
 
     return data;
@@ -2120,10 +2121,10 @@ class ReportModel extends AbstractModels {
       .from('view_journey_date_wise_report')
       .where('airticket_org_agency', this.org_agency)
       .whereNotNull('airticket_journey_date')
-      .andWhereRaw(
-        `Date(airticket_journey_date) BETWEEN ? AND ?`,
-        [from_date, to_date]
-      )
+      .andWhereRaw(`Date(airticket_journey_date) BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ])
       .andWhere((event) => {
         if (client_id && client_id !== 'all')
           event.where('airticket_client_id', client_id);
@@ -2133,7 +2134,6 @@ class ReportModel extends AbstractModels {
       })
       .limit(size)
       .offset(page_number);
-
 
     const [{ count }] = (await this.query()
       .count('*')
@@ -2147,10 +2147,10 @@ class ReportModel extends AbstractModels {
         if (combined_id && combined_id !== 'all')
           event.andWhere('airticket_combined_id', combined_id);
       })
-      .andWhereRaw(
-        `Date(airticket_journey_date) BETWEEN ? AND ?`,
-        [from_date, to_date]
-      )) as { count: number }[];
+      .andWhereRaw(`Date(airticket_journey_date) BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ])) as { count: number }[];
 
     return { count, data };
   }

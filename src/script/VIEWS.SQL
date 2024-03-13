@@ -119,7 +119,7 @@ SELECT
         LEFT JOIN view_airticket_routes ON (((view_airticket_routes.airoute_airticket_id = airtickets.airticket_id)
             AND (view_airticket_routes.airoute_invoice_id = airtickets.airticket_invoice_id)))
 
-        GROUP BY airtickets.airticket_invoice_id
+        GROUP BY airtickets.airticket_invoice_id, airtickets.airticket_id
 
 
       

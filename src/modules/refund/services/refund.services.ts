@@ -32,6 +32,8 @@ class RefundServices extends AbstractServices {
 
     const data = await conn.airTicketInfos(ticket_no);
 
+    console.log({ data, ticket_no });
+
     return { success: true, data };
   };
 
@@ -55,6 +57,8 @@ class RefundServices extends AbstractServices {
         from_date,
         to_date
       );
+
+      console.log({ items });
 
       const count = await conn.countAitRefDataRow(search, from_date, to_date);
 

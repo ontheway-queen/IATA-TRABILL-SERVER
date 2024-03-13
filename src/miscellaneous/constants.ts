@@ -36,4 +36,6 @@ export const origin = [
   'http://192.168.0.215:5173',
   'https://192.168.0.215:5173',
   'http://192.168.0.215:3002',
+  'https://iata.trabill.biz',
+  'https://www.iata.trabill.biz',
 ];

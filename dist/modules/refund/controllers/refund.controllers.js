@@ -56,6 +56,15 @@ class RefundController extends abstract_controllers_1.default {
                 this.error('Get All air ticket refunds...');
             }
         }));
+        this.getRefundDescription = this.assyncWrapper.wrap(this.validator.readAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getRefundDescription(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('Get single air ticket refunds...');
+            }
+        }));
         this.singleAirTicketRefund = this.assyncWrapper.wrap(this.validator.readAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.singleATRefund(req);
             if (data.success) {

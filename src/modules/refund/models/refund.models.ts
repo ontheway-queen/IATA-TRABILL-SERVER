@@ -224,51 +224,10 @@ class RefundModel extends AbstractModels {
   }
 
   public async getAirticketVendorRefund(refundId: idType) {
-    const vendor_info = (await this.query()
-      .select(
-        'atrefund_vouchar_number',
-        this.db.raw(`COALESCE(vendor_name, combine_name) AS vendor_name`),
-        this.db.raw(
-          `CASE WHEN vrefund_vendor_id IS NOT NULL THEN CONCAT('vendor-', vrefund_vendor_id) ELSE CONCAT('combined-', vrefund_vendor_combined_id) END AS comb_vendor`
-        ),
-        'vrefund_total_amount',
-        'vrefund_charge_amount',
-        'vrefund_return_amount',
-        'vrefund_payment_type',
-        'vrefund_moneyreturn_type',
-        'vrefund_account_id',
-        'vrefund_vtrxn_id',
-        'vrefund_charge_vtrxn_id',
-        'vrefund_acctrxn_id',
-        'vrefund_airticket_id',
-        'vrefund_category_id'
-      )
-      .from('trabill_airticket_refunds')
-      .leftJoin('trabill_airticket_vendor_refunds', {
-        vrefund_refund_id: 'atrefund_id',
-      })
-      .leftJoin('trabill_vendors', { vendor_id: 'vrefund_vendor_id' })
-      .leftJoin('trabill_combined_clients', {
-        combine_id: 'vrefund_vendor_combined_id',
-      })
-      .where('atrefund_id', refundId)) as {
-      atrefund_vouchar_number: string;
-      vendor_name: string;
-      comb_vendor: string;
-      vrefund_total_amount: number;
-      vrefund_charge_amount: number;
-      vrefund_return_amount: number;
-      vrefund_payment_type: string;
-      vrefund_moneyreturn_type: 'ADJUST' | 'MONEY_RETURN';
-      vrefund_account_id: number;
-      vrefund_vtrxn_id: number;
-      vrefund_charge_vtrxn_id: number;
-      vrefund_acctrxn_id: number;
-      vrefund_airticket_id: number;
-      vrefund_category_id: number;
-    }[];
-
-    return vendor_info;
+    return await this.query()
+      .select('*')
+      .from('v_ait_refund_desc')
+      .where('vrefund_refund_id', refundId);
   }
 
   public async getAirticketClientRefund(refundId: idType) {
@@ -325,36 +284,47 @@ class RefundModel extends AbstractModels {
       .select(
         'atrefund_id',
         'atrefund_vouchar_number',
-        this.db.raw(
-          'coalesce(comb.combine_name, cl.client_name) as client_name'
-        ),
+        'atrefund_client_id',
+        'atrefund_combined_id',
+        'atrefund_date',
+        'atrefund_note',
+        'atrefund_trxn_charge',
+        'atrefund_create_date',
+        'account_name',
         'crefund_total_amount',
         'crefund_charge_amount',
         'crefund_return_amount',
         'crefund_profit',
+        'crefund_condition_type',
         'crefund_payment_type',
-        'atrefund_date',
-        'atrefund_date',
-        'atrefund_date',
-        'atrefund_date',
-        'atrefund_create_date',
-        'atrefund_note',
-        'atrefund_date'
+        'crefund_moneyreturn_type',
+        'invoice_id',
+        'invoice_no',
+        'invoice_category_id',
+        this.db.raw('coalesce(client_name, combine_name) as client_name')
       )
-      .from('trabill_airticket_refunds')
-      .leftJoin('trabill_airticket_client_refunds', {
-        crefund_refund_id: 'atrefund_id',
-      })
-      .leftJoin('trabill_clients as cl', { client_id: 'atrefund_client_id ' })
-      .leftJoin('trabill_combined_clients as comb', {
-        combine_id: 'atrefund_combined_id ',
-      })
+      .from('trabill.trabill_airticket_refunds')
+      .leftJoin(
+        'trabill_airticket_client_refunds',
+        'crefund_refund_id',
+        '=',
+        'atrefund_id'
+      )
+      .leftJoin('trabill_invoices', 'invoice_id', '=', 'atrefund_invoice_id')
+      .leftJoin('trabill_clients', 'client_id', '=', 'atrefund_client_id')
+      .leftJoin(
+        'trabill_combined_clients',
+        'combine_id',
+        '=',
+        'atrefund_combined_id'
+      )
+      .leftJoin('trabill_accounts', 'account_id', '=', 'crefund_account_id')
       .where('atrefund_org_agency', this.org_agency)
-      .andWhere('atrefund_is_deleted', 0)
+      .andWhereNot('atrefund_is_deleted', 1)
       .andWhere(function () {
         if (from_date && to_date) {
           this.andWhereRaw(
-            `DATE_FORMAT(atrefund_create_date,'%Y-%m-%d') BETWEEN ? AND ?`,
+            `DATE_FORMAT(atrefund_date,'%Y-%m-%d') BETWEEN ? AND ?`,
             [from_date, to_date]
           );
         }
@@ -387,17 +357,20 @@ class RefundModel extends AbstractModels {
     to_date ? (to_date = moment(new Date(to_date)).format('YYYY-MM-DD')) : null;
     const [count] = await this.query()
       .select(this.db.raw(`COUNT(*) AS row_count`))
-      .from('trabill_airticket_refunds')
-      .leftJoin('trabill_clients as cl', { client_id: 'atrefund_client_id ' })
-      .leftJoin('trabill_combined_clients as comb', {
-        combine_id: 'atrefund_combined_id ',
-      })
+      .from('trabill.trabill_airticket_refunds')
+      .leftJoin('trabill_clients', 'client_id', '=', 'atrefund_client_id')
+      .leftJoin(
+        'trabill_combined_clients',
+        'combine_id',
+        '=',
+        'atrefund_combined_id'
+      )
       .where('atrefund_org_agency', this.org_agency)
-      .andWhere('atrefund_is_deleted', 0)
+      .andWhereNot('atrefund_is_deleted', 1)
       .andWhere(function () {
         if (from_date && to_date) {
           this.andWhereRaw(
-            `DATE_FORMAT(atrefund_create_date,'%Y-%m-%d') BETWEEN ? AND ?`,
+            `DATE_FORMAT(atrefund_date,'%Y-%m-%d') BETWEEN ? AND ?`,
             [from_date, to_date]
           );
         }

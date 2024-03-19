@@ -21,6 +21,7 @@ class RefundRouter extends abstract_routers_1.default {
             .route('/air-ticket-refund/:refund_id')
             .delete(this.controllers.deleteAirTicketRefund)
             .get(this.controllers.singleAirTicketRefund);
+        this.routers.get('/iat-description/:refund_id', this.controllers.getRefundDescription);
         this.routers.post('/ticket-infos', this.controllers.airTicketInfos);
         this.routers.get('/ticket-no/:id', this.controllers.getTicketNo);
         // client refund

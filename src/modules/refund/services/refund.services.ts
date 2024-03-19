@@ -38,8 +38,6 @@ class RefundServices extends AbstractServices {
   };
 
   public getAllAirTicketRefund = async (req: Request) => {
-    let data: any[] = [];
-
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);
       const { page, size, search, from_date, to_date } = req.query as {
@@ -50,7 +48,7 @@ class RefundServices extends AbstractServices {
         to_date: string;
       };
 
-      const items = await conn.getAllAirticketRefund(
+      const data = await conn.getAllAirticketRefund(
         Number(page) || 1,
         Number(size) || 20,
         search,
@@ -58,17 +56,7 @@ class RefundServices extends AbstractServices {
         to_date
       );
 
-      console.log({ items });
-
       const count = await conn.countAitRefDataRow(search, from_date, to_date);
-
-      for (const item of items) {
-        const vendor_refund_info = await conn.getAirticketVendorRefund(
-          item.atrefund_id
-        );
-
-        data.push({ ...item, vendor_refund_info });
-      }
 
       return {
         success: true,
@@ -76,6 +64,18 @@ class RefundServices extends AbstractServices {
         count: count.row_count,
         data,
       };
+    });
+  };
+
+  // need to change
+  public getRefundDescription = async (req: Request) => {
+    const { refund_id } = req.params;
+
+    return await this.models.db.transaction(async (trx) => {
+      const conn = this.models.refundModel(req, trx);
+      const data = await conn.getAirticketVendorRefund(refund_id);
+
+      return { success: true, data };
     });
   };
 

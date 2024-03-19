@@ -39,23 +39,26 @@ class RefundServices extends abstract_services_1.default {
             return { success: true, data };
         });
         this.getAllAirTicketRefund = (req) => __awaiter(this, void 0, void 0, function* () {
-            let data = [];
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
                 const { page, size, search, from_date, to_date } = req.query;
-                const items = yield conn.getAllAirticketRefund(Number(page) || 1, Number(size) || 20, search, from_date, to_date);
-                console.log({ items });
+                const data = yield conn.getAllAirticketRefund(Number(page) || 1, Number(size) || 20, search, from_date, to_date);
                 const count = yield conn.countAitRefDataRow(search, from_date, to_date);
-                for (const item of items) {
-                    const vendor_refund_info = yield conn.getAirticketVendorRefund(item.atrefund_id);
-                    data.push(Object.assign(Object.assign({}, item), { vendor_refund_info }));
-                }
                 return {
                     success: true,
                     message: 'All air ticket refund',
                     count: count.row_count,
                     data,
                 };
+            }));
+        });
+        // need to change
+        this.getRefundDescription = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { refund_id } = req.params;
+            return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
+                const conn = this.models.refundModel(req, trx);
+                const data = yield conn.getAirticketVendorRefund(refund_id);
+                return { success: true, data };
             }));
         });
         // need to change

@@ -4,10 +4,11 @@
   "description": "trabill new version ",
   "main": "index.js",
   "scripts": {
+    "build": "npx tsc -w",
     "dev": "nodemon dist/server.js",
     "start": "node dist/server.js"
   },
-  "author": "Saimur Rahman",
+  "author": "Nazmul Hosen",
   "license": "ISC",
   "dependencies": {
     "@azure/identity": "^3.1.2",

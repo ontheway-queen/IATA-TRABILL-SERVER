@@ -381,7 +381,7 @@ class ReportModel extends abstract_models_1.default {
                 }
             })
                 .andWhere('invoice_org_agency', this.org_agency)
-                .andWhereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+                .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ])
@@ -396,7 +396,7 @@ class ReportModel extends abstract_models_1.default {
                 }
             })
                 .andWhere('invoice_org_agency', this.org_agency)
-                .andWhereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+                .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ]);
@@ -1288,7 +1288,7 @@ class ReportModel extends abstract_models_1.default {
                 .andWhere('invoice_org_agency', this.org_agency)
                 .modify((builder) => {
                 if (from_date && to_date) {
-                    builder.andWhereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+                    builder.andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
                         from_date,
                         to_date,
                     ]);
@@ -1308,7 +1308,7 @@ class ReportModel extends abstract_models_1.default {
                 .andWhere('invoice_org_agency', this.org_agency)
                 .modify((builder) => {
                 if (from_date && to_date) {
-                    builder.andWhereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+                    builder.andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
                         from_date,
                         to_date,
                     ]);
@@ -1381,7 +1381,7 @@ class ReportModel extends abstract_models_1.default {
                     builder.andWhere('airticket_airline_id', airline_id);
                 }
             })
-                .andWhereRaw('Date(trabill_invoices.invoice_create_date) BETWEEN ? AND ?', [from_date, to_date])
+                .andWhereRaw('Date(trabill_invoices.invoice_sales_date) BETWEEN ? AND ?', [from_date, to_date])
                 .sum(`airticket_client_price as airticket_client_price`)
                 .sum(`airticket_purchase_price as airticket_purchase_price`);
             return { data: Object.assign({ result }, total[0]) };
@@ -1413,7 +1413,7 @@ class ReportModel extends abstract_models_1.default {
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const page_number = (page - 1) * size;
             const data = yield this.query()
-                .select('invoice_id', 'invoice_category_id', 'invoice_client_id', 'invoice_combined_id', 'invoice_no', this.db.raw(`COALESCE(client_name, combine_name) as client_name`), 'invoice_create_date as payment_date', 'invoice_discount as discount_total')
+                .select('invoice_id', 'invoice_category_id', 'invoice_client_id', 'invoice_combined_id', 'invoice_no', this.db.raw(`COALESCE(client_name, combine_name) as client_name`), 'invoice_sales_date as payment_date', 'invoice_discount as discount_total')
                 .from('trabill_invoices')
                 .leftJoin('trabill_clients', { client_id: 'invoice_client_id' })
                 .leftJoin('trabill_combined_clients', {
@@ -1425,7 +1425,7 @@ class ReportModel extends abstract_models_1.default {
                 .where('trabill_invoices.invoice_org_agency', this.org_agency)
                 .andWhereNot('trabill_invoices.invoice_is_deleted', 1)
                 .andWhere('invoice_discount', '>', 0)
-                .whereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+                .whereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ])
@@ -1448,7 +1448,7 @@ class ReportModel extends abstract_models_1.default {
             })
                 .where('trabill_invoices.invoice_org_agency', this.org_agency)
                 .andWhereNot('invoice_is_deleted', 1)
-                .whereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+                .whereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ])

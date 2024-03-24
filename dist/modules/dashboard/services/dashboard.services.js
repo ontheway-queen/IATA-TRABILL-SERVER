@@ -91,7 +91,7 @@ class DashboardServices extends abstract_services_1.default {
                     monthly_expense,
                     yearly_sales,
                     yearly_received,
-                    yearly_expense
+                    yearly_expense,
                 },
             };
         });
@@ -100,10 +100,11 @@ class DashboardServices extends abstract_services_1.default {
             const daily_purchase = yield conn.selectDailyPurchase();
             const daily_payment = yield conn.selectDailyPayment();
             return {
-                success: true, data: {
+                success: true,
+                data: {
                     daily_purchase,
-                    daily_payment
-                }
+                    daily_payment,
+                },
             };
         });
         this.getMonthlyPaymentPurchase = (req) => __awaiter(this, void 0, void 0, function* () {
@@ -111,10 +112,11 @@ class DashboardServices extends abstract_services_1.default {
             const monthly_purchase = yield conn.selectMonthlyPurchase();
             const monthly_payment = yield conn.selectMonthlyPayment();
             return {
-                success: true, data: {
+                success: true,
+                data: {
                     monthly_purchase,
-                    monthly_payment
-                }
+                    monthly_payment,
+                },
             };
         });
         this.getYearlyPaymentPurchase = (req) => __awaiter(this, void 0, void 0, function* () {
@@ -122,10 +124,11 @@ class DashboardServices extends abstract_services_1.default {
             const yearly_purchase = yield conn.selectYearlyPurchase();
             const yearly_payment = yield conn.selectYearlyPayment();
             return {
-                success: true, data: {
+                success: true,
+                data: {
                     yearly_purchase,
-                    yearly_payment
-                }
+                    yearly_payment,
+                },
             };
         });
         // BSP BILLING
@@ -152,7 +155,10 @@ class DashboardServices extends abstract_services_1.default {
             return {
                 success: true,
                 message: 'the request is OK',
-                data: Object.assign(Object.assign({}, data), { billing_from_date, billing_to_date, sales_from_date, sales_to_date }),
+                data: Object.assign(Object.assign({}, data), { billing_from_date,
+                    billing_to_date,
+                    sales_from_date,
+                    sales_to_date }),
             };
         });
         // VENDORS / BANK Guarantee

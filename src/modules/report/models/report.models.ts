@@ -549,7 +549,7 @@ class ReportModel extends AbstractModels {
         }
       })
       .andWhere('invoice_org_agency', this.org_agency)
-      .andWhereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+      .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])
@@ -565,7 +565,7 @@ class ReportModel extends AbstractModels {
         }
       })
       .andWhere('invoice_org_agency', this.org_agency)
-      .andWhereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+      .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
       ]);
@@ -1862,7 +1862,7 @@ class ReportModel extends AbstractModels {
       .andWhere('invoice_org_agency', this.org_agency)
       .modify((builder) => {
         if (from_date && to_date) {
-          builder.andWhereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+          builder.andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
             from_date,
             to_date,
           ]);
@@ -1884,7 +1884,7 @@ class ReportModel extends AbstractModels {
       .andWhere('invoice_org_agency', this.org_agency)
       .modify((builder) => {
         if (from_date && to_date) {
-          builder.andWhereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+          builder.andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
             from_date,
             to_date,
           ]);
@@ -1995,7 +1995,7 @@ class ReportModel extends AbstractModels {
         }
       })
       .andWhereRaw(
-        'Date(trabill_invoices.invoice_create_date) BETWEEN ? AND ?',
+        'Date(trabill_invoices.invoice_sales_date) BETWEEN ? AND ?',
         [from_date, to_date]
       )
       .sum(`airticket_client_price as airticket_client_price`)
@@ -2049,7 +2049,7 @@ class ReportModel extends AbstractModels {
         'invoice_combined_id',
         'invoice_no',
         this.db.raw(`COALESCE(client_name, combine_name) as client_name`),
-        'invoice_create_date as payment_date',
+        'invoice_sales_date as payment_date',
         'invoice_discount as discount_total'
       )
       .from('trabill_invoices')
@@ -2063,7 +2063,7 @@ class ReportModel extends AbstractModels {
       .where('trabill_invoices.invoice_org_agency', this.org_agency)
       .andWhereNot('trabill_invoices.invoice_is_deleted', 1)
       .andWhere('invoice_discount', '>', 0)
-      .whereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+      .whereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])
@@ -2087,7 +2087,7 @@ class ReportModel extends AbstractModels {
       })
       .where('trabill_invoices.invoice_org_agency', this.org_agency)
       .andWhereNot('invoice_is_deleted', 1)
-      .whereRaw('Date(invoice_create_date) BETWEEN ? AND ?', [
+      .whereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])

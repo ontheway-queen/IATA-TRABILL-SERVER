@@ -347,11 +347,11 @@ class DashboardModels extends abstract_models_1.default {
         });
         this.iataBankGuaranteeLimit = () => __awaiter(this, void 0, void 0, function* () {
             const [result] = yield this.query()
-                .select("vendor_bank_guarantee as limit_amount", "vendor_lbalance as uses_amount")
-                .from("trabill_vendors")
-                .where("vendor_type", "IATA")
-                .andWhere("vendor_org_agency", this.org_agency)
-                .andWhereNot("vendor_is_deleted", 1);
+                .select('vendor_bank_guarantee as limit_amount', 'vendor_lbalance as uses_amount')
+                .from('trabill_vendors')
+                .where('vendor_type', 'IATA')
+                .andWhere('vendor_org_agency', this.org_agency)
+                .andWhereNot('vendor_is_deleted', 1);
             return result;
         });
     }

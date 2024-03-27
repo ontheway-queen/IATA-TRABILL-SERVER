@@ -166,8 +166,8 @@ class DashboardModels extends AbstractModels {
       .whereRaw('YEAR(expense_date) = YEAR(CURDATE())')
       .andWhere('expense_org_agency', this.org_agency)
       .andWhereNot('expense_is_deleted', 1)) as {
-        this_year_total: number;
-      }[];
+      this_year_total: number;
+    }[];
 
     return {
       today_total: todayTotal[0].today_total || 0,
@@ -225,101 +225,78 @@ class DashboardModels extends AbstractModels {
       .orderBy('invoice_id', 'desc');
   };
 
-
-
-
-
-
-
-
-
-
   // DAILY , MONTHLY & YEARLY REPORTS
   selectDailySales = async () => {
     const [result] = await this.query()
       .from('trabill_invoices')
-      .select(
-        this.db.raw('SUM(invoice_net_total) AS value')
-      )
+      .select(this.db.raw('SUM(invoice_net_total) AS value'))
       .whereRaw('DATE(invoice_sales_date) = CURDATE()')
       .andWhere('invoice_org_agency', this.org_agency)
       .andWhereNot('invoice_is_deleted', 1)
       .groupByRaw('DATE(invoice_sales_date)');
     return result?.value || 0;
-  }
+  };
   selectDailyReceived = async () => {
     const [result] = await this.query()
       .from('trabill_money_receipts')
-      .select(
-        this.db.raw('SUM(receipt_total_amount) AS value')
-      )
+      .select(this.db.raw('SUM(receipt_total_amount) AS value'))
       .where('receipt_org_agency', this.org_agency)
       .andWhereNot('receipt_has_deleted', 1)
       .andWhereRaw('DATE(receipt_payment_date) = CURDATE()')
       .groupByRaw('DATE(receipt_payment_date)');
 
     return result?.value || 0;
-  }
+  };
   selectDailyPurchase = async () => {
     const [result] = await this.query()
       .from('view_invoices_cost')
-      .select(
-        this.db.raw('SUM(cost_price) AS value')
-      )
+      .select(this.db.raw('SUM(cost_price) AS value'))
       .whereRaw('DATE(sales_date) = CURDATE()')
       .andWhere('org_agency', this.org_agency)
       .groupByRaw('DATE(sales_date)');
 
     return result?.value || 0;
-  }
+  };
 
   selectDailyPayment = async () => {
     const [result] = await this.query()
       .from('trabill_vendor_payments')
-      .select(
-        this.db.raw('SUM(payment_amount) AS value')
-      )
+      .select(this.db.raw('SUM(payment_amount) AS value'))
       .where('vpay_org_agency', this.org_agency)
       .andWhereNot('vpay_is_deleted', 1)
       .andWhereRaw('DATE(payment_date) = CURDATE()')
       .groupByRaw('DATE(payment_date)');
 
     return result?.value || 0;
-  }
+  };
   selectDailyExpense = async () => {
     const [result] = await this.query()
       .from('trabill_expenses')
-      .select(
-        this.db.raw('SUM(expense_total_amount) AS value')
-      )
+      .select(this.db.raw('SUM(expense_total_amount) AS value'))
       .where('expense_org_agency', this.org_agency)
       .andWhereNot('expense_is_deleted', 1)
       .andWhereRaw('DATE(expense_date) = CURDATE()')
       .groupByRaw('DATE(expense_date)');
 
     return result?.value || 0;
-  }
+  };
 
   // monthly
   selectMonthlySales = async () => {
     const [result] = await this.query()
       .from('trabill_invoices')
-      .select(
-        this.db.raw('SUM(invoice_net_total) AS value')
-      )
+      .select(this.db.raw('SUM(invoice_net_total) AS value'))
       .whereRaw('YEAR(invoice_sales_date) = YEAR(CURDATE())')
       .andWhereRaw('MONTH(invoice_sales_date) = MONTH(CURDATE())')
       .andWhere('invoice_org_agency', this.org_agency)
       .andWhereNot('invoice_is_deleted', 1)
       .groupByRaw('DATE(invoice_sales_date)');
     return result?.value || 0;
-  }
+  };
   selectMonthlyReceived = async () => {
     const [result] = await this.query()
       .from('trabill_money_receipts')
-      .select(
-        this.db.raw('SUM(receipt_total_amount) AS value')
-      )
+      .select(this.db.raw('SUM(receipt_total_amount) AS value'))
       .where('receipt_org_agency', this.org_agency)
       .andWhereNot('receipt_has_deleted', 1)
       .whereRaw('YEAR(receipt_payment_date) = YEAR(CURDATE())')
@@ -327,27 +304,23 @@ class DashboardModels extends AbstractModels {
       .groupByRaw('DATE(receipt_payment_date)');
 
     return result?.value || 0;
-  }
+  };
   selectMonthlyPurchase = async () => {
     const [result] = await this.query()
       .from('view_invoices_cost')
-      .select(
-        this.db.raw('SUM(cost_price) AS daily_cost')
-      )
+      .select(this.db.raw('SUM(cost_price) AS daily_cost'))
       .whereRaw('YEAR(sales_date) = YEAR(CURDATE())')
       .andWhereRaw('MONTH(sales_date) = MONTH(CURDATE())')
       .andWhere('org_agency', this.org_agency)
       .groupByRaw('DATE(sales_date)');
 
     return result?.value || 0;
-  }
+  };
 
   selectMonthlyPayment = async () => {
     const [result] = await this.query()
       .from('trabill_vendor_payments')
-      .select(
-        this.db.raw('SUM(payment_amount) AS value')
-      )
+      .select(this.db.raw('SUM(payment_amount) AS value'))
       .where('vpay_org_agency', this.org_agency)
       .andWhereNot('vpay_is_deleted', 1)
       .whereRaw('YEAR(payment_date) = YEAR(CURDATE())')
@@ -355,13 +328,11 @@ class DashboardModels extends AbstractModels {
       .groupByRaw('DATE(payment_date)');
 
     return result?.value || 0;
-  }
+  };
   selectMonthlyExpense = async () => {
     const [result] = await this.query()
       .from('trabill_expenses')
-      .select(
-        this.db.raw('SUM(expense_total_amount) AS value')
-      )
+      .select(this.db.raw('SUM(expense_total_amount) AS value'))
       .where('expense_org_agency', this.org_agency)
       .andWhereNot('expense_is_deleted', 1)
       .whereRaw('YEAR(expense_date) = YEAR(CURDATE())')
@@ -369,77 +340,63 @@ class DashboardModels extends AbstractModels {
       .groupByRaw('DATE(expense_date)');
 
     return result?.value || 0;
-  }
+  };
 
   // yearly
   selectYearlySales = async () => {
     const [result] = await this.query()
       .from('trabill_invoices')
-      .select(
-        this.db.raw('SUM(invoice_net_total) AS value')
-      )
+      .select(this.db.raw('SUM(invoice_net_total) AS value'))
       .whereRaw('YEAR(invoice_sales_date) = YEAR(CURDATE())')
       .andWhere('invoice_org_agency', this.org_agency)
       .andWhereNot('invoice_is_deleted', 1)
       .groupByRaw('DATE(invoice_sales_date)');
     return result?.value || 0;
-  }
+  };
   selectYearlyReceived = async () => {
     const [result] = await this.query()
       .from('trabill_money_receipts')
-      .select(
-        this.db.raw('SUM(receipt_total_amount) AS value')
-      )
+      .select(this.db.raw('SUM(receipt_total_amount) AS value'))
       .where('receipt_org_agency', this.org_agency)
       .andWhereNot('receipt_has_deleted', 1)
       .whereRaw('YEAR(receipt_payment_date) = YEAR(CURDATE())')
       .groupByRaw('DATE(receipt_payment_date)');
 
     return result?.value || 0;
-  }
+  };
   selectYearlyPurchase = async () => {
     const [result] = await this.query()
       .from('view_invoices_cost')
-      .select(
-        this.db.raw('SUM(cost_price) AS value')
-      )
+      .select(this.db.raw('SUM(cost_price) AS value'))
       .whereRaw('YEAR(sales_date) = YEAR(CURDATE())')
       .andWhere('org_agency', this.org_agency)
       .groupByRaw('DATE(sales_date)');
 
     return result?.value || 0;
-  }
+  };
 
   selectYearlyPayment = async () => {
     const [result] = await this.query()
       .from('trabill_vendor_payments')
-      .select(
-        this.db.raw('SUM(payment_amount) AS value')
-      )
+      .select(this.db.raw('SUM(payment_amount) AS value'))
       .where('vpay_org_agency', this.org_agency)
       .andWhereNot('vpay_is_deleted', 1)
       .whereRaw('YEAR(payment_date) = YEAR(CURDATE())')
       .groupByRaw('DATE(payment_date)');
 
     return result?.value || 0;
-  }
+  };
   selectYearlyExpense = async () => {
     const [result] = await this.query()
       .from('trabill_expenses')
-      .select(
-        this.db.raw('SUM(expense_total_amount) AS value')
-      )
+      .select(this.db.raw('SUM(expense_total_amount) AS value'))
       .where('expense_org_agency', this.org_agency)
       .andWhereNot('expense_is_deleted', 1)
       .whereRaw('YEAR(expense_date) = YEAR(CURDATE())')
       .groupByRaw('DATE(expense_date)');
 
     return result?.value || 0;
-  }
-
-
-
-
+  };
 
   getMonthReport = async () => {
     const [[data]] = await this.db.raw(
@@ -448,7 +405,6 @@ class DashboardModels extends AbstractModels {
 
     return data;
   };
-
 
   // BSP BILLING INFORMATION
   public async bspBillingInformation(from_date: string, to_date: string) {
@@ -460,7 +416,9 @@ class DashboardModels extends AbstractModels {
         this.db.raw('SUM(airticket_gross_fare) AS gross_fare'),
         this.db.raw('SUM(airticket_tax) as tax'),
         this.db.raw('SUM(airticket_base_fare) * 0.07 as gross_commission'),
-        this.db.raw('SUM(airticket_total_taxes_commission) as taxes_commission'),
+        this.db.raw(
+          'SUM(airticket_total_taxes_commission) as taxes_commission'
+        ),
         this.db.raw('SUM(airticket_ait) as ait')
       )
       .from('trabill_invoice_airticket_items')
@@ -473,8 +431,6 @@ class DashboardModels extends AbstractModels {
 
     return data;
   }
-
-
 
   public async getVendorBankGuarantee() {
     const data = await this.query()
@@ -491,7 +447,7 @@ class DashboardModels extends AbstractModels {
       )
       .from('trabill_vendors')
       .whereNot('vendor_is_deleted', 1)
-      .andWhere('vendor_org_agency', this.org_agency)
+      .andWhere('vendor_org_agency', this.org_agency);
 
     return data;
   }
@@ -632,30 +588,19 @@ class DashboardModels extends AbstractModels {
     return { count: count.total, data: result };
   };
 
-
-
-
-
-
   iataBankGuaranteeLimit = async () => {
     const [result] = await this.query()
-      .select("vendor_bank_guarantee as limit_amount", "vendor_lbalance as uses_amount")
-      .from("trabill_vendors")
-      .where("vendor_type", "IATA")
-      .andWhere("vendor_org_agency", this.org_agency)
-      .andWhereNot("vendor_is_deleted", 1);
+      .select(
+        'vendor_bank_guarantee as limit_amount',
+        'vendor_lbalance as uses_amount'
+      )
+      .from('trabill_vendors')
+      .where('vendor_type', 'IATA')
+      .andWhere('vendor_org_agency', this.org_agency)
+      .andWhereNot('vendor_is_deleted', 1);
 
-    return result
-  }
-
-
-
-
-
-
-
-
-
+    return result;
+  };
 }
 
 export default DashboardModels;

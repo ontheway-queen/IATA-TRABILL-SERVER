@@ -206,6 +206,7 @@ class QuotationModel extends AbstractModels {
         'client_mobile',
         'client_email',
         'client_address',
+        'client_lbalance',
         'quotation_no',
         'quotation_net_total',
         'quotation_discount_total',

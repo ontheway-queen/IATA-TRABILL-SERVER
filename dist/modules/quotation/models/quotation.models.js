@@ -152,7 +152,7 @@ class QuotationModel extends abstract_models_1.default {
     viewQuotation(quotation_id) {
         return __awaiter(this, void 0, void 0, function* () {
             const quotation = yield this.query()
-                .select('quotation_id', this.db.raw('CASE WHEN quotation_client_id IS NOT NULL THEN CONCAT("client-",quotation_client_id) ELSE CONCAT("combined-",quotation_combined_id) END AS client_id'), 'client_name', 'client_mobile', 'client_email', 'client_address', 'quotation_no', 'quotation_net_total', 'quotation_discount_total', 'quotation_date', 'quotation_note', 'billing_subtotal as subtotal', 'quotation_is_deleted', this.db.raw("concat(user_first_name, ' ', user_last_name) AS user_full_name"), 'country_name')
+                .select('quotation_id', this.db.raw('CASE WHEN quotation_client_id IS NOT NULL THEN CONCAT("client-",quotation_client_id) ELSE CONCAT("combined-",quotation_combined_id) END AS client_id'), 'client_name', 'client_mobile', 'client_email', 'client_address', 'client_lbalance', 'quotation_no', 'quotation_net_total', 'quotation_discount_total', 'quotation_date', 'quotation_note', 'billing_subtotal as subtotal', 'quotation_is_deleted', this.db.raw("concat(user_first_name, ' ', user_last_name) AS user_full_name"), 'country_name')
                 .from('trabill_quotations')
                 .leftJoin('trabill_clients', 'trabill_clients.client_id', 'trabill_quotations.quotation_client_id')
                 .leftJoin('trabill_users', 'trabill_users.user_id', 'trabill_quotations.quotation_created_by')

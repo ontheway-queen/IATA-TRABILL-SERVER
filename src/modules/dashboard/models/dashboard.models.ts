@@ -432,6 +432,89 @@ class DashboardModels extends AbstractModels {
     return data;
   }
 
+  getBspTicketIssueInfo = async (from_date: string, to_date: string) => {
+    const [data] = await this.query()
+      .select(
+        this.db.raw('sum(airticket_gross_fare) as gross_fare'),
+        this.db.raw('sum(airticket_tax) as tax'),
+        this.db.raw('sum(airticket_base_fare) * 0.07 as iata_commission'),
+        this.db.raw(
+          'sum(airticket_total_taxes_commission) as taxes_commission'
+        ),
+        this.db.raw('SUM(airticket_ait) as ait'),
+        this.db.raw('sum(airticket_purchase_price) as purchase_amount'),
+        this.db.raw('sum(airticket_profit) as overall_profit')
+      )
+      .from('v_bsp_ticket_issue')
+      .where('airticket_vendor_id', 5440)
+      .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ]);
+
+    return data;
+  };
+
+  getBspTicketIssueSummary = async (from_date: string, to_date: string) => {
+    return await this.query()
+      .select('*')
+      .from('v_bsp_ticket_issue')
+      .where('airticket_vendor_id', 5440)
+      .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ]);
+  };
+
+  getBspTicketReissueInfo = async (from_date: string, to_date: string) => {
+    const [data] = await this.query()
+      .select(
+        this.db.raw('sum(airticket_client_price) as gross_fare'),
+        this.db.raw('sum(airticket_tax) as tax'),
+        this.db.raw('sum(airticket_fare_difference) * 0.07 as iata_commission'),
+        this.db.raw('0 as taxes_commission'),
+        this.db.raw('SUM(airticket_ait) as ait'),
+        this.db.raw('sum(airticket_purchase_price) as purchase_amount'),
+        this.db.raw('sum(airticket_profit) as overall_profit')
+      )
+      .from('v_bsp_ticket_reissue')
+      .where('airticket_vendor_id', 5440)
+      .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ]);
+
+    return data;
+  };
+  getBspTicketReissueSummary = async (from_date: string, to_date: string) => {
+    return await this.query()
+      .select('*')
+      .from('v_bsp_ticket_reissue')
+      .where('airticket_vendor_id', 5440)
+      .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ]);
+  };
+
+  getBspTicketRefundInfo = async (from_date: string, to_date: string) => {
+    const [data] = await this.query()
+      .sum('vrefund_return_amount as refund_amount')
+      .from('v_bsp_ticket_refund')
+      .where('vrefund_vendor_id', 5440)
+      .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
+
+    return data;
+  };
+
+  getBspTicketRefundSummary = async (from_date: string, to_date: string) => {
+    return await this.query()
+      .select('*')
+      .from('v_bsp_ticket_refund')
+      .where('vrefund_vendor_id', 5440)
+      .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
+  };
+
   public async getVendorBankGuarantee() {
     const data = await this.query()
       .select(

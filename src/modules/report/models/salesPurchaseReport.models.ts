@@ -750,6 +750,56 @@ class SalesPurchasesReport extends AbstractModels {
 
     return { count: count.total, data: { data, ...infos } };
   }
+
+  // OVERALL PROFIT LOSS
+  // sales report summary
+  getSalesReportSummary = async (
+    from_date: string,
+    to_date: string,
+    page: number,
+    size: number
+  ) => {
+    const offset = (page - 1) * size;
+    const data = await this.query()
+      .from('trabill_invoices')
+      .select(
+        'invoice_id',
+        'invoice_client_id',
+        'invoice_combined_id',
+        'invoice_reissue_client_type',
+        'invoice_no',
+        'invoice_category_id',
+        'invoice_sub_total',
+        'invoice_net_total',
+        'invoice_total_profit',
+        'invoice_sales_date',
+        'invoice_note',
+        this.db.raw('COALESCE(client_name, combine_name) AS client_name')
+      )
+      .leftJoin('trabill_clients', 'client_id', 'invoice_client_id')
+      .leftJoin('trabill_combined_clients', 'combine_id', 'invoice_combined_id')
+      .whereNot('invoice_is_deleted', 1)
+      .andWhere('invoice_org_agency', this.org_agency)
+      .andWhereRaw(
+        `DATE_FORMAT(invoice_sales_date,'%Y-%m-%d') BETWEEN ? AND ?`,
+        [from_date, to_date]
+      )
+      .limit(size)
+      .offset(offset);
+    const [{ count }] = await this.query()
+      .from('trabill_invoices')
+      .count('* as count')
+      .whereNot('invoice_is_deleted', 1)
+      .andWhere('invoice_org_agency', this.org_agency)
+      .andWhereRaw(
+        `DATE_FORMAT(invoice_sales_date,'%Y-%m-%d') BETWEEN ? AND ?`,
+        [from_date, to_date]
+      )
+      .limit(size)
+      .offset(offset);
+
+    return { data, count };
+  };
 }
 
 export default SalesPurchasesReport;

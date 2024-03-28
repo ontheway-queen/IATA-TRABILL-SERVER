@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getNext15Day = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
+exports.getNext15Day = exports.getIataDateRange = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
 const axios_1 = __importDefault(require("axios"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = __importDefault(require("../../../config/config"));
 const customError_1 = __importDefault(require("../errors/customError"));
+const dayjs_1 = __importDefault(require("dayjs"));
 class Lib {
     static jwtVerify(token, key) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -119,6 +120,24 @@ const getPaymentType = (type) => {
     return paymentTypeMap[type] || paymentTypeMap.default;
 };
 exports.getPaymentType = getPaymentType;
+const getIataDateRange = () => {
+    const new_date = new Date();
+    const today = (0, dayjs_1.default)().format('YYYY-MM-DD');
+    const half_month = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth() + 1}-15`).format('YYYY-MM-DD');
+    // SALES
+    let sales_from_date;
+    let sales_to_date;
+    if (today <= half_month) {
+        sales_from_date = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth()}-16`).format('YYYY-MM-DD');
+        sales_to_date = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth() + 1}-00`).format('YYYY-MM-DD');
+    }
+    else {
+        sales_from_date = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth() + 1}-01`).format('YYYY-MM-DD');
+        sales_to_date = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth() + 1}-15`).format('YYYY-MM-DD');
+    }
+    return { sales_from_date, sales_to_date };
+};
+exports.getIataDateRange = getIataDateRange;
 const getNext15Day = (inputDate) => {
     const currentDate = new Date(inputDate);
     const currentMonth = currentDate.getMonth();
@@ -139,7 +158,9 @@ const getNext15Day = (inputDate) => {
         date = new Date(nextYear, nextMonth + 1, 2).toISOString().slice(0, 10);
     }
     else if (currentDate.getDate() === lastDayOfMonth) {
-        date = new Date(currentYear, currentMonth + 1, 16).toISOString().slice(0, 10);
+        date = new Date(currentYear, currentMonth + 1, 16)
+            .toISOString()
+            .slice(0, 10);
     }
     else {
         // Otherwise, return the current month's last day

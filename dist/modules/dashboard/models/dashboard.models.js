@@ -322,6 +322,63 @@ class DashboardModels extends abstract_models_1.default {
             const [[data]] = yield this.db.raw(`call ${this.database}.get_dashboard_this_month_report(${this.org_agency});`);
             return data;
         });
+        this.getBspTicketIssueInfo = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .select(this.db.raw('sum(airticket_gross_fare) as gross_fare'), this.db.raw('sum(airticket_tax) as tax'), this.db.raw('sum(airticket_base_fare) * 0.07 as iata_commission'), this.db.raw('sum(airticket_total_taxes_commission) as taxes_commission'), this.db.raw('SUM(airticket_ait) as ait'), this.db.raw('sum(airticket_purchase_price) as purchase_amount'), this.db.raw('sum(airticket_profit) as overall_profit'))
+                .from('v_bsp_ticket_issue')
+                .where('airticket_vendor_id', 5440)
+                .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+                from_date,
+                to_date,
+            ]);
+            return data;
+        });
+        this.getBspTicketIssueSummary = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .select('*')
+                .from('v_bsp_ticket_issue')
+                .where('airticket_vendor_id', 5440)
+                .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+                from_date,
+                to_date,
+            ]);
+        });
+        this.getBspTicketReissueInfo = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .select(this.db.raw('sum(airticket_client_price) as gross_fare'), this.db.raw('sum(airticket_tax) as tax'), this.db.raw('sum(airticket_fare_difference) * 0.07 as iata_commission'), this.db.raw('0 as taxes_commission'), this.db.raw('SUM(airticket_ait) as ait'), this.db.raw('sum(airticket_purchase_price) as purchase_amount'), this.db.raw('sum(airticket_profit) as overall_profit'))
+                .from('v_bsp_ticket_reissue')
+                .where('airticket_vendor_id', 5440)
+                .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+                from_date,
+                to_date,
+            ]);
+            return data;
+        });
+        this.getBspTicketReissueSummary = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .select('*')
+                .from('v_bsp_ticket_reissue')
+                .where('airticket_vendor_id', 5440)
+                .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+                from_date,
+                to_date,
+            ]);
+        });
+        this.getBspTicketRefundInfo = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .sum('vrefund_return_amount as refund_amount')
+                .from('v_bsp_ticket_refund')
+                .where('vrefund_vendor_id', 5440)
+                .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
+            return data;
+        });
+        this.getBspTicketRefundSummary = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .select('*')
+                .from('v_bsp_ticket_refund')
+                .where('vrefund_vendor_id', 5440)
+                .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
+        });
         // GET ACCOUNT DETAILS BY ACCOUNT TYPE
         this.getAccountDetailsByType = (accountType, limit = 20, offset = 0) => __awaiter(this, void 0, void 0, function* () {
             const result = yield this.query()

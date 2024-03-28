@@ -134,6 +134,16 @@ class DashboardControllers extends AbstractController {
       }
     }
   );
+  getBspBillingSummary = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response) => {
+      const data = await this.services.getBspBillingSummary(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
 
   getVendorBankGuarantee = this.assyncWrapper.wrap(
     [],
@@ -178,6 +188,5 @@ class DashboardControllers extends AbstractController {
       }
     }
   );
-
 }
 export default DashboardControllers;

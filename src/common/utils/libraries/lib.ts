@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { IUser } from '../../../auth/admin_auth.types';
 import config from '../../../config/config';
 import CustomError from '../errors/customError';
+import dayjs from 'dayjs';
 
 type TokenCreds = Omit<
   IUser,
@@ -142,6 +143,36 @@ export const getPaymentType = (type: number) => {
   return paymentTypeMap[type] || paymentTypeMap.default;
 };
 
+export const getIataDateRange = () => {
+  const new_date = new Date();
+  const today = dayjs().format('YYYY-MM-DD');
+  const half_month = dayjs(
+    `${new_date.getFullYear()}-${new_date.getMonth() + 1}-15`
+  ).format('YYYY-MM-DD');
+
+  // SALES
+  let sales_from_date: string;
+  let sales_to_date: string;
+
+  if (today <= half_month) {
+    sales_from_date = dayjs(
+      `${new_date.getFullYear()}-${new_date.getMonth()}-16`
+    ).format('YYYY-MM-DD');
+    sales_to_date = dayjs(
+      `${new_date.getFullYear()}-${new_date.getMonth() + 1}-00`
+    ).format('YYYY-MM-DD');
+  } else {
+    sales_from_date = dayjs(
+      `${new_date.getFullYear()}-${new_date.getMonth() + 1}-01`
+    ).format('YYYY-MM-DD');
+    sales_to_date = dayjs(
+      `${new_date.getFullYear()}-${new_date.getMonth() + 1}-15`
+    ).format('YYYY-MM-DD');
+  }
+
+  return { sales_from_date, sales_to_date };
+};
+
 export const getNext15Day = (inputDate: string) => {
   const currentDate = new Date(inputDate);
   const currentMonth = currentDate.getMonth();
@@ -157,18 +188,16 @@ export const getNext15Day = (inputDate: string) => {
     const nextMonth = currentMonth === 11 ? 0 : currentMonth;
     const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
     date = new Date(nextYear, nextMonth, 17).toISOString().slice(0, 10);
-  }
-  else if (currentDate.getDate() === 16) {
+  } else if (currentDate.getDate() === 16) {
     // If input date is the last day of the month, return the next month's 15th date
     const nextMonth = currentMonth === 11 ? 0 : currentMonth;
     const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
     date = new Date(nextYear, nextMonth + 1, 2).toISOString().slice(0, 10);
-  }
-  else if (currentDate.getDate() === lastDayOfMonth) {
-    date = new Date(currentYear, currentMonth + 1, 16).toISOString().slice(0, 10);
-  }
-
-  else {
+  } else if (currentDate.getDate() === lastDayOfMonth) {
+    date = new Date(currentYear, currentMonth + 1, 16)
+      .toISOString()
+      .slice(0, 10);
+  } else {
     // Otherwise, return the current month's last day
     date = new Date(currentYear, currentMonth, lastDayOfMonth + 1)
       .toISOString()

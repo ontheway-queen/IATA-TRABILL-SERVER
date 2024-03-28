@@ -18,18 +18,27 @@ class DashboardRoutes extends AbstractRouter {
 
     this.routers.get('/expenses', this.controllers.getExpenses);
 
-
     // DAILY, MONTHLY & YEARLY REPORT
     this.routers.get('/tr_info', this.controllers.getTransactionInfo);
-    this.routers.get('/daily-pay-pur', this.controllers.getDailyPaymentPurchase);
-    this.routers.get('/monthly-pay-pur', this.controllers.getMonthlyPaymentPurchase);
-    this.routers.get('/yearly-pay-pur', this.controllers.getYearlyPaymentPurchase);
+    this.routers.get(
+      '/daily-pay-pur',
+      this.controllers.getDailyPaymentPurchase
+    );
+    this.routers.get(
+      '/monthly-pay-pur',
+      this.controllers.getMonthlyPaymentPurchase
+    );
+    this.routers.get(
+      '/yearly-pay-pur',
+      this.controllers.getYearlyPaymentPurchase
+    );
 
     // BSP BILLING
     this.routers.get(
       '/air_ticket-summary',
       this.controllers.getAirTicketSummary
     );
+    this.routers.get('/bsp-summary', this.controllers.getBspBillingSummary);
     this.routers.get('/vendors', this.controllers.getVendorBankGuarantee);
     this.routers.get('/best-clients', this.controllers.getBestClients);
     this.routers.get('/best-employee', this.controllers.getBestEmployee);

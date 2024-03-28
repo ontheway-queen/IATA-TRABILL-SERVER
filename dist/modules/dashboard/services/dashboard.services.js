@@ -12,7 +12,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const dayjs_1 = __importDefault(require("dayjs"));
 const abstract_services_1 = __importDefault(require("../../../abstracts/abstract.services"));
 const lib_1 = require("../../../common/utils/libraries/lib");
 class DashboardServices extends abstract_services_1.default {
@@ -134,20 +133,10 @@ class DashboardServices extends abstract_services_1.default {
         // BSP BILLING
         this.getAirTicketSummary = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.dashboardModal(req);
-            const new_date = new Date();
-            const today = (0, dayjs_1.default)().format('YYYY-MM-DD');
-            const half_month = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth() + 1}-15`).format('YYYY-MM-DD');
-            // SALES
-            let sales_from_date;
-            let sales_to_date;
-            if (today <= half_month) {
-                sales_from_date = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth()}-16`).format('YYYY-MM-DD');
-                sales_to_date = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth() + 1}-00`).format('YYYY-MM-DD');
-            }
-            else {
-                sales_from_date = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth() + 1}-01`).format('YYYY-MM-DD');
-                sales_to_date = (0, dayjs_1.default)(`${new_date.getFullYear()}-${new_date.getMonth() + 1}-15`).format('YYYY-MM-DD');
-            }
+            const { sales_from_date, sales_to_date } = (0, lib_1.getIataDateRange)();
+            const ticket_issue = yield conn.getBspTicketIssueInfo(sales_from_date, sales_to_date);
+            const ticket_re_issue = yield conn.getBspTicketReissueInfo(sales_from_date, sales_to_date);
+            const ticket_refund = yield conn.getBspTicketRefundInfo(sales_from_date, sales_to_date);
             const data = yield conn.bspBillingInformation(sales_from_date, sales_to_date);
             // BILLING DATE
             const billing_from_date = (0, lib_1.getNext15Day)(sales_from_date);
@@ -159,6 +148,25 @@ class DashboardServices extends abstract_services_1.default {
                     billing_to_date,
                     sales_from_date,
                     sales_to_date }),
+            };
+        });
+        // BSP BILLING SUMMARY
+        this.getBspBillingSummary = (req) => __awaiter(this, void 0, void 0, function* () {
+            const conn = this.models.dashboardModal(req);
+            const { sales_from_date, sales_to_date } = (0, lib_1.getIataDateRange)();
+            const ticket_issue = yield conn.getBspTicketIssueSummary(sales_from_date, sales_to_date);
+            const ticket_re_issue = yield conn.getBspTicketReissueSummary(sales_from_date, sales_to_date);
+            const ticket_refund = yield conn.getBspTicketRefundSummary(sales_from_date, sales_to_date);
+            return {
+                success: true,
+                message: 'the request is OK',
+                data: {
+                    sales_from_date,
+                    sales_to_date,
+                    ticket_issue,
+                    ticket_re_issue,
+                    ticket_refund,
+                },
             };
         });
         // VENDORS / BANK Guarantee

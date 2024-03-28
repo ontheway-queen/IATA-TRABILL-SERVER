@@ -97,10 +97,15 @@ class EditExistingCl extends abstract_services_1.default {
                     airticket_classes,
                     airticket_existing_airticket_id,
                     airticket_extra_fee,
-                    airticket_after_reissue_client_price: Number(airticket_client_price || 0) + previousData.cl_price,
-                    airticket_after_reissue_purchase_price: Number(airticket_purchase_price || 0) + previousData.purchase,
-                    airticket_after_reissue_taxes: Number(airticket_tax || 0) + previousData.taxes,
-                    airticket_after_reissue_profit: Number(airticket_profit || 0) + previousData.airticket_profit,
+                    airticket_after_reissue_client_price: Number(airticket_client_price || 0) +
+                        Number(previousData.cl_price || 0) -
+                        Number(airticket_penalties || 0),
+                    airticket_after_reissue_purchase_price: Number(airticket_purchase_price || 0) +
+                        Number(previousData.purchase || 0) -
+                        Number(airticket_penalties || 0),
+                    airticket_after_reissue_taxes: Number(airticket_tax || 0) + Number(previousData.taxes || 0),
+                    airticket_after_reissue_profit: Number(airticket_profit || 0) +
+                        Number(previousData.airticket_profit || 0),
                 };
                 yield conn.updateInvoiceReissueAirticket(invoice_id, reissueAirTicketItem);
                 // UPDATE IS REISSUED

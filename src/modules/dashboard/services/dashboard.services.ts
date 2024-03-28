@@ -1,7 +1,9 @@
-import dayjs from 'dayjs';
 import { Request } from 'express';
 import AbstractServices from '../../../abstracts/abstract.services';
-import { getNext15Day } from '../../../common/utils/libraries/lib';
+import {
+  getIataDateRange,
+  getNext15Day,
+} from '../../../common/utils/libraries/lib';
 
 class DashboardServices extends AbstractServices {
   constructor() {
@@ -162,31 +164,20 @@ class DashboardServices extends AbstractServices {
   public getAirTicketSummary = async (req: Request) => {
     const conn = this.models.dashboardModal(req);
 
-    const new_date = new Date();
-    const today = dayjs().format('YYYY-MM-DD');
-    const half_month = dayjs(
-      `${new_date.getFullYear()}-${new_date.getMonth() + 1}-15`
-    ).format('YYYY-MM-DD');
+    const { sales_from_date, sales_to_date } = getIataDateRange();
 
-    // SALES
-    let sales_from_date: string;
-    let sales_to_date: string;
-
-    if (today <= half_month) {
-      sales_from_date = dayjs(
-        `${new_date.getFullYear()}-${new_date.getMonth()}-16`
-      ).format('YYYY-MM-DD');
-      sales_to_date = dayjs(
-        `${new_date.getFullYear()}-${new_date.getMonth() + 1}-00`
-      ).format('YYYY-MM-DD');
-    } else {
-      sales_from_date = dayjs(
-        `${new_date.getFullYear()}-${new_date.getMonth() + 1}-01`
-      ).format('YYYY-MM-DD');
-      sales_to_date = dayjs(
-        `${new_date.getFullYear()}-${new_date.getMonth() + 1}-15`
-      ).format('YYYY-MM-DD');
-    }
+    const ticket_issue = await conn.getBspTicketIssueInfo(
+      sales_from_date,
+      sales_to_date
+    );
+    const ticket_re_issue = await conn.getBspTicketReissueInfo(
+      sales_from_date,
+      sales_to_date
+    );
+    const ticket_refund = await conn.getBspTicketRefundInfo(
+      sales_from_date,
+      sales_to_date
+    );
 
     const data = await conn.bspBillingInformation(
       sales_from_date,
@@ -206,6 +197,38 @@ class DashboardServices extends AbstractServices {
         billing_to_date,
         sales_from_date,
         sales_to_date,
+      },
+    };
+  };
+
+  // BSP BILLING SUMMARY
+  public getBspBillingSummary = async (req: Request) => {
+    const conn = this.models.dashboardModal(req);
+
+    const { sales_from_date, sales_to_date } = getIataDateRange();
+
+    const ticket_issue = await conn.getBspTicketIssueSummary(
+      sales_from_date,
+      sales_to_date
+    );
+    const ticket_re_issue = await conn.getBspTicketReissueSummary(
+      sales_from_date,
+      sales_to_date
+    );
+    const ticket_refund = await conn.getBspTicketRefundSummary(
+      sales_from_date,
+      sales_to_date
+    );
+
+    return {
+      success: true,
+      message: 'the request is OK',
+      data: {
+        sales_from_date,
+        sales_to_date,
+        ticket_issue,
+        ticket_re_issue,
+        ticket_refund,
       },
     };
   };

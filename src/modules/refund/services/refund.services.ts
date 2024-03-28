@@ -32,8 +32,6 @@ class RefundServices extends AbstractServices {
 
     const data = await conn.airTicketInfos(ticket_no);
 
-    console.log({ data, ticket_no });
-
     return { success: true, data };
   };
 

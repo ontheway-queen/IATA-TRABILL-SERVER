@@ -111,7 +111,7 @@ class ReIssueAirticket extends abstract_models_1.default {
         });
         this.getReissueTicketInfo = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
-                .select('airticket_id', 'airticket_org_agency', 'airticket_ticket_no', 'airticket_client_price', 'airticket_purchase_price', this.db.raw("coalesce( concat('client-', airticket_client_id), concat('combined-', airticket_combined_id)) as comb_client"), this.db.raw('coalesce( concat("vendor-", airticket_vendor_id), concat("combined-", airticket_vendor_combine_id)) as comb_vendor'))
+                .select('airticket_id', 'airticket_org_agency', 'airticket_ticket_no', this.db.raw('COALESCE(airticket_after_reissue_client_price, airticket_client_price) AS airticket_client_price'), this.db.raw('COALESCE(airticket_after_reissue_purchase_price, airticket_purchase_price) AS airticket_purchase_price'), this.db.raw("coalesce( concat('client-', airticket_client_id), concat('combined-', airticket_combined_id)) as comb_client"), this.db.raw('coalesce( concat("vendor-", airticket_vendor_id), concat("combined-", airticket_vendor_combine_id)) as comb_vendor'))
                 .from('trabill_invoice_reissue_airticket_items')
                 .where('airticket_invoice_id', invoiceId)
                 .andWhereNot('airticket_is_refund', 1)

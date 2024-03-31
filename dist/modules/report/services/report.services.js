@@ -77,6 +77,13 @@ class ReportServices extends abstract_services_1.default {
             const data = yield conn.getDueAdvanceCombineClient(combined_id, payment_date, Number(page) || 1, Number(size) || 20);
             return Object.assign({ success: true }, data);
         });
+        this.getAgentsDueAdvance = (req) => __awaiter(this, void 0, void 0, function* () {
+            const vendorId = req.params.agent_id;
+            const { payment_date, page, size } = req.query;
+            const conn = this.models.reportModel(req);
+            const data = yield conn.getAgentsDueAdvance(vendorId, String(payment_date), Number(page) || 1, Number(size) || 20);
+            return Object.assign({ success: true, message: 'Agent advance due' }, data);
+        });
         this.loanReport = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.reportModel(req);
             const { authority, loan_type } = req.params;

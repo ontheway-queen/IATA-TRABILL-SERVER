@@ -285,6 +285,18 @@ class ReportModel extends abstract_models_1.default {
             return count.row_count;
         });
     }
+    getAgentsDueAdvance(agent_id, date, page, size) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = yield this.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
+                const query1 = trx.raw(`call ${this.database}.get_advance_due_agent('${agent_id}', ${this.org_agency}, '${date}', ${page}, ${size}, @count);`);
+                const query2 = trx.raw('SELECT @count AS count;');
+                const [[[data]], [[totalRows]]] = yield Promise.all([query1, query2]);
+                const totalCount = totalRows.count;
+                return { count: totalCount, data };
+            }));
+            return result;
+        });
+    }
     preRegistrationList(possible_year, page, size) {
         return __awaiter(this, void 0, void 0, function* () {
             const offset = (page - 1) * size;

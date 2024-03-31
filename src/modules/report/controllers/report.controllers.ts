@@ -101,6 +101,19 @@ class ReportController extends AbstractController {
     }
   );
 
+  public getAgentsDueAdvance = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.getAgentsDueAdvance(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Get vendor due or advance...');
+      }
+    }
+  );
+
   public getDueAdvanceCombined = this.assyncWrapper.wrap(
     this.validator.readReport,
     async (req: Request, res: Response) => {
@@ -113,7 +126,6 @@ class ReportController extends AbstractController {
       }
     }
   );
-
 
   public loanReport = this.assyncWrapper.wrap(
     this.validator.readReport,
@@ -714,8 +726,6 @@ class ReportController extends AbstractController {
       const data: any = await this.excels.getCombinedLedgersExcel(req, res);
     }
   );
-
-
 
   /**
    * total due/advance

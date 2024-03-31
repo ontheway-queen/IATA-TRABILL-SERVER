@@ -414,8 +414,12 @@ class ReIssueAirticket extends AbstractModels {
         'airticket_id',
         'airticket_org_agency',
         'airticket_ticket_no',
-        'airticket_client_price',
-        'airticket_purchase_price',
+        this.db.raw(
+          'COALESCE(airticket_after_reissue_client_price, airticket_client_price) AS airticket_client_price'
+        ),
+        this.db.raw(
+          'COALESCE(airticket_after_reissue_purchase_price, airticket_purchase_price) AS airticket_purchase_price'
+        ),
         this.db.raw(
           "coalesce( concat('client-', airticket_client_id), concat('combined-', airticket_combined_id)) as comb_client"
         ),

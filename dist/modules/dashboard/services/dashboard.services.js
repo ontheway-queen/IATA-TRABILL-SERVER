@@ -137,17 +137,21 @@ class DashboardServices extends abstract_services_1.default {
             const ticket_issue = yield conn.getBspTicketIssueInfo(sales_from_date, sales_to_date);
             const ticket_re_issue = yield conn.getBspTicketReissueInfo(sales_from_date, sales_to_date);
             const ticket_refund = yield conn.getBspTicketRefundInfo(sales_from_date, sales_to_date);
-            const data = yield conn.bspBillingInformation(sales_from_date, sales_to_date);
             // BILLING DATE
             const billing_from_date = (0, lib_1.getNext15Day)(sales_from_date);
             const billing_to_date = (0, lib_1.getNext15Day)(sales_to_date);
             return {
                 success: true,
                 message: 'the request is OK',
-                data: Object.assign(Object.assign({}, data), { billing_from_date,
+                data: {
+                    billing_from_date,
                     billing_to_date,
                     sales_from_date,
-                    sales_to_date }),
+                    sales_to_date,
+                    ticket_issue,
+                    ticket_re_issue,
+                    ticket_refund,
+                },
             };
         });
         // BSP BILLING SUMMARY

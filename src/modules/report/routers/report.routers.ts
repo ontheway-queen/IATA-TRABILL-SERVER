@@ -64,7 +64,6 @@ class ReportRouter extends AbstractRouter {
       this.controllers.getDueAdvanceCombined
     );
 
-
     this.routers.get(
       '/vendors-purchase-payment/:comb_vendor',
       this.controllers.getVendorPurchaseAndPayment
@@ -280,6 +279,11 @@ class ReportRouter extends AbstractRouter {
     this.routers.get(
       '/combined_ledger_excel/:combined_id',
       this.controllers.getCombinedLedgersExcel
+    );
+
+    this.routers.get(
+      '/due-advance/agents/:agent_id',
+      this.controllers.getAgentsDueAdvance
     );
 
     /**

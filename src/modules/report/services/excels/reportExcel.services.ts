@@ -462,17 +462,19 @@ class ReportExcelServices extends AbstractServices {
       );
     }
   };
-
   public getDueAdvanceAgentExcel = async (req: Request, res: Response) => {
     const { agent_id } = req.params as { agent_id: string };
-    const { payment_date, page, size } = req.query as {
+    const { payment_date } = req.query as {
       payment_date: string;
-      page: string;
-      size: string;
     };
     const conn = this.models.reportModel(req);
 
-    const agents_data: any = [];
+    const agents_data: any = await conn.getAgentsDueAdvance(
+      agent_id,
+      payment_date,
+      1,
+      this.rowSize
+    );
 
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('agent Due Advance Report');
@@ -491,10 +493,10 @@ class ReportExcelServices extends AbstractServices {
     agents_data?.data?.forEach((report: any, index: number) => {
       report.serial = index + 1;
 
-      if (report.actual_lbalance >= 0) {
-        report.credit_Amount = report.actual_lbalance;
+      if (report.agent_last_balance >= 0) {
+        report.credit_Amount = report.agent_last_balance;
       } else {
-        report.debit_Amount = Math.abs(report.actual_lbalance);
+        report.debit_Amount = Math.abs(report.agent_last_balance);
       }
       worksheet.addRow(report);
     });

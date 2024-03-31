@@ -405,9 +405,9 @@ class ReportExcelServices extends abstract_services_1.default {
         this.getDueAdvanceAgentExcel = (req, res) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             const { agent_id } = req.params;
-            const { payment_date, page, size } = req.query;
+            const { payment_date } = req.query;
             const conn = this.models.reportModel(req);
-            const agents_data = [];
+            const agents_data = yield conn.getAgentsDueAdvance(agent_id, payment_date, 1, this.rowSize);
             const workbook = new exceljs_1.default.Workbook();
             const worksheet = workbook.addWorksheet('agent Due Advance Report');
             const dirPath = path_1.default.join(__dirname, '../files');
@@ -423,11 +423,11 @@ class ReportExcelServices extends abstract_services_1.default {
             // Loop through data and populate rows
             (_a = agents_data === null || agents_data === void 0 ? void 0 : agents_data.data) === null || _a === void 0 ? void 0 : _a.forEach((report, index) => {
                 report.serial = index + 1;
-                if (report.actual_lbalance >= 0) {
-                    report.credit_Amount = report.actual_lbalance;
+                if (report.agent_last_balance >= 0) {
+                    report.credit_Amount = report.agent_last_balance;
                 }
                 else {
-                    report.debit_Amount = Math.abs(report.actual_lbalance);
+                    report.debit_Amount = Math.abs(report.agent_last_balance);
                 }
                 worksheet.addRow(report);
             });

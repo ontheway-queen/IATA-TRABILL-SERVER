@@ -85,6 +85,15 @@ class ReportController extends abstract_controllers_1.default {
                 this.error('Get vendor due or advance...');
             }
         }));
+        this.getAgentsDueAdvance = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getAgentsDueAdvance(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('Get vendor due or advance...');
+            }
+        }));
         this.getDueAdvanceCombined = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.getDueAdvanceCombined(req);
             if (data.success) {

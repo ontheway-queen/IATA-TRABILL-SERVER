@@ -412,7 +412,7 @@ class DashboardModels extends abstract_models_1.default {
             return result;
         });
     }
-    // BSP BILLING INFORMATION
+    // BSP BILLING INFORMATION /: DELETE FROM SERVICE
     bspBillingInformation(from_date, to_date) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');

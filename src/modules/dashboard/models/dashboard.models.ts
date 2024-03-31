@@ -406,7 +406,7 @@ class DashboardModels extends AbstractModels {
     return data;
   };
 
-  // BSP BILLING INFORMATION
+  // BSP BILLING INFORMATION /: DELETE FROM SERVICE
   public async bspBillingInformation(from_date: string, to_date: string) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');

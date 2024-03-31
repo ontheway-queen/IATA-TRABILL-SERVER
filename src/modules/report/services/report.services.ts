@@ -184,6 +184,22 @@ class ReportServices extends AbstractServices {
     return { success: true, ...data };
   };
 
+  public getAgentsDueAdvance = async (req: Request) => {
+    const vendorId = req.params.agent_id;
+    const { payment_date, page, size } = req.query;
+
+    const conn = this.models.reportModel(req);
+
+    const data = await conn.getAgentsDueAdvance(
+      vendorId,
+      String(payment_date),
+      Number(page) || 1,
+      Number(size) || 20
+    );
+
+    return { success: true, message: 'Agent advance due', ...data };
+  };
+
   loanReport = async (req: Request) => {
     const conn = this.models.reportModel(req);
 
@@ -1337,7 +1353,6 @@ class ReportServices extends AbstractServices {
       size,
       client
     );
-
 
     return { success: true, message: 'Air ticket total report', ...data };
   };

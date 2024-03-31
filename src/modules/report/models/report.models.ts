@@ -403,6 +403,28 @@ class ReportModel extends AbstractModels {
     return count.row_count;
   }
 
+  public async getAgentsDueAdvance(
+    agent_id: idType,
+    date: string,
+    page: number,
+    size: number
+  ) {
+    const result = await this.db.transaction(async (trx) => {
+      const query1 = trx.raw(
+        `call ${this.database}.get_advance_due_agent('${agent_id}', ${this.org_agency}, '${date}', ${page}, ${size}, @count);`
+      );
+      const query2 = trx.raw('SELECT @count AS count;');
+
+      const [[[data]], [[totalRows]]] = await Promise.all([query1, query2]);
+
+      const totalCount = totalRows.count;
+
+      return { count: totalCount, data };
+    });
+
+    return result;
+  }
+
   public async preRegistrationList(
     possible_year: idType,
     page: number,

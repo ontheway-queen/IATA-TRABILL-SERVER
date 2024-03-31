@@ -93,6 +93,7 @@ class ReportRouter extends abstract_routers_1.default {
         this.routers.get('/client_ledger_excel/:client_id', this.controllers.getClientLedgersExcel);
         this.routers.get('/vendor_ledger_excel/:vendor_id', this.controllers.getVendorLedgersExcel);
         this.routers.get('/combined_ledger_excel/:combined_id', this.controllers.getCombinedLedgersExcel);
+        this.routers.get('/due-advance/agents/:agent_id', this.controllers.getAgentsDueAdvance);
         /**
          * Total Due/Advance
          */

@@ -179,11 +179,6 @@ class DashboardServices extends AbstractServices {
       sales_to_date
     );
 
-    const data = await conn.bspBillingInformation(
-      sales_from_date,
-      sales_to_date
-    );
-
     // BILLING DATE
     const billing_from_date = getNext15Day(sales_from_date);
     const billing_to_date = getNext15Day(sales_to_date);
@@ -192,11 +187,13 @@ class DashboardServices extends AbstractServices {
       success: true,
       message: 'the request is OK',
       data: {
-        ...data,
         billing_from_date,
         billing_to_date,
         sales_from_date,
         sales_to_date,
+        ticket_issue,
+        ticket_re_issue,
+        ticket_refund,
       },
     };
   };

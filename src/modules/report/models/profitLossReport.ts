@@ -169,7 +169,7 @@ class ProfitLossReport extends AbstractModels {
     const offset = (page - 1) * size;
     return await this.query()
       .select('*')
-      .from('v_agent_ledgers')
+      .from('trxn.v_agent_ledgers')
       .where('agtrxn_agency_id', this.org_agency)
       .andWhere('agtrxn_agent_id', agentId)
       .andWhereRaw('Date(agtrxn_created_at) BETWEEN ? AND ?', [

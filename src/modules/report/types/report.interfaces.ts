@@ -1,3 +1,5 @@
+import { idType } from '../../../common/types/common.types';
+
 export interface ITransaction {
   serial: number;
   ctrxn_id: number;
@@ -45,3 +47,10 @@ export type auditModuleType =
   | 'PAYROLL'
   | 'EMAIL'
   | 'SMS';
+
+export type IListQuery = {
+  from_date: string;
+  to_date: string;
+  page: idType;
+  size: idType;
+};

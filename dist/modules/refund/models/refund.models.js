@@ -34,9 +34,14 @@ class RefundModel extends abstract_models_1.default {
             yield this.query()
                 .update('invoice_is_refund', refund)
                 .into('trabill_invoices')
-                .where('invoice_id', invoiceId)
-                .andWhereNot('invoice_is_deleted', 1)
-                .andWhereNot('invoice_is_refund', refund);
+                .where('invoice_id', invoiceId);
+        });
+        this.getInvoiceCategoryId = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
+            const [category_id] = yield this.query()
+                .select('invoice_category_id')
+                .from('trabill_invoices')
+                .where('invoice_id', invoiceId);
+            return category_id;
         });
         this.getInvoiceDuePayment = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
             const [[[invoice_pay]]] = yield this.db.raw(`call ${this.database}.get_invoice_due(${invoiceId});`);
@@ -213,72 +218,47 @@ class RefundModel extends abstract_models_1.default {
             yield this.query().insert(data).into('trabill_pershial_vendor_refund');
         });
         this.getPersialRefundTickets = (client_id, combine_id) => __awaiter(this, void 0, void 0, function* () {
-            const invoices = (yield this.query()
-                .select('invoice_no', 'invoice_id', 'invoice_net_total', this.db.raw(`COALESCE(tai.airticket_ticket_no, tni.airticket_ticket_no, tri.airticket_ticket_no) as airticket_no`), this.db.raw(`COALESCE(tai.airticket_client_price, tni.airticket_client_price, tri.airticket_client_price) as airticket_price`))
-                .from('trabill_invoices')
-                .leftJoin(this.db.raw(`trabill_invoice_airticket_items AS tai ON tai.airticket_invoice_id  = trabill_invoices.invoice_id AND tai.airticket_is_deleted = 0 AND tai.airticket_is_refund = 0`))
-                .leftJoin(this.db.raw(`trabill_invoice_noncom_airticket_items AS tni ON tni.airticket_invoice_id  = trabill_invoices.invoice_id AND tni.airticket_is_deleted = 0 AND tni.airticket_is_refund = 0`))
-                .leftJoin(this.db.raw(`trabill_invoice_reissue_airticket_items AS tri ON tri.airticket_invoice_id  = trabill_invoices.invoice_id AND tri.airticket_is_deleted = 0 AND tri.airticket_is_refund = 0`))
-                .where('invoice_org_agency', this.org_agency)
-                .andWhere('invoice_is_deleted', 0)
+            return yield this.query()
+                .from('trabill.trabill_invoices as ti')
+                .select('ti.invoice_id', 'ti.invoice_no', 'ti.invoice_net_total', this.db.raw('IFNULL(SUM(ticp.invclientpayment_amount), 0) AS payment'))
+                .leftJoin('trabill.trabill_invoice_client_payments AS ticp', 'ti.invoice_id', 'ticp.invclientpayment_invoice_id')
+                .whereNot('invoice_is_deleted', 1)
+                .whereNot('invoice_is_refund', 1)
+                .whereNot('invoice_is_cancel', 1)
+                .whereNot('invoice_is_void', 1)
+                .where('invoice_client_id', client_id)
+                .andWhere('invoice_combined_id', combine_id)
+                .andWhere('invoice_org_agency', this.org_agency)
                 .whereIn('invoice_category_id', [1, 2, 3])
-                .andWhere(function () {
-                if (client_id) {
-                    this.andWhere('invoice_client_id', client_id);
-                }
-                if (combine_id) {
-                    this.andWhere('invoice_combined_id', combine_id);
-                }
-            }));
-            let data = [];
-            for (const inv of invoices) {
-                const [{ total_payment }] = (yield this.query()
-                    .select(this.db.raw(`sum(COALESCE(invclientpayment_amount, 0)) AS total_payment`))
-                    .from('trabill_invoice_client_payments')
-                    .where('invclientpayment_invoice_id', inv.invoice_id)
-                    .andWhere('invclientpayment_is_deleted', 0));
-                const [{ total_ticket_payment }] = (yield this.query()
-                    .select(this.db.raw(`SUM(COALESCE(invclientpayment_amount, 0)) AS total_ticket_payment`))
-                    .from('trabill_invoice_client_payments')
-                    .where('invclientpayment_invoice_id', inv.invoice_id)
-                    .andWhere('invclientpayment_ticket_number', inv.airticket_no)
-                    .andWhere('invclientpayment_is_deleted', 0));
-                if ((inv.invoice_net_total == total_payment && inv.airticket_no != null) ||
-                    inv.airticket_price == total_ticket_payment) {
-                    data.push(Object.assign(Object.assign({}, inv), { total_payment }));
-                }
-            }
-            return data;
+                .groupBy('ti.invoice_id', 'ti.invoice_no', 'ti.invoice_net_total')
+                .havingRaw('payment >= ti.invoice_net_total');
         });
         this.getPersialRefundTicketsByInvoice = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
-            const invoices = (yield this.query()
-                .select('invoice_no', 'invoice_id', 'invoice_net_total', this.db.raw(`COALESCE(tai.airticket_ticket_no, tni.airticket_ticket_no, tri.airticket_ticket_no) as airticket_no`), this.db.raw(`COALESCE(tai.airticket_id, tni.airticket_id, tri.airticket_id) as airticket_id`), this.db.raw(`COALESCE(tai.airticket_client_price, tni.airticket_client_price, tri.airticket_client_price) as airticket_price`))
-                .from('trabill_invoices')
-                .leftJoin(this.db.raw(`trabill_invoice_airticket_items AS tai ON tai.airticket_invoice_id  = trabill_invoices.invoice_id AND tai.airticket_is_deleted = 0 AND tai.airticket_is_refund = 0`))
-                .leftJoin(this.db.raw(`trabill_invoice_noncom_airticket_items AS tni ON tni.airticket_invoice_id  = trabill_invoices.invoice_id AND tni.airticket_is_deleted = 0 AND tni.airticket_is_refund = 0`))
-                .leftJoin(this.db.raw(`trabill_invoice_reissue_airticket_items AS tri ON tri.airticket_invoice_id  = trabill_invoices.invoice_id AND tri.airticket_is_deleted = 0 AND tri.airticket_is_refund = 0`))
-                .where('invoice_org_agency', this.org_agency)
-                .whereIn('invoice_category_id', [1, 2, 3])
-                .andWhere('invoice_id', invoice_id));
-            let data = [];
-            for (const inv of invoices) {
-                const [{ total_payment }] = (yield this.query()
-                    .select(this.db.raw(`sum(COALESCE(invclientpayment_amount, 0)) AS total_payment`))
-                    .from('trabill_invoice_client_payments')
-                    .where('invclientpayment_invoice_id', inv.invoice_id)
-                    .andWhere('invclientpayment_is_deleted', 0));
-                const [{ total_ticket_payment }] = (yield this.query()
-                    .select(this.db.raw(`SUM(COALESCE(invclientpayment_amount, 0)) AS total_ticket_payment`))
-                    .from('trabill_invoice_client_payments')
-                    .where('invclientpayment_invoice_id', inv.invoice_id)
-                    .andWhere('invclientpayment_ticket_number', inv.airticket_no)
-                    .andWhere('invclientpayment_is_deleted', 0));
-                if (inv.invoice_net_total == total_payment ||
-                    inv.airticket_price == total_ticket_payment) {
-                    data.push(Object.assign(Object.assign({}, inv), { total_payment }));
-                }
-            }
-            return data;
+            return yield this.query()
+                .select('airticket_id', 'airticket_invoice_id', 'airticket_org_agency', 'airticket_ticket_no as airticket_no')
+                .from('trabill_invoice_airticket_items')
+                .where('airticket_invoice_id', invoice_id)
+                .whereNot('airticket_is_refund', 1)
+                .whereNot('airticket_is_reissued', 1)
+                .whereNot('airticket_is_deleted', 1)
+                .unionAll([
+                this.db
+                    .select('airticket_id', 'airticket_invoice_id', 'airticket_org_agency', 'airticket_ticket_no')
+                    .from('trabill_invoice_noncom_airticket_items')
+                    .where('airticket_invoice_id', invoice_id)
+                    .whereNot('airticket_is_refund', 1)
+                    .whereNot('airticket_is_reissued', 1)
+                    .whereNot('airticket_is_deleted', 1),
+            ])
+                .unionAll([
+                this.db
+                    .select('airticket_id', 'airticket_invoice_id', 'airticket_org_agency', 'airticket_ticket_no')
+                    .from('trabill_invoice_reissue_airticket_items')
+                    .where('airticket_invoice_id', invoice_id)
+                    .whereNot('airticket_is_refund', 1)
+                    .whereNot('airticket_is_reissued', 1)
+                    .whereNot('airticket_is_deleted', 1),
+            ]);
         });
         this.getPersialRfndInvoiceId = (refund_id) => __awaiter(this, void 0, void 0, function* () {
             const [data] = (yield this.query()
@@ -428,11 +408,11 @@ class RefundModel extends abstract_models_1.default {
         });
         this.getPertialAirticketInfo = (airticket_id, invoice_id) => __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
-                .select('invoice_id', 'invoice_no', 'invoice_client_id', 'invoice_combined_id', 'client_name', 'airticket_id', 'airticket_ticket_no', 'client_price', 'vendor_price', 'vendor_id', 'vendor_combine_id', 'vendor_name')
-                .from('v_airticket_info_for_partial')
-                .where('invoice_id', invoice_id)
-                .andWhere('airticket_id', airticket_id)
-                .andWhere('invoice_org_agency', this.org_agency);
+                .select('airticket_invoice_id as invoice_id', 'invoice_no', 'airticket_client_id as invoice_client_id', 'airticket_client_id as invoice_combined_id', 'client_name', 'airticket_id', 'airline_name', 'airticket_ticket_no', 'airticket_client_price as client_price', 'airticket_purchase_price as vendor_price', 'airticket_vendor_id as vendor_id', 'airticket_vendor_combine_id as vendor_combine_id', 'vendor_name')
+                .from('trabill.v_airticket_for_refund')
+                .where('airticket_org_agency', this.org_agency)
+                .andWhere('airticket_invoice_id', invoice_id)
+                .andWhere('airticket_id', airticket_id);
             return data;
         });
     }
@@ -555,10 +535,8 @@ class RefundModel extends abstract_models_1.default {
                     this.andWhereRaw(`LOWER(atrefund_vouchar_number) LIKE ?`, [
                         `%${search_text}%`,
                     ])
-                        .orWhereRaw(`LOWER(cl.client_name) LIKE ?`, [`%${search_text}%`])
-                        .orWhereRaw(`LOWER(comb.combine_name) LIKE ?`, [
-                        `%${search_text}%`,
-                    ]);
+                        .orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search_text}%`])
+                        .orWhereRaw(`LOWER(combine_name) LIKE ?`, [`%${search_text}%`]);
                 }
             })
                 .limit(size)
@@ -589,10 +567,8 @@ class RefundModel extends abstract_models_1.default {
                     this.andWhereRaw(`LOWER(atrefund_vouchar_number) LIKE ?`, [
                         `%${search_text}%`,
                     ])
-                        .orWhereRaw(`LOWER(cl.client_name) LIKE ?`, [`%${search_text}%`])
-                        .orWhereRaw(`LOWER(comb.combine_name) LIKE ?`, [
-                        `%${search_text}%`,
-                    ]);
+                        .orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search_text}%`])
+                        .orWhereRaw(`LOWER(combine_name) LIKE ?`, [`%${search_text}%`]);
                 }
             });
             return count;
@@ -628,12 +604,13 @@ class RefundModel extends abstract_models_1.default {
             return ticket_infos;
         });
     }
-    airTicketInfos(ticket_no) {
+    airTicketInfos(ticket_no, invoice_id) {
         return __awaiter(this, void 0, void 0, function* () {
             const ticket_infos = yield this.query()
                 .select('airticket_invoice_id', 'invoice_category_id', 'airticket_id', 'airticket_vendor_id', 'airticket_vendor_combine_id', 'airticket_airline_id', 'airline_name', 'vendor_name', 'airticket_discount_total', this.db.raw('CAST(airticket_client_price AS DECIMAL(15,2)) AS airticket_client_price'), this.db.raw('CAST(airticket_purchase_price AS DECIMAL(15,2)) AS airticket_purchase_price'), this.db.raw('CAST(airticket_client_price - airticket_purchase_price -airticket_discount_total AS DECIMAL(15,2)) as airticket_profit'), 'airticket_pnr', 'airticket_ticket_no')
                 .from('v_airticket_for_refund')
                 .where('airticket_org_agency', this.org_agency)
+                .andWhere('airticket_invoice_id', invoice_id)
                 .havingIn('airticket_ticket_no', ticket_no);
             return ticket_infos;
         });

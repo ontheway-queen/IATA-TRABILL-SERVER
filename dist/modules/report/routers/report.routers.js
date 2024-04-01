@@ -50,6 +50,8 @@ class ReportRouter extends abstract_routers_1.default {
          * PROFIT LOSS
          */
         this.routers.get('/overall-profit-loss', this.controllers.overallProfitLoss);
+        this.routers.get('/overall-sales-summery', this.controllers.getOverallSalesSummery);
+        this.routers.get('/overall-client-refunds', this.controllers.getOverallClientRefund);
         this.routers.get('/visa-profit-loss/:visa_id', this.controllers.visaWiseProfitLoss);
         this.routers.get('/ticket-wise-profit-loss/:ticket_id', this.controllers.ticketWiseProfitLoss);
         this.routers.get('/visa-list', this.controllers.getVisaList);

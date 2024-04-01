@@ -83,9 +83,11 @@ class ProfitLossReport extends AbstractModels {
     const data = await this.query()
       .select(
         this.db.raw(
-          'CAST(SUM(view_invoice_total_billing.sales_price) AS DECIMAL(15,2)) AS sales_price'
+          'CAST(SUM(view_invoice_total_billing.sales_price) AS DECIMAL(15,2)) AS total_sales_price'
         ),
-        this.db.raw('CAST(SUM(cost_price) AS DECIMAL(15,2)) AS cost_price')
+        this.db.raw(
+          'CAST(SUM(cost_price) AS DECIMAL(15,2)) AS total_cost_price'
+        )
       )
       .from('view_invoice_total_billing')
       .andWhere('view_invoice_total_billing.org_agency_id', this.org_agency)
@@ -94,7 +96,73 @@ class ProfitLossReport extends AbstractModels {
         [from_date, to_date]
       );
 
-    return data as { invoice_net_total: number; cost_price: number }[];
+    return data as { total_sales_price: number; total_cost_price: number }[];
+  }
+
+  public async getOverallSalesSummery(
+    from_date: string,
+    to_date: string,
+    page: number = 1,
+    size: number = 20
+  ) {
+    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
+    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
+    const offset = (page - 1) * size;
+
+    const data = await this.query()
+      .select('*')
+      .from('view_invoice_total_billing')
+      .where('view_invoice_total_billing.org_agency_id', this.org_agency)
+      .andWhereRaw(
+        'Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?',
+        [from_date, to_date]
+      )
+      .limit(size)
+      .offset(offset);
+
+    const [{ count }] = (await this.query()
+      .count('* as count')
+      .from('view_invoice_total_billing')
+      .where('view_invoice_total_billing.org_agency_id', this.org_agency)
+      .andWhereRaw(
+        'Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?',
+        [from_date, to_date]
+      )) as { count: number }[];
+
+    return { data, count };
+  }
+
+  public async getOverallClientRefund(
+    from_date: string,
+    to_date: string,
+    page: number = 1,
+    size: number = 20
+  ) {
+    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
+    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
+    const offset = (page - 1) * size;
+
+    const data = await this.query()
+      .select('*')
+      .from('v_client_refunds')
+      .where('v_client_refunds.org_id', this.org_agency)
+      .andWhereRaw('Date(v_client_refunds.refund_date) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])
+      .limit(size)
+      .offset(offset);
+
+    const [{ count }] = (await this.query()
+      .count('* as count')
+      .from('v_client_refunds')
+      .where('v_client_refunds.org_id', this.org_agency)
+      .andWhereRaw('Date(v_client_refunds.refund_date) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])) as { count: number }[];
+
+    return { data, count };
   }
 
   public async refundProfitAir(from_date: string, to_date: string) {
@@ -142,7 +210,7 @@ class ProfitLossReport extends AbstractModels {
     return Number(incentive.incentive_total);
   };
 
-  public async getEmplyeExpense(from_date: string, to_date: string) {
+  public async getEmployeeExpense(from_date: string, to_date: string) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
@@ -260,7 +328,7 @@ class ProfitLossReport extends AbstractModels {
     return Number(data.total_service_charge);
   }
 
-  public async getTourProfitLoss(from_date: string, to_date: string) {
+  /*  public async getTourProfitLoss(from_date: string, to_date: string) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
     const [{ tour_profit }] = await this.query()
@@ -280,7 +348,7 @@ class ProfitLossReport extends AbstractModels {
       );
 
     return Number(tour_profit);
-  }
+  } */
 
   public async getBankCharge(from_date: string, to_date: string) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
@@ -381,6 +449,22 @@ class ProfitLossReport extends AbstractModels {
     }[];
 
     return Number(data.total_charge) || 0;
+  };
+  getClientRefundTotal = async (from_date: string, to_date: string) => {
+    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
+    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
+    const [data] = (await this.query()
+      .sum('return_amount as total_return')
+      .from('v_client_refunds')
+      .andWhereRaw(`DATE_FORMAT(refund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ])
+      .andWhere('org_id', this.org_agency)) as {
+      total_return: number;
+    }[];
+
+    return Number(data.total_return) || 0;
   };
 
   public async visaWiseProfitLoss(

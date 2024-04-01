@@ -191,6 +191,32 @@ class ReportController extends AbstractController {
     }
   );
 
+  public getOverallSalesSummery = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.getOverallSalesSummery(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Overall profit and loss...');
+      }
+    }
+  );
+
+  public getOverallClientRefund = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.getOverallClientRefund(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Overall profit and loss...');
+      }
+    }
+  );
+
   payrollReport = this.assyncWrapper.wrap(
     this.validator.readPayroll,
     async (req: Request, res: Response) => {

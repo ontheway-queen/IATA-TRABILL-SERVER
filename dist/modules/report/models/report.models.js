@@ -1218,7 +1218,7 @@ class ReportModel extends abstract_models_1.default {
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const page_number = (page - 1) * size;
             const data = yield this.query()
-                .select('vendor_name', 'airticket_net_commssion', 'airticket_ait', 'airticket_sales_date')
+                .select('vendor_name', 'airticket_net_commssion', 'airticket_ait', 'airticket_sales_date', 'airticket_pnr', 'airticket_ticket_no')
                 .from('trabill_invoice_airticket_items')
                 .leftJoin('trabill_vendors', { vendor_id: 'airticket_vendor_id' })
                 .where('airticket_org_agency', this.org_agency)

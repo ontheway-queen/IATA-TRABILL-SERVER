@@ -57,6 +57,8 @@ class DeleteAirTicketRefund extends AbstractServices {
         refund_id
       );
 
+      const category_id = await conn.getInvoiceCategoryId(atrefund_invoice_id);
+
       for (const item of airticketRefundInfo) {
         const {
           vrefund_vtrxn_id,
@@ -83,9 +85,16 @@ class DeleteAirTicketRefund extends AbstractServices {
         if (vrefund_acctrxn_id) {
           await trxns.deleteAccTrxn(vrefund_acctrxn_id);
         }
+
+        await conn.updateAirticketItemIsRefund(
+          vrefund_airticket_id,
+          category_id,
+          0
+        );
       }
 
       await conn.updateInvoiceAirticketIsRefund(atrefund_invoice_id, 0);
+
       await conn.deleteAirTicketRefund(refund_id, deleted_by);
 
       await this.insertAudit(

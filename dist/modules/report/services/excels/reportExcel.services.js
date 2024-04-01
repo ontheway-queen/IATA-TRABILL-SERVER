@@ -1377,17 +1377,17 @@ class ReportExcelServices extends abstract_services_1.default {
                 const total_sales_price = salesProductTotal.reduce((acc, obj) => acc + parseFloat(obj.sales_price), 0);
                 const total_cost_price = salesProductTotal.reduce((acc, obj) => acc + parseFloat(obj.cost_price), 0);
                 const total_refun_profit = yield conn.refundProfitAir(String(from_date), String(to_date));
-                const total_employee_salary = yield conn.getEmplyeExpense(String(from_date), String(to_date));
+                const total_employee_salary = yield conn.getEmployeeExpense(String(from_date), String(to_date));
                 const incentive = yield conn.allIncentive(String(from_date), String(to_date));
                 const expense_total = yield conn.allExpenses(String(from_date), String(to_date));
                 const client_discount = yield conn.getAllClientDiscount(String(from_date), String(to_date));
                 const service_charge = yield conn.getInvoicesServiceCharge(from_date, to_date);
-                const tour_profit = yield conn.getTourProfitLoss(from_date, to_date);
+                // const tour_profit = await conn.getTourProfitLoss(from_date, to_date);
                 const total_sales_profit = (total_sales_price - (total_cost_price | 0)) | 0;
                 const gross_profit_loss = total_sales_profit + (total_refun_profit | 0);
-                const total_gross_profit_loss = gross_profit_loss + incentive + service_charge + (tour_profit | 0);
+                const total_gross_profit_loss = gross_profit_loss + incentive + service_charge + 0;
                 const total_discount = client_discount || 0;
-                const tour_pakage_profit = tour_profit || 0;
+                const tour_pakage_profit = 0;
                 const total_service_charge = service_charge || 0;
                 const data = {
                     total_sales_price,

@@ -32,9 +32,10 @@ class RefundServices extends abstract_services_1.default {
             return { success: true, data };
         });
         this.airTicketInfos = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { ticket_no } = req.body;
+            const { ticket_no, invoice_id } = req.body;
+            console.log({ body: req.body });
             const conn = this.models.refundModel(req);
-            const data = yield conn.airTicketInfos(ticket_no);
+            const data = yield conn.airTicketInfos(ticket_no, invoice_id);
             return { success: true, data };
         });
         this.getAllAirTicketRefund = (req) => __awaiter(this, void 0, void 0, function* () {

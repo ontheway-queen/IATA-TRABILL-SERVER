@@ -161,57 +161,60 @@ class ReportServices extends abstract_services_1.default {
             const data = yield conn.getSalesReport(client_id, combined_id, employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
             return Object.assign({ success: true }, data);
         });
+        // OVERALL PROFIT LOSS
         this.overallProfitLoss = (req) => __awaiter(this, void 0, void 0, function* () {
             const { from_date, to_date } = req.query;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.profitLossReport(req, trx);
-                const salesProductTotal = yield conn.totalSales(from_date, to_date);
-                const total_sales_price = salesProductTotal.reduce((acc, obj) => acc + parseFloat(obj.sales_price || 0), 0);
-                const total_cost_price = salesProductTotal.reduce((acc, obj) => acc + parseFloat(obj.cost_price || 0), 0);
-                const total_refun_profit = yield conn.refundProfitAir(from_date, to_date);
-                const total_employee_salary = yield conn.getEmplyeExpense(from_date, to_date);
-                const incentive = yield conn.allIncentive(from_date, to_date);
+                const salesAndPurchase = yield conn.totalSales(from_date, to_date);
+                const client_refund = yield conn.getClientRefundTotal(from_date, to_date);
+                const total_refund_profit = yield conn.refundProfitAir(from_date, to_date);
+                const total_employee_salary = yield conn.getEmployeeExpense(from_date, to_date);
                 const expense_total = yield conn.allExpenses(from_date, to_date);
+                const incentive = yield conn.allIncentive(from_date, to_date);
                 const total_discount = yield conn.getAllClientDiscount(from_date, to_date);
                 const service_charge = yield conn.getInvoicesServiceCharge(from_date, to_date);
-                const tour_profit = yield conn.getTourProfitLoss(from_date, to_date);
                 const online_charge = yield conn.getBankCharge(from_date, to_date);
                 const vendor_ait = yield conn.getVendorAit(from_date, to_date);
                 const non_invoice = yield conn.getNonInvoiceIncomeProfit(from_date, to_date);
-                const aget_payment = yield conn.getAgentPayment(from_date, to_date);
+                const agent_payment = yield conn.getAgentPayment(from_date, to_date);
                 const void_profit_loss = yield conn.getInvoiceVoidProfit(from_date, to_date);
-                const total_sales_profit = total_sales_price - total_cost_price;
-                const gross_profit_loss = total_sales_profit + total_refun_profit + service_charge + tour_profit;
-                const total_gross_profit_loss = gross_profit_loss + incentive + non_invoice + void_profit_loss;
-                const overall_expense = expense_total +
-                    total_employee_salary +
-                    total_discount +
-                    online_charge +
-                    vendor_ait +
-                    aget_payment;
                 return {
                     success: true,
-                    data: {
+                    data: Object.assign(Object.assign({}, salesAndPurchase), { client_refund,
                         void_profit_loss,
-                        total_sales_price,
-                        total_cost_price,
-                        total_sales_profit,
-                        total_refun_profit,
-                        gross_profit_loss,
-                        total_incentive_income: incentive,
-                        expense_total,
+                        total_refund_profit, total_incentive_income: incentive, expense_total,
                         total_employee_salary,
                         total_discount,
                         online_charge,
                         vendor_ait,
                         non_invoice,
-                        aget_payment,
-                        overall_expense: Number(overall_expense),
-                        total_gross_profit_loss,
-                        service_charge,
-                        tour_profit,
-                        net_profit_loss: Number(total_gross_profit_loss) - Number(overall_expense),
-                    },
+                        agent_payment,
+                        service_charge }),
+                };
+            }));
+        });
+        // overall sales summery
+        this.getOverallSalesSummery = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { from_date, to_date, page, size } = req.query;
+            return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
+                const conn = this.models.profitLossReport(req, trx);
+                const data = yield conn.getOverallSalesSummery(from_date, to_date, +page, +size);
+                return {
+                    success: true,
+                    data,
+                };
+            }));
+        });
+        // overall client refunds
+        this.getOverallClientRefund = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { from_date, to_date, page, size } = req.query;
+            return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
+                const conn = this.models.profitLossReport(req, trx);
+                const data = yield conn.getOverallClientRefund(from_date, to_date, +page, +size);
+                return {
+                    success: true,
+                    data,
                 };
             }));
         });

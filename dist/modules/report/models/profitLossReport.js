@@ -56,6 +56,19 @@ class ProfitLossReport extends abstract_models_1.default {
                 .andWhere('invoice_org_agency', this.org_agency));
             return Number(data.total_charge) || 0;
         });
+        this.getClientRefundTotal = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
+            to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
+            const [data] = (yield this.query()
+                .sum('return_amount as total_return')
+                .from('v_client_refunds')
+                .andWhereRaw(`DATE_FORMAT(refund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
+                from_date,
+                to_date,
+            ])
+                .andWhere('org_id', this.org_agency));
+            return Number(data.total_return) || 0;
+        });
         this.payrollReport = (payroll_id, from_date, to_date, page, size) => __awaiter(this, void 0, void 0, function* () {
             const offset = (page - 1) * size;
             from_date
@@ -148,11 +161,57 @@ class ProfitLossReport extends abstract_models_1.default {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const data = yield this.query()
-                .select(this.db.raw('CAST(SUM(view_invoice_total_billing.sales_price) AS DECIMAL(15,2)) AS sales_price'), this.db.raw('CAST(SUM(cost_price) AS DECIMAL(15,2)) AS cost_price'))
+                .select(this.db.raw('CAST(SUM(view_invoice_total_billing.sales_price) AS DECIMAL(15,2)) AS total_sales_price'), this.db.raw('CAST(SUM(cost_price) AS DECIMAL(15,2)) AS total_cost_price'))
                 .from('view_invoice_total_billing')
                 .andWhere('view_invoice_total_billing.org_agency_id', this.org_agency)
                 .andWhereRaw('Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?', [from_date, to_date]);
             return data;
+        });
+    }
+    getOverallSalesSummery(from_date, to_date, page = 1, size = 20) {
+        return __awaiter(this, void 0, void 0, function* () {
+            from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
+            to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
+            const offset = (page - 1) * size;
+            const data = yield this.query()
+                .select('*')
+                .from('view_invoice_total_billing')
+                .where('view_invoice_total_billing.org_agency_id', this.org_agency)
+                .andWhereRaw('Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?', [from_date, to_date])
+                .limit(size)
+                .offset(offset);
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from('view_invoice_total_billing')
+                .where('view_invoice_total_billing.org_agency_id', this.org_agency)
+                .andWhereRaw('Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?', [from_date, to_date]));
+            return { data, count };
+        });
+    }
+    getOverallClientRefund(from_date, to_date, page = 1, size = 20) {
+        return __awaiter(this, void 0, void 0, function* () {
+            from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
+            to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
+            const offset = (page - 1) * size;
+            const data = yield this.query()
+                .select('*')
+                .from('v_client_refunds')
+                .where('v_client_refunds.org_id', this.org_agency)
+                .andWhereRaw('Date(v_client_refunds.refund_date) BETWEEN ? AND ?', [
+                from_date,
+                to_date,
+            ])
+                .limit(size)
+                .offset(offset);
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from('v_client_refunds')
+                .where('v_client_refunds.org_id', this.org_agency)
+                .andWhereRaw('Date(v_client_refunds.refund_date) BETWEEN ? AND ?', [
+                from_date,
+                to_date,
+            ]));
+            return { data, count };
         });
     }
     refundProfitAir(from_date, to_date) {
@@ -178,7 +237,7 @@ class ProfitLossReport extends abstract_models_1.default {
                 .andWhere('atrefund_org_agency', this.org_agency);
         });
     }
-    getEmplyeExpense(from_date, to_date) {
+    getEmployeeExpense(from_date, to_date) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
@@ -254,20 +313,27 @@ class ProfitLossReport extends abstract_models_1.default {
             return Number(data.total_service_charge);
         });
     }
-    getTourProfitLoss(from_date, to_date) {
-        return __awaiter(this, void 0, void 0, function* () {
-            from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
-            to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const [{ tour_profit }] = yield this.query()
-                .select(this.db.raw(`SUM(COALESCE(billing_total_sales,0) - COALESCE(billing_cost_price, 0)) as tour_profit`))
-                .from('trabill_invoice_tour_billing')
-                .where('billing_is_deleted', 0)
-                .leftJoin('trabill_invoices', { invoice_id: 'billing_invoice_id' })
-                .andWhere('invoice_org_agency', this.org_agency)
-                .andWhereRaw(`DATE_FORMAT(invoice_sales_date,'%Y-%m-%d') BETWEEN ? AND ?`, [from_date, to_date]);
-            return Number(tour_profit);
-        });
-    }
+    /*  public async getTourProfitLoss(from_date: string, to_date: string) {
+      from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
+      to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
+      const [{ tour_profit }] = await this.query()
+        .select(
+          this.db.raw(
+            `SUM(COALESCE(billing_total_sales,0) - COALESCE(billing_cost_price, 0)) as tour_profit`
+          )
+        )
+        .from('trabill_invoice_tour_billing')
+  
+        .where('billing_is_deleted', 0)
+        .leftJoin('trabill_invoices', { invoice_id: 'billing_invoice_id' })
+        .andWhere('invoice_org_agency', this.org_agency)
+        .andWhereRaw(
+          `DATE_FORMAT(invoice_sales_date,'%Y-%m-%d') BETWEEN ? AND ?`,
+          [from_date, to_date]
+        );
+  
+      return Number(tour_profit);
+    } */
     getBankCharge(from_date, to_date) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');

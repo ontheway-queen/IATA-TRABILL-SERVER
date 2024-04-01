@@ -26,11 +26,16 @@ class RefundServices extends AbstractServices {
   };
 
   public airTicketInfos = async (req: Request) => {
-    const { ticket_no } = req.body as { ticket_no: (string | number)[] };
+    const { ticket_no, invoice_id } = req.body as {
+      ticket_no: (string | number)[];
+      invoice_id: number;
+    };
+
+    console.log({ body: req.body });
 
     const conn = this.models.refundModel(req);
 
-    const data = await conn.airTicketInfos(ticket_no);
+    const data = await conn.airTicketInfos(ticket_no, invoice_id);
 
     return { success: true, data };
   };

@@ -148,6 +148,24 @@ class ReportController extends abstract_controllers_1.default {
                 this.error('Overall profit and loss...');
             }
         }));
+        this.getOverallSalesSummery = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getOverallSalesSummery(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('Overall profit and loss...');
+            }
+        }));
+        this.getOverallClientRefund = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getOverallClientRefund(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('Overall profit and loss...');
+            }
+        }));
         this.payrollReport = this.assyncWrapper.wrap(this.validator.readPayroll, (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.payrollReport(req);
             if (data.success) {

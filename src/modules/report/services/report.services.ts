@@ -3,7 +3,7 @@ import AbstractServices from '../../../abstracts/abstract.services';
 import { separateCombClientToId } from '../../../common/helpers/common.helper';
 import { idType } from '../../../common/types/common.types';
 import CustomError from '../../../common/utils/errors/customError';
-import dayjs from 'dayjs';
+import { IListQuery } from '../types/report.interfaces';
 class ReportServices extends AbstractServices {
   constructor() {
     super();
@@ -379,6 +379,8 @@ class ReportServices extends AbstractServices {
     return { success: true, ...data };
   };
 
+  // OVERALL PROFIT LOSS
+
   public overallProfitLoss = async (req: Request) => {
     const { from_date, to_date } = req.query as {
       from_date: string;
@@ -388,27 +390,19 @@ class ReportServices extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.profitLossReport(req, trx);
 
-      const salesProductTotal = await conn.totalSales(from_date, to_date);
-
-      const total_sales_price = salesProductTotal.reduce(
-        (acc, obj: any) => acc + parseFloat(obj.sales_price || 0),
-        0
-      );
-      const total_cost_price = salesProductTotal.reduce(
-        (acc, obj: any) => acc + parseFloat(obj.cost_price || 0),
-        0
-      );
-
-      const total_refun_profit = await conn.refundProfitAir(from_date, to_date);
-
-      const total_employee_salary = await conn.getEmplyeExpense(
+      const salesAndPurchase = await conn.totalSales(from_date, to_date);
+      const client_refund = await conn.getClientRefundTotal(from_date, to_date);
+      const total_refund_profit = await conn.refundProfitAir(
         from_date,
         to_date
       );
+      const total_employee_salary = await conn.getEmployeeExpense(
+        from_date,
+        to_date
+      );
+      const expense_total = await conn.allExpenses(from_date, to_date);
 
       const incentive = await conn.allIncentive(from_date, to_date);
-
-      const expense_total = await conn.allExpenses(from_date, to_date);
 
       const total_discount = await conn.getAllClientDiscount(
         from_date,
@@ -420,8 +414,6 @@ class ReportServices extends AbstractServices {
         to_date
       );
 
-      const tour_profit = await conn.getTourProfitLoss(from_date, to_date);
-
       const online_charge = await conn.getBankCharge(from_date, to_date);
 
       const vendor_ait = await conn.getVendorAit(from_date, to_date);
@@ -430,37 +422,19 @@ class ReportServices extends AbstractServices {
         from_date,
         to_date
       );
-      const aget_payment = await conn.getAgentPayment(from_date, to_date);
+      const agent_payment = await conn.getAgentPayment(from_date, to_date);
       const void_profit_loss = await conn.getInvoiceVoidProfit(
         from_date,
         to_date
       );
 
-      const total_sales_profit = total_sales_price - total_cost_price;
-
-      const gross_profit_loss =
-        total_sales_profit + total_refun_profit + service_charge + tour_profit;
-
-      const total_gross_profit_loss =
-        gross_profit_loss + incentive + non_invoice + void_profit_loss;
-
-      const overall_expense =
-        expense_total +
-        total_employee_salary +
-        total_discount +
-        online_charge +
-        vendor_ait +
-        aget_payment;
-
       return {
         success: true,
         data: {
+          ...salesAndPurchase,
+          client_refund,
           void_profit_loss,
-          total_sales_price,
-          total_cost_price,
-          total_sales_profit,
-          total_refun_profit,
-          gross_profit_loss,
+          total_refund_profit,
           total_incentive_income: incentive,
           expense_total,
           total_employee_salary,
@@ -468,14 +442,51 @@ class ReportServices extends AbstractServices {
           online_charge,
           vendor_ait,
           non_invoice,
-          aget_payment,
-          overall_expense: Number(overall_expense),
-          total_gross_profit_loss,
+          agent_payment,
           service_charge,
-          tour_profit,
-          net_profit_loss:
-            Number(total_gross_profit_loss) - Number(overall_expense),
         },
+      };
+    });
+  };
+
+  // overall sales summery
+  public getOverallSalesSummery = async (req: Request) => {
+    const { from_date, to_date, page, size } = req.query as IListQuery;
+
+    return await this.models.db.transaction(async (trx) => {
+      const conn = this.models.profitLossReport(req, trx);
+
+      const data = await conn.getOverallSalesSummery(
+        from_date,
+        to_date,
+        +page,
+        +size
+      );
+
+      return {
+        success: true,
+        data,
+      };
+    });
+  };
+
+  // overall client refunds
+  public getOverallClientRefund = async (req: Request) => {
+    const { from_date, to_date, page, size } = req.query as IListQuery;
+
+    return await this.models.db.transaction(async (trx) => {
+      const conn = this.models.profitLossReport(req, trx);
+
+      const data = await conn.getOverallClientRefund(
+        from_date,
+        to_date,
+        +page,
+        +size
+      );
+
+      return {
+        success: true,
+        data,
       };
     });
   };

@@ -208,6 +208,7 @@ class DashboardServices extends AbstractServices {
       sales_from_date,
       sales_to_date
     );
+
     const ticket_re_issue = await conn.getBspTicketReissueSummary(
       sales_from_date,
       sales_to_date

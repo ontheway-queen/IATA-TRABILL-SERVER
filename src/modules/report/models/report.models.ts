@@ -1760,7 +1760,9 @@ class ReportModel extends AbstractModels {
         'vendor_name',
         'airticket_net_commssion',
         'airticket_ait',
-        'airticket_sales_date'
+        'airticket_sales_date',
+        'airticket_pnr',
+        'airticket_ticket_no'
       )
       .from('trabill_invoice_airticket_items')
       .leftJoin('trabill_vendors', { vendor_id: 'airticket_vendor_id' })

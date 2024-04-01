@@ -160,7 +160,7 @@ class ProfitLossReport extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const data = yield this.query()
+            const [data] = yield this.query()
                 .select(this.db.raw('CAST(SUM(view_invoice_total_billing.sales_price) AS DECIMAL(15,2)) AS total_sales_price'), this.db.raw('CAST(SUM(cost_price) AS DECIMAL(15,2)) AS total_cost_price'))
                 .from('view_invoice_total_billing')
                 .andWhere('view_invoice_total_billing.org_agency_id', this.org_agency)

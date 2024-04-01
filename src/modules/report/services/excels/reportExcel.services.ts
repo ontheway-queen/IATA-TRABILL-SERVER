@@ -1678,18 +1678,11 @@ class ReportExcelServices extends AbstractServices {
     };
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.profitLossReport(req, trx);
-      const salesProductTotal = await conn.totalSales(
+      const { total_sales_price, total_cost_price } = await conn.totalSales(
         String(from_date),
         String(to_date)
       );
-      const total_sales_price = salesProductTotal.reduce(
-        (acc, obj: any) => acc + parseFloat(obj.sales_price),
-        0
-      );
-      const total_cost_price = salesProductTotal.reduce(
-        (acc, obj: any) => acc + parseFloat(obj.cost_price),
-        0
-      );
+
       const total_refun_profit = await conn.refundProfitAir(
         String(from_date),
         String(to_date)

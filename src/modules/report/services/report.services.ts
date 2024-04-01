@@ -390,7 +390,10 @@ class ReportServices extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.profitLossReport(req, trx);
 
-      const salesAndPurchase = await conn.totalSales(from_date, to_date);
+      const { total_sales_price, total_cost_price } = await conn.totalSales(
+        from_date,
+        to_date
+      );
       const client_refund = await conn.getClientRefundTotal(from_date, to_date);
       const total_refund_profit = await conn.refundProfitAir(
         from_date,
@@ -428,10 +431,33 @@ class ReportServices extends AbstractServices {
         to_date
       );
 
+      const total_sales_profit = total_sales_price - total_cost_price;
+
+      const gross_profit_loss =
+        total_sales_profit +
+        total_refund_profit +
+        service_charge -
+        client_refund;
+
+      const total_gross_profit_loss =
+        gross_profit_loss + incentive + non_invoice + void_profit_loss;
+
+      const overall_expense =
+        expense_total +
+        total_employee_salary +
+        total_discount +
+        online_charge +
+        vendor_ait +
+        agent_payment -
+        client_refund;
+
       return {
         success: true,
         data: {
-          ...salesAndPurchase,
+          total_sales_price,
+          total_cost_price,
+          total_gross_profit_loss,
+          overall_expense,
           client_refund,
           void_profit_loss,
           total_refund_profit,

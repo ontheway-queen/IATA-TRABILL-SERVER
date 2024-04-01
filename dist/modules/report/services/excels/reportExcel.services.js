@@ -1373,9 +1373,7 @@ class ReportExcelServices extends abstract_services_1.default {
             const { from_date, to_date } = req.query;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.profitLossReport(req, trx);
-                const salesProductTotal = yield conn.totalSales(String(from_date), String(to_date));
-                const total_sales_price = salesProductTotal.reduce((acc, obj) => acc + parseFloat(obj.sales_price), 0);
-                const total_cost_price = salesProductTotal.reduce((acc, obj) => acc + parseFloat(obj.cost_price), 0);
+                const { total_sales_price, total_cost_price } = yield conn.totalSales(String(from_date), String(to_date));
                 const total_refun_profit = yield conn.refundProfitAir(String(from_date), String(to_date));
                 const total_employee_salary = yield conn.getEmployeeExpense(String(from_date), String(to_date));
                 const incentive = yield conn.allIncentive(String(from_date), String(to_date));

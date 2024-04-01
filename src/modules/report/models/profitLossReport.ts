@@ -80,7 +80,7 @@ class ProfitLossReport extends AbstractModels {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const data = await this.query()
+    const [data] = await this.query()
       .select(
         this.db.raw(
           'CAST(SUM(view_invoice_total_billing.sales_price) AS DECIMAL(15,2)) AS total_sales_price'
@@ -96,7 +96,7 @@ class ProfitLossReport extends AbstractModels {
         [from_date, to_date]
       );
 
-    return data as { total_sales_price: number; total_cost_price: number }[];
+    return data;
   }
 
   public async getOverallSalesSummery(

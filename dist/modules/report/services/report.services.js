@@ -196,6 +196,7 @@ class ReportServices extends abstract_services_1.default {
                     success: true,
                     data: {
                         total_sales_price,
+                        total_sales_profit,
                         total_cost_price,
                         total_gross_profit_loss,
                         overall_expense,

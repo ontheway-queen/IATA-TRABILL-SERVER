@@ -165,6 +165,74 @@ class ProfitLossReport extends AbstractModels {
     return { data, count };
   }
 
+  public async getOverallPurchase(
+    from_date: string,
+    to_date: string,
+    page: number = 1,
+    size: number = 20
+  ) {
+    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
+    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
+    const offset = (page - 1) * size;
+
+    const data = await this.query()
+      .select(
+        'cost.invoice_id',
+        'invoice_org_agency',
+        'invoice_category_id',
+        'invoice_no',
+        'airticket_ticket_no',
+        'cost_price',
+        this.db.raw('coalesce(combine_name,vendor_name) as vendor_name'),
+        'invoice_sales_date'
+      )
+      .from('v_inv_cost as cost')
+      .leftJoin(
+        'trabill_invoices as inv',
+        'inv.invoice_id',
+        '=',
+        'cost.invoice_id'
+      )
+      .leftJoin('trabill_vendors as v', 'v.vendor_id', '=', 'cost.vendor_id')
+      .leftJoin(
+        'trabill_combined_clients as c',
+        'c.combine_id',
+        '=',
+        'cost.combine_id'
+      )
+      .where('invoice_org_agency', this.org_agency)
+      .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])
+      .limit(size)
+      .offset(offset);
+
+    const [{ count }] = (await this.query()
+      .count('* as count')
+      .from('v_inv_cost as cost')
+      .leftJoin(
+        'trabill_invoices as inv',
+        'inv.invoice_id',
+        '=',
+        'cost.invoice_id'
+      )
+      .leftJoin('trabill_vendors as v', 'v.vendor_id', '=', 'cost.vendor_id')
+      .leftJoin(
+        'trabill_combined_clients as c',
+        'c.combine_id',
+        '=',
+        'cost.combine_id'
+      )
+      .where('invoice_org_agency', this.org_agency)
+      .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])) as { count: number }[];
+
+    return { data, count };
+  }
+
   public async refundProfitAir(from_date: string, to_date: string) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');

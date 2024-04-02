@@ -234,6 +234,15 @@ class ReportServices extends abstract_services_1.default {
                 return Object.assign({ success: true }, data);
             }));
         });
+        // overall client refunds
+        this.getOverallPurchase = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { from_date, to_date, page, size } = req.query;
+            return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
+                const conn = this.models.profitLossReport(req, trx);
+                const data = yield conn.getOverallPurchase(from_date, to_date, +page, +size);
+                return Object.assign({ success: true }, data);
+            }));
+        });
         this.getVisaList = (req) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.models.reportModel(req).getVisaList();
             return { success: true, data };

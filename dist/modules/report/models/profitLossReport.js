@@ -214,6 +214,38 @@ class ProfitLossReport extends abstract_models_1.default {
             return { data, count };
         });
     }
+    getOverallPurchase(from_date, to_date, page = 1, size = 20) {
+        return __awaiter(this, void 0, void 0, function* () {
+            from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
+            to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
+            const offset = (page - 1) * size;
+            const data = yield this.query()
+                .select('cost.invoice_id', 'invoice_org_agency', 'invoice_category_id', 'invoice_no', 'airticket_ticket_no', 'cost_price', this.db.raw('coalesce(combine_name,vendor_name) as vendor_name'), 'invoice_sales_date')
+                .from('v_inv_cost as cost')
+                .leftJoin('trabill_invoices as inv', 'inv.invoice_id', '=', 'cost.invoice_id')
+                .leftJoin('trabill_vendors as v', 'v.vendor_id', '=', 'cost.vendor_id')
+                .leftJoin('trabill_combined_clients as c', 'c.combine_id', '=', 'cost.combine_id')
+                .where('invoice_org_agency', this.org_agency)
+                .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+                from_date,
+                to_date,
+            ])
+                .limit(size)
+                .offset(offset);
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from('v_inv_cost as cost')
+                .leftJoin('trabill_invoices as inv', 'inv.invoice_id', '=', 'cost.invoice_id')
+                .leftJoin('trabill_vendors as v', 'v.vendor_id', '=', 'cost.vendor_id')
+                .leftJoin('trabill_combined_clients as c', 'c.combine_id', '=', 'cost.combine_id')
+                .where('invoice_org_agency', this.org_agency)
+                .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+                from_date,
+                to_date,
+            ]));
+            return { data, count };
+        });
+    }
     refundProfitAir(from_date, to_date) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');

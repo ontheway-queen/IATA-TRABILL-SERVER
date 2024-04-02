@@ -134,6 +134,10 @@ class ReportRouter extends AbstractRouter {
       '/overall-client-refunds',
       this.controllers.getOverallClientRefund
     );
+    this.routers.get(
+      '/overall-client-purchase',
+      this.controllers.getOverallPurchase
+    );
 
     this.routers.get(
       '/visa-profit-loss/:visa_id',

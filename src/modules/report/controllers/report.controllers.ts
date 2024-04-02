@@ -217,6 +217,19 @@ class ReportController extends AbstractController {
     }
   );
 
+  public getOverallPurchase = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.getOverallPurchase(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Overall profit and loss...');
+      }
+    }
+  );
+
   payrollReport = this.assyncWrapper.wrap(
     this.validator.readPayroll,
     async (req: Request, res: Response) => {

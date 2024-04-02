@@ -171,7 +171,8 @@ class DashboardModels extends abstract_models_1.default {
                 .whereRaw('DATE(invoice_sales_date) = CURDATE()')
                 .andWhere('invoice_org_agency', this.org_agency)
                 .andWhereNot('invoice_is_deleted', 1)
-                .groupByRaw('DATE(invoice_sales_date)');
+                .andWhereNot('invoice_is_cancel', 1)
+                .andWhereNot('invoice_is_reissued', 1);
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectDailyReceived = () => __awaiter(this, void 0, void 0, function* () {
@@ -180,8 +181,7 @@ class DashboardModels extends abstract_models_1.default {
                 .select(this.db.raw('SUM(receipt_total_amount) AS value'))
                 .where('receipt_org_agency', this.org_agency)
                 .andWhereNot('receipt_has_deleted', 1)
-                .andWhereRaw('DATE(receipt_payment_date) = CURDATE()')
-                .groupByRaw('DATE(receipt_payment_date)');
+                .andWhereRaw('DATE(receipt_payment_date) = CURDATE()');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectDailyPurchase = () => __awaiter(this, void 0, void 0, function* () {
@@ -189,8 +189,7 @@ class DashboardModels extends abstract_models_1.default {
                 .from('view_invoices_cost')
                 .select(this.db.raw('SUM(cost_price) AS value'))
                 .whereRaw('DATE(sales_date) = CURDATE()')
-                .andWhere('org_agency', this.org_agency)
-                .groupByRaw('DATE(sales_date)');
+                .andWhere('org_agency', this.org_agency);
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectDailyPayment = () => __awaiter(this, void 0, void 0, function* () {
@@ -199,8 +198,7 @@ class DashboardModels extends abstract_models_1.default {
                 .select(this.db.raw('SUM(payment_amount) AS value'))
                 .where('vpay_org_agency', this.org_agency)
                 .andWhereNot('vpay_is_deleted', 1)
-                .andWhereRaw('DATE(payment_date) = CURDATE()')
-                .groupByRaw('DATE(payment_date)');
+                .andWhereRaw('DATE(payment_date) = CURDATE()');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectDailyExpense = () => __awaiter(this, void 0, void 0, function* () {
@@ -209,8 +207,7 @@ class DashboardModels extends abstract_models_1.default {
                 .select(this.db.raw('SUM(expense_total_amount) AS value'))
                 .where('expense_org_agency', this.org_agency)
                 .andWhereNot('expense_is_deleted', 1)
-                .andWhereRaw('DATE(expense_date) = CURDATE()')
-                .groupByRaw('DATE(expense_date)');
+                .andWhereRaw('DATE(expense_date) = CURDATE()');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         // monthly
@@ -222,7 +219,8 @@ class DashboardModels extends abstract_models_1.default {
                 .andWhereRaw('MONTH(invoice_sales_date) = MONTH(CURDATE())')
                 .andWhere('invoice_org_agency', this.org_agency)
                 .andWhereNot('invoice_is_deleted', 1)
-                .groupByRaw('DATE(invoice_sales_date)');
+                .andWhereNot('invoice_is_cancel', 1)
+                .andWhereNot('invoice_is_reissued', 1);
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectMonthlyReceived = () => __awaiter(this, void 0, void 0, function* () {
@@ -232,8 +230,7 @@ class DashboardModels extends abstract_models_1.default {
                 .where('receipt_org_agency', this.org_agency)
                 .andWhereNot('receipt_has_deleted', 1)
                 .whereRaw('YEAR(receipt_payment_date) = YEAR(CURDATE())')
-                .andWhereRaw('MONTH(receipt_payment_date) = MONTH(CURDATE())')
-                .groupByRaw('DATE(receipt_payment_date)');
+                .andWhereRaw('MONTH(receipt_payment_date) = MONTH(CURDATE())');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectMonthlyPurchase = () => __awaiter(this, void 0, void 0, function* () {
@@ -242,8 +239,7 @@ class DashboardModels extends abstract_models_1.default {
                 .select(this.db.raw('SUM(cost_price) AS daily_cost'))
                 .whereRaw('YEAR(sales_date) = YEAR(CURDATE())')
                 .andWhereRaw('MONTH(sales_date) = MONTH(CURDATE())')
-                .andWhere('org_agency', this.org_agency)
-                .groupByRaw('DATE(sales_date)');
+                .andWhere('org_agency', this.org_agency);
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectMonthlyPayment = () => __awaiter(this, void 0, void 0, function* () {
@@ -253,8 +249,7 @@ class DashboardModels extends abstract_models_1.default {
                 .where('vpay_org_agency', this.org_agency)
                 .andWhereNot('vpay_is_deleted', 1)
                 .whereRaw('YEAR(payment_date) = YEAR(CURDATE())')
-                .andWhereRaw('MONTH(payment_date) = MONTH(CURDATE())')
-                .groupByRaw('DATE(payment_date)');
+                .andWhereRaw('MONTH(payment_date) = MONTH(CURDATE())');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectMonthlyExpense = () => __awaiter(this, void 0, void 0, function* () {
@@ -264,8 +259,7 @@ class DashboardModels extends abstract_models_1.default {
                 .where('expense_org_agency', this.org_agency)
                 .andWhereNot('expense_is_deleted', 1)
                 .whereRaw('YEAR(expense_date) = YEAR(CURDATE())')
-                .andWhereRaw('MONTH(expense_date) = MONTH(CURDATE())')
-                .groupByRaw('DATE(expense_date)');
+                .andWhereRaw('MONTH(expense_date) = MONTH(CURDATE())');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         // yearly
@@ -276,7 +270,8 @@ class DashboardModels extends abstract_models_1.default {
                 .whereRaw('YEAR(invoice_sales_date) = YEAR(CURDATE())')
                 .andWhere('invoice_org_agency', this.org_agency)
                 .andWhereNot('invoice_is_deleted', 1)
-                .groupByRaw('DATE(invoice_sales_date)');
+                .andWhereNot('invoice_is_cancel', 1)
+                .andWhereNot('invoice_is_reissued', 1);
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectYearlyReceived = () => __awaiter(this, void 0, void 0, function* () {
@@ -285,8 +280,7 @@ class DashboardModels extends abstract_models_1.default {
                 .select(this.db.raw('SUM(receipt_total_amount) AS value'))
                 .where('receipt_org_agency', this.org_agency)
                 .andWhereNot('receipt_has_deleted', 1)
-                .whereRaw('YEAR(receipt_payment_date) = YEAR(CURDATE())')
-                .groupByRaw('DATE(receipt_payment_date)');
+                .whereRaw('YEAR(receipt_payment_date) = YEAR(CURDATE())');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectYearlyPurchase = () => __awaiter(this, void 0, void 0, function* () {
@@ -294,8 +288,7 @@ class DashboardModels extends abstract_models_1.default {
                 .from('view_invoices_cost')
                 .select(this.db.raw('SUM(cost_price) AS value'))
                 .whereRaw('YEAR(sales_date) = YEAR(CURDATE())')
-                .andWhere('org_agency', this.org_agency)
-                .groupByRaw('DATE(sales_date)');
+                .andWhere('org_agency', this.org_agency);
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectYearlyPayment = () => __awaiter(this, void 0, void 0, function* () {
@@ -304,8 +297,7 @@ class DashboardModels extends abstract_models_1.default {
                 .select(this.db.raw('SUM(payment_amount) AS value'))
                 .where('vpay_org_agency', this.org_agency)
                 .andWhereNot('vpay_is_deleted', 1)
-                .whereRaw('YEAR(payment_date) = YEAR(CURDATE())')
-                .groupByRaw('DATE(payment_date)');
+                .whereRaw('YEAR(payment_date) = YEAR(CURDATE())');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectYearlyExpense = () => __awaiter(this, void 0, void 0, function* () {
@@ -314,8 +306,7 @@ class DashboardModels extends abstract_models_1.default {
                 .select(this.db.raw('SUM(expense_total_amount) AS value'))
                 .where('expense_org_agency', this.org_agency)
                 .andWhereNot('expense_is_deleted', 1)
-                .whereRaw('YEAR(expense_date) = YEAR(CURDATE())')
-                .groupByRaw('DATE(expense_date)');
+                .whereRaw('YEAR(expense_date) = YEAR(CURDATE())');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.getMonthReport = () => __awaiter(this, void 0, void 0, function* () {

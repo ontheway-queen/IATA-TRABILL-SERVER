@@ -380,7 +380,6 @@ class ReportServices extends AbstractServices {
   };
 
   // OVERALL PROFIT LOSS
-
   public overallProfitLoss = async (req: Request) => {
     const { from_date, to_date } = req.query as {
       from_date: string;
@@ -505,6 +504,27 @@ class ReportServices extends AbstractServices {
       const conn = this.models.profitLossReport(req, trx);
 
       const data = await conn.getOverallClientRefund(
+        from_date,
+        to_date,
+        +page,
+        +size
+      );
+
+      return {
+        success: true,
+        ...data,
+      };
+    });
+  };
+
+  // overall client refunds
+  public getOverallPurchase = async (req: Request) => {
+    const { from_date, to_date, page, size } = req.query as IListQuery;
+
+    return await this.models.db.transaction(async (trx) => {
+      const conn = this.models.profitLossReport(req, trx);
+
+      const data = await conn.getOverallPurchase(
         from_date,
         to_date,
         +page,

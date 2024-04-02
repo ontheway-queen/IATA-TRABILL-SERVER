@@ -1264,7 +1264,7 @@ class ReportModel extends abstract_models_1.default {
                 .andWhere('invoice_org_agency', this.org_agency)
                 .modify((builder) => {
                 if (from_date && to_date) {
-                    builder.andWhereRaw('Date(invoice_deleted_at) BETWEEN ? AND ?', [
+                    builder.andWhereRaw('Date(invoice_update_date) BETWEEN ? AND ?', [
                         from_date,
                         to_date,
                     ]);
@@ -1274,10 +1274,10 @@ class ReportModel extends abstract_models_1.default {
                 .offset(page_number);
             const [{ count }] = (yield this.query()
                 .count('* as count')
-                .from('trabill_invoices_delete_void')
+                .from('trabill_invoices')
                 .modify((builder) => {
                 if (from_date && to_date) {
-                    builder.andWhereRaw('Date(invoice_deleted_at) BETWEEN ? AND ?', [
+                    builder.andWhereRaw('Date(invoice_update_date) BETWEEN ? AND ?', [
                         from_date,
                         to_date,
                     ]);

@@ -104,8 +104,6 @@ class DeleteInvoiceHajj extends AbstractServices {
       await trxns.clTrxnInsert(clTrxnBody);
       await this.deleteInvoiceHajj(req, trx);
 
-      await common_conn.transferInvoiceInfoToVoid(invoice_id, void_charge);
-
       await this.insertAudit(
         req,
         'delete',

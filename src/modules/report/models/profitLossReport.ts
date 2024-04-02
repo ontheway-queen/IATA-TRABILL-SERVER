@@ -438,7 +438,7 @@ class ProfitLossReport extends AbstractModels {
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
     const [data] = (await this.query()
       .sum('invoice_void_charge as total_charge')
-      .from('trabill_invoices_delete_void')
+      .from('trabill_invoices')
       .andWhere('invoice_is_void', 1)
       .andWhereRaw(
         `DATE_FORMAT(invoice_sales_date,'%Y-%m-%d') BETWEEN ? AND ?`,

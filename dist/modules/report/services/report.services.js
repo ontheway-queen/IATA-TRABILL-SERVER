@@ -222,10 +222,7 @@ class ReportServices extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.profitLossReport(req, trx);
                 const data = yield conn.getOverallSalesSummery(from_date, to_date, +page, +size);
-                return {
-                    success: true,
-                    data,
-                };
+                return Object.assign({ success: true }, data);
             }));
         });
         // overall client refunds
@@ -234,10 +231,7 @@ class ReportServices extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.profitLossReport(req, trx);
                 const data = yield conn.getOverallClientRefund(from_date, to_date, +page, +size);
-                return {
-                    success: true,
-                    data,
-                };
+                return Object.assign({ success: true }, data);
             }));
         });
         this.getVisaList = (req) => __awaiter(this, void 0, void 0, function* () {

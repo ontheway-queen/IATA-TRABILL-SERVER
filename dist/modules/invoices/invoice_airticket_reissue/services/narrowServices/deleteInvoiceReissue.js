@@ -66,7 +66,6 @@ class DeleteReissue extends abstract_services_1.default {
                 };
                 yield trxns.clTrxnInsert(clTrxnBody);
                 yield this.deleteReissue(req, voidTrx || trx);
-                yield common_conn.transferInvoiceInfoToVoid(invoice_id, void_charge);
                 yield this.insertAudit(req, 'delete', 'Invoice reissue has been voided', invoice_has_deleted_by, 'INVOICES');
                 return { success: true, message: 'Invoice reissue has been voided' };
             }));

@@ -393,7 +393,7 @@ class InvoiceAirticketService extends AbstractServices {
   public addInvoiceAirticket = new AddInvoiceAirticket().addInvoiceAirTicket;
   public editInvoiceAirticket = new EditInvoiceAirticket().editInvoiceAirTicket;
   public deleteInvoiceAirTicket = new DeleteAirTicket().deleteAirTicket;
-  public voidInvoiceAirticket = new DeleteAirTicket().voidAirticket;
+  public voidInvoiceAirticket = new DeleteAirTicket().voidInvoice;
 
   public sendEmail = new SendMail().sendEmail;
 }

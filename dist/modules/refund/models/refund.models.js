@@ -51,7 +51,7 @@ class RefundModel extends abstract_models_1.default {
             return invoice_pay;
         });
         /**
-         * invoice airticker refund
+         * invoice air ticker refund
          * @param airticketId
          * @param categoryId
          * @param isRefund

@@ -155,7 +155,7 @@ const getNext15Day = (inputDate) => {
         // If input date is the last day of the month, return the next month's 15th date
         const nextMonth = currentMonth === 11 ? 0 : currentMonth;
         const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-        date = new Date(nextYear, nextMonth + 1, 2).toISOString().slice(0, 10);
+        date = new Date(nextYear, nextMonth + 1, 1).toISOString().slice(0, 10);
     }
     else if (currentDate.getDate() === lastDayOfMonth) {
         date = new Date(currentYear, currentMonth + 1, 16)

@@ -71,7 +71,6 @@ class DeleteInvoiceHajj extends abstract_services_1.default {
                 };
                 yield trxns.clTrxnInsert(clTrxnBody);
                 yield this.deleteInvoiceHajj(req, trx);
-                yield common_conn.transferInvoiceInfoToVoid(invoice_id, void_charge);
                 yield this.insertAudit(req, 'delete', `Invoice hajj has been voided, inv-id:${invoice_id}`, invoice_has_deleted_by, 'INVOICES');
                 return { success: true, message: 'Invoice hajj has been voided' };
             }));

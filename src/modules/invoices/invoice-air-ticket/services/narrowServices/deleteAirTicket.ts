@@ -8,14 +8,13 @@ import {
   IClTrxnBody,
   IVTrxn,
 } from '../../../../../common/interfaces/Trxn.interfaces';
-import { IInvoiceVoidDetails } from '../../../../../common/interfaces/commonInterfaces';
-import DeleteOtherRefund from '../../../../refund/services/narrowServices/otherRefundSubServices/deleteOtherRefund';
 import DeleteTourPackRefund from '../../../../refund/services/narrowServices/tourPackRefundSubServices/deleteTourPackRefund';
 import DeleteInvoiceVisa from '../../../invoice-visa/services/narrowServices/deleteinvoicevisa.services';
 import DeleteNonComInvoice from '../../../invoice_airticket_non_commission/services/narrowServices/deleteInvoiceNonCom';
 import DeleteReissue from '../../../invoice_airticket_reissue/services/narrowServices/deleteInvoiceReissue';
 import DeleteInvoiceHajjPreReg from '../../../invoice_hajj_pre_reg/Services/NarrowServices/DeleteInvoiceHajjPreReg';
 import DeleteInvoiceHajj from '../../../invoice_hajji/Services/NarrowServices/DeleteInvoiceHajjServices';
+import DeleteInvoiceOther from '../../../invoice_other/services/narrowServices/deleteInvoiceOther';
 import DeleteInvoiceUmmrah from '../../../invoice_ummrah/Services/NarrowServices/DeleteInvoiceUmmrah';
 
 class DeleteAirTicket extends AbstractServices {
@@ -28,10 +27,6 @@ class DeleteAirTicket extends AbstractServices {
     voidTran?: Knex.Transaction<any, any[]>
   ) => {
     const invoice_id = Number(req.params.invoice_id);
-
-    const { invoice_has_deleted_by } = req.body as {
-      invoice_has_deleted_by: number;
-    };
 
     return await this.models.db.transaction(async (trx) => {
       const common_conn = this.models.CommonInvoiceModel(req, voidTran || trx);
@@ -57,10 +52,9 @@ class DeleteAirTicket extends AbstractServices {
     });
   };
 
-  public voidAirticket = async (req: Request) => {
-    const common_conn = this.models.CommonInvoiceModel(req);
-
+  public voidInvoice = async (req: Request) => {
     const invoice_id = Number(req.params.invoice_id);
+
     const { client_charge, invoice_vendors } = req.body as {
       client_charge: number;
       invoice_vendors: {
@@ -70,10 +64,13 @@ class DeleteAirTicket extends AbstractServices {
     };
 
     return await this.models.db.transaction(async (trx) => {
+      const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
 
       const { comb_client, prevInvoiceNo, invoice_category_id } =
         await common_conn.getPreviousInvoices(invoice_id);
+
+      await common_conn.updateIsVoid(invoice_id, client_charge || 0);
 
       const clTrxnBody: IClTrxnBody = {
         ctrxn_type: 'DEBIT',
@@ -102,7 +99,7 @@ class DeleteAirTicket extends AbstractServices {
       } else if (invoice_category_id === 4) {
         await new DeleteTourPackRefund().delete(req, trx);
       } else if (invoice_category_id === 5) {
-        await new DeleteOtherRefund().deleteOtherRefund(req, trx);
+        await new DeleteInvoiceOther().deleteInvoiceOther(req, trx);
       } else if (invoice_category_id === 10) {
         await new DeleteInvoiceVisa().deleteInvoiceVisa(req, trx);
       } else if (invoice_category_id === 26) {
@@ -113,54 +110,34 @@ class DeleteAirTicket extends AbstractServices {
         await new DeleteInvoiceHajj().deleteInvoiceHajj(req, trx);
       }
 
-      await common_conn.transferInvoiceInfoToVoid(invoice_id, client_charge);
+      const { combined_id } = separateCombClientToId(comb_client);
 
-      const voidDetailsInfo: IInvoiceVoidDetails[] = [];
-
-      const { client_id, combined_id } = separateCombClientToId(comb_client);
       for (const info of invoice_vendors) {
-        const VTrxnBody: IVTrxn = {
-          comb_vendor: info.comb_vendor,
-          vtrxn_amount: info.vendor_charge,
-          vtrxn_created_at: dayjs().format('YYYY-MM-DD'),
-          vtrxn_note: '',
-          vtrxn_particular_id: 1,
-          vtrxn_particular_type: 'Vendor Payment',
-          vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
-          vtrxn_user_id: req.user_id,
-        };
+        if (info.vendor_charge) {
+          const VTrxnBody: IVTrxn = {
+            comb_vendor: info.comb_vendor,
+            vtrxn_amount: info.vendor_charge,
+            vtrxn_created_at: dayjs().format('YYYY-MM-DD'),
+            vtrxn_note: '',
+            vtrxn_particular_id: 1,
+            vtrxn_particular_type: 'Vendor Payment',
+            vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
+            vtrxn_user_id: req.user_id,
+          };
 
-        const vtrxn_id = await trxns.VTrxnInsert(VTrxnBody);
-
-        const { vendor_id, combined_id: invoice_combine_id } =
-          separateCombClientToId(info.comb_vendor);
-        const voidInfo: IInvoiceVoidDetails = {
-          void_charge_ctrxn_id,
-          void_invoice_id: invoice_id,
-          void_client_charge: client_charge,
-          void_client_id: client_id as number,
-          void_combine_id: combined_id as number,
-          void_vendor_id: vendor_id as number,
-          void_vendor_combine_id: invoice_combine_id as number,
-          void_vendor_charge: info.vendor_charge,
-          void_charge_vtrxn_id: vtrxn_id,
-        };
-
-        voidDetailsInfo.push(voidInfo);
+          await trxns.VTrxnInsert(VTrxnBody);
+        }
       }
-
-      if (voidDetailsInfo && voidDetailsInfo.length)
-        await common_conn.createInvoiceVoidDetails(voidDetailsInfo);
 
       await this.insertAudit(
         req,
         'delete',
-        'Invoice air ticket has been voided',
+        'Invoice has been voided!',
         req.user_id,
         'INVOICES'
       );
 
-      return { success: true, message: 'Invoice air ticket has been voided' };
+      return { success: true, message: 'Invoice has been voided!' };
     });
   };
 }

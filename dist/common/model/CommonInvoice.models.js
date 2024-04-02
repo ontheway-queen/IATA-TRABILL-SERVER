@@ -216,15 +216,6 @@ class CommonInvoiceModel extends abstract_models_1.default {
             const route = newRoute.map((item) => item.airline_iata_code).join('->');
             return route;
         });
-        this.transferInvoiceInfoToVoid = (invoice_id, invoice_void_charge) => __awaiter(this, void 0, void 0, function* () {
-            const [data] = (yield this.query()
-                .select('invoice_id', 'invoice_org_agency', 'invoice_client_id', 'invoice_combined_id', 'invoice_cltrxn_id', 'invoice_reissue_client_type', 'invoice_no', 'invoice_hajj_session', 'invoice_sales_man_id', 'invoice_category_id', 'invoice_sub_total', 'invoice_net_total', 'invoice_client_previous_due', 'invoice_total_profit', 'invoice_total_vendor_price', 'invoice_sales_date', 'invoice_haji_group_id', 'invoice_note', 'invoice_created_by', 'invoice_create_date')
-                .from('trabill_invoices')
-                .where({ invoice_id }));
-            yield this.query()
-                .insert(Object.assign(Object.assign({}, data), { invoice_void_charge, invoice_is_void: 1 }))
-                .into('trabill_invoices_delete_void');
-        });
         this.getPassportName = (id) => __awaiter(this, void 0, void 0, function* () {
             if (id[0]) {
                 const names = yield this.query()
@@ -237,13 +228,13 @@ class CommonInvoiceModel extends abstract_models_1.default {
         this.getReissuedItemByInvId = (existingInvoiceId) => __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
                 .select(this.db.raw('COALESCE(vendor_name, combine_name) vendor_name'), 'airticket_sales_date', 'airticket_profit', 'airticket_journey_date', 'airticket_return_date', 'airticket_purchase_price', 'airticket_client_price', 'airticket_ticket_no', 'airticket_existing_invoiceid', 'airticket_existing_airticket_id', 'airticket_penalties', 'airticket_fare_difference', 'airticket_commission_percent', 'airticket_ait', 'airticket_issue_date', 'airticket_classes')
-                .from("trabill_invoice_reissue_airticket_items")
+                .from('trabill_invoice_reissue_airticket_items')
                 .leftJoin('trabill_vendors', { vendor_id: 'airticket_vendor_id' })
                 .leftJoin('trabill_combined_clients', {
                 combine_id: 'airticket_vendor_combine_id',
             })
-                .where("airticket_existing_invoiceid", existingInvoiceId)
-                .andWhereNot("airticket_is_deleted", 1);
+                .where('airticket_existing_invoiceid', existingInvoiceId)
+                .andWhereNot('airticket_is_deleted', 1);
         });
     }
     getAllInvoices(category_id, page, size, search_text = '', from_date, to_date) {

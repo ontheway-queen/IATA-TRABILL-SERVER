@@ -1246,7 +1246,7 @@ class ReportModel extends abstract_models_1.default {
             const page_number = (Number(page) - 1) * size;
             const data = yield this.query()
                 .select('invoice_id', 'invoice_category_id', 'invoice_client_id', 'invoice_combined_id', this.db.raw('coalesce(cl.client_name,comb.combine_name , company_name) as client_name'), 'invoice_reissue_client_type', 'invoice_no', 'invoice_hajj_session', 'invcat_title', 'invoice_sub_total', 'invoice_net_total', 'invoice_void_charge', 'invoice_sales_date', 'invoice_note', this.db.raw('CONCAT(user_first_name, " "  ,user_last_name) as user_name'), this.db.raw("CASE WHEN invoice_is_void = 1 THEN 'VOID' ELSE 'DELETE' END AS invoices_trash_type"), 'invoice_create_date')
-                .from('trabill_invoices_delete_void')
+                .from('trabill_invoices')
                 .leftJoin('trabill_users', { user_id: 'invoice_created_by' })
                 .leftJoin('trabill_client_company_information', {
                 company_client_id: 'invoice_client_id',

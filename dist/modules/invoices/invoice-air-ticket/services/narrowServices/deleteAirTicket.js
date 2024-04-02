@@ -16,20 +16,19 @@ const dayjs_1 = __importDefault(require("dayjs"));
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
-const deleteOtherRefund_1 = __importDefault(require("../../../../refund/services/narrowServices/otherRefundSubServices/deleteOtherRefund"));
 const deleteTourPackRefund_1 = __importDefault(require("../../../../refund/services/narrowServices/tourPackRefundSubServices/deleteTourPackRefund"));
 const deleteinvoicevisa_services_1 = __importDefault(require("../../../invoice-visa/services/narrowServices/deleteinvoicevisa.services"));
 const deleteInvoiceNonCom_1 = __importDefault(require("../../../invoice_airticket_non_commission/services/narrowServices/deleteInvoiceNonCom"));
 const deleteInvoiceReissue_1 = __importDefault(require("../../../invoice_airticket_reissue/services/narrowServices/deleteInvoiceReissue"));
 const DeleteInvoiceHajjPreReg_1 = __importDefault(require("../../../invoice_hajj_pre_reg/Services/NarrowServices/DeleteInvoiceHajjPreReg"));
 const DeleteInvoiceHajjServices_1 = __importDefault(require("../../../invoice_hajji/Services/NarrowServices/DeleteInvoiceHajjServices"));
+const deleteInvoiceOther_1 = __importDefault(require("../../../invoice_other/services/narrowServices/deleteInvoiceOther"));
 const DeleteInvoiceUmmrah_1 = __importDefault(require("../../../invoice_ummrah/Services/NarrowServices/DeleteInvoiceUmmrah"));
 class DeleteAirTicket extends abstract_services_1.default {
     constructor() {
         super();
         this.deleteAirTicket = (req, voidTran) => __awaiter(this, void 0, void 0, function* () {
             const invoice_id = Number(req.params.invoice_id);
-            const { invoice_has_deleted_by } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const common_conn = this.models.CommonInvoiceModel(req, voidTran || trx);
                 const conn = this.models.invoiceAirticketModel(req, voidTran || trx);
@@ -47,13 +46,14 @@ class DeleteAirTicket extends abstract_services_1.default {
                 };
             }));
         });
-        this.voidAirticket = (req) => __awaiter(this, void 0, void 0, function* () {
-            const common_conn = this.models.CommonInvoiceModel(req);
+        this.voidInvoice = (req) => __awaiter(this, void 0, void 0, function* () {
             const invoice_id = Number(req.params.invoice_id);
             const { client_charge, invoice_vendors } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
+                const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { comb_client, prevInvoiceNo, invoice_category_id } = yield common_conn.getPreviousInvoices(invoice_id);
+                yield common_conn.updateIsVoid(invoice_id, client_charge || 0);
                 const clTrxnBody = {
                     ctrxn_type: 'DEBIT',
                     ctrxn_amount: client_charge || 0,
@@ -83,7 +83,7 @@ class DeleteAirTicket extends abstract_services_1.default {
                     yield new deleteTourPackRefund_1.default().delete(req, trx);
                 }
                 else if (invoice_category_id === 5) {
-                    yield new deleteOtherRefund_1.default().deleteOtherRefund(req, trx);
+                    yield new deleteInvoiceOther_1.default().deleteInvoiceOther(req, trx);
                 }
                 else if (invoice_category_id === 10) {
                     yield new deleteinvoicevisa_services_1.default().deleteInvoiceVisa(req, trx);
@@ -97,39 +97,24 @@ class DeleteAirTicket extends abstract_services_1.default {
                 else if (invoice_category_id === 31) {
                     yield new DeleteInvoiceHajjServices_1.default().deleteInvoiceHajj(req, trx);
                 }
-                yield common_conn.transferInvoiceInfoToVoid(invoice_id, client_charge);
-                const voidDetailsInfo = [];
-                const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
+                const { combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
                 for (const info of invoice_vendors) {
-                    const VTrxnBody = {
-                        comb_vendor: info.comb_vendor,
-                        vtrxn_amount: info.vendor_charge,
-                        vtrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
-                        vtrxn_note: '',
-                        vtrxn_particular_id: 1,
-                        vtrxn_particular_type: 'Vendor Payment',
-                        vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
-                        vtrxn_user_id: req.user_id,
-                    };
-                    const vtrxn_id = yield trxns.VTrxnInsert(VTrxnBody);
-                    const { vendor_id, combined_id: invoice_combine_id } = (0, common_helper_1.separateCombClientToId)(info.comb_vendor);
-                    const voidInfo = {
-                        void_charge_ctrxn_id,
-                        void_invoice_id: invoice_id,
-                        void_client_charge: client_charge,
-                        void_client_id: client_id,
-                        void_combine_id: combined_id,
-                        void_vendor_id: vendor_id,
-                        void_vendor_combine_id: invoice_combine_id,
-                        void_vendor_charge: info.vendor_charge,
-                        void_charge_vtrxn_id: vtrxn_id,
-                    };
-                    voidDetailsInfo.push(voidInfo);
+                    if (info.vendor_charge) {
+                        const VTrxnBody = {
+                            comb_vendor: info.comb_vendor,
+                            vtrxn_amount: info.vendor_charge,
+                            vtrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
+                            vtrxn_note: '',
+                            vtrxn_particular_id: 1,
+                            vtrxn_particular_type: 'Vendor Payment',
+                            vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
+                            vtrxn_user_id: req.user_id,
+                        };
+                        yield trxns.VTrxnInsert(VTrxnBody);
+                    }
                 }
-                if (voidDetailsInfo && voidDetailsInfo.length)
-                    yield common_conn.createInvoiceVoidDetails(voidDetailsInfo);
-                yield this.insertAudit(req, 'delete', 'Invoice air ticket has been voided', req.user_id, 'INVOICES');
-                return { success: true, message: 'Invoice air ticket has been voided' };
+                yield this.insertAudit(req, 'delete', 'Invoice has been voided!', req.user_id, 'INVOICES');
+                return { success: true, message: 'Invoice has been voided!' };
             }));
         });
     }

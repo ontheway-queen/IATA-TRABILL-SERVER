@@ -84,8 +84,6 @@ class DeleteNonComInvoice extends AbstractServices {
 
       await this.deleteNonComInvoice(req, trx);
 
-      await common_conn.transferInvoiceInfoToVoid(invoice_id, void_charge);
-
       return {
         success: true,
         message: 'Invoice air ticket non commission has been voided',

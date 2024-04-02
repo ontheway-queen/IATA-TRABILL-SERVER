@@ -492,7 +492,7 @@ class ReportServices extends AbstractServices {
 
       return {
         success: true,
-        data,
+        ...data,
       };
     });
   };
@@ -513,7 +513,7 @@ class ReportServices extends AbstractServices {
 
       return {
         success: true,
-        data,
+        ...data,
       };
     });
   };

@@ -351,7 +351,6 @@ class CommonInvoiceModel extends AbstractModels {
       );
     }
 
-
     await this.db.raw(`CALL ${this.database}.delete_invoice(?,?);`, [
       invoiceId,
       invoice_has_deleted_by,
@@ -773,8 +772,8 @@ class CommonInvoiceModel extends AbstractModels {
           .select('airline_iata_code')
           .from('trabill_airports')
           .where('trabill_airports.airline_id', id)) as {
-            airline_iata_code: string;
-          }[];
+          airline_iata_code: string;
+        }[];
         newRoute.push(route);
       }
     }
@@ -782,41 +781,6 @@ class CommonInvoiceModel extends AbstractModels {
     const route = newRoute.map((item) => item.airline_iata_code).join('->');
 
     return route;
-  };
-
-  transferInvoiceInfoToVoid = async (
-    invoice_id: idType,
-    invoice_void_charge: idType
-  ) => {
-    const [data] = (await this.query()
-      .select(
-        'invoice_id',
-        'invoice_org_agency',
-        'invoice_client_id',
-        'invoice_combined_id',
-        'invoice_cltrxn_id',
-        'invoice_reissue_client_type',
-        'invoice_no',
-        'invoice_hajj_session',
-        'invoice_sales_man_id',
-        'invoice_category_id',
-        'invoice_sub_total',
-        'invoice_net_total',
-        'invoice_client_previous_due',
-        'invoice_total_profit',
-        'invoice_total_vendor_price',
-        'invoice_sales_date',
-        'invoice_haji_group_id',
-        'invoice_note',
-        'invoice_created_by',
-        'invoice_create_date'
-      )
-      .from('trabill_invoices')
-      .where({ invoice_id })) as IInvoiceVoidInfo[];
-
-    await this.query()
-      .insert({ ...data, invoice_void_charge, invoice_is_void: 1 })
-      .into('trabill_invoices_delete_void');
   };
 
   getPassportName = async (id: number[]) => {
@@ -840,7 +804,6 @@ class CommonInvoiceModel extends AbstractModels {
     return id;
   }
 
-
   getReissuedItemByInvId = async (existingInvoiceId: idType) => {
     return await this.query()
       .select(
@@ -859,19 +822,16 @@ class CommonInvoiceModel extends AbstractModels {
         'airticket_commission_percent',
         'airticket_ait',
         'airticket_issue_date',
-        'airticket_classes',
-
+        'airticket_classes'
       )
-      .from("trabill_invoice_reissue_airticket_items")
+      .from('trabill_invoice_reissue_airticket_items')
       .leftJoin('trabill_vendors', { vendor_id: 'airticket_vendor_id' })
       .leftJoin('trabill_combined_clients', {
         combine_id: 'airticket_vendor_combine_id',
       })
-      .where("airticket_existing_invoiceid", existingInvoiceId)
-      .andWhereNot("airticket_is_deleted", 1)
-
-  }
-
+      .where('airticket_existing_invoiceid', existingInvoiceId)
+      .andWhereNot('airticket_is_deleted', 1);
+  };
 }
 
 export default CommonInvoiceModel;

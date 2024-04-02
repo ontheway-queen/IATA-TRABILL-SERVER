@@ -272,7 +272,7 @@ class InvoiceAirticketService extends abstract_services_1.default {
         this.addInvoiceAirticket = new addInvoiceAirticket_1.default().addInvoiceAirTicket;
         this.editInvoiceAirticket = new editInvoiceAirticket_1.default().editInvoiceAirTicket;
         this.deleteInvoiceAirTicket = new deleteAirTicket_1.default().deleteAirTicket;
-        this.voidInvoiceAirticket = new deleteAirTicket_1.default().voidAirticket;
+        this.voidInvoiceAirticket = new deleteAirTicket_1.default().voidInvoice;
         this.sendEmail = new sendMail_services_1.default().sendEmail;
     }
 }

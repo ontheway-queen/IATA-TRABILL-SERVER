@@ -1822,7 +1822,7 @@ class ReportModel extends AbstractModels {
         ),
         'invoice_create_date'
       )
-      .from('trabill_invoices_delete_void')
+      .from('trabill_invoices')
       .leftJoin('trabill_users', { user_id: 'invoice_created_by' })
       .leftJoin('trabill_client_company_information', {
         company_client_id: 'invoice_client_id',

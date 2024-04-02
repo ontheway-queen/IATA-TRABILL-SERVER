@@ -72,7 +72,6 @@ class DeleteInvoiceVisa extends abstract_services_1.default {
                 };
                 yield trxns.clTrxnInsert(clTrxnBody);
                 yield this.deleteInvoiceVisa(req, trx);
-                yield common_conn.transferInvoiceInfoToVoid(invoice_id, void_charge);
                 yield this.insertAudit(req, 'delete', 'Invoice visa has been voided', invoice_has_deleted_by, 'INVOICES');
                 return { success: true, message: 'Invoice visa has been voided' };
             }));

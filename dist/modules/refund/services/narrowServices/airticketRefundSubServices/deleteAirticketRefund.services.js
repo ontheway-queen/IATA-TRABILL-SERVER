@@ -48,10 +48,8 @@ class DeleteAirTicketRefund extends abstract_services_1.default {
                 }
                 // vendor trxn delete
                 const airticketRefundInfo = yield conn.getAirticketVendorRefund(refund_id);
-                const category_id = yield conn.getInvoiceCategoryId(atrefund_invoice_id);
                 for (const item of airticketRefundInfo) {
-                    const { vrefund_vtrxn_id, vrefund_charge_vtrxn_id, vrefund_acctrxn_id, vrefund_airticket_id, vrefund_category_id, } = item;
-                    yield conn.updateAirticketItemIsRefund(vrefund_airticket_id, vrefund_category_id, 0);
+                    const { vrefund_vtrxn_id, vrefund_category_id, vrefund_charge_vtrxn_id, vrefund_acctrxn_id, vrefund_airticket_id, } = item;
                     if (vrefund_vtrxn_id) {
                         yield trxns.deleteVTrxn(vrefund_vtrxn_id, item.comb_vendor);
                     }
@@ -61,7 +59,7 @@ class DeleteAirTicketRefund extends abstract_services_1.default {
                     if (vrefund_acctrxn_id) {
                         yield trxns.deleteAccTrxn(vrefund_acctrxn_id);
                     }
-                    yield conn.updateAirticketItemIsRefund(vrefund_airticket_id, category_id, 0);
+                    yield conn.updateAirticketItemIsRefund(vrefund_airticket_id, vrefund_category_id, 0);
                 }
                 yield conn.updateInvoiceAirticketIsRefund(atrefund_invoice_id, 0);
                 yield conn.deleteAirTicketRefund(refund_id, deleted_by);

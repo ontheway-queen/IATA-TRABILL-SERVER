@@ -61,7 +61,6 @@ class DeleteNonComInvoice extends abstract_services_1.default {
                 };
                 yield trxns.clTrxnInsert(clTrxnBody);
                 yield this.deleteNonComInvoice(req, trx);
-                yield common_conn.transferInvoiceInfoToVoid(invoice_id, void_charge);
                 return {
                     success: true,
                     message: 'Invoice air ticket non commission has been voided',

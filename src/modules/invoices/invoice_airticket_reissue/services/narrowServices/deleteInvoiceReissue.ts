@@ -103,7 +103,6 @@ class DeleteReissue extends AbstractServices {
 
       await this.deleteReissue(req, voidTrx || trx);
 
-      await common_conn.transferInvoiceInfoToVoid(invoice_id, void_charge);
       await this.insertAudit(
         req,
         'delete',

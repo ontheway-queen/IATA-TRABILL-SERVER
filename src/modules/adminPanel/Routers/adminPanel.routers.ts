@@ -195,6 +195,11 @@ class AdminPanelRouters extends AbstractRouter {
       this.configControllers.getTrabillSalesmanSales
     );
 
+    this.routers
+      .route('/agency_profile')
+      .get(this.controllers.getAgencyProfile)
+      .put(this.controllers.updateAgencyProfile);
+
     // Notice
 
     this.routers

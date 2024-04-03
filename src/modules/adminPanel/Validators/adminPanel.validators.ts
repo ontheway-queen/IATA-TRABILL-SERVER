@@ -203,6 +203,22 @@ class AdminPanelValidators extends AbstractValidator {
   addNotice = [
     check('ntc_txt').notEmpty().withMessage('Please provide notice text'),
   ];
+
+  updateAgencyProfile = [
+    check('org_name').optional().isString(),
+    check('org_owner_full_name').optional().isString(),
+    check('org_owner_email')
+      .isEmail()
+      .withMessage('Please provide a valid email')
+      .optional(),
+    check('org_address1').isString().optional(),
+    check('org_address2').isString().optional(),
+    check('org_dial_code').optional().isString(),
+    check('org_mobile_number').isInt().optional(),
+    check('org_facebook').isString().optional(),
+    check('org_website').isString().optional(),
+    check('org_extra_info').isString().optional(),
+  ];
 }
 
 export default AdminPanelValidators;

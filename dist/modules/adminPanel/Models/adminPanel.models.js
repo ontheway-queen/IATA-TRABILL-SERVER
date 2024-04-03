@@ -247,7 +247,7 @@ class AdminPanelModels extends abstract_models_1.default {
                 .where('org_id', agencyId);
             if (is_success) {
                 yield this.db.raw(`call ${this.database}.resetDatabase(${agencyId});`);
-                return 'Agency delete successsfully!';
+                return 'Agency delete successfully!';
             }
             else {
                 throw new customError_1.default('Invalid agency', 400, 'Please provide a valid agency');
@@ -947,6 +947,23 @@ class AdminPanelModels extends abstract_models_1.default {
                 }
             });
             return total_sales;
+        });
+    }
+    getAgencyProfile() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .select('org_id', 'org_name', 'org_owner_full_name', 'org_owner_email', 'org_logo', 'org_address1', 'org_address2', 'org_dial_code', 'org_mobile_number', 'org_facebook', 'org_website', 'org_extra_info')
+                .from('trabill_agency_organization_information')
+                .where('org_id', this.org_agency);
+            return data;
+        });
+    }
+    updateAgencyProfile(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .update(data)
+                .into('trabill_agency_organization_information')
+                .where('org_id', this.org_agency);
         });
     }
     getAllNotice(page, size, search) {

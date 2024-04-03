@@ -21,6 +21,7 @@ import {
   ITrabillSalesman,
   IUpdateAgencyOrgBody,
   IUpdateAgencyOrganization,
+  IUpdateAgencyProfile,
 } from '../Interfaces/adminPanel.interfaces';
 import AdminConfiguration from './NarrowServices/configuration.services';
 
@@ -405,8 +406,9 @@ class AdminPanelServices extends AbstractServices {
 
     return {
       success: true,
-      message: `Agency ${org_subscription_expired ? 'expired date' : 'activity status'
-        }  has been changed`,
+      message: `Agency ${
+        org_subscription_expired ? 'expired date' : 'activity status'
+      }  has been changed`,
     };
   };
 
@@ -478,6 +480,8 @@ class AdminPanelServices extends AbstractServices {
     const conn = this.models.adminPanel(req);
 
     const new_logo = req.image_files['scan_copy_0'];
+
+    console.log({ new_logo });
 
     if (new_logo) {
       const previous_logo = await conn.updateAgencyLogo(new_logo, agency_id);
@@ -731,6 +735,26 @@ class AdminPanelServices extends AbstractServices {
     }
 
     return { success: true, data };
+  };
+
+  public getAgencyProfile = async (req: Request) => {
+    const data = await this.conn(req).getAgencyProfile();
+
+    return {
+      success: true,
+      data,
+    };
+  };
+
+  public updateAgencyProfile = async (req: Request) => {
+    const body = req.body as IUpdateAgencyProfile;
+
+    await this.conn(req).updateAgencyProfile(body);
+
+    return {
+      success: true,
+      message: 'Agency Profile has been updated successfully',
+    };
   };
 
   public deleteOrgAgency = async (req: Request, res: Response) => {

@@ -216,6 +216,7 @@ export interface IAppConfig {
   tac_due_wtr_mark: 0 | 1;
   tac_paid_wtr_mark: 0 | 1;
   tac_auto_sms: 0 | 1;
+  tac_wk_day: number;
 }
 
 export interface ImagesTypes {

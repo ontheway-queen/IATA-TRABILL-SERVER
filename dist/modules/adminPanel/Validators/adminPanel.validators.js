@@ -180,6 +180,21 @@ class AdminPanelValidators extends abstract_validators_1.default {
         this.addNotice = [
             (0, express_validator_1.check)('ntc_txt').notEmpty().withMessage('Please provide notice text'),
         ];
+        this.updateAgencyProfile = [
+            (0, express_validator_1.check)('org_name').optional().isString(),
+            (0, express_validator_1.check)('org_owner_full_name').optional().isString(),
+            (0, express_validator_1.check)('org_owner_email')
+                .isEmail()
+                .withMessage('Please provide a valid email')
+                .optional(),
+            (0, express_validator_1.check)('org_address1').isString().optional(),
+            (0, express_validator_1.check)('org_address2').isString().optional(),
+            (0, express_validator_1.check)('org_dial_code').optional().isString(),
+            (0, express_validator_1.check)('org_mobile_number').isInt().optional(),
+            (0, express_validator_1.check)('org_facebook').isString().optional(),
+            (0, express_validator_1.check)('org_website').isString().optional(),
+            (0, express_validator_1.check)('org_extra_info').isString().optional(),
+        ];
     }
 }
 exports.default = AdminPanelValidators;

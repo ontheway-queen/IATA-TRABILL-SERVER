@@ -125,3 +125,17 @@ export interface INotice {
   ntc_bg_img: string;
   ntc_status: number;
 }
+
+export interface IUpdateAgencyProfile {
+  org_name: string;
+  org_owner_full_name: string;
+  org_owner_email: string;
+  org_logo?: string;
+  org_address1: string;
+  org_address2: string;
+  org_dial_code: string;
+  org_mobile_number: string;
+  org_facebook: string;
+  org_website: string;
+  org_extra_info: string;
+}

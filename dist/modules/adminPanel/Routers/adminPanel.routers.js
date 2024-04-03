@@ -146,6 +146,10 @@ class AdminPanelRouters extends abstract_routers_1.default {
         this.routers.get('/salesman-chart/:salesman_id', this.configControllers.getSalesmanSalesForChart);
         this.routers.get('/salesman', this.configControllers.getTrabillEmployeeForSelect);
         this.routers.get('/trabill_sales', this.configControllers.getTrabillSalesmanSales);
+        this.routers
+            .route('/agency_profile')
+            .get(this.controllers.getAgencyProfile)
+            .put(this.controllers.updateAgencyProfile);
         // Notice
         this.routers
             .route('/notice')

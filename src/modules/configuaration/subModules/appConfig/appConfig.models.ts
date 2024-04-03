@@ -186,7 +186,8 @@ class AppConfigModels extends AbstractModels {
         `tac_auto_sms`,
         `tac_invoice_footer_note`,
         `tac_inv_curr_sym`,
-        `tac_auto_email`
+        `tac_auto_email`,
+        `tac_wk_day`
       )
       .from('trabill_app_config')
       .where('tac_org_id', this.org_agency)) as {
@@ -209,6 +210,7 @@ class AppConfigModels extends AbstractModels {
       tac_inv_curr_sym: string;
       tac_auto_email: 0 | 1;
       tac_airticket_type: 'IATA' | 'NON_IATA';
+      tac_wk_day: number;
     }[];
 
     return data;

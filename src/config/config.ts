@@ -19,7 +19,6 @@ const getConfig = (): ENV => {
   };
 };
 
-
 const getSanitizedConfig = (config: ENV): Config => {
   return config as Config;
 };

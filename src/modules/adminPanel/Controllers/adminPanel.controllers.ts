@@ -253,6 +253,27 @@ class AdminPanelControllers extends AbstractController {
       }
     }
   );
+
+  public getAgencyProfile = this.assyncWrapper.wrap(
+    this.validator.commonRead,
+    async (req: Request, res: Response) => {
+      const data = await this.services.getAgencyProfile(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
+  public updateAgencyProfile = this.assyncWrapper.wrap(
+    this.validator.updateAgencyProfile,
+    async (req: Request, res: Response) => {
+      const data = await this.services.updateAgencyProfile(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
 }
 
 export default AdminPanelControllers;

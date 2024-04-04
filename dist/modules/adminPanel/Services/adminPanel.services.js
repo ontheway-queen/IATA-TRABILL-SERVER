@@ -304,6 +304,7 @@ class AdminPanelServices extends abstract_services_1.default {
             const agency_id = req.params.agency_id;
             const conn = this.models.adminPanel(req);
             const new_logo = req.image_files['scan_copy_0'];
+            console.log({ new_logo });
             if (new_logo) {
                 const previous_logo = yield conn.updateAgencyLogo(new_logo, agency_id);
                 yield this.deleteFile.delete_image(previous_logo);
@@ -474,6 +475,21 @@ class AdminPanelServices extends abstract_services_1.default {
                 data.push(Object.assign(Object.assign({}, sales), { month: month.month_name }));
             }
             return { success: true, data };
+        });
+        this.getAgencyProfile = (req) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.conn(req).getAgencyProfile();
+            return {
+                success: true,
+                data,
+            };
+        });
+        this.updateAgencyProfile = (req) => __awaiter(this, void 0, void 0, function* () {
+            const body = req.body;
+            yield this.conn(req).updateAgencyProfile(body);
+            return {
+                success: true,
+                message: 'Agency Profile has been updated successfully',
+            };
         });
         this.deleteOrgAgency = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.adminPanel(req);

@@ -191,6 +191,18 @@ class AdminPanelControllers extends abstract_controllers_1.default {
                 this.error('An error is occurred');
             }
         }));
+        this.getAgencyProfile = this.assyncWrapper.wrap(this.validator.commonRead, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getAgencyProfile(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+        }));
+        this.updateAgencyProfile = this.assyncWrapper.wrap(this.validator.updateAgencyProfile, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.updateAgencyProfile(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+        }));
     }
 }
 exports.default = AdminPanelControllers;

@@ -19,6 +19,7 @@ import {
   ITrabillSalesman,
   ITransportTypeData,
   IUpdateAgencyOrganization,
+  IUpdateAgencyProfile,
   IVisaTypeData,
 } from '../Interfaces/adminPanel.interfaces';
 class AdminPanelModels extends AbstractModels {
@@ -1206,6 +1207,35 @@ class AdminPanelModels extends AbstractModels {
     return total_sales;
   }
 
+  public async getAgencyProfile() {
+    const [data] = await this.query()
+      .select(
+        'org_id',
+        'org_name',
+        'org_owner_full_name',
+        'org_owner_email',
+        'org_logo',
+        'org_address1',
+        'org_address2',
+        'org_dial_code',
+        'org_mobile_number',
+        'org_facebook',
+        'org_website',
+        'org_extra_info'
+      )
+      .from('trabill_agency_organization_information')
+      .where('org_id', this.org_agency);
+
+    return data;
+  }
+
+  public async updateAgencyProfile(data: IUpdateAgencyProfile) {
+    return await this.query()
+      .update(data)
+      .into('trabill_agency_organization_information')
+      .where('org_id', this.org_agency);
+  }
+
   deleteOrgAgency = async (agencyId: idType) => {
     const is_success = await this.query()
       .update('org_isdelete', 1)
@@ -1215,7 +1245,7 @@ class AdminPanelModels extends AbstractModels {
     if (is_success) {
       await this.db.raw(`call ${this.database}.resetDatabase(${agencyId});`);
 
-      return 'Agency delete successsfully!';
+      return 'Agency delete successfully!';
     } else {
       throw new CustomError(
         'Invalid agency',

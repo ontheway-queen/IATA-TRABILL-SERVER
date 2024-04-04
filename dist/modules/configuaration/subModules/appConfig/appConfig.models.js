@@ -121,7 +121,7 @@ class AppConfigModels extends abstract_models_1.default {
     getAppConfig() {
         return __awaiter(this, void 0, void 0, function* () {
             const [data] = (yield this.query()
-                .select(`tac_org_id`, `tac_inv_cs`, `tac_inv_as`, `tac_inv_iw`, `tac_inv_in`, `tac_inv_sd`, `tac_inv_mob`, `tac_ait_cal`, `tac_wtr_mark`, 'tac_airticket_type', `tac_sig_url`, `tac_wtr_mark_url`, `tac_signtr`, `tac_due_wtr_mark`, `tac_paid_wtr_mark`, `tac_auto_sms`, `tac_invoice_footer_note`, `tac_inv_curr_sym`, `tac_auto_email`)
+                .select(`tac_org_id`, `tac_inv_cs`, `tac_inv_as`, `tac_inv_iw`, `tac_inv_in`, `tac_inv_sd`, `tac_inv_mob`, `tac_ait_cal`, `tac_wtr_mark`, 'tac_airticket_type', `tac_sig_url`, `tac_wtr_mark_url`, `tac_signtr`, `tac_due_wtr_mark`, `tac_paid_wtr_mark`, `tac_auto_sms`, `tac_invoice_footer_note`, `tac_inv_curr_sym`, `tac_auto_email`, `tac_wk_day`)
                 .from('trabill_app_config')
                 .where('tac_org_id', this.org_agency));
             return data;

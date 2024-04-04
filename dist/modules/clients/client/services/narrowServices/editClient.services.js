@@ -66,7 +66,6 @@ class EditClientService extends abstract_services_1.default {
                             ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                             ctrxn_note: client_designation,
                             ctrxn_particular_type: 'Client opening balance ',
-                            ctrxn_user_id: client_created_by,
                         };
                         const clTrxnId = yield trxns.clTrxnInsert(clTrxnBody);
                         yield conn.updateClientOpeningTransactions(clTrxnId, client_id);

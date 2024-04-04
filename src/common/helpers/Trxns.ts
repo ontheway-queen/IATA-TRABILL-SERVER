@@ -22,10 +22,11 @@ import { idType } from '../types/common.types';
 import { separateCombClientToId } from './common.helper';
 
 class Trxns extends AbstractServices {
-  conn: TrxnModels;
+  protected conn: TrxnModels;
+  protected req: Request;
   constructor(req: Request, trx: Knex.Transaction) {
     super();
-
+    this.req = req;
     this.conn = this.models.trxnModels(req, trx);
   }
 
@@ -43,7 +44,6 @@ class Trxns extends AbstractServices {
       ctrxn_pnr,
       ctrxn_route,
       ctrxn_type,
-      ctrxn_user_id,
       ctrxn_voucher,
       ctrxn_airticket_no,
       ctrxn_pay_type,
@@ -65,7 +65,6 @@ class Trxns extends AbstractServices {
         ctrxn_pnr,
         ctrxn_route,
         ctrxn_type,
-        ctrxn_user_id,
         ctrxn_voucher,
         ctrxn_airticket_no,
         ctrxn_pay_type,
@@ -86,7 +85,7 @@ class Trxns extends AbstractServices {
         comtrxn_amount: ctrxn_amount,
         comtrxn_note: ctrxn_note,
         comtrxn_create_at: ctrxn_created_at,
-        comtrxn_user_id: ctrxn_user_id,
+        comtrxn_user_id: this.req.user_id,
         comtrxn_pay_type: ctrxn_pay_type,
       };
 

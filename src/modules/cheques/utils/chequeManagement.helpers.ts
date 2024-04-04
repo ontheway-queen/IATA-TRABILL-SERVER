@@ -75,7 +75,6 @@ class ChequeManagementHelpers {
         ctrxn_created_at: date,
         ctrxn_note: cheque_note,
         ctrxn_particular_type: 'Advance return',
-        ctrxn_user_id: user_id,
       };
 
       const client_trxn_id = await trxns.clTrxnInsert(clTrxnBody);
@@ -497,7 +496,6 @@ class ChequeManagementHelpers {
         ctrxn_created_at: date,
         ctrxn_note: cheque_note,
         ctrxn_particular_type: 'Money Receipt cheque',
-        ctrxn_user_id: user_id,
       };
 
       const client_trxn_id = await trxns.clTrxnInsert(clTrxnBody);

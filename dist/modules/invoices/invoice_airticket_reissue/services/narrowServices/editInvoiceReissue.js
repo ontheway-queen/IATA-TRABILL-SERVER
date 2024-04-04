@@ -46,11 +46,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const moment_1 = __importDefault(require("moment"));
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 class EditReissueAirticket extends abstract_services_1.default {
     constructor() {
         super();
@@ -77,7 +77,7 @@ class EditReissueAirticket extends abstract_services_1.default {
                 const conn = this.models.reissueAirticket(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const { prevCtrxnId } = yield common_conn.getPreviousInvoices(invoice_id);
+                const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
                 const ctrxn_pnr = ticketInfo &&
                     ticketInfo.map((item) => item.ticket_details.airticket_pnr).join(', ');
                 const ticket_no = ticketInfo[0] &&
@@ -91,55 +91,20 @@ class EditReissueAirticket extends abstract_services_1.default {
                 if (flattenedRoutes) {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
-                const paxPassports = ticketInfo
-                    .flatMap((item) => item.pax_passports)
-                    .filter((item) => item !== null)
-                    .filter((item2) => item2.is_deleted !== 1);
-                let paxPassportName = paxPassports
-                    .map((item) => item.passport_name)
-                    .join(',');
-                // journey date
-                const journey_date = ticketInfo[0] &&
-                    ticketInfo
-                        .map((item) => item.ticket_details.airticket_journey_date)
-                        .join(', ');
-                let ctrxn_particular_type = 'Air ticket reissue. \n';
-                if (journey_date) {
-                    const inputDate = new Date(journey_date);
-                    ctrxn_particular_type +=
-                        'Journey date: ' + (0, moment_1.default)(inputDate).format('DD MMM YYYY');
-                }
-                const clTrxnBody = {
-                    ctrxn_type: 'DEBIT',
-                    ctrxn_amount: invoice_net_total,
-                    ctrxn_cl: invoice_combclient_id,
-                    ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 91,
-                    ctrxn_created_at: invoice_sales_date,
-                    ctrxn_note: invoice_note,
-                    ctrxn_particular_type,
-                    ctrxn_pnr,
-                    ctrxn_trxn_id: prevCtrxnId,
-                    ctrxn_route,
-                    ctrxn_airticket_no: ticket_no,
-                    ctrxn_pax: paxPassportName,
-                };
-                yield trxns.clTrxnUpdate(clTrxnBody);
+                const utils = new invoice_utils_1.InvoiceUtils(invoice_info, common_conn);
+                // CLIENT TRANSACTIONS
+                const clientTransId = yield utils.updateClientTrans(trxns, prevCtrxnId, prevClChargeTransId, invoice_no, ctrxn_pnr, ctrxn_route, ticket_no);
                 // UPDATE INVOICE INFORMATION
-                const invoice_information = {
-                    invoice_combined_id,
+                const invoice_information = Object.assign(Object.assign({}, clientTransId), { invoice_combined_id,
                     invoice_client_id,
                     invoice_net_total,
                     invoice_sales_date,
                     invoice_due_date,
                     invoice_sales_man_id,
                     invoice_sub_total,
-                    invoice_note,
-                    invoice_updated_by: invoice_created_by,
-                    invoice_reference,
+                    invoice_note, invoice_updated_by: invoice_created_by, invoice_reference,
                     invoice_total_profit,
-                    invoice_total_vendor_price,
-                };
+                    invoice_total_vendor_price });
                 common_conn.updateInvoiceInformation(invoice_id, invoice_information);
                 const invoiceExtraAmount = {
                     extra_amount_invoice_id: invoice_id,

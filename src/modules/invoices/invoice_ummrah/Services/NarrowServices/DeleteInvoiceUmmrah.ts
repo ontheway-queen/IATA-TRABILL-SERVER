@@ -84,7 +84,6 @@ class DeleteInvoiceUmmrah extends AbstractServices {
         ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
         ctrxn_note: '',
         ctrxn_particular_type: 'reissue void',
-        ctrxn_user_id: invoice_has_deleted_by,
       };
 
       await trxns.clTrxnInsert(clTrxnBody);

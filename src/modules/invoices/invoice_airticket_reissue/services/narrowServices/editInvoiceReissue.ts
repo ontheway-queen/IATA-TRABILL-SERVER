@@ -1,5 +1,4 @@
 import { Request } from 'express';
-import moment from 'moment';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import InvoiceHelpers, {
@@ -8,20 +7,15 @@ import InvoiceHelpers, {
   ValidateClientAndVendor,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
-import {
-  IClTrxnUpdate,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
 import {
   InvoiceExtraAmount,
   IUpdateInvoiceInfoDb,
 } from '../../../../../common/types/Invoice.common.interface';
 import { InvoiceAirticketPreType } from '../../../invoice-air-ticket/types/invoiceAirticket.interface';
-import {
-  InvoiceAirticketReissueReq,
-  IReissueTicketDetailsDb,
-} from '../../types/invoiceReissue.interface';
+import { InvoiceAirticketReissueReq } from '../../types/invoiceReissue.interface';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 
 class EditReissueAirticket extends AbstractServices {
   constructor() {
@@ -52,8 +46,6 @@ class EditReissueAirticket extends AbstractServices {
       invoice_reference,
     } = invoice_info;
 
-
-
     let invoice_total_profit = 0;
     let invoice_total_vendor_price = 0;
 
@@ -64,7 +56,6 @@ class EditReissueAirticket extends AbstractServices {
 
       await ValidateClientAndVendor(invoice_combclient_id, vendor as string);
     }
-
 
     // VALIDATE CLIENT AND VENDOR
     for (const ticket of ticketInfo) {
@@ -86,7 +77,8 @@ class EditReissueAirticket extends AbstractServices {
 
       const trxns = new Trxns(req, trx);
 
-      const { prevCtrxnId } = await common_conn.getPreviousInvoices(invoice_id);
+      const { prevCtrxnId, prevClChargeTransId } =
+        await common_conn.getPreviousInvoices(invoice_id);
 
       const ctrxn_pnr =
         ticketInfo &&
@@ -110,49 +102,21 @@ class EditReissueAirticket extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      const paxPassports = ticketInfo
-        .flatMap((item) => item.pax_passports)
-        .filter((item) => item !== null)
-        .filter((item2) => item2.is_deleted !== 1);
-
-      let paxPassportName = paxPassports
-        .map((item) => item.passport_name)
-        .join(',');
-
-      // journey date
-      const journey_date =
-        ticketInfo[0] &&
-        ticketInfo
-          .map((item) => item.ticket_details.airticket_journey_date)
-          .join(', ');
-      let ctrxn_particular_type = 'Air ticket reissue. \n';
-
-      if (journey_date) {
-        const inputDate = new Date(journey_date);
-        ctrxn_particular_type +=
-          'Journey date: ' + moment(inputDate).format('DD MMM YYYY');
-      }
-
-      const clTrxnBody: IClTrxnUpdate = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 91,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type,
-        ctrxn_pnr,
-        ctrxn_trxn_id: prevCtrxnId,
-        ctrxn_route,
-        ctrxn_airticket_no: ticket_no,
-        ctrxn_pax: paxPassportName,
-      };
-
-      await trxns.clTrxnUpdate(clTrxnBody);
+      const utils = new InvoiceUtils(invoice_info, common_conn);
+      // CLIENT TRANSACTIONS
+      const clientTransId = await utils.updateClientTrans(
+        trxns,
+        prevCtrxnId,
+        prevClChargeTransId,
+        invoice_no,
+        ctrxn_pnr as string,
+        ctrxn_route as string,
+        ticket_no
+      );
 
       // UPDATE INVOICE INFORMATION
       const invoice_information: IUpdateInvoiceInfoDb = {
+        ...clientTransId,
         invoice_combined_id,
         invoice_client_id,
         invoice_net_total,
@@ -293,8 +257,6 @@ class EditReissueAirticket extends AbstractServices {
           airticket_vendor_combine_id: combined_id,
           airticket_vtrxn_id,
           airticket_ticket_no,
-
-
         };
 
         airticketId = await conn.insertReissueAirTicketItems(

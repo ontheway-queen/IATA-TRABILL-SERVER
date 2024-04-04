@@ -51,8 +51,9 @@ const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const CommonAddMoneyReceipt_1 = __importDefault(require("../../../../../common/services/CommonAddMoneyReceipt"));
-const CommonSmsSend_services_1 = __importDefault(require("../../../../smsSystem/utils/CommonSmsSend.services"));
 const moment_1 = __importDefault(require("moment"));
+const CommonSmsSend_services_1 = __importDefault(require("../../../../smsSystem/utils/CommonSmsSend.services"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 class AddInvoiceNonCommission extends abstract_services_1.default {
     constructor() {
         super();
@@ -78,6 +79,7 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                 const conn = this.models.invoiceNonCommission(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const combined_conn = this.models.combineClientModel(req, trx);
+                const utils = new invoice_utils_1.InvoiceUtils(invoice_info, common_conn);
                 const trxns = new Trxns_1.default(req, trx);
                 const invoice_no = yield this.generateVoucher(req, 'ANC');
                 const invoice_client_previous_due = yield combined_conn.getClientLastBalanceById(invoice_client_id, invoice_combined_id);
@@ -94,43 +96,9 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                 if (flattenedRoutes.length > 0) {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
-                const paxPassports = ticketInfo.flatMap((item) => item.pax_passports);
-                let paxPassportName = paxPassports
-                    .map((item) => item.passport_name)
-                    .join(',');
-                // journey date
-                const journey_date = ticketInfo[0] &&
-                    ticketInfo
-                        .map((item) => item.ticket_details.airticket_journey_date)
-                        .join(', ');
-                let ctrxn_particular_type = 'Invoice non-commission. \n';
-                if (journey_date) {
-                    const inputDate = new Date(journey_date);
-                    ctrxn_particular_type +=
-                        'Journey date: ' + (0, moment_1.default)(inputDate).format('DD MMM YYYY');
-                }
-                const clTrxnBody = {
-                    ctrxn_type: 'DEBIT',
-                    ctrxn_amount: invoice_net_total,
-                    ctrxn_cl: invoice_combclient_id,
-                    ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 92,
-                    ctrxn_created_at: invoice_sales_date,
-                    ctrxn_note: invoice_note,
-                    ctrxn_particular_type,
-                    ctrxn_pax: paxPassportName,
-                    ctrxn_pnr: ctrxn_pnr,
-                    ctrxn_user_id: invoice_created_by,
-                    ctrxn_route: ctrxn_route,
-                    ctrxn_airticket_no: ticket_no,
-                };
-                const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
-                const invoiceData = {
-                    invoice_category_id: 2,
-                    invoice_client_id,
-                    invoice_net_total,
-                    invoice_no: invoice_no,
-                    invoice_combined_id,
+                const clientTransId = yield utils.clientTrans(trxns, invoice_no, ctrxn_pnr, ctrxn_route, ticket_no);
+                const invoiceData = Object.assign(Object.assign({}, clientTransId), { invoice_category_id: 2, invoice_client_id,
+                    invoice_net_total, invoice_no: invoice_no, invoice_combined_id,
                     invoice_sales_date,
                     invoice_due_date,
                     invoice_sales_man_id,
@@ -140,10 +108,8 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                     invoice_client_previous_due,
                     invoice_total_profit,
                     invoice_total_vendor_price,
-                    invoice_cltrxn_id,
                     invoice_walking_customer_name,
-                    invoice_reference,
-                };
+                    invoice_reference });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoiceData);
                 // AGENT TRANSACTION
                 yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 92, 'AIR TICKET NON COMMISSION');

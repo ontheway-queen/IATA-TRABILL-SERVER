@@ -65,7 +65,6 @@ class AddClientService extends AbstractServices {
           ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
           ctrxn_note: client_designation as string,
           ctrxn_particular_type: 'Client opening balance ',
-          ctrxn_user_id: client_created_by,
         };
 
         const clTrxnId = await trxns.clTrxnInsert(clTrxnBody);

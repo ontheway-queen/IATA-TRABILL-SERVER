@@ -8,10 +8,7 @@ import InvoiceHelpers, {
   ValidateClientAndVendor,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
-import {
-  IClTrxnBody,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
 import CommonAddMoneyReceipt from '../../../../../common/services/CommonAddMoneyReceipt';
 import {
   ICommonMoneyReceiptInvoiceData,
@@ -22,14 +19,15 @@ import {
   InvoiceExtraAmount,
 } from '../../../../../common/types/Invoice.common.interface';
 
+import moment from 'moment';
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
 import { InvoiceAirticketPreType } from '../../../invoice-air-ticket/types/invoiceAirticket.interface';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   INonComTicketDetailsDb,
   InvoiceNonComReq,
 } from '../../types/invoiceNonCommission.interface';
-import moment from 'moment';
 
 class AddInvoiceNonCommission extends AbstractServices {
   constructor() {
@@ -91,6 +89,7 @@ class AddInvoiceNonCommission extends AbstractServices {
       const conn = this.models.invoiceNonCommission(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const combined_conn = this.models.combineClientModel(req, trx);
+      const utils = new InvoiceUtils(invoice_info, common_conn);
 
       const trxns = new Trxns(req, trx);
 
@@ -124,45 +123,16 @@ class AddInvoiceNonCommission extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      const paxPassports = ticketInfo.flatMap((item) => item.pax_passports);
-
-      let paxPassportName = paxPassports
-        .map((item) => item.passport_name)
-        .join(',');
-
-      // journey date
-      const journey_date =
-        ticketInfo[0] &&
-        ticketInfo
-          .map((item) => item.ticket_details.airticket_journey_date)
-          .join(', ');
-      let ctrxn_particular_type = 'Invoice non-commission. \n';
-
-      if (journey_date) {
-        const inputDate = new Date(journey_date);
-        ctrxn_particular_type +=
-          'Journey date: ' + moment(inputDate).format('DD MMM YYYY');
-      }
-
-      const clTrxnBody: IClTrxnBody = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 92,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type,
-        ctrxn_pax: paxPassportName,
-        ctrxn_pnr: ctrxn_pnr,
-        ctrxn_user_id: invoice_created_by,
-        ctrxn_route: ctrxn_route,
-        ctrxn_airticket_no: ticket_no,
-      };
-
-      const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
+      const clientTransId = await utils.clientTrans(
+        trxns,
+        invoice_no,
+        ctrxn_pnr as string,
+        ctrxn_route as string,
+        ticket_no
+      );
 
       const invoiceData: IInvoiceInfoDb = {
+        ...clientTransId,
         invoice_category_id: 2,
         invoice_client_id,
         invoice_net_total,
@@ -177,10 +147,8 @@ class AddInvoiceNonCommission extends AbstractServices {
         invoice_client_previous_due,
         invoice_total_profit,
         invoice_total_vendor_price,
-        invoice_cltrxn_id,
         invoice_walking_customer_name,
         invoice_reference,
-
       };
       const invoice_id = await common_conn.insertInvoicesInfo(invoiceData);
 

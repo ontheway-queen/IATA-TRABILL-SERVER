@@ -81,7 +81,6 @@ class DeleteAirTicket extends AbstractServices {
         ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
         ctrxn_note: '',
         ctrxn_particular_type: 'invoice void charge',
-        ctrxn_user_id: req.user_id,
       };
 
       let void_charge_ctrxn_id: number = 0;

@@ -237,6 +237,22 @@ class RefundModel extends AbstractModels {
       .where('vrefund_refund_id', refundId);
   }
 
+  public async getPreviousVendorRefundInfo(refundId: idType) {
+    return await this.query()
+      .select(
+        'vrefund_vtrxn_id',
+        'vrefund_category_id',
+        'vrefund_charge_vtrxn_id',
+        'vrefund_acctrxn_id',
+        'vrefund_airticket_id',
+        this.db.raw(
+          "coalesce(concat('vendor-',vrefund_vendor_id), concat('combined-',vrefund_vendor_combined_id)) as comb_vendor"
+        )
+      )
+      .from('trabill_airticket_vendor_refunds')
+      .where('vrefund_refund_id', refundId);
+  }
+
   public async getAirticketClientRefund(refundId: idType) {
     const clientRefund = (await this.query()
       .select(

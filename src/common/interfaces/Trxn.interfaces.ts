@@ -14,7 +14,6 @@ export interface IClTrxnBody {
   ctrxn_particular_type: string;
   ctrxn_note: string;
   ctrxn_created_at: string;
-  ctrxn_user_id: idType;
   ctrxn_pass_id?: number;
 }
 
@@ -40,11 +39,11 @@ export interface IClTrxn extends Omit<IClTrxnBody, 'ctrxn_cl'> {
   ctrxn_cl_id: number;
 }
 export interface IClTrxnUpdate extends Omit<IClTrxnBody, 'ctrxn_user_id'> {
-  ctrxn_trxn_id: number;
+  ctrxn_trxn_id: idType;
 }
 
 export interface IUpdateCTrxn {
-  p_trxn_id: number;
+  p_trxn_id: idType;
   p_client_id: number;
   p_voucher?: string;
   p_airticket_no: string;
@@ -90,7 +89,7 @@ export interface IVTrxnUpdate extends IVTrxn {
 }
 
 export interface IUpdateCombTrxn {
-  p_trxn_id: number;
+  p_trxn_id: idType;
   p_airticket_no?: string;
   p_voucher_no?: string;
   p_pnr?: string;

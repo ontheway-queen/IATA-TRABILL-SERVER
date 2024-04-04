@@ -490,6 +490,14 @@ class RefundModel extends abstract_models_1.default {
                 .where('vrefund_refund_id', refundId);
         });
     }
+    getPreviousVendorRefundInfo(refundId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .select('vrefund_vtrxn_id', 'vrefund_category_id', 'vrefund_charge_vtrxn_id', 'vrefund_acctrxn_id', 'vrefund_airticket_id', this.db.raw("coalesce(concat('vendor-',vrefund_vendor_id), concat('combined-',vrefund_vendor_combined_id)) as comb_vendor"))
+                .from('trabill_airticket_vendor_refunds')
+                .where('vrefund_refund_id', refundId);
+        });
+    }
     getAirticketClientRefund(refundId) {
         return __awaiter(this, void 0, void 0, function* () {
             const clientRefund = (yield this.query()

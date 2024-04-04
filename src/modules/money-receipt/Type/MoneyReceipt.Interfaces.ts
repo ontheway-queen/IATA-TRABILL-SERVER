@@ -28,7 +28,7 @@ export interface IMoneyReceiptDb {
   receipt_vouchar_no: string;
   receipt_client_id: number | null;
   receipt_combined_id: number | null;
-  receipt_ctrxn_id?: number | null;
+  receipt_ctrxn_id?: idType | null;
   receipt_payment_to: 'INVOICE' | 'OVERALL' | 'TICKET' | 'AGENT_COMMISSION';
   receipt_invoice_id?: number;
   receipt_money_receipt_no?: string;

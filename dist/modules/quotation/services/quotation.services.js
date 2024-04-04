@@ -117,7 +117,6 @@ class QuotationServices extends abstract_services_1.default {
                     ctrxn_created_at: invoice_sales_date,
                     ctrxn_note: invoice_note,
                     ctrxn_particular_type: 'quotation invoice',
-                    ctrxn_user_id: invoice_created_by,
                 };
                 const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                 const invoieInfo = {

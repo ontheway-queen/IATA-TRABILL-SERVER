@@ -36,7 +36,6 @@ class AddClientBillAdjustment extends abstract_services_1.default {
                     ctrxn_created_at: bill_create_date,
                     ctrxn_note: bill_note,
                     ctrxn_particular_type: 'Client Bill Adjustment',
-                    ctrxn_user_id: bill_created_by,
                 };
                 const cbilladjust_ctrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                 const clientBillInfo = {

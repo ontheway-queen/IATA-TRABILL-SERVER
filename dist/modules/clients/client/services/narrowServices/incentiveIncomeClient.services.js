@@ -37,7 +37,6 @@ class IncentiveIncomeClientServices extends abstract_services_1.default {
                         ctrxn_created_at: date,
                         ctrxn_note: note,
                         ctrxn_particular_type: 'Incentive income',
-                        ctrxn_user_id: incentive_created_by,
                     };
                     ctrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                     const clientBillInfo = {

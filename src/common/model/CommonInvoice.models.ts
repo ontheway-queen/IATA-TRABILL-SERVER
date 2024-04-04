@@ -246,6 +246,7 @@ class CommonInvoiceModel extends AbstractModels {
         'invoice_agent_com_amount as prevAgentCommission',
         'invoice_agent_id as prevAgentId',
         'invoice_cltrxn_id as prevCtrxnId',
+        'invoice_discount_cltrxn_id as prevClChargeTransId',
         'invoice_no as prevInvoiceNo',
         'invoice_note AS prevInvoiceNote',
         this.db.raw(
@@ -277,6 +278,7 @@ class CommonInvoiceModel extends AbstractModels {
       prevAgentCommission: number;
       prevAgentId: number;
       prevCtrxnId: number;
+      prevClChargeTransId: number;
       comb_client: string;
       prevInvoiceNo: string;
       prevInvoiceNote: string;

@@ -19,7 +19,7 @@ class Trxns extends abstract_services_1.default {
         super();
         // client
         this.clTrxnInsert = (body) => __awaiter(this, void 0, void 0, function* () {
-            const { ctrxn_amount, ctrxn_cl, ctrxn_created_at, ctrxn_note, ctrxn_particular_id, ctrxn_particular_type, ctrxn_pax, ctrxn_pnr, ctrxn_route, ctrxn_type, ctrxn_user_id, ctrxn_voucher, ctrxn_airticket_no, ctrxn_pay_type, } = body;
+            const { ctrxn_amount, ctrxn_cl, ctrxn_created_at, ctrxn_note, ctrxn_particular_id, ctrxn_particular_type, ctrxn_pax, ctrxn_pnr, ctrxn_route, ctrxn_type, ctrxn_voucher, ctrxn_airticket_no, ctrxn_pay_type, } = body;
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(ctrxn_cl);
             let trxnId;
             if (client_id) {
@@ -34,7 +34,6 @@ class Trxns extends abstract_services_1.default {
                     ctrxn_pnr,
                     ctrxn_route,
                     ctrxn_type,
-                    ctrxn_user_id,
                     ctrxn_voucher,
                     ctrxn_airticket_no,
                     ctrxn_pay_type,
@@ -55,7 +54,7 @@ class Trxns extends abstract_services_1.default {
                     comtrxn_amount: ctrxn_amount,
                     comtrxn_note: ctrxn_note,
                     comtrxn_create_at: ctrxn_created_at,
-                    comtrxn_user_id: ctrxn_user_id,
+                    comtrxn_user_id: this.req.user_id,
                     comtrxn_pay_type: ctrxn_pay_type,
                 };
                 trxnId = yield this.conn.insertComTrxn(comTrxnBody);
@@ -260,6 +259,7 @@ class Trxns extends abstract_services_1.default {
                 }
             }
         });
+        this.req = req;
         this.conn = this.models.trxnModels(req, trx);
     }
 }

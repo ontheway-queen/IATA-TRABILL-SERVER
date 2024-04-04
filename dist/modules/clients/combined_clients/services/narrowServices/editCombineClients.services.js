@@ -83,7 +83,6 @@ class EditCombineClient extends abstract_services_1.default {
                         ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                         ctrxn_note: combine_designation,
                         ctrxn_particular_type: 'Opening balance',
-                        ctrxn_user_id: combine_update_by,
                     };
                     const combine_trxn_id = yield new Trxns_1.default(req, trx).clTrxnInsert(clTrxnBody);
                     yield conn.updateCombineClientOpeningTrxnId(combine_trxn_id, combine_id);

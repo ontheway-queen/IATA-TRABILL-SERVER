@@ -36,7 +36,6 @@ class AddClientOpeningService extends AbstractServices {
         ctrxn_particular_id: 12,
         ctrxn_particular_type: 'Client opening balance',
         ctrxn_type: transaction_type,
-        ctrxn_user_id: transaction_created_by,
         ctrxn_voucher: '',
       };
 

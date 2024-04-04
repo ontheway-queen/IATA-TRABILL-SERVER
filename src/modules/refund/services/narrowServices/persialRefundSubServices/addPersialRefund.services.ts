@@ -5,19 +5,19 @@ Partial Refund create service
 
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
-import {
-  IPershialRefund,
-  IPersialRefundReqBody,
-  IpersialRefundVendorInfo,
-} from '../../../types/refund.interfaces';
-import { generateVoucherNumber } from '../../../../../common/helpers/invoice.helpers';
+import Trxns from '../../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
+import { generateVoucherNumber } from '../../../../../common/helpers/invoice.helpers';
 import {
   IAcTrxn,
   IClTrxnBody,
   IVTrxn,
 } from '../../../../../common/interfaces/Trxn.interfaces';
-import Trxns from '../../../../../common/helpers/Trxns';
+import {
+  IPershialRefund,
+  IPersialRefundReqBody,
+  IpersialRefundVendorInfo,
+} from '../../../types/refund.interfaces';
 
 class AddPersialRefundServices extends AbstractServices {
   constructor() {
@@ -90,7 +90,6 @@ class AddPersialRefundServices extends AbstractServices {
         ctrxn_created_at: date,
         ctrxn_note: note,
         ctrxn_particular_type: 'Partial refund create',
-        ctrxn_user_id: created_by,
         ctrxn_airticket_no: airticketNo.join(', '),
         ctrxn_pax: passportName.join(', '),
         ctrxn_pnr: airtickerPnr.join(', '),
@@ -107,7 +106,6 @@ class AddPersialRefundServices extends AbstractServices {
           ctrxn_created_at: date,
           ctrxn_note: note,
           ctrxn_particular_type: 'Partial refund create',
-          ctrxn_user_id: created_by,
           ctrxn_airticket_no: airticketNo.join(', '),
           ctrxn_pax: passportName.join(', '),
           ctrxn_pnr: airtickerPnr.join(', '),
@@ -167,7 +165,6 @@ class AddPersialRefundServices extends AbstractServices {
             ctrxn_created_at: date,
             ctrxn_note: note,
             ctrxn_particular_type: 'Partial refund create',
-            ctrxn_user_id: created_by,
             ctrxn_airticket_no: airticketNo.join(', '),
             ctrxn_pax: passportName.join(', '),
             ctrxn_pnr: airtickerPnr.join(', '),

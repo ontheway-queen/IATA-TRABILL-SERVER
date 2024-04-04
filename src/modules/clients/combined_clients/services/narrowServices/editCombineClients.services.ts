@@ -112,7 +112,6 @@ class EditCombineClient extends AbstractServices {
           ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
           ctrxn_note: combine_designation as string,
           ctrxn_particular_type: 'Opening balance',
-          ctrxn_user_id: combine_update_by as number,
         };
 
         const combine_trxn_id = await new Trxns(req, trx).clTrxnInsert(

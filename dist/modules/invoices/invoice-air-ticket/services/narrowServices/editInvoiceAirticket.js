@@ -46,11 +46,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const moment_1 = __importDefault(require("moment"));
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 class EditInvoiceAirticket extends abstract_services_1.default {
     constructor() {
         super();
@@ -77,9 +77,10 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                 var _a, _b, _c, _d, _e;
                 const conn = this.models.invoiceAirticketModel(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
+                const utils = new invoice_utils_1.InvoiceUtils(invoice_info, common_conn);
                 const trxns = new Trxns_1.default(req, trx);
                 // CLIENT COMBINED TRANSACTIONS
-                const { prevCtrxnId } = yield common_conn.getPreviousInvoices(invoice_id);
+                const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
                 const ctrxn_pnr = ticketInfo &&
                     ticketInfo.map((item) => item.ticket_details.airticket_pnr).join(', ');
                 const ticket_no = ticketInfo[0] &&
@@ -93,36 +94,8 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                 if ((flattenedRoutes === null || flattenedRoutes === void 0 ? void 0 : flattenedRoutes.length) > 0) {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
-                const paxPassports = ticketInfo
-                    .flatMap((item) => item.pax_passports)
-                    .filter((item) => item !== null)
-                    .filter((item2) => (item2 === null || item2 === void 0 ? void 0 : item2.is_deleted) !== 1);
-                let paxPassportName = paxPassports === null || paxPassports === void 0 ? void 0 : paxPassports.map((item) => item === null || item === void 0 ? void 0 : item.passport_name).join(',');
-                // journey date
-                const journey_date = ticketInfo[0] &&
-                    (ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.map((item) => item.ticket_details.airticket_journey_date).join(', '));
-                let ctrxn_particular_type = 'Invoice air-ticket. \n';
-                if (journey_date) {
-                    const inputDate = new Date(journey_date);
-                    ctrxn_particular_type +=
-                        'Journey date: ' + (0, moment_1.default)(inputDate).format('DD MMM YYYY');
-                }
-                const clTrxnBody = {
-                    ctrxn_type: 'DEBIT',
-                    ctrxn_amount: invoice_net_total,
-                    ctrxn_cl: invoice_combclient_id,
-                    ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 91,
-                    ctrxn_created_at: invoice_sales_date,
-                    ctrxn_note: invoice_note,
-                    ctrxn_particular_type,
-                    ctrxn_pax: paxPassportName,
-                    ctrxn_pnr,
-                    ctrxn_trxn_id: prevCtrxnId,
-                    ctrxn_route,
-                    ctrxn_airticket_no: ticket_no,
-                };
-                yield trxns.clTrxnUpdate(clTrxnBody);
+                // CLIENT TRANSACTIONS
+                const clientTransId = yield utils.updateClientTrans(trxns, prevCtrxnId, prevClChargeTransId, invoice_no, ctrxn_pnr, ctrxn_route, ticket_no);
                 // AGENT TRANSACTION
                 if (invoice_agent_id) {
                     yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'UPDATE', 91, 'INVOICE AIR TICKET');
@@ -131,21 +104,17 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                     yield invoice_helpers_1.default.deleteAgentTransactions(this.models.agentProfileModel(req, trx), invoice_id, invoice_created_by);
                 }
                 // INVOICE INFORMATION UPDATE
-                const invoice_information = {
-                    invoice_client_id,
+                const invoice_information = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_sub_total,
                     invoice_sales_man_id,
                     invoice_net_total,
                     invoice_sales_date,
-                    invoice_due_date,
-                    invoice_updated_by: invoice_created_by,
-                    invoice_note,
+                    invoice_due_date, invoice_updated_by: invoice_created_by, invoice_note,
                     invoice_combined_id,
                     invoice_walking_customer_name,
                     invoice_reference,
                     invoice_total_profit,
-                    invoice_total_vendor_price,
-                };
+                    invoice_total_vendor_price });
                 yield common_conn.updateInvoiceInformation(invoice_id, invoice_information);
                 const invoiceExtraAmount = {
                     extra_amount_invoice_id: invoice_id,
@@ -168,7 +137,7 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                 yield conn.deleteAirTicketAirlineCommissions(invoice_id);
                 // air tickets
                 for (const ticket of ticketInfo) {
-                    const { flight_details, pax_passports, ticket_details, taxes_commission, total_taxes_commission } = ticket;
+                    const { flight_details, pax_passports, ticket_details, taxes_commission, total_taxes_commission, } = ticket;
                     const { airticket_id, is_deleted, airticket_comvendor, airticket_route_or_sector, airticket_purchase_price, airticket_ticket_no, airticket_pnr } = ticket_details, restAirticketData = __rest(ticket_details, ["airticket_id", "is_deleted", "airticket_comvendor", "airticket_route_or_sector", "airticket_purchase_price", "airticket_ticket_no", "airticket_pnr"]);
                     let prevAirticket;
                     let airticketId = airticket_id;
@@ -267,7 +236,9 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                         }
                     }
                     // TAXES COMMISSION
-                    if (taxes_commission && (0, invoice_helpers_1.isNotEmpty)(taxes_commission[0]) && airticketId) {
+                    if (taxes_commission &&
+                        (0, invoice_helpers_1.isNotEmpty)(taxes_commission[0]) &&
+                        airticketId) {
                         const taxesCommission = taxes_commission === null || taxes_commission === void 0 ? void 0 : taxes_commission.map((item) => {
                             return Object.assign(Object.assign({}, item), { airline_airticket_id: airticketId, airline_invoice_id: invoice_id });
                         });

@@ -72,7 +72,6 @@ class AddMoneyReceipt extends abstract_services_1.default {
                         ctrxn_created_at: receipt_payment_date,
                         ctrxn_note: note,
                         ctrxn_particular_type: 'Money Receipt',
-                        ctrxn_user_id: receipt_created_by,
                         ctrxn_pay_type: accPayType,
                     };
                     client_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);

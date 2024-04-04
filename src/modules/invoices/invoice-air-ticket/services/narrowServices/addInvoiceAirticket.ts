@@ -1,6 +1,5 @@
 import { Request } from 'express';
 
-import moment from 'moment';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import InvoiceHelpers, {
@@ -10,10 +9,7 @@ import InvoiceHelpers, {
   ValidateClientAndVendor,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
-import {
-  IClTrxnBody,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
 import CommonAddMoneyReceipt from '../../../../../common/services/CommonAddMoneyReceipt';
 import {
   ICommonMoneyReceiptInvoiceData,
@@ -25,6 +21,7 @@ import {
 } from '../../../../../common/types/Invoice.common.interface';
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   IAirTicketDb,
   IFlightDetailsDb,
@@ -85,6 +82,7 @@ class AddInvoiceAirticket extends AbstractServices {
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const combined_conn = this.models.combineClientModel(req, trx);
       const trxns = new Trxns(req, trx);
+      const utils = new InvoiceUtils(invoice_info, common_conn);
 
       const invoice_no = await this.generateVoucher(req, 'AIT');
 
@@ -116,45 +114,16 @@ class AddInvoiceAirticket extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      const paxPassports = ticketInfo.flatMap((item) => item.pax_passports);
-
-      let paxPassportName = paxPassports
-        .map((item) => item?.passport_name)
-        .join(',');
-
-      // journey date
-      const journey_date =
-        ticketInfo[0] &&
-        ticketInfo
-          .map((item) => item.ticket_details.airticket_journey_date)
-          .join(', ');
-      let ctrxn_particular_type = 'Invoice air-ticket. \n';
-
-      if (journey_date) {
-        const inputDate = new Date(journey_date);
-        ctrxn_particular_type +=
-          'Journey date: ' + moment(inputDate).format('DD MMM YYYY');
-      }
-
-      const clTrxnBody: IClTrxnBody = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 90,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type,
-        ctrxn_pnr: ctrxn_pnr as string,
-        ctrxn_user_id: invoice_created_by,
-        ctrxn_route: ctrxn_route,
-        ctrxn_airticket_no: ticket_no,
-        ctrxn_pax: paxPassportName,
-      };
-
-      const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
+      const clientTransId = await utils.clientTrans(
+        trxns,
+        invoice_no,
+        ctrxn_pnr as string,
+        ctrxn_route as string,
+        ticket_no
+      );
 
       const invoiceData: IInvoiceInfoDb = {
+        ...clientTransId,
         invoice_category_id: 1,
         invoice_client_id,
         invoice_net_total,
@@ -167,7 +136,6 @@ class AddInvoiceAirticket extends AbstractServices {
         invoice_note,
         invoice_created_by,
         invoice_client_previous_due,
-        invoice_cltrxn_id,
         invoice_walking_customer_name,
         invoice_reference,
         invoice_total_profit,

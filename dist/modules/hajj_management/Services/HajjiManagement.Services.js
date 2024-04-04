@@ -95,7 +95,6 @@ class HajjiManagementServices extends abstract_services_1.default {
                                     ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                                     ctrxn_note: '',
                                     ctrxn_particular_type: 'Cancel pre reg',
-                                    ctrxn_user_id: cancel_created_by,
                                 };
                                 const cancel_track_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                                 const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
@@ -238,7 +237,6 @@ class HajjiManagementServices extends abstract_services_1.default {
                         ctrxn_particular_id: 152,
                         ctrxn_particular_type: 'Cancel Hajj Registration',
                         ctrxn_type: 'DEBIT',
-                        ctrxn_user_id: created_by,
                     });
                     const trackingNo = {
                         clt_cl_id: cancel_id,

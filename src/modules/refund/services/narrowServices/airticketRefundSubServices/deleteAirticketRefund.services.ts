@@ -12,7 +12,6 @@ class DeleteAirTicketRefund extends AbstractServices {
    */
   public delete = async (req: Request) => {
     const { refund_id } = req.params;
-
     const { deleted_by } = req.body;
 
     return await this.models.db.transaction(async (trx) => {
@@ -52,12 +51,12 @@ class DeleteAirTicketRefund extends AbstractServices {
         }
       }
 
-      // vendor trxn delete
-      const airticketRefundInfo = await conn.getAirticketVendorRefund(
+      // vendor trans delete
+      const previousVendorRefundInfo = await conn.getPreviousVendorRefundInfo(
         refund_id
       );
 
-      for (const item of airticketRefundInfo) {
+      for (const item of previousVendorRefundInfo) {
         const {
           vrefund_vtrxn_id,
           vrefund_category_id,
@@ -92,14 +91,14 @@ class DeleteAirTicketRefund extends AbstractServices {
       await this.insertAudit(
         req,
         'delete',
-        'Airticket refund has been deleted',
+        'Air ticket refund has been deleted',
         deleted_by,
         'REFUND'
       );
 
       return {
         success: true,
-        message: 'Airticket refund has been deleted',
+        message: 'Air ticket refund has been deleted',
       };
     });
   };

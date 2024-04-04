@@ -7,16 +7,14 @@ import InvoiceHelpers, {
   ValidateClientAndVendor,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
-import {
-  IClTrxnUpdate,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
 import {
   InvoiceExtraAmount,
   IUpdateInvoiceInfoDb,
 } from '../../../../../common/types/Invoice.common.interface';
 import { InvoiceAirticketPreType } from '../../../invoice-air-ticket/types/invoiceAirticket.interface';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   INonComTicketDetailsDb,
   InvoiceNonComReq,
@@ -72,11 +70,13 @@ class EditInvoiceNonCommission extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.invoiceNonCommission(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
+      const utils = new InvoiceUtils(invoice_info, common_conn);
 
       const trxns = new Trxns(req, trx);
 
       // CLIENT COMBINED TRANSACTIONS
-      const { prevCtrxnId } = await common_conn.getPreviousInvoices(invoice_id);
+      const { prevCtrxnId, prevClChargeTransId } =
+        await common_conn.getPreviousInvoices(invoice_id);
 
       const ctrxn_pnr =
         ticketInfo &&
@@ -100,46 +100,15 @@ class EditInvoiceNonCommission extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      const paxPassports = ticketInfo
-        .flatMap((item) => item.pax_passports)
-        .filter((item) => item !== null)
-        .filter((item) => item.is_deleted !== 1);
-
-      let paxPassportName = paxPassports
-        .map((item) => item.passport_name)
-        .join(',');
-
-      // journey date
-      const journey_date =
-        ticketInfo[0] &&
-        ticketInfo
-          .map((item) => item.ticket_details.airticket_journey_date)
-          .join(', ');
-      let ctrxn_particular_type = 'Invoice non-commission. \n';
-
-      if (journey_date) {
-        const inputDate = new Date(journey_date);
-        ctrxn_particular_type +=
-          'Journey date: ' + moment(inputDate).format('DD MMM YYYY');
-      }
-
-      const clTrxnBody: IClTrxnUpdate = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 93,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type,
-        ctrxn_pax: paxPassportName,
-        ctrxn_pnr,
-        ctrxn_trxn_id: prevCtrxnId,
-        ctrxn_route,
-        ctrxn_airticket_no: ticket_no,
-      };
-
-      await trxns.clTrxnUpdate(clTrxnBody);
+      await utils.updateClientTrans(
+        trxns,
+        prevCtrxnId,
+        prevClChargeTransId,
+        invoice_no,
+        ctrxn_pnr as string,
+        ctrxn_route as string,
+        ticket_no
+      );
 
       const prevBillingInfo = await conn.getPrevNonComVendor(invoice_id);
 

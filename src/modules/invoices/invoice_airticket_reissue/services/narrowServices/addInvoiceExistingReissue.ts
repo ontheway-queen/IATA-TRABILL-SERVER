@@ -70,7 +70,6 @@ class AddExistingClient extends AbstractServices {
         ctrxn_created_at: invoice_sales_date,
         ctrxn_note: invoice_note as string,
         ctrxn_particular_type: 'Reissue Air Ticket',
-        ctrxn_user_id: req.user_id,
         ctrxn_airticket_no: airticket_ticket_no,
       };
 

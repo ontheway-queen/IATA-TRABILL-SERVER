@@ -53,7 +53,6 @@ class DeleteResetInvoiceTour extends abstract_services_1.default {
                     ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                     ctrxn_note: '',
                     ctrxn_particular_type: 'voice invoice tour',
-                    ctrxn_user_id: invoice_has_deleted_by,
                 };
                 yield trxns.clTrxnInsert(clTrxnBody);
                 yield this.deleteResetInvoiceTour(req, trx);

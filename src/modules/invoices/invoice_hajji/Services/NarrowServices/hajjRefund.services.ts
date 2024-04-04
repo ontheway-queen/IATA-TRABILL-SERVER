@@ -67,7 +67,6 @@ class HajjRefundServices extends AbstractServices {
           ctrxn_particular_type: 'Hajj Refund ' + client_refund_type,
           ctrxn_voucher: voucher_no,
           ctrxn_type: 'CREDIT',
-          ctrxn_user_id: created_by,
           ctrxn_note: clientContent,
         });
       } else {

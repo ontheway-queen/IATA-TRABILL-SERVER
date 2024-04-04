@@ -121,10 +121,6 @@ class AddAirTicketRefund extends AbstractServices {
       let crefund_actransaction_id = null;
 
       if (crefund_payment_type === 'ADJUST') {
-        let clientRefundTrxnNote = `Net total : ${crefund_total_amount}/- 
-        Money return : ${crefund_return_amount}/-
-        Refund charge : ${crefund_charge_amount}/-`;
-
         const clTrxnBody: IClTrxnBody = {
           ctrxn_type: 'CREDIT',
           ctrxn_amount: crefund_total_amount,
@@ -132,9 +128,8 @@ class AddAirTicketRefund extends AbstractServices {
           ctrxn_voucher: voucher_number,
           ctrxn_particular_id: 108,
           ctrxn_created_at: date,
-          ctrxn_note: '', //clientRefundTrxnNote,
+          ctrxn_note: '',
           ctrxn_particular_type: 'AIR TICKET REFUND(ADJUST)',
-          ctrxn_user_id: created_by,
           ctrxn_pnr: airtickerPnr.join(', '),
           ctrxn_airticket_no: airticketNo.join(', '),
           ctrxn_pax: passportName.join(', '),
@@ -149,9 +144,8 @@ class AddAirTicketRefund extends AbstractServices {
           ctrxn_voucher: voucher_number,
           ctrxn_particular_id: 108,
           ctrxn_created_at: date,
-          ctrxn_note: '', // clientRefundTrxnNote,
+          ctrxn_note: '',
           ctrxn_particular_type: 'AIR TICKET REFUND(CHARGE)',
-          ctrxn_user_id: created_by,
           ctrxn_pnr: airtickerPnr.join(', '),
           ctrxn_airticket_no: airticketNo.join(', '),
           ctrxn_pax: passportName.join(', '),
@@ -216,7 +210,6 @@ class AddAirTicketRefund extends AbstractServices {
             ctrxn_created_at: date,
             ctrxn_note: clientRefundTrxnNote,
             ctrxn_particular_type: 'AIR TICKET REFUND',
-            ctrxn_user_id: created_by,
             ctrxn_pnr: airtickerPnr.join(', '),
             ctrxn_airticket_no: airticketNo.join(', '),
             ctrxn_pax: passportName.join(', '),
@@ -292,7 +285,7 @@ class AddAirTicketRefund extends AbstractServices {
             comb_vendor: airticket_combvendor,
             vtrxn_amount: vrefund_total_amount,
             vtrxn_created_at: date,
-            vtrxn_note: '', // vendorRefundTrxnNote,
+            vtrxn_note: vendorRefundTrxnNote,
             vtrxn_particular_id: 108,
             vtrxn_particular_type: 'AIR TICKET REFUND(ADJUST)',
             vtrxn_type: 'CREDIT',
@@ -322,7 +315,9 @@ class AddAirTicketRefund extends AbstractServices {
             vtrxn_route: airticket_routes,
           };
 
-          vrefund_vtrxn_id = await trxns.VTrxnInsert(vRefundChargeTrxnBody);
+          vrefund_charge_vtrxn_id = await trxns.VTrxnInsert(
+            vRefundChargeTrxnBody
+          );
         }
 
         // VENDOR MONEY RETURN

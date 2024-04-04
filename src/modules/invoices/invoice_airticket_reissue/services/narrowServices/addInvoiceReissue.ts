@@ -25,9 +25,8 @@ import {
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
 import { InvoiceAirticketPreType } from '../../../invoice-air-ticket/types/invoiceAirticket.interface';
-import {
-  InvoiceAirticketReissueReq
-} from '../../types/invoiceReissue.interface';
+import { InvoiceAirticketReissueReq } from '../../types/invoiceReissue.interface';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 
 class AddReissueAirticket extends AbstractServices {
   constructor() {
@@ -57,7 +56,6 @@ class AddReissueAirticket extends AbstractServices {
       invoice_show_discount,
       invoice_reference,
     } = invoice_info;
-
 
     let invoice_total_profit = 0;
     let invoice_total_vendor_price = 0;
@@ -119,44 +117,18 @@ class AddReissueAirticket extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      const paxPassports = ticketInfo.flatMap((item) => item.pax_passports);
-
-      let paxPassportName = paxPassports
-        .map((item) => item.passport_name)
-        .join(',');
-      // journey date
-      const journey_date =
-        ticketInfo[0] &&
-        ticketInfo
-          .map((item) => item.ticket_details.airticket_journey_date)
-          .join(', ');
-      let ctrxn_particular_type = 'Air ticket reissue. \n';
-
-      if (journey_date) {
-        const inputDate = new Date(journey_date);
-        ctrxn_particular_type +=
-          'Journey date: ' + moment(inputDate).format('DD MMM YYYY');
-      }
-
-      const clTrxnBody: IClTrxnBody = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 94,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type,
-        ctrxn_pax: paxPassportName,
-        ctrxn_pnr: ctrxn_pnr,
-        ctrxn_user_id: invoice_created_by,
-        ctrxn_route: ctrxn_route,
-        ctrxn_airticket_no: ticket_no,
-      };
-
-      const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
+      const utils = new InvoiceUtils(invoice_info, common_conn);
+      // CLIENT TRANSACTIONS
+      const clientTransId = await utils.clientTrans(
+        trxns,
+        invoice_no,
+        ctrxn_pnr as string,
+        ctrxn_route as string,
+        ticket_no
+      );
 
       const invoice_information: IInvoiceInfoDb = {
+        ...clientTransId,
         invoice_combined_id,
         invoice_client_id,
         invoice_created_by,
@@ -170,7 +142,6 @@ class AddReissueAirticket extends AbstractServices {
         invoice_client_previous_due,
         invoice_no: invoice_no as string,
         invoice_reissue_client_type: 'NEW',
-        invoice_cltrxn_id,
         invoice_reference,
         invoice_total_profit,
         invoice_total_vendor_price,

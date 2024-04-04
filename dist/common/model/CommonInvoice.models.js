@@ -389,7 +389,7 @@ class CommonInvoiceModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
                 .from('trabill_invoices')
-                .select('invoice_client_id as prevClientId', 'invoice_net_total as prev_inv_net_total', 'invoice_combined_id as prevComId', 'invoice_agent_com_amount as prevAgentCommission', 'invoice_agent_id as prevAgentId', 'invoice_cltrxn_id as prevCtrxnId', 'invoice_no as prevInvoiceNo', 'invoice_note AS prevInvoiceNote', this.db.raw("coalesce(concat('client-',invoice_client_id), concat('combined-',invoice_combined_id)) as comb_client"), 'invoice_category_id')
+                .select('invoice_client_id as prevClientId', 'invoice_net_total as prev_inv_net_total', 'invoice_combined_id as prevComId', 'invoice_agent_com_amount as prevAgentCommission', 'invoice_agent_id as prevAgentId', 'invoice_cltrxn_id as prevCtrxnId', 'invoice_discount_cltrxn_id as prevClChargeTransId', 'invoice_no as prevInvoiceNo', 'invoice_note AS prevInvoiceNote', this.db.raw("coalesce(concat('client-',invoice_client_id), concat('combined-',invoice_combined_id)) as comb_client"), 'invoice_category_id')
                 .where('invoice_id', invoice_id)
                 .leftJoin('trabill_invoices_extra_amounts', {
                 extra_amount_invoice_id: 'invoice_id',

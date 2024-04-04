@@ -55,7 +55,6 @@ class ReissueRefundService extends abstract_services_1.default {
                         ctrxn_created_at: refund_date,
                         ctrxn_note: clientContent,
                         ctrxn_particular_type: 'Reissue Refund ' + client_refund_type,
-                        ctrxn_user_id: created_by,
                     };
                     refund_client_trx_id = yield trxns.clTrxnInsert(clTrxnBody);
                 }

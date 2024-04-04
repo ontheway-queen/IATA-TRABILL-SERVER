@@ -74,7 +74,6 @@ class AddAdvanceReturn extends abstract_services_1.default {
                         ctrxn_created_at: advr_payment_date,
                         ctrxn_note: advr_note,
                         ctrxn_particular_type: 'Money Receipt',
-                        ctrxn_user_id: advr_created_by,
                         ctrxn_pay_type: accPayType,
                     };
                     client_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);

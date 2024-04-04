@@ -399,7 +399,6 @@ class MoneyReceiptServices extends abstract_services_1.default {
                     ctrxn_created_at: payment_date,
                     ctrxn_note: cheque_note,
                     ctrxn_particular_type: 'Money receipt',
-                    ctrxn_user_id: created_by,
                 };
                 const clientTrxnId = yield trxns.clTrxnInsert(clTrxnBody);
                 const AccTrxnBody = {

@@ -53,7 +53,8 @@ class EditInvoiceVisa extends abstract_services_1.default {
                 let invoice_total_vendor_price = 0;
                 for (const item of billing_information) {
                     invoice_total_profit += item.billing_profit;
-                    invoice_total_vendor_price += (item.billing_cost_price * item.billing_quantity);
+                    invoice_total_vendor_price +=
+                        item.billing_cost_price * item.billing_quantity;
                 }
                 let ctrxn_pax_name = null;
                 if (passport_information.length) {
@@ -79,7 +80,6 @@ class EditInvoiceVisa extends abstract_services_1.default {
                         ctrxn_particular_type: prevCtrxnId
                             ? 'Invoice visa update'
                             : 'Invoice visa create',
-                        ctrxn_user_id: invoice_created_by,
                         ctrxn_pax: ctrxn_pax_name,
                     };
                     if (prevCtrxnId) {
@@ -110,7 +110,7 @@ class EditInvoiceVisa extends abstract_services_1.default {
                     invoice_combined_id,
                     invoice_reference,
                     invoice_total_profit,
-                    invoice_total_vendor_price
+                    invoice_total_vendor_price,
                 };
                 yield common_conn.updateInvoiceInformation(invoice_id, invoice_information);
                 const invoiceExtraAmount = {

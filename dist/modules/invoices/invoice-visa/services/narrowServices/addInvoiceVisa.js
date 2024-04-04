@@ -45,7 +45,7 @@ class AddInvoiceVisa extends abstract_services_1.default {
     constructor() {
         super();
         this.addInvoiceVisa = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { invoice_sales_man_id, invoice_sub_total, invoice_created_by, invoice_net_total, invoice_discount, invoice_vat, invoice_service_charge, invoice_agent_id, invoice_agent_com_amount, invoice_combclient_id, invoice_sales_date, invoice_due_date, invoice_note, money_receipt, passport_information, invoice_reference, billing_information } = req.body;
+            const { invoice_sales_man_id, invoice_sub_total, invoice_created_by, invoice_net_total, invoice_discount, invoice_vat, invoice_service_charge, invoice_agent_id, invoice_agent_com_amount, invoice_combclient_id, invoice_sales_date, invoice_due_date, invoice_note, money_receipt, passport_information, invoice_reference, billing_information, } = req.body;
             (0, invoice_helpers_1.MoneyReceiptAmountIsValid)(money_receipt, invoice_net_total);
             const { invoice_client_id, invoice_combined_id } = yield (0, invoice_helpers_1.getClientOrCombId)(invoice_combclient_id);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
@@ -56,7 +56,8 @@ class AddInvoiceVisa extends abstract_services_1.default {
                 let invoice_total_vendor_price = 0;
                 for (const item of billing_information) {
                     invoice_total_profit += item.billing_profit;
-                    invoice_total_vendor_price += (item.billing_cost_price * item.billing_quantity);
+                    invoice_total_vendor_price +=
+                        item.billing_cost_price * item.billing_quantity;
                 }
                 if (passport_information.length) {
                     const passport_id = passport_information.map((item) => item.passport_id);
@@ -82,7 +83,6 @@ class AddInvoiceVisa extends abstract_services_1.default {
                         ctrxn_created_at: invoice_sales_date,
                         ctrxn_note: invoice_note,
                         ctrxn_particular_type: 'Invoice visa create',
-                        ctrxn_user_id: invoice_created_by,
                         ctrxn_pax: ctrxn_pax_name,
                     };
                     invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
@@ -102,7 +102,7 @@ class AddInvoiceVisa extends abstract_services_1.default {
                     invoice_cltrxn_id,
                     invoice_reference,
                     invoice_total_profit,
-                    invoice_total_vendor_price
+                    invoice_total_vendor_price,
                 };
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoice_information);
                 // AGENT COMMISSION

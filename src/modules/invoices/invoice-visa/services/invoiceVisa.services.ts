@@ -139,7 +139,6 @@ class InvoiceVisaServices extends AbstractServices {
             ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
             ctrxn_note: prevInvoiceNote,
             ctrxn_particular_type: 'invoice visa ',
-            ctrxn_user_id: created_by,
           };
 
           const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);

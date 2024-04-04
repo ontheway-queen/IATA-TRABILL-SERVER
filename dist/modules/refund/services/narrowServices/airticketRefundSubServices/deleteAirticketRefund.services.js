@@ -46,9 +46,9 @@ class DeleteAirTicketRefund extends abstract_services_1.default {
                         yield trxns.deleteAccTrxn(crefund_actransaction_id);
                     }
                 }
-                // vendor trxn delete
-                const airticketRefundInfo = yield conn.getAirticketVendorRefund(refund_id);
-                for (const item of airticketRefundInfo) {
+                // vendor trans delete
+                const previousVendorRefundInfo = yield conn.getPreviousVendorRefundInfo(refund_id);
+                for (const item of previousVendorRefundInfo) {
                     const { vrefund_vtrxn_id, vrefund_category_id, vrefund_charge_vtrxn_id, vrefund_acctrxn_id, vrefund_airticket_id, } = item;
                     if (vrefund_vtrxn_id) {
                         yield trxns.deleteVTrxn(vrefund_vtrxn_id, item.comb_vendor);
@@ -63,10 +63,10 @@ class DeleteAirTicketRefund extends abstract_services_1.default {
                 }
                 yield conn.updateInvoiceAirticketIsRefund(atrefund_invoice_id, 0);
                 yield conn.deleteAirTicketRefund(refund_id, deleted_by);
-                yield this.insertAudit(req, 'delete', 'Airticket refund has been deleted', deleted_by, 'REFUND');
+                yield this.insertAudit(req, 'delete', 'Air ticket refund has been deleted', deleted_by, 'REFUND');
                 return {
                     success: true,
-                    message: 'Airticket refund has been deleted',
+                    message: 'Air ticket refund has been deleted',
                 };
             }));
         });

@@ -119,7 +119,6 @@ class CommonAddMoneyReceipt extends AbstractServices {
           ctrxn_created_at: receipt_payment_date,
           ctrxn_note: note,
           ctrxn_particular_type: 'Money Receipt',
-          ctrxn_user_id: invoice_created_by,
         };
 
         client_trxn_id = await trxns.clTrxnInsert(clTrxnBody);

@@ -116,7 +116,6 @@ class AddInvoiceUmmrah extends AbstractServices {
         ctrxn_pnr,
         ctrxn_airticket_no: tickets_no,
         ctrxn_route,
-        ctrxn_user_id: invoice_created_by,
       };
 
       const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);

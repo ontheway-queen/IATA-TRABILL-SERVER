@@ -71,7 +71,6 @@ class AddInvoiceHajjpre extends abstract_services_1.default {
                     ctrxn_note: invoice_note,
                     ctrxn_particular_type: 'Invoice hajj pre reg create',
                     ctrxn_pax,
-                    ctrxn_user_id: invoice_created_by,
                 };
                 const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                 // ============= invoice inforamtion

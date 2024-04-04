@@ -53,7 +53,6 @@ ChequeManagementHelpers.moneyReceiptAdvrChequeStatus = (req, conn, trx) => __awa
             ctrxn_created_at: date,
             ctrxn_note: cheque_note,
             ctrxn_particular_type: 'Advance return',
-            ctrxn_user_id: user_id,
         };
         const client_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);
         const advanceReturnInfo = {
@@ -342,7 +341,6 @@ ChequeManagementHelpers.moneyReceiptChequeUpdate = (req, conn, trx, agent_conn) 
             ctrxn_created_at: date,
             ctrxn_note: cheque_note,
             ctrxn_particular_type: 'Money Receipt cheque',
-            ctrxn_user_id: user_id,
         };
         const client_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);
         const moneyReceiptAccountInfo = {

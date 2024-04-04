@@ -1,5 +1,4 @@
 import { Request } from 'express';
-import moment from 'moment';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
@@ -9,10 +8,7 @@ import InvoiceHelpers, {
   getClientOrCombId,
   isNotEmpty,
 } from '../../../../../common/helpers/invoice.helpers';
-import {
-  IClTrxnBody,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
 import CommonAddMoneyReceipt from '../../../../../common/services/CommonAddMoneyReceipt';
 import {
   IInvoiceInfoDb,
@@ -25,6 +21,7 @@ import {
 } from '../../../../../common/types/common.types';
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   IOtherBillingInfoDb,
   IOtherInvoiceReq,
@@ -83,17 +80,12 @@ class AddInvoiceOther extends AbstractServices {
       const productsIds = billing_information.map(
         (item) => item.billing_product_id
       );
+
       let productName = '';
 
       if (productsIds.length) {
         productName = await conn.getProductsName(productsIds);
       }
-
-
-      // PAX PASSPORT NAME
-      const passportName = passport_information
-        ?.map((item) => item.passport_name)
-        .join(',');
 
       const invoice_no = await this.generateVoucher(req, 'IO');
 
@@ -103,39 +95,19 @@ class AddInvoiceOther extends AbstractServices {
 
       const ctrxn_pnr = ticketInfo.map((item) => item.ticket_pnr).join(', ');
 
-      // journey date
-      const journey_date =
-        ticketInfo[0] && ticketInfo.map((item) => item.ticket_journey_date)[0];
-      let ctrxn_particular_type = 'Invoice Other';
-
-      if (productName) {
-        ctrxn_particular_type += ` (${productName}).`;
-      }
-
-      if (journey_date) {
-        ctrxn_particular_type +=
-          ' \n Journey date: ' + moment(journey_date).format('DD MMM YYYY');
-      }
-
-
-      const clTrxnBody: IClTrxnBody = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 98,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type,
-        ctrxn_pax: passportName || pax_name,
-        ctrxn_pnr,
-        ctrxn_user_id: invoice_created_by,
-        ctrxn_airticket_no: ctrxn_ticket as string,
-      };
-
-      const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
+      const utils = new InvoiceUtils(req.body, common_conn);
+      // CLIENT TRANSACTIONS
+      const clientTransId = await utils.clientTrans(
+        trxns,
+        invoice_no,
+        ctrxn_pnr as string,
+        ticketInfo[0]?.ticket_route as string,
+        ctrxn_ticket as string,
+        productName
+      );
 
       const invoieInfo: IInvoiceInfoDb = {
+        ...clientTransId,
         invoice_client_id,
         invoice_combined_id,
         invoice_created_by,
@@ -147,7 +119,6 @@ class AddInvoiceOther extends AbstractServices {
         invoice_due_date,
         invoice_sales_man_id,
         invoice_sub_total,
-        invoice_cltrxn_id,
         invoice_total_profit,
         invoice_total_vendor_price,
         invoice_reference,
@@ -273,10 +244,6 @@ class AddInvoiceOther extends AbstractServices {
           );
 
           let vtrxn_particular_type = `Invoice other (${productName}). \n`;
-          if (journey_date) {
-            vtrxn_particular_type +=
-              'Journey date: ' + moment(journey_date).format('DD MMM YYYY');
-          }
 
           // VENDOR TRANSACTIONS
           const VTrxnBody: IVTrxn = {

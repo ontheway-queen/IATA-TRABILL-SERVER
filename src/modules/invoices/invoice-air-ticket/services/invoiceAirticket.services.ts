@@ -258,7 +258,6 @@ class InvoiceAirticketService extends AbstractServices {
           ctrxn_created_at: refund_date,
           ctrxn_note: '',
           ctrxn_particular_type: 'AIR TICKET TAX REFUND',
-          ctrxn_user_id: req.user_id,
           ctrxn_pay_type: clAccPayType,
         };
 
@@ -286,7 +285,6 @@ class InvoiceAirticketService extends AbstractServices {
           ctrxn_created_at: refund_date,
           ctrxn_note: `Money return : ${client_total_tax_refund}/-`,
           ctrxn_particular_type: 'AIR TICKET TAX REFUND',
-          ctrxn_user_id: req.user_id,
           ctrxn_pay_type: clAccPayType,
         };
 

@@ -1,5 +1,4 @@
 import { Request } from 'express';
-import moment from 'moment';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import InvoiceHelpers, {
@@ -8,10 +7,7 @@ import InvoiceHelpers, {
   isNotEmpty,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
-import {
-  IClTrxnUpdate,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
 import {
   IHotelInfoDB,
@@ -20,6 +16,7 @@ import {
   ITransportInfo,
   IUpdateInvoiceInfoDb,
 } from '../../../../../common/types/Invoice.common.interface';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   IOtherBillingInfoDb,
   IOtherInvoiceReq,
@@ -61,7 +58,6 @@ class EditInvoiceOther extends AbstractServices {
         invoice_combclient_id
       );
 
-
     // CLIENT AND COMBINED CLIENT
     const { invoice_client_id, invoice_combined_id } = getClientOrCombId(
       invoice_combclient_id
@@ -82,23 +78,8 @@ class EditInvoiceOther extends AbstractServices {
         productName = await conn.getProductsName(productsIds);
       }
 
-      let ctrxn_pax_name = null;
-
-      if (passport_information && passport_information?.length) {
-        if (passport_information[0].passport_id) {
-          const passport_id = passport_information.map(
-            (item) => item.passport_id
-          );
-
-          ctrxn_pax_name = await common_conn.getPassportName(
-            passport_id as number[]
-          );
-        }
-      }
-
-
-
-      const { prevCtrxnId } = await common_conn.getPreviousInvoices(invoice_id);
+      const { prevCtrxnId, prevClChargeTransId } =
+        await common_conn.getPreviousInvoices(invoice_id);
 
       const ctrxn_ticket =
         ticketInfo &&
@@ -110,40 +91,22 @@ class EditInvoiceOther extends AbstractServices {
         ticketInfo?.length > 0 &&
         ticketInfo.map((item) => item.ticket_pnr).join(' ,');
 
-      // journey date
-      const journey_date =
-        ticketInfo?.length &&
-        ticketInfo?.map((item) => item?.ticket_journey_date).join(', ');
-
-      let ctrxn_particular_type = 'Invoice Other';
-
-      if (productName) {
-        ctrxn_particular_type += `(${productName}).`;
-      }
-
-      if (journey_date) {
-        ctrxn_particular_type +=
-          ' \n Journey date: ' + moment(journey_date).format('DD MMM YYYY');
-      }
-      const clTrxnBody: IClTrxnUpdate = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 99,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type,
-        ctrxn_pax: ctrxn_pax_name || pax_name,
-        ctrxn_pnr: ctrxn_pnr as string,
-        ctrxn_trxn_id: prevCtrxnId,
-        ctrxn_airticket_no: ctrxn_ticket as string,
-      };
-
-      await trxns.clTrxnUpdate(clTrxnBody);
+      const utils = new InvoiceUtils(req.body, common_conn);
+      // CLIENT TRANSACTIONS
+      const clientTransId = await utils.updateClientTrans(
+        trxns,
+        prevCtrxnId,
+        prevClChargeTransId,
+        invoice_no,
+        ctrxn_pnr as string,
+        ticketInfo[0]?.ticket_route as string,
+        ctrxn_ticket as string,
+        productName
+      );
 
       // UPDATE INVOICE INFORMATION
       const invoieInfo: IUpdateInvoiceInfoDb = {
+        ...clientTransId,
         invoice_client_id,
         invoice_combined_id,
         invoice_net_total,
@@ -386,10 +349,6 @@ class EditInvoiceOther extends AbstractServices {
             billingInfo.billing_product_id
           );
           let vtrxn_particular_type = `Invoice other (${productName}). \n`;
-          if (journey_date) {
-            vtrxn_particular_type +=
-              'Journey date: ' + moment(journey_date).format('DD MMM YYYY');
-          }
 
           VTrxnBody = {
             comb_vendor: billing_comvendor,

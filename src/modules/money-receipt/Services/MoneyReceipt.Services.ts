@@ -635,7 +635,6 @@ class MoneyReceiptServices extends AbstractServices {
         ctrxn_created_at: payment_date,
         ctrxn_note: cheque_note,
         ctrxn_particular_type: 'Money receipt',
-        ctrxn_user_id: created_by,
       };
 
       const clientTrxnId = await trxns.clTrxnInsert(clTrxnBody);

@@ -118,7 +118,6 @@ class ChequeCollectionStatusUpdate extends AbstractServices {
             ctrxn_created_at: date,
             ctrxn_note: note,
             ctrxn_particular_type: 'Collection cheques',
-            ctrxn_user_id: user_id,
           };
 
           await new Trxns(req, trx).clTrxnInsert(clTrxnBody);
@@ -169,7 +168,6 @@ class ChequeCollectionStatusUpdate extends AbstractServices {
             ctrxn_created_at: date,
             ctrxn_note: note,
             ctrxn_particular_type: 'Client refund',
-            ctrxn_user_id: user_id,
           };
 
           await new Trxns(req, trx).clTrxnInsert(clTrxnBody);

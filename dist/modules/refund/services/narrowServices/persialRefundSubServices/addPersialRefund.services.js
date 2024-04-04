@@ -17,9 +17,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
-const invoice_helpers_1 = require("../../../../../common/helpers/invoice.helpers");
-const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
+const common_helper_1 = require("../../../../../common/helpers/common.helper");
+const invoice_helpers_1 = require("../../../../../common/helpers/invoice.helpers");
 class AddPersialRefundServices extends abstract_services_1.default {
     constructor() {
         super();
@@ -56,7 +56,6 @@ class AddPersialRefundServices extends abstract_services_1.default {
                     ctrxn_created_at: date,
                     ctrxn_note: note,
                     ctrxn_particular_type: 'Partial refund create',
-                    ctrxn_user_id: created_by,
                     ctrxn_airticket_no: airticketNo.join(', '),
                     ctrxn_pax: passportName.join(', '),
                     ctrxn_pnr: airtickerPnr.join(', '),
@@ -72,7 +71,6 @@ class AddPersialRefundServices extends abstract_services_1.default {
                         ctrxn_created_at: date,
                         ctrxn_note: note,
                         ctrxn_particular_type: 'Partial refund create',
-                        ctrxn_user_id: created_by,
                         ctrxn_airticket_no: airticketNo.join(', '),
                         ctrxn_pax: passportName.join(', '),
                         ctrxn_pnr: airtickerPnr.join(', '),
@@ -131,7 +129,6 @@ class AddPersialRefundServices extends abstract_services_1.default {
                             ctrxn_created_at: date,
                             ctrxn_note: note,
                             ctrxn_particular_type: 'Partial refund create',
-                            ctrxn_user_id: created_by,
                             ctrxn_airticket_no: airticketNo.join(', '),
                             ctrxn_pax: passportName.join(', '),
                             ctrxn_pnr: airtickerPnr.join(', '),

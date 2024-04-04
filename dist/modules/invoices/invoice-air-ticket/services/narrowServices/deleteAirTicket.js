@@ -63,7 +63,6 @@ class DeleteAirTicket extends abstract_services_1.default {
                     ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                     ctrxn_note: '',
                     ctrxn_particular_type: 'invoice void charge',
-                    ctrxn_user_id: req.user_id,
                 };
                 let void_charge_ctrxn_id = 0;
                 if (client_charge && client_charge > 0) {

@@ -53,14 +53,13 @@ class EditInvoiceVisa extends AbstractServices {
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-
       let invoice_total_profit = 0;
       let invoice_total_vendor_price = 0;
 
       for (const item of billing_information) {
         invoice_total_profit += item.billing_profit;
-        invoice_total_vendor_price += (item.billing_cost_price * item.billing_quantity);
-
+        invoice_total_vendor_price +=
+          item.billing_cost_price * item.billing_quantity;
       }
 
       let ctrxn_pax_name = null;
@@ -98,7 +97,6 @@ class EditInvoiceVisa extends AbstractServices {
           ctrxn_particular_type: prevCtrxnId
             ? 'Invoice visa update'
             : 'Invoice visa create',
-          ctrxn_user_id: invoice_created_by,
           ctrxn_pax: ctrxn_pax_name,
         };
 
@@ -149,7 +147,7 @@ class EditInvoiceVisa extends AbstractServices {
         invoice_combined_id,
         invoice_reference,
         invoice_total_profit,
-        invoice_total_vendor_price
+        invoice_total_vendor_price,
       };
       await common_conn.updateInvoiceInformation(
         invoice_id,

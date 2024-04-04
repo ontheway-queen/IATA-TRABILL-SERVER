@@ -99,7 +99,6 @@ class ChequeCollectionStatusUpdate extends abstract_services_1.default {
                             ctrxn_created_at: date,
                             ctrxn_note: note,
                             ctrxn_particular_type: 'Collection cheques',
-                            ctrxn_user_id: user_id,
                         };
                         yield new Trxns_1.default(req, trx).clTrxnInsert(clTrxnBody);
                         const data = {
@@ -146,7 +145,6 @@ class ChequeCollectionStatusUpdate extends abstract_services_1.default {
                             ctrxn_created_at: date,
                             ctrxn_note: note,
                             ctrxn_particular_type: 'Client refund',
-                            ctrxn_user_id: user_id,
                         };
                         yield new Trxns_1.default(req, trx).clTrxnInsert(clTrxnBody);
                         const data = {

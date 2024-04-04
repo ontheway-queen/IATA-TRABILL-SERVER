@@ -35,13 +35,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const moment_1 = __importDefault(require("moment"));
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
 const CommonAddMoneyReceipt_1 = __importDefault(require("../../../../../common/services/CommonAddMoneyReceipt"));
 const CommonSmsSend_services_1 = __importDefault(require("../../../../smsSystem/utils/CommonSmsSend.services"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 class AddInvoiceOther extends abstract_services_1.default {
     constructor() {
         super();
@@ -54,6 +54,7 @@ class AddInvoiceOther extends abstract_services_1.default {
             // CLIENT AND COMBINED CLIENT
             const { invoice_client_id, invoice_combined_id } = (0, invoice_helpers_1.getClientOrCombId)(invoice_combclient_id);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
+                var _a;
                 const conn = this.models.invoiceOtherModel(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
@@ -62,54 +63,23 @@ class AddInvoiceOther extends abstract_services_1.default {
                 if (productsIds.length) {
                     productName = yield conn.getProductsName(productsIds);
                 }
-                // PAX PASSPORT NAME
-                const passportName = passport_information === null || passport_information === void 0 ? void 0 : passport_information.map((item) => item.passport_name).join(',');
                 const invoice_no = yield this.generateVoucher(req, 'IO');
                 const ctrxn_ticket = ticketInfo.length > 0 &&
                     ticketInfo.map((item) => item.ticket_no).join(' ,');
                 const ctrxn_pnr = ticketInfo.map((item) => item.ticket_pnr).join(', ');
-                // journey date
-                const journey_date = ticketInfo[0] && ticketInfo.map((item) => item.ticket_journey_date)[0];
-                let ctrxn_particular_type = 'Invoice Other';
-                if (productName) {
-                    ctrxn_particular_type += ` (${productName}).`;
-                }
-                if (journey_date) {
-                    ctrxn_particular_type +=
-                        ' \n Journey date: ' + (0, moment_1.default)(journey_date).format('DD MMM YYYY');
-                }
-                const clTrxnBody = {
-                    ctrxn_type: 'DEBIT',
-                    ctrxn_amount: invoice_net_total,
-                    ctrxn_cl: invoice_combclient_id,
-                    ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 98,
-                    ctrxn_created_at: invoice_sales_date,
-                    ctrxn_note: invoice_note,
-                    ctrxn_particular_type,
-                    ctrxn_pax: passportName || pax_name,
-                    ctrxn_pnr,
-                    ctrxn_user_id: invoice_created_by,
-                    ctrxn_airticket_no: ctrxn_ticket,
-                };
-                const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
-                const invoieInfo = {
-                    invoice_client_id,
+                const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
+                // CLIENT TRANSACTIONS
+                const clientTransId = yield utils.clientTrans(trxns, invoice_no, ctrxn_pnr, (_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route, ctrxn_ticket, productName);
+                const invoieInfo = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_combined_id,
                     invoice_created_by,
-                    invoice_net_total,
-                    invoice_no: invoice_no,
-                    invoice_note,
-                    invoice_category_id: 5,
-                    invoice_sales_date,
+                    invoice_net_total, invoice_no: invoice_no, invoice_note, invoice_category_id: 5, invoice_sales_date,
                     invoice_due_date,
                     invoice_sales_man_id,
                     invoice_sub_total,
-                    invoice_cltrxn_id,
                     invoice_total_profit,
                     invoice_total_vendor_price,
-                    invoice_reference,
-                };
+                    invoice_reference });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoieInfo);
                 // AGENT TRANSACTION
                 yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 98, 'INVOICE OTHER');
@@ -177,10 +147,6 @@ class AddInvoiceOther extends abstract_services_1.default {
                         billingInfoData.billing_vendor_id = vendor_id;
                         const productName = yield common_conn.getProductById(billingInfo.billing_product_id);
                         let vtrxn_particular_type = `Invoice other (${productName}). \n`;
-                        if (journey_date) {
-                            vtrxn_particular_type +=
-                                'Journey date: ' + (0, moment_1.default)(journey_date).format('DD MMM YYYY');
-                        }
                         // VENDOR TRANSACTIONS
                         const VTrxnBody = {
                             comb_vendor: billing_comvendor,

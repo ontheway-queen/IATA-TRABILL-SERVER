@@ -83,7 +83,6 @@ class AddInvoiceHajjServices extends abstract_services_1.default {
                     ctrxn_pnr,
                     ctrxn_airticket_no: ctrnx_ticket_no,
                     ctrxn_route,
-                    ctrxn_user_id: invoice_created_by,
                 };
                 const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                 const invoice_information = {

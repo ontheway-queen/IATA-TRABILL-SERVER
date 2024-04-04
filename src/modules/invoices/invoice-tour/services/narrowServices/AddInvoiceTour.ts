@@ -96,7 +96,6 @@ class AddInvoiceTour extends AbstractServices {
         ctrxn_particular_type: 'Invoice tour create',
         ctrxn_pax,
         ctrxn_pnr: ticket_pnr,
-        ctrxn_user_id: invoice_created_by,
         ctrxn_route: ctrxn_route,
         ctrxn_airticket_no: ticket_no,
       };
@@ -131,7 +130,7 @@ class AddInvoiceTour extends AbstractServices {
         invoice_note,
         invoice_cltrxn_id,
         invoice_reference,
-        invoice_total_vendor_price: totalCost
+        invoice_total_vendor_price: totalCost,
       };
 
       const invoice_id = await common_conn.insertInvoicesInfo(invoiceData);

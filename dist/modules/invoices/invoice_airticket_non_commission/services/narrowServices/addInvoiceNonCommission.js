@@ -215,7 +215,7 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                     invoicelog_content: 'Invoice airticket non comission  has been created',
                 };
                 yield common_conn.insertInvoiceHistory(history_data);
-                // MOENY RECEIPT
+                // MONEY RECEIPT
                 const moneyReceiptInvoice = {
                     invoice_client_id,
                     invoice_combined_id,

@@ -165,7 +165,7 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: invoice_note,
                         vtrxn_particular_id: 146,
-                        vtrxn_particular_type: 'Invoice Airticket update',
+                        vtrxn_particular_type: 'Invoice Airticket',
                         vtrxn_pax: pax_names,
                         vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
                         vtrxn_user_id: invoice_created_by,

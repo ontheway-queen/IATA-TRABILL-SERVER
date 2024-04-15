@@ -606,7 +606,7 @@ class MoneyReceiptServices extends AbstractServices {
           cheque_return_note: cheque_note,
         };
 
-        chequeMessage = `Moeny receipt cheque has been return`;
+        chequeMessage = `MONEY receipt cheque has been return`;
       }
 
       await this.insertAudit(

@@ -20,6 +20,7 @@ class AddClientService extends abstract_services_1.default {
         super();
         this.addClient = (req) => __awaiter(this, void 0, void 0, function* () {
             const { client_designation, client_created_by, opening_balance, opening_balance_type, client_address, client_category_id, client_credit_limit, client_email, client_gender, client_mobile, client_name, client_trade_license, client_type, client_walking_customer, client_source, } = req.body;
+            console.log({ body: req.body });
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.clientModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);

@@ -331,7 +331,7 @@ class AddInvoiceNonCommission extends AbstractServices {
 
       await common_conn.insertInvoiceHistory(history_data);
 
-      // MOENY RECEIPT
+      // MONEY RECEIPT
       const moneyReceiptInvoice: ICommonMoneyReceiptInvoiceData = {
         invoice_client_id,
         invoice_combined_id,

@@ -380,7 +380,7 @@ class MoneyReceiptServices extends abstract_services_1.default {
                         cheque_return_date: payment_date,
                         cheque_return_note: cheque_note,
                     };
-                    chequeMessage = `Moeny receipt cheque has been return`;
+                    chequeMessage = `MONEY receipt cheque has been return`;
                 }
                 yield this.insertAudit(req, 'update', chequeMessage, created_by, 'MONEY_RECEIPT');
                 yield conn.MoneyReceiptChequeStatus(chequeStatusData, receipt_id);

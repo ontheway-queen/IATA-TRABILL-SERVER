@@ -4,8 +4,6 @@ import Trxns from '../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../common/helpers/common.helper';
 import { isNotEmpty } from '../../../../common/helpers/invoice.helpers';
 import { IVTrxn } from '../../../../common/interfaces/Trxn.interfaces';
-import CombineClientsModels from '../../../clients/combined_clients/models/combineClients.models';
-import VendorModel from '../../../vendor/models/VendorModel';
 import invoiceTourModels from '../models/invoiceTour.models';
 import {
   IAirticketroute,
@@ -40,8 +38,6 @@ class InvoiceTourHelpers {
   public static addVendorCostBilling = async (
     req: Request,
     conn: invoiceTourModels,
-    conn_vendor: VendorModel,
-    combined_conn: CombineClientsModels,
     invoice_id: number,
     trx: Knex.Transaction
   ) => {
@@ -464,10 +460,10 @@ class InvoiceTourHelpers {
       }
 
       const VTrxnBody: IVTrxn = {
-        comb_vendor: guide_comvendor_id,
-        vtrxn_amount: guide_cost_price,
+        comb_vendor: ticket_comvendor_id,
+        vtrxn_amount: ticket_cost_price,
         vtrxn_created_at: invoice_sales_date,
-        vtrxn_note: guide_description,
+        vtrxn_note: ticket_description,
         vtrxn_particular_id: 159,
         vtrxn_particular_type: 'Invoice Tour Create',
         vtrxn_pax: ctrxn_pax,
@@ -478,7 +474,7 @@ class InvoiceTourHelpers {
         vtrxn_airticket_no: ticket_no,
       };
 
-      const ticktData: ITourTicketDB = {
+      const ticketData: ITourTicketDB = {
         ticket_invoice_id: invoice_id,
         ticket_combined_id: combined_id,
         ticket_vendor_id: vendor_id,
@@ -501,14 +497,14 @@ class InvoiceTourHelpers {
       if (!ticket_id) {
         const ticket_vtrxnid = await trxns.VTrxnInsert(VTrxnBody);
 
-        await conn.insertTourTicketInfo({ ...ticktData, ticket_vtrxnid });
+        await conn.insertTourTicketInfo({ ...ticketData, ticket_vtrxnid });
       } else {
         await trxns.VTrxnUpdate({
           ...VTrxnBody,
           trxn_id: prevTourTicketInfo[0]?.prevTrxnId,
         });
 
-        await conn.updateTourTicketInfo(ticktData, ticket_id);
+        await conn.updateTourTicketInfo(ticketData, ticket_id);
       }
 
       // delete previous route id

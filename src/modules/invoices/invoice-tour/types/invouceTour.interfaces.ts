@@ -3,7 +3,7 @@ import {
   idType,
 } from '../../../../common/types/common.types';
 
-export interface IinvoiceTourItem {
+export interface IInvoiceTourItem {
   itour_invoice_id: number;
   itour_group_id: number;
   itour_day: number;

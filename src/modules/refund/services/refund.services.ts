@@ -282,6 +282,8 @@ class RefundServices extends AbstractServices {
 
     const data = await conn.getPersialRefundTickets(client_id, combined_id);
 
+    console.log({ client_id, combined_id, data });
+
     return { success: true, data };
   };
 

@@ -309,7 +309,7 @@ export interface IRefundOtherClient {
   crefund_account_id: number;
   crefund_actransaction_id: number;
   crefund_ctrxnid?: number;
-  crefund_charge_ctrxnid?: number;
+  crefund_charge_ctrxnid: number | null;
   crefund_total_amount: number;
   crefund_return_amount: number;
   crefund_vouchar_number: string;

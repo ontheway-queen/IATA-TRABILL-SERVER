@@ -56,26 +56,39 @@ class AddOtherRefund extends abstract_services_1.default {
                 };
                 const refund_id = yield conn.refundOther(refundInfo);
                 let crefund_ctrxnid = null;
+                let crefund_charge_ctrxnid = null;
                 let crefund_actransaction_id = null;
                 if (crefund_payment_type === 'ADJUST') {
-                    let clientRefundTrxnNote = `Net total : ${total_refund_amount}/- 
-        Adjust amount : ${total_return_amount}/-
-        Refund charge : ${total_refund_charge}/-`;
                     const clTrxnBody = {
                         ctrxn_type: 'CREDIT',
-                        ctrxn_amount: total_return_amount,
+                        ctrxn_amount: total_refund_amount,
                         ctrxn_cl: comb_client,
                         ctrxn_voucher: other_vouchar_number,
                         ctrxn_particular_id: 110,
                         ctrxn_created_at: date,
-                        ctrxn_note: clientRefundTrxnNote,
+                        ctrxn_note: '',
                         ctrxn_particular_type: 'OTHER REFUND(ADJUST)',
                         ctrxn_airticket_no: ticket_no,
                         ctrxn_pax: pax_name,
                         ctrxn_pnr: ticket_pnr,
                         ctrxn_route: airticket_route,
                     };
+                    const clChargeTrxnBody = {
+                        ctrxn_type: 'DEBIT',
+                        ctrxn_amount: total_refund_charge,
+                        ctrxn_cl: comb_client,
+                        ctrxn_voucher: other_vouchar_number,
+                        ctrxn_particular_id: 110,
+                        ctrxn_created_at: date,
+                        ctrxn_note: '',
+                        ctrxn_particular_type: 'OTHER REFUND(CHARGE)',
+                        ctrxn_airticket_no: ticket_no,
+                        ctrxn_pax: pax_name,
+                        ctrxn_pnr: ticket_pnr,
+                        ctrxn_route: airticket_route,
+                    };
                     crefund_ctrxnid = yield trxns.clTrxnInsert(clTrxnBody);
+                    crefund_charge_ctrxnid = yield trxns.clTrxnInsert(clChargeTrxnBody);
                 }
                 // MONEY RETURN
                 else {
@@ -141,7 +154,7 @@ class AddOtherRefund extends abstract_services_1.default {
                     crefund_account_id: account_id,
                     crefund_actransaction_id: crefund_actransaction_id,
                     crefund_ctrxnid: crefund_ctrxnid,
-                    // crefund_charge_ctrxnid: crefund_actransaction_charge_id as number,
+                    crefund_charge_ctrxnid: crefund_charge_ctrxnid,
                     crefund_charge_amount: total_refund_charge,
                     crefund_total_amount: total_refund_amount,
                     crefund_return_amount: total_return_amount,

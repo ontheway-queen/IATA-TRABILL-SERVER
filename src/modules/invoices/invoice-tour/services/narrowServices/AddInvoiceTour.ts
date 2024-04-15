@@ -18,7 +18,7 @@ import {
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
 import {
-  IinvoiceTourItem,
+  IInvoiceTourItem,
   ITourRequest,
 } from '../../types/invouceTour.interfaces';
 import InvoiceTourHelpers from '../../utils/invoicetour.helpers';
@@ -150,14 +150,7 @@ class AddInvoiceTour extends AbstractServices {
       );
 
       // TOUR VENDOR COST BILLING INSERT
-      await InvoiceTourHelpers.addVendorCostBilling(
-        req,
-        conn,
-        conn_vendor,
-        combined_conn,
-        invoice_id,
-        trx
-      );
+      await InvoiceTourHelpers.addVendorCostBilling(req, conn, invoice_id, trx);
 
       const invoiceExtraAmount: InvoiceExtraAmount = {
         extra_amount_invoice_id: invoice_id,
@@ -169,7 +162,7 @@ class AddInvoiceTour extends AbstractServices {
       };
       await common_conn.insertInvoiceExtraAmount(invoiceExtraAmount);
 
-      const invoiceTourItemData: IinvoiceTourItem = {
+      const invoiceTourItemData: IInvoiceTourItem = {
         itour_day,
         itour_from_date,
         itour_to_date,
@@ -192,7 +185,7 @@ class AddInvoiceTour extends AbstractServices {
 
       await this.updateVoucher(req, 'ITP');
 
-      // MOENY RECEIPT
+      // MONEY RECEIPT
       const moneyReceiptInvoice: ICommonMoneyReceiptInvoiceData = {
         invoice_client_id,
         invoice_combined_id,

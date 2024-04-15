@@ -84,7 +84,7 @@ class EditInvoiceTour extends abstract_services_1.default {
                     yield invoice_helpers_1.default.deleteAgentTransactions(this.models.agentProfileModel(req, trx), invoice_id, invoice_created_by);
                 }
                 // TOUR VENDOR COST BILLING INSERT
-                yield invoicetour_helpers_1.default.addVendorCostBilling(req, conn, vendor_conn, combined_conn, invoice_id, trx);
+                yield invoicetour_helpers_1.default.addVendorCostBilling(req, conn, invoice_id, trx);
                 const { totalCost, totalSales, totalProfit } = tourBilling.reduce((acc, billing) => {
                     var _a;
                     const { totalCost, totalSales, totalProfit } = acc;

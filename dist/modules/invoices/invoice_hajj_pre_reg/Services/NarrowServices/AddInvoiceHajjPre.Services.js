@@ -165,7 +165,7 @@ class AddInvoiceHajjpre extends abstract_services_1.default {
                     };
                     yield conn.insertHajiBillingInfo(billingInfoData);
                 }
-                // MOENY RECEIPT
+                // MONEY RECEIPT
                 const moneyReceiptInvoice = {
                     invoice_client_id,
                     invoice_combined_id,

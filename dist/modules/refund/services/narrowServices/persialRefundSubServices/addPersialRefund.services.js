@@ -55,7 +55,7 @@ class AddPersialRefundServices extends abstract_services_1.default {
                     ctrxn_particular_id: 163,
                     ctrxn_created_at: date,
                     ctrxn_note: note,
-                    ctrxn_particular_type: 'Partial refund create',
+                    ctrxn_particular_type: 'Partial refund charge',
                     ctrxn_airticket_no: airticketNo.join(', '),
                     ctrxn_pax: passportName.join(', '),
                     ctrxn_pnr: airtickerPnr.join(', '),
@@ -70,7 +70,7 @@ class AddPersialRefundServices extends abstract_services_1.default {
                         ctrxn_particular_id: 162,
                         ctrxn_created_at: date,
                         ctrxn_note: note,
-                        ctrxn_particular_type: 'Partial refund create',
+                        ctrxn_particular_type: 'Partial refund adjust',
                         ctrxn_airticket_no: airticketNo.join(', '),
                         ctrxn_pax: passportName.join(', '),
                         ctrxn_pnr: airtickerPnr.join(', '),
@@ -180,7 +180,7 @@ class AddPersialRefundServices extends abstract_services_1.default {
                         vtrxn_created_at: date,
                         vtrxn_note: note,
                         vtrxn_particular_id: 163,
-                        vtrxn_particular_type: 'Partial refund Create',
+                        vtrxn_particular_type: 'Partial refund charge',
                         vtrxn_type: 'DEBIT',
                         vtrxn_user_id: created_by,
                         vtrxn_voucher: vouchar_no,
@@ -196,7 +196,7 @@ class AddPersialRefundServices extends abstract_services_1.default {
                             vtrxn_created_at: date,
                             vtrxn_note: note,
                             vtrxn_particular_id: 162,
-                            vtrxn_particular_type: 'Partial refund Create',
+                            vtrxn_particular_type: 'Partial refund adjust',
                             vtrxn_type: 'CREDIT',
                             vtrxn_user_id: created_by,
                             vtrxn_voucher: vouchar_no,
@@ -295,7 +295,7 @@ class AddPersialRefundServices extends abstract_services_1.default {
                 yield this.insertAudit(req, 'create', audit_content, created_by, 'REFUND');
                 return {
                     success: true,
-                    message: 'Persial Refund created successfuly!',
+                    message: 'Persial Refund created successfully!',
                     refund_id,
                 };
             }));

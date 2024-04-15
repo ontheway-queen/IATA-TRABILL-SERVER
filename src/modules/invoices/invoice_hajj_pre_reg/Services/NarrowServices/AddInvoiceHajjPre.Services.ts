@@ -224,7 +224,7 @@ class AddInvoiceHajjpre extends AbstractServices {
         await conn.insertHajiBillingInfo(billingInfoData);
       }
 
-      // MOENY RECEIPT
+      // MONEY RECEIPT
 
       const moneyReceiptInvoice: ICommonMoneyReceiptInvoiceData = {
         invoice_client_id,

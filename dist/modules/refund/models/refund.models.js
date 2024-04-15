@@ -222,16 +222,16 @@ class RefundModel extends abstract_models_1.default {
                 .from('trabill.trabill_invoices as ti')
                 .select('ti.invoice_id', 'ti.invoice_no', 'ti.invoice_net_total', this.db.raw('IFNULL(SUM(ticp.invclientpayment_amount), 0) AS payment'))
                 .leftJoin('trabill.trabill_invoice_client_payments AS ticp', 'ti.invoice_id', 'ticp.invclientpayment_invoice_id')
+                .where('invoice_org_agency', this.org_agency)
+                .whereIn('invoice_category_id', [1, 2, 3])
+                .andWhere('invoice_client_id', client_id)
+                .andWhere('invoice_combined_id', combine_id)
                 .whereNot('invoice_is_deleted', 1)
                 .whereNot('invoice_is_refund', 1)
                 .whereNot('invoice_is_cancel', 1)
                 .whereNot('invoice_is_void', 1)
-                .where('invoice_client_id', client_id)
-                .andWhere('invoice_combined_id', combine_id)
-                .andWhere('invoice_org_agency', this.org_agency)
-                .whereIn('invoice_category_id', [1, 2, 3])
-                .groupBy('ti.invoice_id', 'ti.invoice_no', 'ti.invoice_net_total')
-                .havingRaw('payment >= ti.invoice_net_total');
+                .groupBy('ti.invoice_id', 'ti.invoice_no', 'ti.invoice_net_total');
+            // .havingRaw('payment >= ti.invoice_net_total');
         });
         this.getPersialRefundTicketsByInvoice = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
             return yield this.query()

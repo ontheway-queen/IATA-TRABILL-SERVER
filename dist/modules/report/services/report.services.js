@@ -166,53 +166,29 @@ class ReportServices extends abstract_services_1.default {
             const { from_date, to_date } = req.query;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.profitLossReport(req, trx);
-                const { total_sales_price, total_cost_price } = yield conn.totalSales(from_date, to_date);
-                const client_refund = yield conn.getClientRefundTotal(from_date, to_date);
-                const total_refund_profit = yield conn.refundProfitAir(from_date, to_date);
+                // sales and purchase
+                const sales_info = yield conn.totalSales(from_date, to_date);
+                const refund_info = yield conn.getClientRefundTotal(from_date, to_date);
+                const service_charge = yield conn.getInvoicesServiceCharge(from_date, to_date);
+                const void_profit_loss = yield conn.getInvoiceVoidProfit(from_date, to_date);
                 const total_employee_salary = yield conn.getEmployeeExpense(from_date, to_date);
                 const expense_total = yield conn.allExpenses(from_date, to_date);
                 const incentive = yield conn.allIncentive(from_date, to_date);
                 const total_discount = yield conn.getAllClientDiscount(from_date, to_date);
-                const service_charge = yield conn.getInvoicesServiceCharge(from_date, to_date);
                 const online_charge = yield conn.getBankCharge(from_date, to_date);
                 const vendor_ait = yield conn.getVendorAit(from_date, to_date);
                 const non_invoice = yield conn.getNonInvoiceIncomeProfit(from_date, to_date);
                 const agent_payment = yield conn.getAgentPayment(from_date, to_date);
-                const void_profit_loss = yield conn.getInvoiceVoidProfit(from_date, to_date);
-                const total_sales_profit = total_sales_price - total_cost_price;
-                const gross_profit_loss = total_sales_profit +
-                    total_refund_profit +
-                    service_charge -
-                    client_refund;
-                const total_gross_profit_loss = gross_profit_loss + incentive + non_invoice + void_profit_loss;
-                const overall_expense = expense_total +
-                    total_employee_salary +
-                    total_discount +
-                    online_charge +
-                    vendor_ait +
-                    agent_payment -
-                    client_refund;
                 return {
                     success: true,
-                    data: {
-                        total_sales_price,
-                        total_sales_profit,
-                        total_cost_price,
-                        total_gross_profit_loss,
-                        overall_expense,
-                        client_refund,
-                        void_profit_loss,
-                        total_refund_profit,
-                        total_incentive_income: incentive,
+                    data: Object.assign(Object.assign(Object.assign({}, sales_info), refund_info), { service_charge,
+                        void_profit_loss, total_incentive_income: incentive, non_invoice,
                         expense_total,
                         total_employee_salary,
                         total_discount,
                         online_charge,
                         vendor_ait,
-                        non_invoice,
-                        agent_payment,
-                        service_charge,
-                    },
+                        agent_payment }),
                 };
             }));
         });

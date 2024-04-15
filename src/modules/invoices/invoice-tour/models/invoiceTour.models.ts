@@ -3,7 +3,7 @@ import { IDeletePreviousVendor } from '../../../../common/interfaces/commonInter
 import { idType } from '../../../../common/types/common.types';
 import {
   IAirticketroute,
-  IinvoiceTourItem,
+  IInvoiceTourItem,
   ITourAccmDB,
   ITourBilling,
   ITourFoodDB,
@@ -48,11 +48,11 @@ class invoiceTourModels extends AbstractModels {
     }[];
   };
 
-  insertInvoiceTourItem = async (data: IinvoiceTourItem) => {
+  insertInvoiceTourItem = async (data: IInvoiceTourItem) => {
     await this.query().insert(data).into('trabill_invoice_tour_item');
   };
 
-  updateInvoiceTourItem = async (data: IinvoiceTourItem, invoiceId: idType) => {
+  updateInvoiceTourItem = async (data: IInvoiceTourItem, invoiceId: idType) => {
     await this.query()
       .update(data)
       .into('trabill_invoice_tour_item')

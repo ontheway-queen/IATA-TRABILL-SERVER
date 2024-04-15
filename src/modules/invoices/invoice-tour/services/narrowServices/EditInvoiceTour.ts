@@ -11,7 +11,7 @@ import {
   IUpdateInvoiceInfoDb,
 } from '../../../../../common/types/Invoice.common.interface';
 import {
-  IinvoiceTourItem,
+  IInvoiceTourItem,
   ITourRequest,
 } from '../../types/invouceTour.interfaces';
 import InvoiceTourHelpers from '../../utils/invoicetour.helpers';
@@ -116,14 +116,7 @@ class EditInvoiceTour extends AbstractServices {
       }
 
       // TOUR VENDOR COST BILLING INSERT
-      await InvoiceTourHelpers.addVendorCostBilling(
-        req,
-        conn,
-        vendor_conn,
-        combined_conn,
-        invoice_id,
-        trx
-      );
+      await InvoiceTourHelpers.addVendorCostBilling(req, conn, invoice_id, trx);
 
       const { totalCost, totalSales, totalProfit } = tourBilling.reduce(
         (acc, billing) => {
@@ -168,7 +161,7 @@ class EditInvoiceTour extends AbstractServices {
         invoice_id
       );
 
-      const invoiceTourItemData: IinvoiceTourItem = {
+      const invoiceTourItemData: IInvoiceTourItem = {
         itour_day,
         itour_from_date,
         itour_to_date,

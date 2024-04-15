@@ -389,29 +389,31 @@ class ReportServices extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.profitLossReport(req, trx);
 
-      const { total_sales_price, total_cost_price } = await conn.totalSales(
+      // sales and purchase
+      const sales_info = await conn.totalSales(from_date, to_date);
+
+      const refund_info = await conn.getClientRefundTotal(from_date, to_date);
+
+      const service_charge = await conn.getInvoicesServiceCharge(
         from_date,
         to_date
       );
-      const client_refund = await conn.getClientRefundTotal(from_date, to_date);
-      const total_refund_profit = await conn.refundProfitAir(
+
+      const void_profit_loss = await conn.getInvoiceVoidProfit(
         from_date,
         to_date
       );
+
       const total_employee_salary = await conn.getEmployeeExpense(
         from_date,
         to_date
       );
+
       const expense_total = await conn.allExpenses(from_date, to_date);
 
       const incentive = await conn.allIncentive(from_date, to_date);
 
       const total_discount = await conn.getAllClientDiscount(
-        from_date,
-        to_date
-      );
-
-      const service_charge = await conn.getInvoicesServiceCharge(
         from_date,
         to_date
       );
@@ -425,51 +427,24 @@ class ReportServices extends AbstractServices {
         to_date
       );
       const agent_payment = await conn.getAgentPayment(from_date, to_date);
-      const void_profit_loss = await conn.getInvoiceVoidProfit(
-        from_date,
-        to_date
-      );
-
-      const total_sales_profit = total_sales_price - total_cost_price;
-
-      const gross_profit_loss =
-        total_sales_profit +
-        total_refund_profit +
-        service_charge -
-        client_refund;
-
-      const total_gross_profit_loss =
-        gross_profit_loss + incentive + non_invoice + void_profit_loss;
-
-      const overall_expense =
-        expense_total +
-        total_employee_salary +
-        total_discount +
-        online_charge +
-        vendor_ait +
-        agent_payment -
-        client_refund;
 
       return {
         success: true,
         data: {
-          total_sales_price,
-          total_sales_profit,
-          total_cost_price,
-          total_gross_profit_loss,
-          overall_expense,
-          client_refund,
+          ...sales_info,
+          ...refund_info,
+          service_charge,
           void_profit_loss,
-          total_refund_profit,
+
           total_incentive_income: incentive,
+          non_invoice,
+
           expense_total,
           total_employee_salary,
           total_discount,
           online_charge,
           vendor_ait,
-          non_invoice,
           agent_payment,
-          service_charge,
         },
       };
     });

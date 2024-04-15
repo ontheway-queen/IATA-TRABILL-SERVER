@@ -77,7 +77,7 @@ class DeleteMoneyReceipt extends AbstractServices {
       await this.insertAudit(
         req,
         'delete',
-        `Moeny receipt has been deleted , mr-id:${receipt_id}`,
+        `MONEY receipt has been deleted , mr-id:${receipt_id}`,
         receipt_deleted_by,
         'MONEY_RECEIPT'
       );

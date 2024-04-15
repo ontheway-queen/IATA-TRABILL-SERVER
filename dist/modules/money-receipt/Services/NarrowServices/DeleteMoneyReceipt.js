@@ -57,7 +57,7 @@ class DeleteMoneyReceipt extends abstract_services_1.default {
                     };
                     yield common_conn.insertInvoiceHistory(history_data);
                 }
-                yield this.insertAudit(req, 'delete', `Moeny receipt has been deleted , mr-id:${receipt_id}`, receipt_deleted_by, 'MONEY_RECEIPT');
+                yield this.insertAudit(req, 'delete', `MONEY receipt has been deleted , mr-id:${receipt_id}`, receipt_deleted_by, 'MONEY_RECEIPT');
                 return {
                     success: true,
                     data: 'Money receipt deleted successfully...',

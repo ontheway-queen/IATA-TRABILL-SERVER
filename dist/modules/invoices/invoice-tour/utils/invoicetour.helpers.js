@@ -33,7 +33,7 @@ exports.calculateTotalProfit = calculateTotalProfit;
 class InvoiceTourHelpers {
 }
 _a = InvoiceTourHelpers;
-InvoiceTourHelpers.addVendorCostBilling = (req, conn, conn_vendor, combined_conn, invoice_id, trx) => __awaiter(void 0, void 0, void 0, function* () {
+InvoiceTourHelpers.addVendorCostBilling = (req, conn, invoice_id, trx) => __awaiter(void 0, void 0, void 0, function* () {
     var _b, _c, _d, _e;
     const trxns = new Trxns_1.default(req, trx);
     const { tourTransports, tourFoods, tourAccms, tourBilling, tourOtherTrans, invoice_created_by, guide_id, guide_comvendor_id, guide_cost_price, guide_description, guide_itinerary_id, guide_is_deleted, ticket_id, ticket_comvendor_id, ticket_cost_price, ticket_description, ticket_itinerary_id, ticket_no, ticket_route, ticket_airline_id, ticket_pnr, ticket_journey_date, ticket_return_date, ticket_is_deleted, invoice_sales_date, invoice_no, } = req.body;
@@ -298,10 +298,10 @@ InvoiceTourHelpers.addVendorCostBilling = (req, conn, conn_vendor, combined_conn
             prevTourTicketInfo = yield conn.getSignleTourTicketInfo(ticket_id);
         }
         const VTrxnBody = {
-            comb_vendor: guide_comvendor_id,
-            vtrxn_amount: guide_cost_price,
+            comb_vendor: ticket_comvendor_id,
+            vtrxn_amount: ticket_cost_price,
             vtrxn_created_at: invoice_sales_date,
-            vtrxn_note: guide_description,
+            vtrxn_note: ticket_description,
             vtrxn_particular_id: 159,
             vtrxn_particular_type: 'Invoice Tour Create',
             vtrxn_pax: ctrxn_pax,
@@ -311,7 +311,7 @@ InvoiceTourHelpers.addVendorCostBilling = (req, conn, conn_vendor, combined_conn
             vtrxn_pnr: ticket_pnr,
             vtrxn_airticket_no: ticket_no,
         };
-        const ticktData = {
+        const ticketData = {
             ticket_invoice_id: invoice_id,
             ticket_combined_id: combined_id,
             ticket_vendor_id: vendor_id,
@@ -330,11 +330,11 @@ InvoiceTourHelpers.addVendorCostBilling = (req, conn, conn_vendor, combined_conn
         }
         if (!ticket_id) {
             const ticket_vtrxnid = yield trxns.VTrxnInsert(VTrxnBody);
-            yield conn.insertTourTicketInfo(Object.assign(Object.assign({}, ticktData), { ticket_vtrxnid }));
+            yield conn.insertTourTicketInfo(Object.assign(Object.assign({}, ticketData), { ticket_vtrxnid }));
         }
         else {
             yield trxns.VTrxnUpdate(Object.assign(Object.assign({}, VTrxnBody), { trxn_id: (_e = prevTourTicketInfo[0]) === null || _e === void 0 ? void 0 : _e.prevTrxnId }));
-            yield conn.updateTourTicketInfo(ticktData, ticket_id);
+            yield conn.updateTourTicketInfo(ticketData, ticket_id);
         }
         // delete previous route id
         yield conn.deletePrevAirticketRoute(invoice_id, invoice_created_by);

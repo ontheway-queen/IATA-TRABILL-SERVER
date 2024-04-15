@@ -111,7 +111,7 @@ class AddInvoiceTour extends abstract_services_1.default {
                 // AGENT TRANSACTION
                 yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 100, 'TOUR PACKAGE');
                 // TOUR VENDOR COST BILLING INSERT
-                yield invoicetour_helpers_1.default.addVendorCostBilling(req, conn, conn_vendor, combined_conn, invoice_id, trx);
+                yield invoicetour_helpers_1.default.addVendorCostBilling(req, conn, invoice_id, trx);
                 const invoiceExtraAmount = {
                     extra_amount_invoice_id: invoice_id,
                     invoice_vat,
@@ -139,7 +139,7 @@ class AddInvoiceTour extends abstract_services_1.default {
                 };
                 yield common_conn.insertInvoiceHistory(history_data);
                 yield this.updateVoucher(req, 'ITP');
-                // MOENY RECEIPT
+                // MONEY RECEIPT
                 const moneyReceiptInvoice = {
                     invoice_client_id,
                     invoice_combined_id,

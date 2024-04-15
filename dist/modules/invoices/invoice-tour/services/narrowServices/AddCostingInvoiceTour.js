@@ -22,12 +22,10 @@ class AddCostingInvoiceTour extends abstract_services_1.default {
             const invoice_id = Number(req.params.invoice_id);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.invoiceTourModels(req, trx);
-                const vendor_conn = this.models.vendorModel(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
-                const combined_conn = this.models.combineClientModel(req, trx);
                 yield conn.deleteBillingOnly(invoice_id, invoice_created_by);
                 // TOUR VENDOR COST BILLING INSERT
-                yield invoicetour_helpers_1.default.addVendorCostBilling(req, conn, vendor_conn, combined_conn, invoice_id, trx);
+                yield invoicetour_helpers_1.default.addVendorCostBilling(req, conn, invoice_id, trx);
                 const history_data = {
                     history_activity_type: 'INVOICE_PAYMENT_CREATED',
                     history_invoice_id: invoice_id,

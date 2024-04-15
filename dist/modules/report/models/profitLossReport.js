@@ -60,14 +60,15 @@ class ProfitLossReport extends abstract_models_1.default {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const [data] = (yield this.query()
-                .sum('return_amount as total_return')
-                .from('v_client_refunds')
-                .andWhereRaw(`DATE_FORMAT(refund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
+                .sum('crefund_return_amount as client_refund_return')
+                .sum('vrefund_return_amount as vendor_refund_return')
+                .from('v_all_refunds')
+                .andWhereRaw(`DATE_FORMAT(atrefund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
                 from_date,
                 to_date,
             ])
-                .andWhere('org_id', this.org_agency));
-            return Number(data.total_return) || 0;
+                .andWhere('atrefund_org_agency', this.org_agency));
+            return data;
         });
         this.payrollReport = (payroll_id, from_date, to_date, page, size) => __awaiter(this, void 0, void 0, function* () {
             const offset = (page - 1) * size;

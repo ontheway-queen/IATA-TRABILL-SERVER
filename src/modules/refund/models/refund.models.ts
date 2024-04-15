@@ -1541,16 +1541,16 @@ class RefundModel extends AbstractModels {
         'ti.invoice_id',
         'ticp.invclientpayment_invoice_id'
       )
+      .where('invoice_org_agency', this.org_agency)
+      .whereIn('invoice_category_id', [1, 2, 3])
+      .andWhere('invoice_client_id', client_id)
+      .andWhere('invoice_combined_id', combine_id)
       .whereNot('invoice_is_deleted', 1)
       .whereNot('invoice_is_refund', 1)
       .whereNot('invoice_is_cancel', 1)
       .whereNot('invoice_is_void', 1)
-      .where('invoice_client_id', client_id)
-      .andWhere('invoice_combined_id', combine_id)
-      .andWhere('invoice_org_agency', this.org_agency)
-      .whereIn('invoice_category_id', [1, 2, 3])
-      .groupBy('ti.invoice_id', 'ti.invoice_no', 'ti.invoice_net_total')
-      .havingRaw('payment >= ti.invoice_net_total');
+      .groupBy('ti.invoice_id', 'ti.invoice_no', 'ti.invoice_net_total');
+    // .havingRaw('payment >= ti.invoice_net_total');
   };
 
   getPersialRefundTicketsByInvoice = async (invoice_id: idType) => {

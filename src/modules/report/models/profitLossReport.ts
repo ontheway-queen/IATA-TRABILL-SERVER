@@ -522,17 +522,19 @@ class ProfitLossReport extends AbstractModels {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
     const [data] = (await this.query()
-      .sum('return_amount as total_return')
-      .from('v_client_refunds')
-      .andWhereRaw(`DATE_FORMAT(refund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
+      .sum('crefund_return_amount as client_refund_return')
+      .sum('vrefund_return_amount as vendor_refund_return')
+      .from('v_all_refunds')
+      .andWhereRaw(`DATE_FORMAT(atrefund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
         from_date,
         to_date,
       ])
-      .andWhere('org_id', this.org_agency)) as {
-      total_return: number;
+      .andWhere('atrefund_org_agency', this.org_agency)) as {
+      client_refund_return: string;
+      vendor_refund_return: string;
     }[];
 
-    return Number(data.total_return) || 0;
+    return data;
   };
 
   public async visaWiseProfitLoss(

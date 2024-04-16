@@ -341,6 +341,7 @@ class RefundModel extends abstract_models_1.default {
             })
                 .andWhere('prfnd_is_deleted', 0)
                 .andWhere('prfnd_org_agency', this.org_agency)
+                .orderBy('prfnd_id', 'desc')
                 .limit(size)
                 .offset(offset);
             for (const info of refund_info) {

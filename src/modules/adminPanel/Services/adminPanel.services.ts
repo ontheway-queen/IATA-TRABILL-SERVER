@@ -481,8 +481,6 @@ class AdminPanelServices extends AbstractServices {
 
     const new_logo = req.image_files['scan_copy_0'];
 
-    console.log({ new_logo });
-
     if (new_logo) {
       const previous_logo = await conn.updateAgencyLogo(new_logo, agency_id);
 

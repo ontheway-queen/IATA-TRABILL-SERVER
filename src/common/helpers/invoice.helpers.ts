@@ -3,6 +3,7 @@ import { IAgentProfileTransaction } from '../../modules/clients/agents_profile/T
 import CombineClientsModels from '../../modules/clients/combined_clients/models/combineClients.models';
 import VendorModel from '../../modules/vendor/models/VendorModel';
 import { IDeletePreviousVendor } from '../interfaces/commonInterfaces';
+import CommonInvoiceModel from '../model/CommonInvoice.models';
 import {
   ClientComType,
   InvoiceMoneyReceiptType,
@@ -29,8 +30,6 @@ class InvoiceHelpers {
     }
 
     const agent_last_balance = await models.getAgentLastBalance(agent_id);
-
-    const updateAgentBalance = agent_last_balance - Number(commission_amount);
 
     const agentTransactionData: IAgentProfileTransaction = {
       agtrxn_agency_id,
@@ -65,8 +64,6 @@ class InvoiceHelpers {
   ) => {
     await models.deleteAgentTransaction(invoice_id, user_id);
   };
-
-
 }
 
 export default InvoiceHelpers;
@@ -203,4 +200,42 @@ export const ValidateCreditLimit = async (vendor_id: string) => {
   //   'bad request'
   // );
   return true;
+};
+
+// ADD ADVANCE MONEY RECEIPT
+export const addAdvanceMr = async (
+  common_conn: CommonInvoiceModel,
+  inv_id: number,
+  cl_id: number | null,
+  com_id: number | null,
+  net_total: number
+) => {
+  const data = await common_conn.getAdvanceMrById(cl_id, com_id);
+
+  let need_to_payment = Number(net_total);
+
+  if (data.length) {
+    for (const item of data) {
+      if (need_to_payment === 0) {
+        break;
+      }
+
+      const payment_amount =
+        need_to_payment > item.payable_amount
+          ? item.payable_amount
+          : need_to_payment;
+
+      const invClPay = {
+        invclientpayment_moneyreceipt_id: item.receipt_id,
+        invclientpayment_amount: payment_amount,
+        invclientpayment_invoice_id: inv_id,
+        invclientpayment_client_id: cl_id,
+        invclientpayment_combined_id: com_id,
+      };
+
+      await common_conn.insertAdvanceMr(invClPay);
+
+      need_to_payment -= Number(payment_amount);
+    }
+  }
 };

@@ -236,6 +236,19 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .where('airticket_existing_invoiceid', existingInvoiceId)
                 .andWhereNot('airticket_is_deleted', 1);
         });
+        // ADVANCE MONEY RECEIPT
+        this.getAdvanceMrById = (cl_id, com_id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.query()
+                .select('*')
+                .from('v_advance_mr')
+                .where('receipt_org_agency', this.org_agency)
+                .andWhere('receipt_client_id', cl_id)
+                .andWhere('receipt_combined_id', com_id);
+            return data;
+        });
+        this.insertAdvanceMr = (data) => __awaiter(this, void 0, void 0, function* () {
+            yield this.query().insert(data).into('trabill_invoice_client_payments');
+        });
     }
     getAllInvoices(category_id, page, size, search_text = '', from_date, to_date) {
         return __awaiter(this, void 0, void 0, function* () {

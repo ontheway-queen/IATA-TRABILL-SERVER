@@ -45,7 +45,7 @@ const invoice_utils_1 = require("../../../utils/invoice.utils");
 class AddInvoiceOther extends abstract_services_1.default {
     constructor() {
         super();
-        this.addInvoiceOtehr = (req) => __awaiter(this, void 0, void 0, function* () {
+        this.addInvoiceOther = (req) => __awaiter(this, void 0, void 0, function* () {
             const { invoice_net_total, invoice_combclient_id, invoice_created_by, invoice_note, invoice_sales_date, invoice_due_date, invoice_sales_man_id, invoice_sub_total, invoice_vat, invoice_service_charge, invoice_discount, invoice_agent_id, invoice_agent_com_amount, money_receipt, billing_information, hotel_information, ticketInfo, transport_information, passport_information, invoice_reference, } = req.body;
             // VALIDATE CLIENT AND VENDOR
             const { invoice_total_profit, invoice_total_vendor_price, pax_name } = yield (0, invoice_helpers_1.InvoiceClientAndVendorValidate)(billing_information, invoice_combclient_id);
@@ -69,7 +69,7 @@ class AddInvoiceOther extends abstract_services_1.default {
                 const ctrxn_pnr = ticketInfo.map((item) => item.ticket_pnr).join(', ');
                 const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
                 // CLIENT TRANSACTIONS
-                const clientTransId = yield utils.clientTrans(trxns, invoice_no, ctrxn_pnr, (_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route, ctrxn_ticket, productName);
+                const clientTransId = yield utils.clientTrans(trxns, invoice_no, ctrxn_pnr, ticketInfo && ((_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route), ctrxn_ticket, productName);
                 const invoieInfo = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_combined_id,
                     invoice_created_by,
@@ -81,6 +81,10 @@ class AddInvoiceOther extends abstract_services_1.default {
                     invoice_total_vendor_price,
                     invoice_reference });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoieInfo);
+                // ADVANCE MR
+                if ((0, invoice_helpers_1.isEmpty)(req.body.money_receipt)) {
+                    yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, invoice_client_id, invoice_combined_id, invoice_net_total);
+                }
                 // AGENT TRANSACTION
                 yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 98, 'INVOICE OTHER');
                 const invoiceExtraAmount = {

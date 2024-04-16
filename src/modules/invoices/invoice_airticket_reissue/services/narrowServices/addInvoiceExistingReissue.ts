@@ -3,6 +3,10 @@ import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import {
+  addAdvanceMr,
+  isEmpty,
+} from '../../../../../common/helpers/invoice.helpers';
+import {
   IClTrxnBody,
   IVTrxn,
 } from '../../../../../common/interfaces/Trxn.interfaces';
@@ -99,6 +103,17 @@ class AddExistingClient extends AbstractServices {
       const invoice_id = await common_conn.insertInvoicesInfo(
         invoice_information
       );
+
+      // ADVANCE MR
+      if (isEmpty(req.body.money_receipt)) {
+        await addAdvanceMr(
+          common_conn,
+          invoice_id,
+          client_id,
+          combined_id,
+          airticket_client_price
+        );
+      }
 
       const {
         combined_id: airticket_vendor_combine_id,

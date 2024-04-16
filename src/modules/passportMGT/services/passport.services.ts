@@ -234,7 +234,6 @@ class PassportServices extends AbstractServices {
 
   public allPassports = async (req: Request) => {
     let {
-      trash,
       page,
       size,
       search,
@@ -242,7 +241,6 @@ class PassportServices extends AbstractServices {
       to_date,
       filter: client_id,
     } = req.query as {
-      trash: string;
       page: string;
       size: string;
       search: string;

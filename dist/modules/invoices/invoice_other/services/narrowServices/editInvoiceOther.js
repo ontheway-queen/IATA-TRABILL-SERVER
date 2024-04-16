@@ -61,17 +61,13 @@ class EditInvoiceOther extends abstract_services_1.default {
                     productName = yield conn.getProductsName(productsIds);
                 }
                 const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
-                const ctrxn_ticket = ticketInfo &&
-                    (ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.length) > 0 &&
-                    ticketInfo.map((item) => item.ticket_no).join(' ,');
-                const ctrxn_pnr = ticketInfo &&
-                    (ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.length) > 0 &&
-                    ticketInfo.map((item) => item.ticket_pnr).join(' ,');
+                const ctrxn_ticket = ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.map((item) => item.ticket_no).join(' ,');
+                const ctrxn_pnr = ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.map((item) => item.ticket_pnr).join(', ');
                 const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
                 // CLIENT TRANSACTIONS
-                const clientTransId = yield utils.updateClientTrans(trxns, prevCtrxnId, prevClChargeTransId, invoice_no, ctrxn_pnr, (_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route, ctrxn_ticket, productName);
+                const clientTransId = yield utils.updateClientTrans(trxns, prevCtrxnId, prevClChargeTransId, invoice_no, ctrxn_pnr, ticketInfo && ((_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route), ctrxn_ticket, productName);
                 // UPDATE INVOICE INFORMATION
-                const invoieInfo = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
+                const invoiceInfo = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_combined_id,
                     invoice_net_total,
                     invoice_note,
@@ -81,7 +77,7 @@ class EditInvoiceOther extends abstract_services_1.default {
                     invoice_sub_total, invoice_updated_by: invoice_created_by, invoice_reference,
                     invoice_total_profit,
                     invoice_total_vendor_price });
-                yield common_conn.updateInvoiceInformation(invoice_id, invoieInfo);
+                yield common_conn.updateInvoiceInformation(invoice_id, invoiceInfo);
                 if (invoice_agent_id) {
                     // AGENT TRANSACTION
                     yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'UPDATE', 99, 'INVOICE OTHER ');

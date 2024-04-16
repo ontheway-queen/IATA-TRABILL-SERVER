@@ -111,6 +111,10 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                     invoice_walking_customer_name,
                     invoice_reference });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoiceData);
+                // ADVANCE MR
+                if ((0, invoice_helpers_1.isEmpty)(req.body.money_receipt)) {
+                    yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, invoice_client_id, invoice_combined_id, invoice_net_total);
+                }
                 // AGENT TRANSACTION
                 yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 92, 'AIR TICKET NON COMMISSION');
                 const invoice_extra_ammount = {

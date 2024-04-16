@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ValidateCreditLimit = exports.generateVoucherNumber = exports.MoneyReceiptAmountIsValid = exports.InvoiceClientAndVendorValidate = exports.ValidateClientAndVendor = exports.getClientOrCombId = exports.isEmpty = exports.isNotEmpty = exports._ = void 0;
+exports.addAdvanceMr = exports.ValidateCreditLimit = exports.generateVoucherNumber = exports.MoneyReceiptAmountIsValid = exports.InvoiceClientAndVendorValidate = exports.ValidateClientAndVendor = exports.getClientOrCombId = exports.isEmpty = exports.isNotEmpty = exports._ = void 0;
 const customError_1 = __importDefault(require("../utils/errors/customError"));
 class InvoiceHelpers {
 }
@@ -23,7 +23,6 @@ InvoiceHelpers.invoiceAgentTransactions = (models, agtrxn_agency_id, agent_id, i
         return;
     }
     const agent_last_balance = yield models.getAgentLastBalance(agent_id);
-    const updateAgentBalance = agent_last_balance - Number(commission_amount);
     const agentTransactionData = {
         agtrxn_agency_id,
         agtrxn_invoice_id: invoice_id,
@@ -141,4 +140,29 @@ const ValidateCreditLimit = (vendor_id) => __awaiter(void 0, void 0, void 0, fun
     return true;
 });
 exports.ValidateCreditLimit = ValidateCreditLimit;
+// ADD ADVANCE MONEY RECEIPT
+const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total) => __awaiter(void 0, void 0, void 0, function* () {
+    const data = yield common_conn.getAdvanceMrById(cl_id, com_id);
+    let need_to_payment = Number(net_total);
+    if (data.length) {
+        for (const item of data) {
+            if (need_to_payment === 0) {
+                break;
+            }
+            const payment_amount = need_to_payment > item.payable_amount
+                ? item.payable_amount
+                : need_to_payment;
+            const invClPay = {
+                invclientpayment_moneyreceipt_id: item.receipt_id,
+                invclientpayment_amount: payment_amount,
+                invclientpayment_invoice_id: inv_id,
+                invclientpayment_client_id: cl_id,
+                invclientpayment_combined_id: com_id,
+            };
+            yield common_conn.insertAdvanceMr(invClPay);
+            need_to_payment -= Number(payment_amount);
+        }
+    }
+});
+exports.addAdvanceMr = addAdvanceMr;
 //# sourceMappingURL=invoice.helpers.js.map

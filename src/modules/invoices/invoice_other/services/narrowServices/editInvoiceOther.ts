@@ -81,15 +81,9 @@ class EditInvoiceOther extends AbstractServices {
       const { prevCtrxnId, prevClChargeTransId } =
         await common_conn.getPreviousInvoices(invoice_id);
 
-      const ctrxn_ticket =
-        ticketInfo &&
-        ticketInfo?.length > 0 &&
-        ticketInfo.map((item) => item.ticket_no).join(' ,');
+      const ctrxn_ticket = ticketInfo?.map((item) => item.ticket_no).join(' ,');
 
-      const ctrxn_pnr =
-        ticketInfo &&
-        ticketInfo?.length > 0 &&
-        ticketInfo.map((item) => item.ticket_pnr).join(' ,');
+      const ctrxn_pnr = ticketInfo?.map((item) => item.ticket_pnr).join(', ');
 
       const utils = new InvoiceUtils(req.body, common_conn);
       // CLIENT TRANSACTIONS
@@ -99,13 +93,13 @@ class EditInvoiceOther extends AbstractServices {
         prevClChargeTransId,
         invoice_no,
         ctrxn_pnr as string,
-        ticketInfo[0]?.ticket_route as string,
+        ticketInfo && (ticketInfo[0]?.ticket_route as string),
         ctrxn_ticket as string,
         productName
       );
 
       // UPDATE INVOICE INFORMATION
-      const invoieInfo: IUpdateInvoiceInfoDb = {
+      const invoiceInfo: IUpdateInvoiceInfoDb = {
         ...clientTransId,
         invoice_client_id,
         invoice_combined_id,
@@ -122,7 +116,7 @@ class EditInvoiceOther extends AbstractServices {
         invoice_total_vendor_price,
       };
 
-      await common_conn.updateInvoiceInformation(invoice_id, invoieInfo);
+      await common_conn.updateInvoiceInformation(invoice_id, invoiceInfo);
 
       if (invoice_agent_id) {
         // AGENT TRANSACTION

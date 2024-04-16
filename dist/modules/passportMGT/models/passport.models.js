@@ -63,14 +63,13 @@ class PassportModel extends abstract_models_1.default {
             search_text && search_text.toLocaleLowerCase();
             const page_number = (page - 1) * size;
             const data = yield this.query()
-                .select('passport_org_agency', 'passport_id', 'pstatus_name', 'passport_client_id', 'client_name', 'client_mobile', 'passport_name', 'passport_passport_no', 'passport_mobile_no', 'passport_date_of_birth', 'passport_date_of_issue', 'passport_date_of_expire', 'passport_create_date', 'passport_email', 'passport_scan_copy', 'passport_upload_photo', 'passport_upload_others', 'rclient_name')
+                .select('passport_org_agency', 'passport_id', 'pstatus_name', 'passport_client_id', 'client_name', 'client_mobile', 'passport_name', 'passport_passport_no', 'passport_mobile_no', 'passport_date_of_birth', 'passport_date_of_issue', 'passport_date_of_expire', 'passport_create_date', 'passport_email', 'passport_scan_copy', 'passport_upload_photo', 'passport_upload_others')
                 .from('trabill_passport_details')
                 .leftJoin('trabill_clients', { client_id: 'passport_client_id' })
                 .leftJoin('trabill_combined_clients', {
                 combine_id: 'passport_combined_id',
             })
                 .leftJoin(this.db.raw(`trabill_passport_status ON pstatus_id = passport_status_id AND pstatus_is_deleted = 0`))
-                .leftJoin(this.db.raw(`rcm.rcm_clients ON trabill.trabill_passport_details.passport_rec_cl_id = rcm.rcm_clients.rclient_id AND rclient_is_deleted = 0`))
                 .where('passport_is_deleted', 0)
                 .andWhere((builder) => {
                 builder.andWhere('passport_org_agency', this.org_agency).modify((e) => {

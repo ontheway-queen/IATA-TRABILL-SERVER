@@ -15,10 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getNext15Day = exports.getIataDateRange = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
 const axios_1 = __importDefault(require("axios"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
+const dayjs_1 = __importDefault(require("dayjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const config_1 = __importDefault(require("../../../config/config"));
 const customError_1 = __importDefault(require("../errors/customError"));
-const dayjs_1 = __importDefault(require("dayjs"));
 class Lib {
     static jwtVerify(token, key) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -144,29 +144,17 @@ const getNext15Day = (inputDate) => {
     const currentYear = currentDate.getFullYear();
     // Get the last day of the current month
     const lastDayOfMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const nextMonth = currentMonth === 11 ? 0 : currentMonth;
+    const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
     let date = '';
     if (currentDate.getDate() === 1) {
-        // If input date is the last day of the month, return the next month's 15th date
-        const nextMonth = currentMonth === 11 ? 0 : currentMonth;
-        const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-        date = new Date(nextYear, nextMonth, 17).toISOString().slice(0, 10);
+        date = new Date(nextYear, nextMonth, 16).toISOString();
     }
-    else if (currentDate.getDate() === 16) {
-        // If input date is the last day of the month, return the next month's 15th date
-        const nextMonth = currentMonth === 11 ? 0 : currentMonth;
-        const nextYear = currentMonth === 11 ? currentYear + 1 : currentYear;
-        date = new Date(nextYear, nextMonth + 1, 2).toISOString().slice(0, 10);
+    else if (currentDate.getDate() === 15) {
+        date = new Date(nextYear, nextMonth, lastDayOfMonth).toISOString();
     }
     else if (currentDate.getDate() === lastDayOfMonth) {
-        date = new Date(currentYear, currentMonth + 1, 16)
-            .toISOString()
-            .slice(0, 10);
-    }
-    else {
-        // Otherwise, return the current month's last day
-        date = new Date(currentYear, currentMonth, lastDayOfMonth + 1)
-            .toISOString()
-            .slice(0, 10);
+        date = new Date(currentYear, currentMonth + 1, 16).toISOString();
     }
     return date;
 };

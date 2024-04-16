@@ -114,7 +114,7 @@ class PassportServices extends abstract_services_1.default {
             }));
         });
         this.allPassports = (req) => __awaiter(this, void 0, void 0, function* () {
-            let { trash, page, size, search, from_date, to_date, filter: client_id, } = req.query;
+            let { page, size, search, from_date, to_date, filter: client_id, } = req.query;
             let client = null;
             let combined = null;
             client_id = client_id === 'undefined' ? '' : client_id;

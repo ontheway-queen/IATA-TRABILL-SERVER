@@ -28,3 +28,20 @@ export interface IModels {
   invoiceOtherModel(schema: string, trx?: Knex.Transaction): InvoiceOther;
   invoiceVisa(schema: string, trx?: Knex.Transaction): InvoiceVisaModels;
 }
+
+export interface IAdvanceMr {
+  receipt_id: number;
+  receipt_org_agency: number;
+  receipt_client_id: number | null;
+  receipt_combined_id: number | null;
+  receipt_total_amount: number;
+  total_inv_paid: number;
+  payable_amount: number;
+}
+export interface IAdvanceMrInsert {
+  invclientpayment_moneyreceipt_id: number;
+  invclientpayment_amount: number;
+  invclientpayment_invoice_id: number;
+  invclientpayment_client_id: number | null;
+  invclientpayment_combined_id: number | null;
+}

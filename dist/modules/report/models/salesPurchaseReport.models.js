@@ -522,7 +522,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 to_date,
             ]));
             const [infos] = yield this.query()
-                .select(this.db.raw(`SUM(COALESCE(invoice_net_total, 0)) AS total_sales`), this.db.raw(`SUM(COALESCE(cost_price, 0)) AS total_cost`), this.db.raw(`SUM(COALESCE(profit_amount, 0)) AS total_profit`), this.db.raw(`SUM(COALESCE(client_pay_amount, 0)) AS total_collection`), this.db.raw(`SUM(COALESCE(due_amount, 0)) AS total_due`), this.db.raw(`SUM(COALESCE(vendor_pay_amount, 0)) AS total_payment`), this.db.raw(`SUM(COALESCE(refund_total_amount, 0)) AS total_refund`), this.db.raw(`SUM(COALESCE(refund_profit, 0)) AS total_refund_profit`))
+                .select(this.db.raw(`SUM(COALESCE(invoice_net_total, 0)) AS total_sales`), this.db.raw(`SUM(COALESCE(cost_price, 0)) AS total_cost`), this.db.raw(`SUM(COALESCE(client_pay_amount, 0)) AS total_collection`), this.db.raw(`SUM(COALESCE(due_amount, 0)) AS total_due`), this.db.raw(`SUM(COALESCE(invoice_service_charge, 0)) AS total_service_charge`), this.db.raw(`SUM(COALESCE(invoice_discount, 0)) AS total_discount`), this.db.raw(`SUM(COALESCE(vendor_pay_amount, 0)) AS total_payment`))
                 .from('view_daily_sales_report')
                 .where('org_agency_id', this.org_agency)
                 .modify((event) => {

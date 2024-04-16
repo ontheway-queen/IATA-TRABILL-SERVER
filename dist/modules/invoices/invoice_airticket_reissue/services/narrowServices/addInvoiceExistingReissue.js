@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
+const invoice_helpers_1 = require("../../../../../common/helpers/invoice.helpers");
 class AddExistingClient extends abstract_services_1.default {
     constructor() {
         super();
@@ -60,6 +61,10 @@ class AddExistingClient extends abstract_services_1.default {
                     invoice_total_vendor_price: airticket_purchase_price,
                 };
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoice_information);
+                // ADVANCE MR
+                if ((0, invoice_helpers_1.isEmpty)(req.body.money_receipt)) {
+                    yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, client_id, combined_id, airticket_client_price);
+                }
                 const { combined_id: airticket_vendor_combine_id, vendor_id: airticket_vendor_id, } = (0, common_helper_1.separateCombClientToId)(comb_vendor);
                 // VENDOR TRANSACTIONS
                 const VTrxnBody = {

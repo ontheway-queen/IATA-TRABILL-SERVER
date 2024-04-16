@@ -31,8 +31,6 @@ class RefundServices extends AbstractServices {
       invoice_id: number;
     };
 
-    console.log({ body: req.body });
-
     const conn = this.models.refundModel(req);
 
     const data = await conn.airTicketInfos(ticket_no, invoice_id);
@@ -281,8 +279,6 @@ class RefundServices extends AbstractServices {
     const conn = this.models.refundModel(req);
 
     const data = await conn.getPersialRefundTickets(client_id, combined_id);
-
-    console.log({ client_id, combined_id, data });
 
     return { success: true, data };
   };

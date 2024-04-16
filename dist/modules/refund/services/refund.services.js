@@ -33,7 +33,6 @@ class RefundServices extends abstract_services_1.default {
         });
         this.airTicketInfos = (req) => __awaiter(this, void 0, void 0, function* () {
             const { ticket_no, invoice_id } = req.body;
-            console.log({ body: req.body });
             const conn = this.models.refundModel(req);
             const data = yield conn.airTicketInfos(ticket_no, invoice_id);
             return { success: true, data };
@@ -169,7 +168,6 @@ class RefundServices extends abstract_services_1.default {
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
             const conn = this.models.refundModel(req);
             const data = yield conn.getPersialRefundTickets(client_id, combined_id);
-            console.log({ client_id, combined_id, data });
             return { success: true, data };
         });
         this.getPersialRefundTicketsByInvoice = (req) => __awaiter(this, void 0, void 0, function* () {

@@ -3,7 +3,9 @@ import moment from 'moment';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import InvoiceHelpers, {
+  addAdvanceMr,
   getClientOrCombId,
+  isEmpty,
   isNotEmpty,
   MoneyReceiptAmountIsValid,
   ValidateClientAndVendor,
@@ -149,6 +151,17 @@ class AddReissueAirticket extends AbstractServices {
       const invoice_id = await common_conn.insertInvoicesInfo(
         invoice_information
       );
+
+      // ADVANCE MR
+      if (isEmpty(req.body.money_receipt)) {
+        await addAdvanceMr(
+          common_conn,
+          invoice_id,
+          invoice_client_id,
+          invoice_combined_id,
+          invoice_net_total
+        );
+      }
 
       // AGENT TRANSACTION
       await InvoiceHelpers.invoiceAgentTransactions(

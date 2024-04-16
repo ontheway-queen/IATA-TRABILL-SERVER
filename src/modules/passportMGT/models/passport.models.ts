@@ -66,8 +66,7 @@ class PassportModel extends AbstractModels {
         'passport_email',
         'passport_scan_copy',
         'passport_upload_photo',
-        'passport_upload_others',
-        'rclient_name'
+        'passport_upload_others'
       )
       .from('trabill_passport_details')
       .leftJoin('trabill_clients', { client_id: 'passport_client_id' })
@@ -77,11 +76,6 @@ class PassportModel extends AbstractModels {
       .leftJoin(
         this.db.raw(
           `trabill_passport_status ON pstatus_id = passport_status_id AND pstatus_is_deleted = 0`
-        )
-      )
-      .leftJoin(
-        this.db.raw(
-          `rcm.rcm_clients ON trabill.trabill_passport_details.passport_rec_cl_id = rcm.rcm_clients.rclient_id AND rclient_is_deleted = 0`
         )
       )
       .where('passport_is_deleted', 0)
@@ -113,9 +107,7 @@ class PassportModel extends AbstractModels {
           }
         });
       })
-
       .andWhere('passport_org_agency', this.org_agency)
-
       .orderBy('passport_create_date', 'desc')
       .limit(size)
       .offset(page_number);

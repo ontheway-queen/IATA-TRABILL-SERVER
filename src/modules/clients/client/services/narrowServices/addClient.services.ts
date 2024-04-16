@@ -29,8 +29,6 @@ class AddClientService extends AbstractServices {
       client_source,
     } = req.body as IClientBody;
 
-    console.log({ body: req.body });
-
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.clientModel(req, trx);
       const trxns = new Trxns(req, trx);

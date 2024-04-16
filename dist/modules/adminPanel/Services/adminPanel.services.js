@@ -304,7 +304,6 @@ class AdminPanelServices extends abstract_services_1.default {
             const agency_id = req.params.agency_id;
             const conn = this.models.adminPanel(req);
             const new_logo = req.image_files['scan_copy_0'];
-            console.log({ new_logo });
             if (new_logo) {
                 const previous_logo = yield conn.updateAgencyLogo(new_logo, agency_id);
                 yield this.deleteFile.delete_image(previous_logo);

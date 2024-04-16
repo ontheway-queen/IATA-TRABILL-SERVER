@@ -5,7 +5,9 @@ import { separateCombClientToId } from '../../../../../common/helpers/common.hel
 import InvoiceHelpers, {
   InvoiceClientAndVendorValidate,
   MoneyReceiptAmountIsValid,
+  addAdvanceMr,
   getClientOrCombId,
+  isEmpty,
   isNotEmpty,
 } from '../../../../../common/helpers/invoice.helpers';
 import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
@@ -32,7 +34,7 @@ class AddInvoiceOther extends AbstractServices {
     super();
   }
 
-  public addInvoiceOtehr = async (req: Request) => {
+  public addInvoiceOther = async (req: Request) => {
     const {
       invoice_net_total,
       invoice_combclient_id,
@@ -101,7 +103,7 @@ class AddInvoiceOther extends AbstractServices {
         trxns,
         invoice_no,
         ctrxn_pnr as string,
-        ticketInfo[0]?.ticket_route as string,
+        ticketInfo && (ticketInfo[0]?.ticket_route as string),
         ctrxn_ticket as string,
         productName
       );
@@ -125,6 +127,17 @@ class AddInvoiceOther extends AbstractServices {
       };
 
       const invoice_id = await common_conn.insertInvoicesInfo(invoieInfo);
+
+      // ADVANCE MR
+      if (isEmpty(req.body.money_receipt)) {
+        await addAdvanceMr(
+          common_conn,
+          invoice_id,
+          invoice_client_id,
+          invoice_combined_id,
+          invoice_net_total
+        );
+      }
 
       // AGENT TRANSACTION
       await InvoiceHelpers.invoiceAgentTransactions(

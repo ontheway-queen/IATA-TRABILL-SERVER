@@ -19,8 +19,6 @@ class InivoiceOther extends AbstractServices {
       to_date: string;
     };
 
-
-
     const conn = this.models.invoiceOtherModel(req);
 
     const data = await conn.getAllInvoiceOtherList(
@@ -30,8 +28,6 @@ class InivoiceOther extends AbstractServices {
       Number(page),
       size
     );
-
-
 
     return {
       success: true,
@@ -118,7 +114,6 @@ class InivoiceOther extends AbstractServices {
     const conn = this.models.invoiceOtherModel(req);
     const invoiceOthers = await conn.getRefundOthersInfo(clientId);
 
-
     return {
       success: true,
       data: invoiceOthers,
@@ -127,7 +122,7 @@ class InivoiceOther extends AbstractServices {
 
   // ============= narrow services ==============
 
-  public postInvoiceOther = new AddInvoiceOther().addInvoiceOtehr;
+  public postInvoiceOther = new AddInvoiceOther().addInvoiceOther;
   public editInvoiceOther = new EditInvoiceOther().editInvoiceOther;
   public deleteInvoiceOther = new DeleteInvoiceOtehr().deleteInvoiceOther;
   public voidInvoiceOther = new DeleteInvoiceOtehr().voidInvoiceOther;

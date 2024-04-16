@@ -19,6 +19,7 @@ import {
   idType,
 } from '../types/common.types';
 import CustomError from '../utils/errors/customError';
+import { IAdvanceMr, IAdvanceMrInsert } from './interfaces';
 
 class CommonInvoiceModel extends AbstractModels {
   checkCreditLimit = async (
@@ -833,6 +834,22 @@ class CommonInvoiceModel extends AbstractModels {
       })
       .where('airticket_existing_invoiceid', existingInvoiceId)
       .andWhereNot('airticket_is_deleted', 1);
+  };
+
+  // ADVANCE MONEY RECEIPT
+  getAdvanceMrById = async (cl_id: number | null, com_id: number | null) => {
+    const data = await this.query()
+      .select('*')
+      .from('v_advance_mr')
+      .where('receipt_org_agency', this.org_agency)
+      .andWhere('receipt_client_id', cl_id)
+      .andWhere('receipt_combined_id', com_id);
+
+    return data as IAdvanceMr[];
+  };
+
+  insertAdvanceMr = async (data: IAdvanceMrInsert) => {
+    await this.query().insert(data).into('trabill_invoice_client_payments');
   };
 }
 

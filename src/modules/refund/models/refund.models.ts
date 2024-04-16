@@ -1546,7 +1546,7 @@ class RefundModel extends AbstractModels {
       .andWhere('invoice_client_id', client_id)
       .andWhere('invoice_combined_id', combine_id)
       .whereNot('invoice_is_deleted', 1)
-      .whereNot('invoice_is_refund', 1)
+      // .whereNot('invoice_is_refund', 1)
       .whereNot('invoice_is_cancel', 1)
       .whereNot('invoice_is_void', 1)
       .groupBy('ti.invoice_id', 'ti.invoice_no', 'ti.invoice_net_total');

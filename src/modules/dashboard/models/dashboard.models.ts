@@ -437,7 +437,8 @@ class DashboardModels extends AbstractModels {
         this.db.raw('sum(airticket_profit) as overall_profit')
       )
       .from('v_bsp_ticket_issue')
-      .where('airticket_vendor_id', 5440)
+      .where('vendor_org_agency', this.org_agency)
+      .andWhere('vendor_type', 'IATA')
       .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
         from_date,
         to_date,
@@ -450,7 +451,8 @@ class DashboardModels extends AbstractModels {
     return await this.query()
       .select('*')
       .from('v_bsp_ticket_issue')
-      .where('airticket_vendor_id', 5440)
+      .where('vendor_org_agency', this.org_agency)
+      .andWhere('vendor_type', 'IATA')
       .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
         from_date,
         to_date,
@@ -469,7 +471,8 @@ class DashboardModels extends AbstractModels {
         this.db.raw('sum(airticket_profit) as overall_profit')
       )
       .from('v_bsp_ticket_reissue')
-      .where('airticket_vendor_id', 5440)
+      .where('vendor_org_agency', this.org_agency)
+      .andWhere('vendor_type', 'IATA')
       .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
         from_date,
         to_date,
@@ -481,7 +484,8 @@ class DashboardModels extends AbstractModels {
     return await this.query()
       .select('*')
       .from('v_bsp_ticket_reissue')
-      .where('airticket_vendor_id', 5440)
+      .where('vendor_org_agency', this.org_agency)
+      .andWhere('vendor_type', 'IATA')
       .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
         from_date,
         to_date,
@@ -492,7 +496,8 @@ class DashboardModels extends AbstractModels {
     const [data] = await this.query()
       .sum('vrefund_return_amount as refund_amount')
       .from('v_bsp_ticket_refund')
-      .where('vrefund_vendor_id', 5440)
+      .where('vendor_org_agency', this.org_agency)
+      .andWhere('vendor_type', 'IATA')
       .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
 
     return data;
@@ -502,7 +507,8 @@ class DashboardModels extends AbstractModels {
     return await this.query()
       .select('*')
       .from('v_bsp_ticket_refund')
-      .where('vrefund_vendor_id', 5440)
+      .where('vendor_org_agency', this.org_agency)
+      .andWhere('vendor_type', 'IATA')
       .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
   };
 

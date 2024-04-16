@@ -371,7 +371,7 @@ class AddPersialRefundServices extends AbstractServices {
 
       await conn.updateInvoiceAirticketIsRefund(invoice_id, 1);
 
-      const audit_content = `Persial refund has been created vouchar no:${vouchar_no} invoice id: ${invoice_id}`;
+      const audit_content = `Persial refund has been created vouchar no:${vouchar_no}`;
 
       await this.insertAudit(
         req,

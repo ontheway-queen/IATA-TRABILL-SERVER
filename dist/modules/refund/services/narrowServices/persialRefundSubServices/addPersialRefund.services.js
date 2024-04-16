@@ -291,7 +291,7 @@ class AddPersialRefundServices extends abstract_services_1.default {
                 }
                 yield conn.addPersialRefundVendorInfo(persialVendorInfos);
                 yield conn.updateInvoiceAirticketIsRefund(invoice_id, 1);
-                const audit_content = `Persial refund has been created vouchar no:${vouchar_no} invoice id: ${invoice_id}`;
+                const audit_content = `Persial refund has been created vouchar no:${vouchar_no}`;
                 yield this.insertAudit(req, 'create', audit_content, created_by, 'REFUND');
                 return {
                     success: true,

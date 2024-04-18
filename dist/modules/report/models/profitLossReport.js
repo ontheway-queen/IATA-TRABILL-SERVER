@@ -25,7 +25,7 @@ class ProfitLossReport extends abstract_models_1.default {
                 .from('trabill_incentive_income_details')
                 .where('incentive_is_deleted', 0)
                 .andWhere('incentive_org_agency', this.org_agency)
-                .andWhereRaw('Date(incentive_created_date) BETWEEN ? AND ?', [
+                .andWhereRaw('Date(incentive_date) BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ]));
@@ -33,7 +33,7 @@ class ProfitLossReport extends abstract_models_1.default {
         });
         this.agentLedgers = (agentId, from_date, to_date, page = 1, size = 20) => __awaiter(this, void 0, void 0, function* () {
             const offset = (page - 1) * size;
-            return yield this.query()
+            const data = yield this.query()
                 .select('*')
                 .from('trxn.v_agent_ledgers')
                 .where('agtrxn_agency_id', this.org_agency)
@@ -44,6 +44,16 @@ class ProfitLossReport extends abstract_models_1.default {
             ])
                 .limit(size)
                 .offset(offset);
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from('trxn.v_agent_ledgers')
+                .where('agtrxn_agency_id', this.org_agency)
+                .andWhere('agtrxn_agent_id', agentId)
+                .andWhereRaw('Date(agtrxn_created_at) BETWEEN ? AND ?', [
+                from_date,
+                to_date,
+            ]));
+            return { data, count };
         });
         this.getInvoiceVoidProfit = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
@@ -109,20 +119,17 @@ class ProfitLossReport extends abstract_models_1.default {
             return { count: row_count, data: { total_payment, data } };
         });
     }
-    getEmployeExpense(employee_id, from_date, to_date, page, size) {
+    getEmployeeExpenses(employee_id, from_date, to_date, page, size) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const page_number = (page - 1) * size;
             const data = yield this.query()
-                .select('payroll_id', 'employee_full_name as employes_name', 'payroll_salary as employes_salary', 'payroll_net_amount', this.db.raw('(payroll_net_amount - payroll_salary) as payroll_other_aloowance'), 'payroll_note as note', 'payroll_create_date as created_date', this.db.raw("concat(user_first_name, ' ', user_last_name) AS user_full_name"))
+                .select('payroll_id', 'employee_full_name as employes_name', 'payroll_salary as employes_salary', 'payroll_net_amount', this.db.raw('(payroll_net_amount - payroll_salary) as payroll_other_aloowance'), 'payroll_note as note', 'payroll_date', 'payroll_create_date as created_date', this.db.raw("concat(user_first_name, ' ', user_last_name) AS user_full_name"))
                 .from('trabill_payroll')
                 .leftJoin('trabill_users', { user_id: 'payroll_created_by' })
                 .leftJoin('trabill_employees', { employee_id: 'payroll_employee_id' })
-                .andWhereRaw('Date(payroll_create_date) BETWEEN ? AND ?', [
-                from_date,
-                to_date,
-            ])
+                .andWhereRaw('Date(payroll_date) BETWEEN ? AND ?', [from_date, to_date])
                 .modify((builder) => {
                 if (employee_id !== 'all') {
                     builder.where('payroll_employee_id', employee_id);
@@ -144,10 +151,7 @@ class ProfitLossReport extends abstract_models_1.default {
                 .select(this.db.raw(`count(*) as row_count`))
                 .from('trabill_payroll')
                 .where('payroll_id_deleted', 0)
-                .andWhereRaw('Date(payroll_create_date) BETWEEN ? AND ?', [
-                from_date,
-                to_date,
-            ])
+                .andWhereRaw('Date(payroll_date) BETWEEN ? AND ?', [from_date, to_date])
                 .modify((builder) => {
                 if (employee_id !== 'all') {
                     builder.where('payroll_employee_id', employee_id);
@@ -165,7 +169,7 @@ class ProfitLossReport extends abstract_models_1.default {
                 .select(this.db.raw('CAST(SUM(view_invoice_total_billing.sales_price) AS DECIMAL(15,2)) AS total_sales_price'), this.db.raw('CAST(SUM(cost_price) AS DECIMAL(15,2)) AS total_cost_price'))
                 .from('view_invoice_total_billing')
                 .andWhere('view_invoice_total_billing.org_agency_id', this.org_agency)
-                .andWhereRaw('Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?', [from_date, to_date]);
+                .andWhereRaw('Date(view_invoice_total_billing.sales_date) BETWEEN ? AND ?', [from_date, to_date]);
             return data;
         });
     }
@@ -178,14 +182,14 @@ class ProfitLossReport extends abstract_models_1.default {
                 .select('*')
                 .from('view_invoice_total_billing')
                 .where('view_invoice_total_billing.org_agency_id', this.org_agency)
-                .andWhereRaw('Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?', [from_date, to_date])
+                .andWhereRaw('Date(view_invoice_total_billing.sales_date) BETWEEN ? AND ?', [from_date, to_date])
                 .limit(size)
                 .offset(offset);
             const [{ count }] = (yield this.query()
                 .count('* as count')
                 .from('view_invoice_total_billing')
                 .where('view_invoice_total_billing.org_agency_id', this.org_agency)
-                .andWhereRaw('Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?', [from_date, to_date]));
+                .andWhereRaw('Date(view_invoice_total_billing.sales_date) BETWEEN ? AND ?', [from_date, to_date]));
             return { data, count };
         });
     }
@@ -279,7 +283,7 @@ class ProfitLossReport extends abstract_models_1.default {
                 .from('trabill_payroll')
                 .where('payroll_org_agency', this.org_agency)
                 .andWhereNot('payroll_id_deleted', 1)
-                .andWhereRaw('Date(payroll_create_date) BETWEEN ? AND ?', [
+                .andWhereRaw('Date(payroll_date) BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ]));
@@ -389,7 +393,7 @@ class ProfitLossReport extends abstract_models_1.default {
                 .from('trabill_vendor_payments')
                 .where('vpay_is_deleted', 0)
                 .andWhere('vpay_org_agency', this.org_agency)
-                .andWhereRaw('DATE_FORMAT(created_date, "%Y-%m-%d") BETWEEN ? AND ?', [
+                .andWhereRaw('DATE_FORMAT(payment_date, "%Y-%m-%d") BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ]));
@@ -482,7 +486,7 @@ class ProfitLossReport extends abstract_models_1.default {
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const page_number = (page - 1) * size;
             const airticket = yield this.query()
-                .select('airticket_id', 'airticket_airline_id', 'airticket_client_id', 'airticket_vendor_combine_id', 'invoice_category_id', 'airticket_pnr', 'airticket_purchase_price', 'passport_name', 'airline_name', 'airticket_ticket_no', 'invoice_no', 'create_date AS invoice_create_date', 'client_name', 'airticket_client_price', this.db.raw('(airticket_client_price - airticket_purchase_price) as airticket_profit'), 'airticket_invoice_id as invoice_id')
+                .select('airticket_id', 'airticket_airline_id', 'airticket_client_id', 'airticket_vendor_combine_id', 'invoice_category_id', 'airticket_pnr', 'airticket_purchase_price', 'passport_name', 'airline_name', 'airticket_ticket_no', 'invoice_no', 'sales_date', 'create_date AS invoice_create_date', 'client_name', 'airticket_client_price', this.db.raw('(airticket_client_price - airticket_purchase_price) as airticket_profit'), 'airticket_invoice_id as invoice_id')
                 .from('view_all_airticket_details')
                 .modify((event) => {
                 if (ticket_no && ticket_no !== 'all') {
@@ -490,7 +494,7 @@ class ProfitLossReport extends abstract_models_1.default {
                 }
             })
                 .where('airticket_org_agency', this.org_agency)
-                .andWhereRaw('DATE_FORMAT(create_date,"%Y-%m-%d") BETWEEN ? AND ?', [
+                .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ])
@@ -512,7 +516,7 @@ class ProfitLossReport extends abstract_models_1.default {
                 }
             })
                 .where('airticket_org_agency', this.org_agency)
-                .andWhereRaw('DATE_FORMAT(create_date,"%Y-%m-%d") BETWEEN ? AND ?', [
+                .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ]);

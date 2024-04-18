@@ -41,6 +41,7 @@ class ServicesVendor extends abstract_services_1.default {
             const data = Object.assign(Object.assign({}, vendor_payment), { specific_inv_vendors });
             return { success: true, data };
         });
+        // all vendor excel report
         this.getVendorExcelReport = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.vendorModel(req);
             const vendor = yield conn.getVendorExcelReport();
@@ -73,10 +74,10 @@ class ServicesVendor extends abstract_services_1.default {
                 return { success: true, data: data.client_last_balance };
             }
         });
-        this.getAllVendorsAndcombined = (req) => __awaiter(this, void 0, void 0, function* () {
+        this.getAllVendorsAndCombined = (req) => __awaiter(this, void 0, void 0, function* () {
             const { search } = req.query;
             const conn = this.models.vendorModel(req);
-            const data = yield conn.getAllVendorsAndcombined(search);
+            const data = yield conn.getAllVendorsAndCombined(search);
             return { success: true, data };
         });
         this.getAllVendors = (req) => __awaiter(this, void 0, void 0, function* () {

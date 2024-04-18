@@ -818,7 +818,7 @@ class ReportServices extends AbstractServices {
     return { success: true, count, data };
   };
 
-  public refundReportVandor = async (req: Request) => {
+  public refundReportVendor = async (req: Request) => {
     const { from_date, to_date, page, size } = req.query;
     const conn = this.models.reportModel(req);
 
@@ -1077,7 +1077,7 @@ class ReportServices extends AbstractServices {
     return { success: true, ...data };
   };
 
-  public journyDateWiseclientReport = async (req: Request) => {
+  public journeyDateWiseclientReport = async (req: Request) => {
     const { comb_client } = req.body as { comb_client: string };
 
     let separeClient;
@@ -1131,7 +1131,9 @@ class ReportServices extends AbstractServices {
         const invoiceDue = await this.models
           .MoneyReceiptModels(req)
           .getInvoiceDue(invoiceId);
+
         const ticket_info = { ...invoiceDue, ...ticket };
+
         data.push(ticket_info);
       }
     }
@@ -1172,7 +1174,7 @@ class ReportServices extends AbstractServices {
     return { success: true, ...data };
   };
 
-  public getEmployeExpense = async (req: Request) => {
+  public getEmployeeExpense = async (req: Request) => {
     const { employee_id } = req.params as {
       employee_id: idType;
     };
@@ -1181,7 +1183,7 @@ class ReportServices extends AbstractServices {
 
     const conn = this.models.profitLossReport(req);
 
-    const data = await conn.getEmployeExpense(
+    const data = await conn.getEmployeeExpenses(
       employee_id,
       String(from_date),
       String(to_date),
@@ -1412,6 +1414,26 @@ class ReportServices extends AbstractServices {
     const count = await conn.airTicketDetailsCount(from_date, to_date, client);
 
     return { success: true, data, count };
+  };
+  invoiceAndMoneyReceiptDiscount = async (req: Request) => {
+    const { from_date, to_date } = req.query as {
+      from_date: string;
+      to_date: string;
+    };
+
+    if (!from_date || !to_date) {
+      return {
+        success: true,
+        error: 'From date and to date is required !',
+        data: null,
+      };
+    }
+
+    const conn = this.models.reportModel(req);
+
+    const data = await conn.invoiceAndMoneyReceiptDiscount(from_date, to_date);
+
+    return { success: true, data };
   };
 }
 

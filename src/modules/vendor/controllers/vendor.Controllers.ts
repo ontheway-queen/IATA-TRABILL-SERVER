@@ -46,10 +46,10 @@ class VendorController extends AbstractController {
       }
     }
   );
-  public getAllVendorsAndcombined = this.assyncWrapper.wrap(
+  public getAllVendorsAndCombined = this.assyncWrapper.wrap(
     this.validator.commonRead,
     async (req: Request, res: Response) => {
-      const data = await this.services.getAllVendorsAndcombined(req);
+      const data = await this.services.getAllVendorsAndCombined(req);
       if (data.success) {
         res.status(200).json(data);
       } else {

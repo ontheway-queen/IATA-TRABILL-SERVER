@@ -392,11 +392,11 @@ class ReportController extends AbstractController {
     }
   );
 
-  public refundReportVandor = this.assyncWrapper.wrap(
+  public refundReportVendor = this.assyncWrapper.wrap(
     this.validator.readReport,
 
     async (req: Request, res: Response) => {
-      const data = await this.services.refundReportVandor(req);
+      const data = await this.services.refundReportVendor(req);
 
       if (data.success) {
         res.status(200).json(data);
@@ -554,7 +554,7 @@ class ReportController extends AbstractController {
   public journeyDateWiseClientReport = this.assyncWrapper.wrap(
     this.validator.readReport,
     async (req: Request, res: Response) => {
-      const data = await this.services.journyDateWiseclientReport(req);
+      const data = await this.services.journeyDateWiseclientReport(req);
 
       if (data.success) {
         res.status(200).json(data);
@@ -619,12 +619,12 @@ class ReportController extends AbstractController {
   public getEmployeExpense = this.assyncWrapper.wrap(
     this.validator.readReport,
     async (req: Request, res: Response) => {
-      const data = await this.services.getEmployeExpense(req);
+      const data = await this.services.getEmployeeExpense(req);
 
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('Get Employe Expense Report...');
+        this.error('Get Employee Expense Report...');
       }
     }
   );
@@ -637,7 +637,7 @@ class ReportController extends AbstractController {
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('Get All invoice categorys...');
+        this.error('Get All invoice categories...');
       }
     }
   );
@@ -650,7 +650,7 @@ class ReportController extends AbstractController {
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('get ait reportl...');
+        this.error('get ait reports...');
       }
     }
   );
@@ -663,7 +663,7 @@ class ReportController extends AbstractController {
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('get ait reportl...');
+        this.error('get ait reports...');
       }
     }
   );
@@ -676,7 +676,7 @@ class ReportController extends AbstractController {
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('get ait reportl...');
+        this.error('get ait reports...');
       }
     }
   );
@@ -685,6 +685,19 @@ class ReportController extends AbstractController {
     this.validator.readReport,
     async (req: Request, res: Response) => {
       const data = await this.services.getOnlineTrxnCharge(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('');
+      }
+    }
+  );
+
+  public invoiceAndMoneyReceiptDiscount = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.invoiceAndMoneyReceiptDiscount(req);
 
       if (data.success) {
         res.status(200).json(data);

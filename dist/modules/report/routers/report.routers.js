@@ -46,6 +46,7 @@ class ReportRouter extends abstract_routers_1.default {
         // SALES REPORT
         this.routers.post('/daily-sales-report', this.controllers.getDailySalesReport);
         this.routers.get('/daily-sales-report/excel', this.controllers.getDailySalesReportExcel);
+        this.routers.get('/invoice-money-receipt-discount', this.controllers.invoiceAndMoneyReceiptDiscount);
         /**
          * PROFIT LOSS
          */
@@ -65,7 +66,7 @@ class ReportRouter extends abstract_routers_1.default {
         this.routers.get('/monthly-summary', this.controllers.monthlySummary);
         this.routers.get('/daily-summary', this.controllers.dailySummary);
         this.routers.get('/refund-report-client', this.controllers.refundReportClient);
-        this.routers.get('/refund-report-vendor', this.controllers.refundReportVandor);
+        this.routers.get('/refund-report-vendor', this.controllers.refundReportVendor);
         this.routers.get('/salesman-collection-due/:salesman_id', this.controllers.salesManWiseCollectionDue);
         this.routers.get('/sales_report_collection_due', this.controllers.salesReportCollectionDue);
         this.routers.get('/head-wise-expense-report/:head_id', this.controllers.headWiseExpenseReport);

@@ -58,7 +58,7 @@ class ExpenseHeadModel extends AbstractModels {
       .where('head_status', 1)
       .andWhereNot('head_is_deleted', 1)
       .andWhere('head_org_agency', this.org_agency)
-      .orderBy('head_id', 'desc');
+      .orderBy('head_name');
 
     const by_default = await this.query()
       .from('trabill_expense_head')
@@ -71,7 +71,7 @@ class ExpenseHeadModel extends AbstractModels {
       .where('head_status', 1)
       .andWhereNot('head_is_deleted', 1)
       .andWhere('head_org_agency', null)
-      .orderBy('head_id', 'desc');
+      .orderBy('head_name');
 
     return [...by_clients, ...by_default];
   }

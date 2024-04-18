@@ -63,7 +63,7 @@ class VendorModel extends abstract_models_1.default {
                 .where({ vpay_id })
                 .andWhere('vpay_is_deleted', 0);
         });
-        this.getAllVendorsAndcombined = (search) => __awaiter(this, void 0, void 0, function* () {
+        this.getAllVendorsAndCombined = (search) => __awaiter(this, void 0, void 0, function* () {
             return yield this.db('view_vendor_and_combined')
                 .select('vendor_id', 'vendor_name', 'vendor_created_date as created_date', 'vendor_mobile', 'type as vendor_type', 'vendor_lbalance', 'vproduct_commission_rate')
                 .andWhere((build) => {

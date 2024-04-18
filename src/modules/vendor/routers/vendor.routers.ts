@@ -50,7 +50,7 @@ class VendorRouter extends AbstractRouter {
 
     this.routers.get(
       '/all-vendors-combined',
-      this.controller.getAllVendorsAndcombined
+      this.controller.getAllVendorsAndCombined
     );
 
     this.routers.get(

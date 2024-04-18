@@ -155,7 +155,7 @@ class MoneyReceiptModels extends abstract_models_1.default {
                 .whereNot('invoice_is_deleted', 1)
                 .whereNot('invoice_is_refund', 1)
                 .where('invoice_id', invoiceId);
-            return Object.assign(Object.assign({}, data), { invoice_due: data.invoice_due || data.invoice_net_total });
+            return Object.assign(Object.assign({}, data), { invoice_due: (data === null || data === void 0 ? void 0 : data.invoice_due) || (data === null || data === void 0 ? void 0 : data.invoice_net_total) });
         });
         // ======================== @GET_ALL_MONEY_RECEIPT
         this.getAllMoneyReceipt = (page, size, search, from_date, to_date) => __awaiter(this, void 0, void 0, function* () {

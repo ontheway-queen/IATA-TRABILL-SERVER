@@ -59,14 +59,14 @@ class ExpenseHeadModel extends abstract_models_1.default {
                 .where('head_status', 1)
                 .andWhereNot('head_is_deleted', 1)
                 .andWhere('head_org_agency', this.org_agency)
-                .orderBy('head_id', 'desc');
+                .orderBy('head_name');
             const by_default = yield this.query()
                 .from('trabill_expense_head')
                 .select('head_id', 'head_create_date', 'head_name', 'head_org_agency as agency_id')
                 .where('head_status', 1)
                 .andWhereNot('head_is_deleted', 1)
                 .andWhere('head_org_agency', null)
-                .orderBy('head_id', 'desc');
+                .orderBy('head_name');
             return [...by_clients, ...by_default];
         });
     }

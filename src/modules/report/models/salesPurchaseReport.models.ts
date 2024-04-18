@@ -198,6 +198,7 @@ class SalesPurchasesReport extends AbstractModels {
         'view.cost_price',
         'view.invoice_total_pay AS client_payment',
         'view.create_date',
+        'view.sales_date',
         'view.invoice_sales_man_id'
       )
       .from('view_invoice_total_billing as view')
@@ -213,7 +214,7 @@ class SalesPurchasesReport extends AbstractModels {
         }
         if (from_date && to_date) {
           event.whereRaw(
-            'DATE_FORMAT(view.create_date,"%Y-%m-%d") BETWEEN ? AND ?',
+            'DATE_FORMAT(view.sales_date,"%Y-%m-%d") BETWEEN ? AND ?',
             [from_date, to_date]
           );
         }
@@ -232,7 +233,7 @@ class SalesPurchasesReport extends AbstractModels {
         }
         if (from_date && to_date) {
           event.whereRaw(
-            'DATE_FORMAT(view.create_date,"%Y-%m-%d") BETWEEN ? AND ?',
+            'DATE_FORMAT(view.sales_date,"%Y-%m-%d") BETWEEN ? AND ?',
             [from_date, to_date]
           );
         }
@@ -247,7 +248,7 @@ class SalesPurchasesReport extends AbstractModels {
         }
         if (from_date && to_date) {
           event.whereRaw(
-            'DATE_FORMAT(view.create_date,"%Y-%m-%d") BETWEEN ? AND ?',
+            'DATE_FORMAT(view.sales_date,"%Y-%m-%d") BETWEEN ? AND ?',
             [from_date, to_date]
           );
         }
@@ -474,7 +475,8 @@ class SalesPurchasesReport extends AbstractModels {
         'view.invoice_no',
         'view.purchase_price',
         'view.vendor_name',
-        'view.create_date as created_date'
+        'view.create_date as created_date',
+        'view.sales_date'
       )
       .from('view_all_invoices_billing AS view')
       .where('invoice_org_agency', this.org_agency)
@@ -486,7 +488,7 @@ class SalesPurchasesReport extends AbstractModels {
           event.andWhere('view.combined_id', combine_id);
         }
       })
-      .andWhereRaw('Date(view.create_date) BETWEEN ? AND ?', [
+      .andWhereRaw('Date(view.sales_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])
@@ -518,7 +520,7 @@ class SalesPurchasesReport extends AbstractModels {
           event.andWhere('view.combined_id', combine_id);
         }
       })
-      .andWhereRaw('Date(view.create_date) BETWEEN ? AND ?', [
+      .andWhereRaw('Date(view.sales_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
       ]);

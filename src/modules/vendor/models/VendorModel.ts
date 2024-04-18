@@ -1119,7 +1119,7 @@ class VendorModel extends AbstractModels {
     return cheques;
   }
 
-  getAllVendorsAndcombined = async (search: string) => {
+  getAllVendorsAndCombined = async (search: string) => {
     return await this.db('view_vendor_and_combined')
       .select(
         'vendor_id',

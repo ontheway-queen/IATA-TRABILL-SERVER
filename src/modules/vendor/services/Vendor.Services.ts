@@ -44,6 +44,7 @@ class ServicesVendor extends AbstractServices {
     return { success: true, data };
   };
 
+  // all vendor excel report
   public getVendorExcelReport = async (req: Request) => {
     const conn = this.models.vendorModel(req);
     const vendor = await conn.getVendorExcelReport();
@@ -83,12 +84,12 @@ class ServicesVendor extends AbstractServices {
     }
   };
 
-  public getAllVendorsAndcombined = async (req: Request) => {
+  public getAllVendorsAndCombined = async (req: Request) => {
     const { search } = req.query;
 
     const conn = this.models.vendorModel(req);
 
-    const data = await conn.getAllVendorsAndcombined(search as string);
+    const data = await conn.getAllVendorsAndCombined(search as string);
 
     return { success: true, data };
   };

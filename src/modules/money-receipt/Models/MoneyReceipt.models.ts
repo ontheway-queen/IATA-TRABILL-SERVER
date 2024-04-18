@@ -283,7 +283,10 @@ class MoneyReceiptModels extends AbstractModels {
       .whereNot('invoice_is_refund', 1)
       .where('invoice_id', invoiceId);
 
-    return { ...data, invoice_due: data.invoice_due || data.invoice_net_total };
+    return {
+      ...data,
+      invoice_due: data?.invoice_due || data?.invoice_net_total,
+    };
   };
 
   public async updateAgentAmountPaid(invoiceId: idType, is_paid: 0 | 1) {

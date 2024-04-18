@@ -27,7 +27,7 @@ class VendorRouter extends abstract_routers_1.default {
         this.routers.patch('/advance-return-edit/:id', this.controller.editAdvanceReturn);
         // =============== vendors ======================
         this.routers.get('/vendor-invoice-due/:invoice_id', this.controller.getVendorInvoiceDue);
-        this.routers.get('/all-vendors-combined', this.controller.getAllVendorsAndcombined);
+        this.routers.get('/all-vendors-combined', this.controller.getAllVendorsAndCombined);
         this.routers.get('/all-vendors-combined/:product_id', this.controller.getAllVendorsAndCombinedByProductId);
         this.routers.get('/for-edit/:id', this.controller.getForEdit);
         this.routers.get('/vendor/:id', this.controller.getVendorById);

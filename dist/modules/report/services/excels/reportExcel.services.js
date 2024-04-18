@@ -1700,7 +1700,7 @@ class ReportExcelServices extends abstract_services_1.default {
             const { employee_id } = req.params;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.profitLossReport(req);
-            const data = yield conn.getEmployeExpense(employee_id, String(from_date), String(to_date), 1, this.rowSize);
+            const data = yield conn.getEmployeeExpenses(employee_id, String(from_date), String(to_date), 1, this.rowSize);
             const workbook = new exceljs_1.default.Workbook();
             const worksheet = workbook.addWorksheet('Employee Expense Report');
             const dirPath = path_1.default.join(__dirname, '../files');

@@ -2072,7 +2072,7 @@ class ReportExcelServices extends AbstractServices {
     };
     const { from_date, to_date, page, size } = req.query;
     const conn = this.models.profitLossReport(req);
-    const data = await conn.getEmployeExpense(
+    const data = await conn.getEmployeeExpenses(
       employee_id,
       String(from_date),
       String(to_date),

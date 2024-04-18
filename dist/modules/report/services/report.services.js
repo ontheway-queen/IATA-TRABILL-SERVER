@@ -366,7 +366,7 @@ class ReportServices extends abstract_services_1.default {
             const count = yield conn.countRefundClientDataRow(String(from_date), String(to_date));
             return { success: true, count, data };
         });
-        this.refundReportVandor = (req) => __awaiter(this, void 0, void 0, function* () {
+        this.refundReportVendor = (req) => __awaiter(this, void 0, void 0, function* () {
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.reportModel(req);
             const data = yield conn.refundReportVendor(String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
@@ -464,7 +464,7 @@ class ReportServices extends abstract_services_1.default {
             const data = yield conn.getClientDiscount(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
             return Object.assign({ success: true }, data);
         });
-        this.journyDateWiseclientReport = (req) => __awaiter(this, void 0, void 0, function* () {
+        this.journeyDateWiseclientReport = (req) => __awaiter(this, void 0, void 0, function* () {
             const { comb_client } = req.body;
             let separeClient;
             if (comb_client !== 'all') {
@@ -512,11 +512,11 @@ class ReportServices extends abstract_services_1.default {
             const data = yield conn.hajGroupPassengerList(group_id, Number(page) || 1, Number(size) || 20);
             return Object.assign({ success: true }, data);
         });
-        this.getEmployeExpense = (req) => __awaiter(this, void 0, void 0, function* () {
+        this.getEmployeeExpense = (req) => __awaiter(this, void 0, void 0, function* () {
             const { employee_id } = req.params;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.profitLossReport(req);
-            const data = yield conn.getEmployeExpense(employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
+            const data = yield conn.getEmployeeExpenses(employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
             const count = yield conn.countEmployeeExpenseDataRow(employee_id, String(from_date), String(to_date));
             return { success: true, count, data };
         });
@@ -603,6 +603,19 @@ class ReportServices extends abstract_services_1.default {
             const data = yield conn.airTicketDetailsReport(from_date, to_date, Number(page), Number(size), client);
             const count = yield conn.airTicketDetailsCount(from_date, to_date, client);
             return { success: true, data, count };
+        });
+        this.invoiceAndMoneyReceiptDiscount = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { from_date, to_date } = req.query;
+            if (!from_date || !to_date) {
+                return {
+                    success: true,
+                    error: 'From date and to date is required !',
+                    data: null,
+                };
+            }
+            const conn = this.models.reportModel(req);
+            const data = yield conn.invoiceAndMoneyReceiptDiscount(from_date, to_date);
+            return { success: true, data };
         });
     }
 }

@@ -48,8 +48,8 @@ class VendorController extends abstract_controllers_1.default {
                 this.error();
             }
         }));
-        this.getAllVendorsAndcombined = this.assyncWrapper.wrap(this.validator.commonRead, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.getAllVendorsAndcombined(req);
+        this.getAllVendorsAndCombined = this.assyncWrapper.wrap(this.validator.commonRead, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getAllVendorsAndCombined(req);
             if (data.success) {
                 res.status(200).json(data);
             }

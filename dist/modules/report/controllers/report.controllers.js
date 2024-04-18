@@ -280,8 +280,8 @@ class ReportController extends abstract_controllers_1.default {
                 this.error('Get Refund Report...');
             }
         }));
-        this.refundReportVandor = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.refundReportVandor(req);
+        this.refundReportVendor = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.refundReportVendor(req);
             if (data.success) {
                 res.status(200).json(data);
             }
@@ -389,7 +389,7 @@ class ReportController extends abstract_controllers_1.default {
             }
         }));
         this.journeyDateWiseClientReport = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.journyDateWiseclientReport(req);
+            const data = yield this.services.journeyDateWiseclientReport(req);
             if (data.success) {
                 res.status(200).json(data);
             }
@@ -434,12 +434,12 @@ class ReportController extends abstract_controllers_1.default {
             }
         }));
         this.getEmployeExpense = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.getEmployeExpense(req);
+            const data = yield this.services.getEmployeeExpense(req);
             if (data.success) {
                 res.status(200).json(data);
             }
             else {
-                this.error('Get Employe Expense Report...');
+                this.error('Get Employee Expense Report...');
             }
         }));
         this.getAllInvoiceCategory = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -448,7 +448,7 @@ class ReportController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
             else {
-                this.error('Get All invoice categorys...');
+                this.error('Get All invoice categories...');
             }
         }));
         this.getAuditHistory = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -457,7 +457,7 @@ class ReportController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
             else {
-                this.error('get ait reportl...');
+                this.error('get ait reports...');
             }
         }));
         this.todaySales = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -466,7 +466,7 @@ class ReportController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
             else {
-                this.error('get ait reportl...');
+                this.error('get ait reports...');
             }
         }));
         this.paymentAndPurchase = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -475,11 +475,20 @@ class ReportController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
             else {
-                this.error('get ait reportl...');
+                this.error('get ait reports...');
             }
         }));
         this.getOnlineTrxnCharge = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.getOnlineTrxnCharge(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('');
+            }
+        }));
+        this.invoiceAndMoneyReceiptDiscount = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.invoiceAndMoneyReceiptDiscount(req);
             if (data.success) {
                 res.status(200).json(data);
             }

@@ -50,7 +50,7 @@ class ReportModel extends AbstractModels {
           builder.andWhere('loan_type', loan_type);
         }
         if (from_date && to_date) {
-          builder.whereRaw('Date(loan_create_date) BETWEEN ? AND ?', [
+          builder.whereRaw('Date(loan_date) BETWEEN ? AND ?', [
             from_date,
             to_date,
           ]);
@@ -151,7 +151,7 @@ class ReportModel extends AbstractModels {
           builder.andWhere('loan_type', loan_type);
         }
         if (from_date && to_date) {
-          builder.whereRaw('Date(loan_create_date) BETWEEN ? AND ?', [
+          builder.whereRaw('Date(loan_date) BETWEEN ? AND ?', [
             from_date,
             to_date,
           ]);
@@ -304,7 +304,7 @@ class ReportModel extends AbstractModels {
         }
       })
       .andWhere('org_agency', this.org_agency)
-      .andWhereRaw('Date(create_date) BETWEEN ? AND ?', [from_date, to_date])
+      .andWhereRaw('Date(sales_date) BETWEEN ? AND ?', [from_date, to_date])
       .limit(size)
       .offset(page_number);
   }
@@ -330,7 +330,7 @@ class ReportModel extends AbstractModels {
         }
       })
       .andWhere('org_agency', this.org_agency)
-      .andWhereRaw('Date(create_date) BETWEEN ? AND ?', [from_date, to_date]);
+      .andWhereRaw('Date(sales_date) BETWEEN ? AND ?', [from_date, to_date]);
 
     return count.row_count;
   }
@@ -953,14 +953,10 @@ class ReportModel extends AbstractModels {
       .andWhereNot('expense_is_deleted', 1)
       .modify((event) => {
         type === 'daily'
-          ? event.andWhereRaw(
-              `DATE_FORMAT(expense_created_date, '%Y-%m-%d') = ?`,
-              [date]
-            )
-          : event.andWhereRaw(
-              'DATE_FORMAT(expense_created_date, "%Y-%m") = ?',
-              [date]
-            );
+          ? event.andWhereRaw(`DATE_FORMAT(expense_date, '%Y-%m-%d') = ?`, [
+              date,
+            ])
+          : event.andWhereRaw('DATE_FORMAT(expense_date, "%Y-%m") = ?', [date]);
       });
 
     return data;
@@ -1000,13 +996,10 @@ class ReportModel extends AbstractModels {
       .where('payroll_id_deleted', 0)
       .modify((event) => {
         type === 'daily'
-          ? event.andWhereRaw(
-              `DATE_FORMAT(payroll_create_date, '%Y-%m-%d') = ?`,
-              [date]
-            )
-          : event.andWhereRaw('DATE_FORMAT(payroll_create_date, "%Y-%m") = ?', [
+          ? event.andWhereRaw(`DATE_FORMAT(payroll_date, '%Y-%m-%d') = ?`, [
               date,
-            ]);
+            ])
+          : event.andWhereRaw('DATE_FORMAT(payroll_date, "%Y-%m") = ?', [date]);
       });
 
     return data;
@@ -1293,7 +1286,7 @@ class ReportModel extends AbstractModels {
       .where('trabill_invoices.invoice_org_agency', this.org_agency)
       .andWhere('trabill_money_receipts.receipt_org_agency', this.org_agency)
       .andWhere('trabill_money_receipts.receipt_has_deleted', 0)
-      .whereRaw('Date(receipt_create_date) BETWEEN ? AND ?', [
+      .whereRaw('Date(receipt_payment_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])
@@ -1395,10 +1388,7 @@ class ReportModel extends AbstractModels {
           }
         );
       })
-      .andWhereRaw('Date(expense_created_date) BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ]);
+      .andWhereRaw('Date(expense_date) BETWEEN ? AND ?', [from_date, to_date]);
 
     return count.row_count;
   }
@@ -2001,7 +1991,7 @@ class ReportModel extends AbstractModels {
           builder.whereILike('airticket_ticket_no', `%${search_query}%`);
         }
       })
-      .andWhereRaw('DATE_FORMAT(create_date,"%Y-%m-%d") BETWEEN ? AND ?', [
+      .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])
@@ -2045,7 +2035,7 @@ class ReportModel extends AbstractModels {
           builder.andWhere('airticket_airline_id', airline_id);
         }
       })
-      .andWhereRaw('DATE_FORMAT(create_date,"%Y-%m-%d") BETWEEN ? AND ?', [
+      .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
         from_date,
         to_date,
       ]);
@@ -2254,26 +2244,6 @@ class ReportModel extends AbstractModels {
     return client_ledgers as ITransaction[];
   }
 
-  public async countClientDataRow(
-    client_id: idType,
-    from_date: string,
-    to_date: string
-  ) {
-    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
-    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-
-    const [count] = await this.query()
-      .select(this.db.raw(`count(*) as row_count`))
-      .from('view_client_ledgers')
-      .where('ctrxn_client_id', client_id)
-      .andWhereRaw('Date(ctrxn_create_date) BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ]);
-
-    return count.row_count;
-  }
-
   public async getCombinedLedger(
     combined_id: idType,
     from_date: string,
@@ -2361,6 +2331,57 @@ class ReportModel extends AbstractModels {
 
     return { count: row_count, data };
   }
+
+  // INVOICE AND MONEY RECEIPT DISCOUNT
+  invoiceAndMoneyReceiptDiscount = async (
+    from_date: string,
+    to_date: string
+  ) => {
+    const data = await this.query()
+      .select(
+        'invoice_id',
+        'invoice_org_agency',
+        'invoice_category_id',
+        'invoice_no',
+        'invoice_discount',
+        'invoice_net_total',
+        'invoice_sales_date as date',
+        this.db.raw('"TICKET" AS type')
+      )
+      .from('trabill.trabill_invoices_extra_amounts')
+      .leftJoin('trabill_invoices', 'invoice_id', 'extra_amount_invoice_id')
+      .whereNot('invoice_is_deleted', 1)
+      .andWhere('invoice_org_agency', this.org_agency)
+      .andWhere('invoice_discount', '>', 0)
+      .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])
+      .unionAll([
+        this.db
+          .select(
+            'receipt_id',
+            'receipt_org_agency',
+            this.db.raw('null as invoice_category_id'),
+            'receipt_vouchar_no',
+            'receipt_total_discount',
+            'receipt_total_amount',
+            'receipt_payment_date as date',
+            this.db.raw('"MONEY_RECEIPT" AS type')
+          )
+          .from('trabill.trabill_money_receipts')
+          .whereNot('receipt_has_deleted', 1)
+          .andWhere('receipt_org_agency', this.org_agency)
+          .andWhere('receipt_total_discount', '>', 0)
+          .andWhereRaw('Date(receipt_payment_date) BETWEEN ? AND ?', [
+            from_date,
+            to_date,
+          ]),
+      ])
+      .orderBy('date');
+
+    return data;
+  };
 }
 
 export default ReportModel;

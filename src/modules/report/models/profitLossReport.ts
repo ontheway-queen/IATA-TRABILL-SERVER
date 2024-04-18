@@ -3,7 +3,7 @@ import AbstractModels from '../../../abstracts/abstract.models';
 import { idType } from '../../../common/types/common.types';
 
 class ProfitLossReport extends AbstractModels {
-  public async getEmployeExpense(
+  public async getEmployeeExpenses(
     employee_id: idType,
     from_date: string,
     to_date: string,
@@ -24,6 +24,7 @@ class ProfitLossReport extends AbstractModels {
           '(payroll_net_amount - payroll_salary) as payroll_other_aloowance'
         ),
         'payroll_note as note',
+        'payroll_date',
         'payroll_create_date as created_date',
         this.db.raw(
           "concat(user_first_name, ' ', user_last_name) AS user_full_name"
@@ -32,10 +33,7 @@ class ProfitLossReport extends AbstractModels {
       .from('trabill_payroll')
       .leftJoin('trabill_users', { user_id: 'payroll_created_by' })
       .leftJoin('trabill_employees', { employee_id: 'payroll_employee_id' })
-      .andWhereRaw('Date(payroll_create_date) BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ])
+      .andWhereRaw('Date(payroll_date) BETWEEN ? AND ?', [from_date, to_date])
       .modify((builder) => {
         if (employee_id !== 'all') {
           builder.where('payroll_employee_id', employee_id);
@@ -62,10 +60,7 @@ class ProfitLossReport extends AbstractModels {
       .select(this.db.raw(`count(*) as row_count`))
       .from('trabill_payroll')
       .where('payroll_id_deleted', 0)
-      .andWhereRaw('Date(payroll_create_date) BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ])
+      .andWhereRaw('Date(payroll_date) BETWEEN ? AND ?', [from_date, to_date])
       .modify((builder) => {
         if (employee_id !== 'all') {
           builder.where('payroll_employee_id', employee_id);
@@ -92,7 +87,7 @@ class ProfitLossReport extends AbstractModels {
       .from('view_invoice_total_billing')
       .andWhere('view_invoice_total_billing.org_agency_id', this.org_agency)
       .andWhereRaw(
-        'Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?',
+        'Date(view_invoice_total_billing.sales_date) BETWEEN ? AND ?',
         [from_date, to_date]
       );
 
@@ -114,7 +109,7 @@ class ProfitLossReport extends AbstractModels {
       .from('view_invoice_total_billing')
       .where('view_invoice_total_billing.org_agency_id', this.org_agency)
       .andWhereRaw(
-        'Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?',
+        'Date(view_invoice_total_billing.sales_date) BETWEEN ? AND ?',
         [from_date, to_date]
       )
       .limit(size)
@@ -125,7 +120,7 @@ class ProfitLossReport extends AbstractModels {
       .from('view_invoice_total_billing')
       .where('view_invoice_total_billing.org_agency_id', this.org_agency)
       .andWhereRaw(
-        'Date(view_invoice_total_billing.create_date) BETWEEN ? AND ?',
+        'Date(view_invoice_total_billing.sales_date) BETWEEN ? AND ?',
         [from_date, to_date]
       )) as { count: number }[];
 
@@ -270,7 +265,7 @@ class ProfitLossReport extends AbstractModels {
       .from('trabill_incentive_income_details')
       .where('incentive_is_deleted', 0)
       .andWhere('incentive_org_agency', this.org_agency)
-      .andWhereRaw('Date(incentive_created_date) BETWEEN ? AND ?', [
+      .andWhereRaw('Date(incentive_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])) as { incentive_total: number }[];
@@ -287,7 +282,7 @@ class ProfitLossReport extends AbstractModels {
       .from('trabill_payroll')
       .where('payroll_org_agency', this.org_agency)
       .andWhereNot('payroll_id_deleted', 1)
-      .andWhereRaw('Date(payroll_create_date) BETWEEN ? AND ?', [
+      .andWhereRaw('Date(payroll_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])) as { employee_salary: number }[];
@@ -303,7 +298,7 @@ class ProfitLossReport extends AbstractModels {
     size: number = 20
   ) => {
     const offset = (page - 1) * size;
-    return await this.query()
+    const data = await this.query()
       .select('*')
       .from('trxn.v_agent_ledgers')
       .where('agtrxn_agency_id', this.org_agency)
@@ -314,6 +309,17 @@ class ProfitLossReport extends AbstractModels {
       ])
       .limit(size)
       .offset(offset);
+    const [{ count }] = (await this.query()
+      .count('* as count')
+      .from('trxn.v_agent_ledgers')
+      .where('agtrxn_agency_id', this.org_agency)
+      .andWhere('agtrxn_agent_id', agentId)
+      .andWhereRaw('Date(agtrxn_created_at) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])) as { count: number }[];
+
+    return { data, count };
   };
 
   public async allExpenses(from_date: string, to_date: string) {
@@ -448,7 +454,7 @@ class ProfitLossReport extends AbstractModels {
       .from('trabill_vendor_payments')
       .where('vpay_is_deleted', 0)
       .andWhere('vpay_org_agency', this.org_agency)
-      .andWhereRaw('DATE_FORMAT(created_date, "%Y-%m-%d") BETWEEN ? AND ?', [
+      .andWhereRaw('DATE_FORMAT(payment_date, "%Y-%m-%d") BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])) as { total_ait: number }[];
@@ -635,6 +641,7 @@ class ProfitLossReport extends AbstractModels {
 
         'airticket_ticket_no',
         'invoice_no',
+        'sales_date',
         'create_date AS invoice_create_date',
         'client_name',
         'airticket_client_price',
@@ -650,7 +657,7 @@ class ProfitLossReport extends AbstractModels {
         }
       })
       .where('airticket_org_agency', this.org_agency)
-      .andWhereRaw('DATE_FORMAT(create_date,"%Y-%m-%d") BETWEEN ? AND ?', [
+      .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
         from_date,
         to_date,
       ])
@@ -675,7 +682,7 @@ class ProfitLossReport extends AbstractModels {
         }
       })
       .where('airticket_org_agency', this.org_agency)
-      .andWhereRaw('DATE_FORMAT(create_date,"%Y-%m-%d") BETWEEN ? AND ?', [
+      .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
         from_date,
         to_date,
       ]);

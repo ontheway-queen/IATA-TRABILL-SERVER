@@ -118,6 +118,10 @@ class ReportRouter extends AbstractRouter {
       '/daily-sales-report/excel',
       this.controllers.getDailySalesReportExcel
     );
+    this.routers.get(
+      '/invoice-money-receipt-discount',
+      this.controllers.invoiceAndMoneyReceiptDiscount
+    );
 
     /**
      * PROFIT LOSS
@@ -188,7 +192,7 @@ class ReportRouter extends AbstractRouter {
 
     this.routers.get(
       '/refund-report-vendor',
-      this.controllers.refundReportVandor
+      this.controllers.refundReportVendor
     );
 
     this.routers.get(

@@ -245,7 +245,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const page_number = (page - 1) * size;
             const result = yield this.query()
-                .select('view.invoice_id', 'view.invoice_category_id', 'view.invoice_no', 'trabill_employees.employee_full_name', this.db.raw(`(view.sales_price - view.invoice_discount) as sales_price`), 'view.cost_price', 'view.invoice_total_pay AS client_payment', 'view.create_date', 'view.invoice_sales_man_id')
+                .select('view.invoice_id', 'view.invoice_category_id', 'view.invoice_no', 'trabill_employees.employee_full_name', this.db.raw(`(view.sales_price - view.invoice_discount) as sales_price`), 'view.cost_price', 'view.invoice_total_pay AS client_payment', 'view.create_date', 'view.sales_date', 'view.invoice_sales_man_id')
                 .from('view_invoice_total_billing as view')
                 .leftJoin('trabill_employees', 'employee_id', '=', 'view.invoice_sales_man_id')
                 .modify((event) => {
@@ -253,7 +253,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
                     event.where('view.invoice_sales_man_id', employee_id);
                 }
                 if (from_date && to_date) {
-                    event.whereRaw('DATE_FORMAT(view.create_date,"%Y-%m-%d") BETWEEN ? AND ?', [from_date, to_date]);
+                    event.whereRaw('DATE_FORMAT(view.sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [from_date, to_date]);
                 }
             })
                 .andWhere('view.org_agency_id', this.org_agency)
@@ -267,7 +267,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
                     event.where('view.invoice_sales_man_id', employee_id);
                 }
                 if (from_date && to_date) {
-                    event.whereRaw('DATE_FORMAT(view.create_date,"%Y-%m-%d") BETWEEN ? AND ?', [from_date, to_date]);
+                    event.whereRaw('DATE_FORMAT(view.sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [from_date, to_date]);
                 }
             })
                 .andWhere('view.org_agency_id', this.org_agency);
@@ -278,7 +278,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
                     event.where('view.invoice_sales_man_id', employee_id);
                 }
                 if (from_date && to_date) {
-                    event.whereRaw('DATE_FORMAT(view.create_date,"%Y-%m-%d") BETWEEN ? AND ?', [from_date, to_date]);
+                    event.whereRaw('DATE_FORMAT(view.sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [from_date, to_date]);
                 }
             })
                 .andWhere('view.org_agency_id', this.org_agency)
@@ -434,7 +434,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const page_number = (page - 1) * size;
             const data = yield this.query()
-                .select('view.inv_id as invoice_id', 'view.invoice_no', 'view.purchase_price', 'view.vendor_name', 'view.create_date as created_date')
+                .select('view.inv_id as invoice_id', 'view.invoice_no', 'view.purchase_price', 'view.vendor_name', 'view.create_date as created_date', 'view.sales_date')
                 .from('view_all_invoices_billing AS view')
                 .where('invoice_org_agency', this.org_agency)
                 .modify((event) => {
@@ -445,7 +445,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
                     event.andWhere('view.combined_id', combine_id);
                 }
             })
-                .andWhereRaw('Date(view.create_date) BETWEEN ? AND ?', [
+                .andWhereRaw('Date(view.sales_date) BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ])
@@ -471,7 +471,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
                     event.andWhere('view.combined_id', combine_id);
                 }
             })
-                .andWhereRaw('Date(view.create_date) BETWEEN ? AND ?', [
+                .andWhereRaw('Date(view.sales_date) BETWEEN ? AND ?', [
                 from_date,
                 to_date,
             ]);

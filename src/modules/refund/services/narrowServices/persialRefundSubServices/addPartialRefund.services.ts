@@ -14,12 +14,12 @@ import {
   IVTrxn,
 } from '../../../../../common/interfaces/Trxn.interfaces';
 import {
-  IPershialRefund,
-  IPersialRefundReqBody,
-  IpersialRefundVendorInfo,
+  IPartialRefund,
+  IPartialRefundReqBody,
+  IPartialRefundVendorInfo,
 } from '../../../types/refund.interfaces';
 
-class AddPersialRefundServices extends AbstractServices {
+class AddPartialRefundServices extends AbstractServices {
   constructor() {
     super();
   }
@@ -39,11 +39,11 @@ class AddPersialRefundServices extends AbstractServices {
       note,
       prfnd_payment_type,
       prfnd_payment_method,
-    } = req.body as IPersialRefundReqBody;
+    } = req.body as IPartialRefundReqBody;
 
     const { client_id, combined_id } = separateCombClientToId(comb_client);
 
-    const vouchar_no = generateVoucherNumber(7, 'P-REF');
+    const voucher_no = generateVoucherNumber(7, 'PRF');
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);
@@ -85,11 +85,11 @@ class AddPersialRefundServices extends AbstractServices {
         ctrxn_type: 'DEBIT',
         ctrxn_amount: prfnd_charge_amount,
         ctrxn_cl: comb_client,
-        ctrxn_voucher: vouchar_no,
+        ctrxn_voucher: voucher_no,
         ctrxn_particular_id: 163,
         ctrxn_created_at: date,
         ctrxn_note: note,
-        ctrxn_particular_type: 'Partial refund charge',
+        ctrxn_particular_type: 'PARTIAL RFND(CHARGE)',
         ctrxn_airticket_no: airticketNo.join(', '),
         ctrxn_pax: passportName.join(', '),
         ctrxn_pnr: airtickerPnr.join(', '),
@@ -101,11 +101,11 @@ class AddPersialRefundServices extends AbstractServices {
           ctrxn_type: 'CREDIT',
           ctrxn_amount: prfnd_total_amount,
           ctrxn_cl: comb_client,
-          ctrxn_voucher: vouchar_no,
+          ctrxn_voucher: voucher_no,
           ctrxn_particular_id: 162,
           ctrxn_created_at: date,
           ctrxn_note: note,
-          ctrxn_particular_type: 'Partial refund adjust',
+          ctrxn_particular_type: 'PARTIAL RFND',
           ctrxn_airticket_no: airticketNo.join(', '),
           ctrxn_pax: passportName.join(', '),
           ctrxn_pnr: airtickerPnr.join(', '),
@@ -143,12 +143,12 @@ class AddPersialRefundServices extends AbstractServices {
             acctrxn_ac_id: prfnd_account_id,
             acctrxn_type: 'DEBIT',
             acctrxn_amount: return_amount,
-            acctrxn_voucher: vouchar_no,
+            acctrxn_voucher: voucher_no,
             acctrxn_created_at: date,
             acctrxn_created_by: created_by,
             acctrxn_note: note,
             acctrxn_particular_id: 162,
-            acctrxn_particular_type: 'Partial refund create',
+            acctrxn_particular_type: 'PARTIAL RFND',
             acctrxn_pay_type: accPayType,
           };
 
@@ -160,11 +160,11 @@ class AddPersialRefundServices extends AbstractServices {
             ctrxn_type: 'CREDIT',
             ctrxn_amount: prfnd_return_amount,
             ctrxn_cl: comb_client,
-            ctrxn_voucher: vouchar_no,
+            ctrxn_voucher: voucher_no,
             ctrxn_particular_id: 162,
             ctrxn_created_at: date,
             ctrxn_note: note,
-            ctrxn_particular_type: 'Partial refund create',
+            ctrxn_particular_type: 'PARTIAL RFND',
             ctrxn_airticket_no: airticketNo.join(', '),
             ctrxn_pax: passportName.join(', '),
             ctrxn_pnr: airtickerPnr.join(', '),
@@ -183,9 +183,9 @@ class AddPersialRefundServices extends AbstractServices {
         }
       }
 
-      const persialRefundInfo: IPershialRefund = {
+      const persialRefundInfo: IPartialRefund = {
         prfnd_invoice_id: invoice_id,
-        prfnd_vouchar_number: vouchar_no,
+        prfnd_vouchar_number: voucher_no,
         prfnd_date: date,
         prfnd_client_id: client_id as number,
         prfnd_combine_id: combined_id as number,
@@ -203,10 +203,10 @@ class AddPersialRefundServices extends AbstractServices {
         prfnd_note: note,
       };
 
-      const refund_id = await conn.addPersialRefund(persialRefundInfo);
+      const refund_id = await conn.addPartialRefund(persialRefundInfo);
 
       // VENDOR REFUND INFO
-      let persialVendorInfos: IpersialRefundVendorInfo[] = [];
+      let persialVendorInfos: IPartialRefundVendorInfo[] = [];
       let vprfnd_trxn_id;
       let vprfnd_charge_trxn_id;
       let vprfnd_actrxn_id;
@@ -214,12 +214,19 @@ class AddPersialRefundServices extends AbstractServices {
         const {
           vprfnd_airticket_id,
           vprfnd_account_id,
-          vprfnd_charge_amount,
           vprfnd_payment_type,
-          vprfnd_return_amount,
-          vprfnd_total_amount,
           comb_vendor,
           vprfnd_payment_method,
+          vendor_refundable_amount,
+          vprfnd_ait,
+          vprfnd_base_fare_amount,
+          vprfnd_penalties,
+          vprfnd_remaining_tax,
+          vprfnd_used_airticket_tax,
+          vprfnd_used_base_fare,
+          vprfnd_remaining_base_fare,
+          vprfnd_tax,
+          vprfnd_total_commission,
         } = vendor_info;
 
         const {
@@ -234,46 +241,24 @@ class AddPersialRefundServices extends AbstractServices {
 
         const { combined_id, vendor_id } = separateCombClientToId(comb_vendor);
 
-        const VTrxnChargeBody: IVTrxn = {
-          comb_vendor: comb_vendor,
-          vtrxn_amount: vprfnd_charge_amount,
-          vtrxn_created_at: date,
-          vtrxn_note: note,
-          vtrxn_particular_id: 163,
-          vtrxn_particular_type: 'Partial refund charge',
-          vtrxn_type: 'DEBIT',
-          vtrxn_user_id: created_by,
-          vtrxn_voucher: vouchar_no,
-          vtrxn_pnr: airticket_pnr,
-          vtrxn_airticket_no: airticket_ticket_no,
-          vtrxn_pax: passport_name,
-          vtrxn_route: airticket_routes,
-        };
-
         if (vprfnd_payment_type === 'ADJUST') {
           const VTrxnBody: IVTrxn = {
             comb_vendor: comb_vendor,
-            vtrxn_amount: vprfnd_total_amount,
+            vtrxn_amount: vendor_refundable_amount,
             vtrxn_created_at: date,
             vtrxn_note: note,
             vtrxn_particular_id: 162,
-            vtrxn_particular_type: 'Partial refund adjust',
+            vtrxn_particular_type: 'PARTIAL RFND',
             vtrxn_type: 'CREDIT',
             vtrxn_user_id: created_by,
-            vtrxn_voucher: vouchar_no,
+            vtrxn_voucher: voucher_no,
             vtrxn_pnr: airticket_pnr,
             vtrxn_airticket_no: airticket_ticket_no,
             vtrxn_pax: passport_name,
             vtrxn_route: airticket_routes,
           };
 
-          if (vprfnd_total_amount > 0) {
-            vprfnd_trxn_id = await trxns.VTrxnInsert(VTrxnBody);
-          }
-
-          if (vprfnd_charge_amount > 0) {
-            vprfnd_charge_trxn_id = await trxns.VTrxnInsert(VTrxnChargeBody);
-          }
+          vprfnd_trxn_id = await trxns.VTrxnInsert(VTrxnBody);
         } else {
           // MONEY RETURN
           if (vprfnd_payment_method !== 4) {
@@ -297,45 +282,41 @@ class AddPersialRefundServices extends AbstractServices {
             const ACTrxnBody: IAcTrxn = {
               acctrxn_ac_id: vprfnd_account_id,
               acctrxn_type: 'CREDIT',
-              acctrxn_amount: vprfnd_return_amount,
+              acctrxn_amount: vendor_refundable_amount,
               acctrxn_created_at: date,
               acctrxn_created_by: created_by,
-              acctrxn_voucher: vouchar_no,
+              acctrxn_voucher: voucher_no,
               acctrxn_note: note,
               acctrxn_particular_id: 162,
-              acctrxn_particular_type: 'Partial refund create',
+              acctrxn_particular_type: 'PARTIAL RFND',
               acctrxn_pay_type: accPayType,
             };
 
             if (
-              total_vendor_pay >= vprfnd_return_amount &&
-              vprfnd_return_amount > 0
+              total_vendor_pay >= vendor_refundable_amount &&
+              vendor_refundable_amount > 0
             ) {
               vprfnd_actrxn_id = await trxns.AccTrxnInsert(ACTrxnBody);
             }
 
             const VTrxnBody: IVTrxn = {
               comb_vendor: comb_vendor,
-              vtrxn_amount: vprfnd_return_amount,
+              vtrxn_amount: vendor_refundable_amount,
               vtrxn_created_at: date,
               vtrxn_note: note,
               vtrxn_particular_id: 162,
-              vtrxn_particular_type: 'Partial refund Create',
+              vtrxn_particular_type: 'PARTIAL RFND',
               vtrxn_type: 'CREDIT',
               vtrxn_user_id: created_by,
-              vtrxn_voucher: vouchar_no,
+              vtrxn_voucher: voucher_no,
               vtrxn_pnr: airticket_pnr,
               vtrxn_airticket_no: airticket_ticket_no,
               vtrxn_pax: passport_name,
               vtrxn_route: airticket_routes,
             };
 
-            if (vprfnd_return_amount) {
+            if (vendor_refundable_amount) {
               vprfnd_trxn_id = await trxns.VTrxnInsert(VTrxnBody);
-            }
-
-            if (vprfnd_charge_amount) {
-              vprfnd_charge_trxn_id = await trxns.VTrxnInsert(VTrxnChargeBody);
             }
           } else {
             // Here for cheque....
@@ -348,30 +329,37 @@ class AddPersialRefundServices extends AbstractServices {
           1
         );
 
-        const persialVendorInfo: IpersialRefundVendorInfo = {
+        const persialVendorInfo: IPartialRefundVendorInfo = {
           vprfnd_refund_id: refund_id,
           vprfnd_airticket_id,
           vprfnd_account_id: vprfnd_account_id,
           vprfnd_actrxn_id: vprfnd_actrxn_id as number,
-          vprfnd_charge_amount,
-          vprfnd_charge_trxn_id: vprfnd_charge_trxn_id as number,
+          vprfnd_charge_amount: vprfnd_penalties,
           vprfnd_vendor_id: vendor_id as number,
           vprfnd_combine_id: combined_id as number,
           vprfnd_payment_type,
-          vprfnd_return_amount,
-          vprfnd_total_amount,
           vprfnd_trxn_id: vprfnd_trxn_id as number,
           vprfnd_payment_method,
+          vprfnd_ait,
+          vprfnd_base_fare: vprfnd_base_fare_amount,
+          vprfnd_used_base_fare,
+          vprfnd_remaining_base_fare,
+          vprfnd_tax,
+          vprfnd_total_commission,
+          vprfnd_used_tax: vprfnd_used_airticket_tax,
+          vprfnd_remaining_tax,
+          vprfnd_return_amount: vendor_refundable_amount,
+          vprfnd_total_amount: vprfnd_base_fare_amount,
         };
 
         persialVendorInfos.push(persialVendorInfo);
       }
 
-      await conn.addPersialRefundVendorInfo(persialVendorInfos);
+      await conn.addPartialRefundVendorInfo(persialVendorInfos);
 
       await conn.updateInvoiceAirticketIsRefund(invoice_id, 1);
 
-      const audit_content = `Persial refund has been created vouchar no:${vouchar_no}`;
+      const audit_content = `Partial refund has been created voucher no:${voucher_no}`;
 
       await this.insertAudit(
         req,
@@ -383,10 +371,10 @@ class AddPersialRefundServices extends AbstractServices {
 
       return {
         success: true,
-        message: 'Persial Refund created successfully!',
+        message: 'Partial Refund created successfully!',
         refund_id,
       };
     });
   };
 }
-export default AddPersialRefundServices;
+export default AddPartialRefundServices;

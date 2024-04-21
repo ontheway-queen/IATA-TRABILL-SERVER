@@ -189,23 +189,24 @@ export interface IRefundTourPack {
   refund_charge_id: number | null;
 }
 
-export interface IPersialRefundReqBody {
-  vendor_refund_info: IPershialRefundVendorReqInfo[];
+export interface IPartialRefundReqBody {
+  vendor_refund_info: IPartialRefundVendorReqInfo[];
+
   invoice_id: number;
+  comb_client: string;
   created_by: number;
   date: string;
   note: string;
-  comb_client: string;
   prfnd_total_amount: number;
   prfnd_charge_amount: number;
-  prfnd_profit_amount: number;
   prfnd_return_amount: number;
+  prfnd_profit_amount: number;
   prfnd_payment_type: 'MONEY_RETURN' | 'ADJUST';
   prfnd_payment_method: 1 | 2 | 3 | 4;
   prfnd_account_id: number;
 }
 
-export interface IPershialRefund {
+export interface IPartialRefund {
   prfnd_invoice_id: number;
   prfnd_vouchar_number: string;
   prfnd_note: string;
@@ -225,31 +226,46 @@ export interface IPershialRefund {
   prfnd_payment_method: number;
 }
 
-export interface IpersialRefundVendorInfo {
+export interface IPartialRefundVendorInfo {
+  vprfnd_payment_type: 'MONEY_RETURN' | 'ADJUST';
   vprfnd_refund_id: number;
   vprfnd_airticket_id: number;
   vprfnd_vendor_id: number;
   vprfnd_combine_id: number;
   vprfnd_trxn_id: number;
-  vprfnd_charge_trxn_id: number | null;
   vprfnd_account_id: number;
   vprfnd_actrxn_id: number;
-  vprfnd_payment_type: 'MONEY_RETURN' | 'ADJUST';
-  vprfnd_total_amount: number;
-  vprfnd_charge_amount: number;
-  vprfnd_return_amount: number;
   vprfnd_payment_method: number;
+  vprfnd_total_amount: number;
+  vprfnd_return_amount: number;
+  vprfnd_charge_amount: number;
+  vprfnd_ait: number;
+  vprfnd_base_fare: number;
+  vprfnd_used_base_fare: number;
+  vprfnd_remaining_base_fare: number;
+  vprfnd_tax: number;
+  vprfnd_used_tax: number;
+  vprfnd_remaining_tax: number;
+  vprfnd_total_commission: number;
 }
 
-export interface IPershialRefundVendorReqInfo {
+export interface IPartialRefundVendorReqInfo {
   vprfnd_airticket_id: number;
   comb_vendor: string;
   vprfnd_account_id: number;
   vprfnd_payment_type: 'MONEY_RETURN' | 'ADJUST';
-  vprfnd_total_amount: number;
-  vprfnd_charge_amount: number;
-  vprfnd_return_amount: number;
   vprfnd_payment_method: 1 | 2 | 3 | 4;
+
+  vendor_refundable_amount: number;
+  vprfnd_base_fare_amount: number;
+  vprfnd_used_airticket_tax: number;
+  vprfnd_used_base_fare: number;
+  vprfnd_penalties: number;
+  vprfnd_remaining_tax: number;
+  vprfnd_ait: number;
+  vprfnd_remaining_base_fare: number;
+  vprfnd_tax: number;
+  vprfnd_total_commission: number;
 }
 
 export interface TourRefundGeneric {

@@ -214,7 +214,7 @@ class RefundModel extends abstract_models_1.default {
             }
             return data;
         });
-        this.addPersialRefundVendorInfo = (data) => __awaiter(this, void 0, void 0, function* () {
+        this.addPartialRefundVendorInfo = (data) => __awaiter(this, void 0, void 0, function* () {
             yield this.query().insert(data).into('trabill_pershial_vendor_refund');
         });
         this.getPersialRefundTickets = (client_id, combine_id) => __awaiter(this, void 0, void 0, function* () {
@@ -282,13 +282,13 @@ class RefundModel extends abstract_models_1.default {
                 .andWhere('vprfnd_is_deleted', 0));
             return data;
         });
-        this.deletePersialRefund = (refund_id, prfnd_deleted_by) => __awaiter(this, void 0, void 0, function* () {
+        this.DeletePartialRefund = (refund_id, prfnd_deleted_by) => __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
                 .update({ prfnd_is_deleted: 1, prfnd_deleted_by })
                 .into('trabill_pershial_refund')
                 .where('prfnd_id', refund_id);
         });
-        this.deletePersialVendorRefund = (refund_id, vprefund_deleted_by) => __awaiter(this, void 0, void 0, function* () {
+        this.deletePartialVendorRefund = (refund_id, vprefund_deleted_by) => __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
                 .update({
                 vprfnd_is_deleted: 1,
@@ -396,7 +396,7 @@ class RefundModel extends abstract_models_1.default {
                 .leftJoin('trabill_combined_clients', { combine_id: 'prfnd_combine_id' })
                 .where('prfnd_id', refund_id);
             const vendor_refund_info = yield this.query()
-                .select('vprfnd_vendor_id', 'vprfnd_combine_id', this.db.raw(`COALESCE(combine_name, vendor_name) as vendor_name`), this.db.raw(`COALESCE(combine_mobile, vendor_mobile) as vendor_mobile`), 'vprfnd_payment_type', 'vprfnd_total_amount', 'vprfnd_charge_amount', 'vprfnd_return_amount')
+                .select('vprfnd_vendor_id', 'vprfnd_combine_id', 'vprfnd_account_id', 'vprfnd_payment_type', 'vprfnd_payment_method', 'vprfnd_total_amount', 'vprfnd_return_amount', 'vprfnd_charge_amount', 'vprfnd_ait', 'vprfnd_base_fare', 'vprfnd_used_base_fare', 'vprfnd_remaining_base_fare', 'vprfnd_tax', 'vprfnd_used_tax', 'vprfnd_remaining_tax', 'vprfnd_total_commission', this.db.raw(`COALESCE(combine_name, vendor_name) as vendor_name`), this.db.raw(`COALESCE(combine_mobile, vendor_mobile) as vendor_mobile`))
                 .from('trabill_pershial_vendor_refund')
                 .leftJoin('trabill_combined_clients', {
                 combine_id: 'vprfnd_combine_id',
@@ -407,9 +407,9 @@ class RefundModel extends abstract_models_1.default {
             const data = Object.assign(Object.assign({}, refund_info), { vendor_refund_info });
             return data;
         });
-        this.getPertialAirticketInfo = (airticket_id, invoice_id) => __awaiter(this, void 0, void 0, function* () {
+        this.getPartialAirticketInfo = (airticket_id, invoice_id) => __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
-                .select('airticket_invoice_id as invoice_id', 'invoice_no', 'airticket_client_id as invoice_client_id', 'airticket_client_id as invoice_combined_id', 'client_name', 'airticket_id', 'airline_name', 'airticket_ticket_no', 'airticket_client_price as client_price', 'airticket_purchase_price as vendor_price', 'airticket_vendor_id as vendor_id', 'airticket_vendor_combine_id as vendor_combine_id', 'vendor_name')
+                .select('airticket_invoice_id as invoice_id', 'invoice_no', 'airticket_client_id as invoice_client_id', 'airticket_client_id as invoice_combined_id', 'client_name', 'airticket_id', 'airline_name', 'airticket_ticket_no', 'airticket_client_price as client_price', 'airticket_base_fare', 'airticket_purchase_price as vendor_price', 'airticket_vendor_id as vendor_id', 'airticket_vendor_combine_id as vendor_combine_id', 'vendor_name', 'airticket_tax')
                 .from('trabill.v_airticket_for_refund')
                 .where('airticket_org_agency', this.org_agency)
                 .andWhere('airticket_invoice_id', invoice_id)
@@ -1169,7 +1169,7 @@ class RefundModel extends abstract_models_1.default {
             return data;
         });
     }
-    addPersialRefund(data) {
+    addPartialRefund(data) {
         return __awaiter(this, void 0, void 0, function* () {
             const [id] = yield this.query()
                 .insert(Object.assign(Object.assign({}, data), { prfnd_org_agency: this.org_agency }))

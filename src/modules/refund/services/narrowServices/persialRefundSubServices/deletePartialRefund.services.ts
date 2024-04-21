@@ -7,7 +7,7 @@ import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
 
-class DeletePersialRefund extends AbstractServices {
+class DeletePartialRefund extends AbstractServices {
   constructor() {
     super();
   }
@@ -74,12 +74,12 @@ class DeletePersialRefund extends AbstractServices {
         }
       }
 
-      await conn.deletePersialRefund(refund_id, deleted_by);
-      await conn.deletePersialVendorRefund(refund_id, deleted_by);
+      await conn.DeletePartialRefund(refund_id, deleted_by);
+      await conn.deletePartialVendorRefund(refund_id, deleted_by);
 
       await conn.updateInvoiceAirticketIsRefund(prfnd_invoice_id, 0);
 
-      const audit_content = `Persial refund deleted vouchar no: ${prfnd_vouchar_number}`;
+      const audit_content = `Persial refund deleted voucher no: ${prfnd_vouchar_number}`;
       await this.insertAudit(
         req,
         'delete',
@@ -91,4 +91,4 @@ class DeletePersialRefund extends AbstractServices {
     });
   };
 }
-export default DeletePersialRefund;
+export default DeletePartialRefund;

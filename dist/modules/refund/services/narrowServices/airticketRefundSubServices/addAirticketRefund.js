@@ -21,7 +21,10 @@ class AddAirTicketRefund extends abstract_services_1.default {
     constructor() {
         super();
         this.addAirTicketRefund = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { client_refund_info, vendor_refund_info, invoice_id, comb_client, created_by, date, profit, note, } = req.body;
+            const { client_refund_info, vendor_refund_info, invoice_id, comb_client, created_by, date, note, } = req.body;
+            const totalVReturnAmount = vendor_refund_info.reduce((total, item) => total + Number(item.vrefund_return_amount || 0), 0);
+            const crefund_profit = totalVReturnAmount -
+                Number(client_refund_info.crefund_return_amount || 0);
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
             const voucher_number = (0, invoice_helpers_1.generateVoucherNumber)(7, 'AR-REF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
@@ -174,7 +177,7 @@ class AddAirTicketRefund extends abstract_services_1.default {
                     crefund_actransaction_id,
                     crefund_account_id,
                     crefund_refund_id: refund_id,
-                    crefund_profit: profit,
+                    crefund_profit,
                 };
                 yield conn.insertAirticketClientRefund(airticketClientRefund);
                 // airticket vendor refund

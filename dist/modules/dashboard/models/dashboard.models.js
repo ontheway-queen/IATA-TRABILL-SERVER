@@ -236,7 +236,7 @@ class DashboardModels extends abstract_models_1.default {
         this.selectMonthlyPurchase = () => __awaiter(this, void 0, void 0, function* () {
             const [result] = yield this.query()
                 .from('view_invoices_cost')
-                .select(this.db.raw('SUM(cost_price) AS daily_cost'))
+                .select(this.db.raw('SUM(cost_price) AS value'))
                 .whereRaw('YEAR(sales_date) = YEAR(CURDATE())')
                 .andWhereRaw('MONTH(sales_date) = MONTH(CURDATE())')
                 .andWhere('org_agency', this.org_agency);

@@ -5,8 +5,8 @@ import AddAirTicketRefund from './narrowServices/airticketRefundSubServices/addA
 import DeleteAirTicketRefund from './narrowServices/airticketRefundSubServices/deleteAirticketRefund.services';
 import AddOtherRefund from './narrowServices/otherRefundSubServices/addOtherRefund';
 import DeleteOtherRefund from './narrowServices/otherRefundSubServices/deleteOtherRefund';
-import AddPersialRefundServices from './narrowServices/persialRefundSubServices/addPersialRefund.services';
-import DeletePersialRefund from './narrowServices/persialRefundSubServices/deletePersialRefund.services';
+import AddPartialRefundServices from './narrowServices/persialRefundSubServices/addPartialRefund.services';
+import DeletePartialRefund from './narrowServices/persialRefundSubServices/deletePartialRefund.services';
 import AddTourPackRefund from './narrowServices/tourPackRefundSubServices/addTourPackRefund';
 import DeleteTourPackRefund from './narrowServices/tourPackRefundSubServices/deleteTourPackRefund';
 
@@ -333,7 +333,7 @@ class RefundServices extends AbstractServices {
 
     const conn = this.models.refundModel(req);
 
-    const data = await conn.getPertialAirticketInfo(airticket_id, invoice_id);
+    const data = await conn.getPartialAirticketInfo(airticket_id, invoice_id);
 
     return { success: true, data };
   };
@@ -345,10 +345,10 @@ class RefundServices extends AbstractServices {
   public deleteOtherRefund = new DeleteOtherRefund().deleteOtherRefund;
 
   public addTourPackRefund = new AddTourPackRefund().add;
-  public delteTourPackRefund = new DeleteTourPackRefund().delete;
+  public deleteTourPackRefund = new DeleteTourPackRefund().delete;
 
-  public addPersialRefund = new AddPersialRefundServices().add;
-  public deletePersialRefund = new DeletePersialRefund().delete;
+  public addPartialRefund = new AddPartialRefundServices().add;
+  public DeletePartialRefund = new DeletePartialRefund().delete;
 }
 
 export default RefundServices;

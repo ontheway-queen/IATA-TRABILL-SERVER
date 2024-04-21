@@ -483,7 +483,7 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 throw new customError_1.default('Please provide a valid invoice id', 400, 'Invalid Invoice Id');
             }
             const payments = yield this.query()
-                .select('invclientpayment_moneyreceipt_id', 'invclientpayment_amount as receipt_total_amount', 'receipt_payment_date', 'user_first_name', 'acctype_name', this.db.raw('COALESCE(cl.client_name, ccl.combine_name) AS client_name'), this.db.raw('COALESCE(mr.receipt_money_receipt_no, mr.receipt_vouchar_no) AS receipt_money_receipt_no'), 'mr.receipt_payment_to', this.db.raw("COALESCE(mr.receipt_note, 'N/A') AS receipt_note "))
+                .select('invclientpayment_moneyreceipt_id', 'invclientpayment_amount as receipt_total_amount', 'receipt_payment_date', 'user_full_name as received_by', 'acctype_name', this.db.raw('COALESCE(cl.client_name, ccl.combine_name) AS client_name'), this.db.raw('COALESCE(mr.receipt_money_receipt_no, mr.receipt_vouchar_no) AS receipt_money_receipt_no'), 'mr.receipt_payment_to', this.db.raw("COALESCE(mr.receipt_note, 'N/A') AS receipt_note "))
                 .from('trabill_invoice_client_payments')
                 .join('trabill_users', { user_id: 'invclientpayment_collected_by' })
                 .leftJoin('trabill_money_receipts as mr', {

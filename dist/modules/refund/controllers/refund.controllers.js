@@ -191,22 +191,22 @@ class RefundController extends abstract_controllers_1.default {
                 this.error('view tour for edit...');
             }
         }));
-        this.delteTourPackRefund = this.assyncWrapper.wrap(this.validator.deleteTourPakage, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.delteTourPackRefund(req);
+        this.deleteTourPackRefund = this.assyncWrapper.wrap(this.validator.deleteTourPackage, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.deleteTourPackRefund(req);
             if (data.success) {
                 res.status(200).json(data);
             }
             else {
-                this.error('tour refund delte');
+                this.error('tour refund delete');
             }
         }));
-        this.addPersialRefund = this.assyncWrapper.wrap(this.validator.addPersialRefund, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.addPersialRefund(req);
+        this.addPartialRefund = this.assyncWrapper.wrap(this.validator.addPartialRefund, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.addPartialRefund(req);
             if (data.success) {
                 res.status(201).json(data);
             }
             else {
-                this.error('tour refund delte');
+                this.error('tour refund delete');
             }
         }));
         this.getPersialRefundTickets = this.assyncWrapper.wrap(this.validator.readAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -215,7 +215,7 @@ class RefundController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
             else {
-                this.error('tour refund delte');
+                this.error('tour refund delete');
             }
         }));
         this.getPersialRefundTicketsByInvoice = this.assyncWrapper.wrap(this.validator.readAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -224,16 +224,16 @@ class RefundController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
             else {
-                this.error('tour refund delte');
+                this.error('tour refund delete');
             }
         }));
-        this.deletePersialRefund = this.assyncWrapper.wrap(this.validator.deletePersialRefund, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.deletePersialRefund(req);
+        this.DeletePartialRefund = this.assyncWrapper.wrap(this.validator.DeletePartialRefund, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.DeletePartialRefund(req);
             if (data.success) {
                 res.status(200).json(data);
             }
             else {
-                this.error('tour refund delte');
+                this.error('tour refund delete');
             }
         }));
         this.getPersialRefund = this.assyncWrapper.wrap(this.validator.readPersialRefund, (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -242,7 +242,7 @@ class RefundController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
             else {
-                this.error('tour refund delte');
+                this.error('tour refund delete');
             }
         }));
         this.getSinglePersialRefund = this.assyncWrapper.wrap(this.validator.readPersialRefund, (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -251,7 +251,7 @@ class RefundController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
             else {
-                this.error('tour refund delte');
+                this.error('tour refund delete');
             }
         }));
         this.getPertialAirticketInfo = this.assyncWrapper.wrap(this.validator.readPersialRefund, (req, res) => __awaiter(this, void 0, void 0, function* () {
@@ -260,7 +260,7 @@ class RefundController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
             else {
-                this.error('tour refund delte');
+                this.error('tour refund delete');
             }
         }));
     }

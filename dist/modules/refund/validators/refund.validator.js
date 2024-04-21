@@ -64,7 +64,7 @@ class RefundValidator extends abstract_validators_1.default {
         this.readTourPakageInfo = [
             this.permissions.check(this.resources.refund_tour_package, 'read'),
         ];
-        this.deleteTourPakage = [
+        this.deleteTourPackage = [
             this.permissions.check(this.resources.refund_tour_package, 'delete'),
             (0, express_validator_1.check)('refund_deleted_by')
                 .notEmpty()
@@ -525,7 +525,7 @@ class RefundValidator extends abstract_validators_1.default {
                 .isInt()
                 .withMessage('Created By must be an integer value'),
         ];
-        this.addPersialRefund = [
+        this.addPartialRefund = [
             this.permissions.check(this.resources.refund_module, 'create'),
             (0, express_validator_1.check)('invoice_id')
                 .isInt()
@@ -570,7 +570,7 @@ class RefundValidator extends abstract_validators_1.default {
                 .notEmpty()
                 .withMessage('Please enter comb vendor'),
         ];
-        this.deletePersialRefund = [
+        this.DeletePartialRefund = [
             this.permissions.check(this.resources.refund_module, 'delete'),
             (0, express_validator_1.check)('deleted_by')
                 .notEmpty()

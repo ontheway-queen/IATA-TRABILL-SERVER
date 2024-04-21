@@ -496,7 +496,7 @@ class CommonInvoiceModel extends AbstractModels {
         'invclientpayment_moneyreceipt_id',
         'invclientpayment_amount as receipt_total_amount',
         'receipt_payment_date',
-        'user_first_name',
+        'user_full_name as received_by',
         'acctype_name',
         this.db.raw(
           'COALESCE(cl.client_name, ccl.combine_name) AS client_name'

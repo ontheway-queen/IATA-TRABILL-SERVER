@@ -253,27 +253,27 @@ class RefundController extends AbstractController {
     }
   );
 
-  public delteTourPackRefund = this.assyncWrapper.wrap(
-    this.validator.deleteTourPakage,
+  public deleteTourPackRefund = this.assyncWrapper.wrap(
+    this.validator.deleteTourPackage,
     async (req: Request, res: Response) => {
-      const data = await this.services.delteTourPackRefund(req);
+      const data = await this.services.deleteTourPackRefund(req);
 
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('tour refund delte');
+        this.error('tour refund delete');
       }
     }
   );
-  public addPersialRefund = this.assyncWrapper.wrap(
-    this.validator.addPersialRefund,
+  public addPartialRefund = this.assyncWrapper.wrap(
+    this.validator.addPartialRefund,
     async (req: Request, res: Response) => {
-      const data = await this.services.addPersialRefund(req);
+      const data = await this.services.addPartialRefund(req);
 
       if (data.success) {
         res.status(201).json(data);
       } else {
-        this.error('tour refund delte');
+        this.error('tour refund delete');
       }
     }
   );
@@ -285,7 +285,7 @@ class RefundController extends AbstractController {
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('tour refund delte');
+        this.error('tour refund delete');
       }
     }
   );
@@ -298,20 +298,20 @@ class RefundController extends AbstractController {
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('tour refund delte');
+        this.error('tour refund delete');
       }
     }
   );
 
-  public deletePersialRefund = this.assyncWrapper.wrap(
-    this.validator.deletePersialRefund,
+  public DeletePartialRefund = this.assyncWrapper.wrap(
+    this.validator.DeletePartialRefund,
     async (req: Request, res: Response) => {
-      const data = await this.services.deletePersialRefund(req);
+      const data = await this.services.DeletePartialRefund(req);
 
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('tour refund delte');
+        this.error('tour refund delete');
       }
     }
   );
@@ -323,7 +323,7 @@ class RefundController extends AbstractController {
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('tour refund delte');
+        this.error('tour refund delete');
       }
     }
   );
@@ -336,7 +336,7 @@ class RefundController extends AbstractController {
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('tour refund delte');
+        this.error('tour refund delete');
       }
     }
   );
@@ -348,7 +348,7 @@ class RefundController extends AbstractController {
       if (data.success) {
         res.status(200).json(data);
       } else {
-        this.error('tour refund delte');
+        this.error('tour refund delete');
       }
     }
   );

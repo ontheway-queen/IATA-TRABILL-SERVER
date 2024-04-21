@@ -8,7 +8,7 @@ import {
   IAirticketClientRefund,
   IGetCleintRefund,
   IGetVendorRefund,
-  IPershialRefund,
+  IPartialRefund,
   IRefundOther,
   IRefundOtherClient,
   IRefundOtherVendor,
@@ -16,7 +16,7 @@ import {
   IRefundTourPack,
   IRefundTourVendor,
   IVendorRefundInfo,
-  IpersialRefundVendorInfo,
+  IPartialRefundVendorInfo,
   otherVendorRefundInfo,
 } from '../types/refund.interfaces';
 import {
@@ -1507,7 +1507,7 @@ class RefundModel extends AbstractModels {
     return data;
   }
 
-  async addPersialRefund(data: IPershialRefund) {
+  async addPartialRefund(data: IPartialRefund) {
     const [id] = await this.query()
       .insert({
         ...data,
@@ -1518,8 +1518,8 @@ class RefundModel extends AbstractModels {
     return id;
   }
 
-  addPersialRefundVendorInfo = async (
-    data: IpersialRefundVendorInfo | IpersialRefundVendorInfo[]
+  addPartialRefundVendorInfo = async (
+    data: IPartialRefundVendorInfo | IPartialRefundVendorInfo[]
   ) => {
     await this.query().insert(data).into('trabill_pershial_vendor_refund');
   };
@@ -1653,14 +1653,14 @@ class RefundModel extends AbstractModels {
     return data;
   };
 
-  deletePersialRefund = async (refund_id: idType, prfnd_deleted_by: idType) => {
+  DeletePartialRefund = async (refund_id: idType, prfnd_deleted_by: idType) => {
     return await this.query()
       .update({ prfnd_is_deleted: 1, prfnd_deleted_by })
       .into('trabill_pershial_refund')
       .where('prfnd_id', refund_id);
   };
 
-  deletePersialVendorRefund = async (
+  deletePartialVendorRefund = async (
     refund_id: idType,
     vprefund_deleted_by: idType
   ) => {
@@ -1838,12 +1838,22 @@ class RefundModel extends AbstractModels {
       .select(
         'vprfnd_vendor_id',
         'vprfnd_combine_id',
-        this.db.raw(`COALESCE(combine_name, vendor_name) as vendor_name`),
-        this.db.raw(`COALESCE(combine_mobile, vendor_mobile) as vendor_mobile`),
+        'vprfnd_account_id',
         'vprfnd_payment_type',
+        'vprfnd_payment_method',
         'vprfnd_total_amount',
+        'vprfnd_return_amount',
         'vprfnd_charge_amount',
-        'vprfnd_return_amount'
+        'vprfnd_ait',
+        'vprfnd_base_fare',
+        'vprfnd_used_base_fare',
+        'vprfnd_remaining_base_fare',
+        'vprfnd_tax',
+        'vprfnd_used_tax',
+        'vprfnd_remaining_tax',
+        'vprfnd_total_commission',
+        this.db.raw(`COALESCE(combine_name, vendor_name) as vendor_name`),
+        this.db.raw(`COALESCE(combine_mobile, vendor_mobile) as vendor_mobile`)
       )
       .from('trabill_pershial_vendor_refund')
       .leftJoin('trabill_combined_clients', {
@@ -1858,7 +1868,7 @@ class RefundModel extends AbstractModels {
     return data;
   };
 
-  getPertialAirticketInfo = async (
+  getPartialAirticketInfo = async (
     airticket_id: idType,
     invoice_id: idType
   ) => {
@@ -1873,10 +1883,12 @@ class RefundModel extends AbstractModels {
         'airline_name',
         'airticket_ticket_no',
         'airticket_client_price as client_price',
+        'airticket_base_fare',
         'airticket_purchase_price as vendor_price',
         'airticket_vendor_id as vendor_id',
         'airticket_vendor_combine_id as vendor_combine_id',
-        'vendor_name'
+        'vendor_name',
+        'airticket_tax'
       )
       .from('trabill.v_airticket_for_refund')
       .where('airticket_org_agency', this.org_agency)

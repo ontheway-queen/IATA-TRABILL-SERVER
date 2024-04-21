@@ -305,7 +305,7 @@ class DashboardModels extends AbstractModels {
   selectMonthlyPurchase = async () => {
     const [result] = await this.query()
       .from('view_invoices_cost')
-      .select(this.db.raw('SUM(cost_price) AS daily_cost'))
+      .select(this.db.raw('SUM(cost_price) AS value'))
       .whereRaw('YEAR(sales_date) = YEAR(CURDATE())')
       .andWhereRaw('MONTH(sales_date) = MONTH(CURDATE())')
       .andWhere('org_agency', this.org_agency);

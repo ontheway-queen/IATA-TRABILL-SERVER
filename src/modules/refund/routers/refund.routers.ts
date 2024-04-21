@@ -51,19 +51,19 @@ class RefundRouter extends AbstractRouter {
       .route('/other-refund/:refund_id')
       .get(this.controllers.singleOtherRefund)
       .delete(this.controllers.deleteOtherRefund);
-    // PERSIAL REFUND
+    // PARTIAL REFUND
     this.routers
-      .route('/persial-refund')
-      .post(this.controllers.addPersialRefund)
+      .route('/partial-refund')
+      .post(this.controllers.addPartialRefund)
       .get(this.controllers.getPersialRefund);
 
     this.routers
-      .route('/persial-refund/:refund_id')
-      .delete(this.controllers.deletePersialRefund)
+      .route('/partial-refund/:refund_id')
+      .delete(this.controllers.DeletePartialRefund)
       .get(this.controllers.getSinglePersialRefund);
 
     this.routers.get(
-      '/persial-refundable-ticket/:comb_client',
+      '/partial-refundable-ticket/:comb_client',
       this.controllers.getPersialRefundTickets
     );
 
@@ -73,7 +73,7 @@ class RefundRouter extends AbstractRouter {
     );
 
     this.routers.get(
-      '/get_pertial_ticket_by_invoice/:invoice_id',
+      '/get_partial_ticket_by_invoice/:invoice_id',
       this.controllers.getPersialRefundTicketsByInvoice
     );
 
@@ -96,7 +96,7 @@ class RefundRouter extends AbstractRouter {
 
     this.routers
       .route('/invoice-tour-refund/:refund_id')
-      .delete(this.controllers.delteTourPackRefund)
+      .delete(this.controllers.deleteTourPackRefund)
       .get(this.controllers.viewTourForEdit);
   }
 }

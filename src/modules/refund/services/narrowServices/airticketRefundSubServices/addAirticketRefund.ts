@@ -30,9 +30,17 @@ class AddAirTicketRefund extends AbstractServices {
       comb_client,
       created_by,
       date,
-      profit,
       note,
     } = req.body as IAirTicketRefundReqBody;
+
+    const totalVReturnAmount = vendor_refund_info.reduce(
+      (total, item) => total + Number(item.vrefund_return_amount || 0),
+      0
+    );
+
+    const crefund_profit =
+      totalVReturnAmount -
+      Number(client_refund_info.crefund_return_amount || 0);
 
     const { client_id, combined_id } = separateCombClientToId(comb_client);
 
@@ -236,7 +244,7 @@ class AddAirTicketRefund extends AbstractServices {
         crefund_actransaction_id,
         crefund_account_id,
         crefund_refund_id: refund_id,
-        crefund_profit: profit,
+        crefund_profit,
       };
 
       await conn.insertAirticketClientRefund(airticketClientRefund);

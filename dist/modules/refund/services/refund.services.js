@@ -18,8 +18,8 @@ const addAirticketRefund_1 = __importDefault(require("./narrowServices/airticket
 const deleteAirticketRefund_services_1 = __importDefault(require("./narrowServices/airticketRefundSubServices/deleteAirticketRefund.services"));
 const addOtherRefund_1 = __importDefault(require("./narrowServices/otherRefundSubServices/addOtherRefund"));
 const deleteOtherRefund_1 = __importDefault(require("./narrowServices/otherRefundSubServices/deleteOtherRefund"));
-const addPersialRefund_services_1 = __importDefault(require("./narrowServices/persialRefundSubServices/addPersialRefund.services"));
-const deletePersialRefund_services_1 = __importDefault(require("./narrowServices/persialRefundSubServices/deletePersialRefund.services"));
+const addPartialRefund_services_1 = __importDefault(require("./narrowServices/persialRefundSubServices/addPartialRefund.services"));
+const deletePartialRefund_services_1 = __importDefault(require("./narrowServices/persialRefundSubServices/deletePartialRefund.services"));
 const addTourPackRefund_1 = __importDefault(require("./narrowServices/tourPackRefundSubServices/addTourPackRefund"));
 const deleteTourPackRefund_1 = __importDefault(require("./narrowServices/tourPackRefundSubServices/deleteTourPackRefund"));
 class RefundServices extends abstract_services_1.default {
@@ -191,7 +191,7 @@ class RefundServices extends abstract_services_1.default {
         this.getPertialAirticketInfo = (req) => __awaiter(this, void 0, void 0, function* () {
             const { airticket_id, invoice_id } = req.body;
             const conn = this.models.refundModel(req);
-            const data = yield conn.getPertialAirticketInfo(airticket_id, invoice_id);
+            const data = yield conn.getPartialAirticketInfo(airticket_id, invoice_id);
             return { success: true, data };
         });
         this.addAirTicketRefund = new addAirticketRefund_1.default().addAirTicketRefund;
@@ -199,9 +199,9 @@ class RefundServices extends abstract_services_1.default {
         this.addOtherRefund = new addOtherRefund_1.default().add;
         this.deleteOtherRefund = new deleteOtherRefund_1.default().deleteOtherRefund;
         this.addTourPackRefund = new addTourPackRefund_1.default().add;
-        this.delteTourPackRefund = new deleteTourPackRefund_1.default().delete;
-        this.addPersialRefund = new addPersialRefund_services_1.default().add;
-        this.deletePersialRefund = new deletePersialRefund_services_1.default().delete;
+        this.deleteTourPackRefund = new deleteTourPackRefund_1.default().delete;
+        this.addPartialRefund = new addPartialRefund_services_1.default().add;
+        this.DeletePartialRefund = new deletePartialRefund_services_1.default().delete;
     }
 }
 exports.default = RefundServices;

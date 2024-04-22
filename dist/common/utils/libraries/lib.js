@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getNext15Day = exports.getIataDateRange = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
+exports.getDateRangeByWeek = exports.getNext15Day = exports.getIataDateRange = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
 const axios_1 = __importDefault(require("axios"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const dayjs_1 = __importDefault(require("dayjs"));
@@ -159,4 +159,29 @@ const getNext15Day = (inputDate) => {
     return date;
 };
 exports.getNext15Day = getNext15Day;
+const getDateRangeByWeek = (input) => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth() + 1;
+    let startDate = null, endDate = null;
+    switch (input) {
+        case 'first':
+            startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 1);
+            endDate = new Date(currentDate.getFullYear(), currentMonth - 1, 8);
+            break;
+        case 'second':
+            startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 9);
+            endDate = new Date(currentDate.getFullYear(), currentMonth - 1, 15);
+            break;
+        case 'third':
+            startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 16);
+            endDate = new Date(currentDate.getFullYear(), currentMonth - 1, 23);
+            break;
+        case 'fourth':
+            startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 24);
+            endDate = new Date(currentDate.getFullYear(), currentMonth - 1, new Date(currentDate.getFullYear(), currentMonth, 0).getDate());
+            break;
+    }
+    return { startDate, endDate };
+};
+exports.getDateRangeByWeek = getDateRangeByWeek;
 //# sourceMappingURL=lib.js.map

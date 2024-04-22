@@ -170,10 +170,13 @@ export const getIataDateRange = () => {
     ).format('YYYY-MM-DD');
   }
 
-  return { sales_from_date, sales_to_date };
+  return { sales_from_date, sales_to_date } as {
+    sales_from_date: string | Date;
+    sales_to_date: string | Date;
+  };
 };
 
-export const getNext15Day = (inputDate: string) => {
+export const getNext15Day = (inputDate: string | Date) => {
   const currentDate = new Date(inputDate);
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
@@ -194,4 +197,38 @@ export const getNext15Day = (inputDate: string) => {
   }
 
   return date;
+};
+
+export const getDateRangeByWeek = (
+  input: 'first' | 'second' | 'third' | 'fourth'
+) => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth() + 1;
+  let startDate = null,
+    endDate = null;
+
+  switch (input) {
+    case 'first':
+      startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 1);
+      endDate = new Date(currentDate.getFullYear(), currentMonth - 1, 8);
+      break;
+    case 'second':
+      startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 9);
+      endDate = new Date(currentDate.getFullYear(), currentMonth - 1, 15);
+      break;
+    case 'third':
+      startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 16);
+      endDate = new Date(currentDate.getFullYear(), currentMonth - 1, 23);
+      break;
+    case 'fourth':
+      startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 24);
+      endDate = new Date(
+        currentDate.getFullYear(),
+        currentMonth - 1,
+        new Date(currentDate.getFullYear(), currentMonth, 0).getDate()
+      );
+      break;
+  }
+
+  return { startDate, endDate };
 };

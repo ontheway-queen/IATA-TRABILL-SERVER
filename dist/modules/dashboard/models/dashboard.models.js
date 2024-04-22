@@ -326,7 +326,7 @@ class DashboardModels extends abstract_models_1.default {
             return data;
         });
         this.getBspTicketIssueSummary = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
-            return yield this.query()
+            const ticket_issue = yield this.query()
                 .select('*')
                 .from('v_bsp_ticket_issue')
                 .where('vendor_org_agency', this.org_agency)
@@ -335,6 +335,16 @@ class DashboardModels extends abstract_models_1.default {
                 from_date,
                 to_date,
             ]);
+            // const [{ total_ticket_issue }] = (await this.query()
+            //   .sum('airticket_purchase_price as total_ticket_issue')
+            //   .from('v_bsp_ticket_issue')
+            //   .where('vendor_org_agency', this.org_agency)
+            //   .andWhere('vendor_type', 'IATA')
+            //   .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+            //     from_date,
+            //     to_date,
+            //   ])) as { total_ticket_issue: string }[];
+            return { ticket_issue };
         });
         this.getBspTicketReissueInfo = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
@@ -349,7 +359,7 @@ class DashboardModels extends abstract_models_1.default {
             return data;
         });
         this.getBspTicketReissueSummary = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
-            return yield this.query()
+            const ticket_re_issue = yield this.query()
                 .select('*')
                 .from('v_bsp_ticket_reissue')
                 .where('vendor_org_agency', this.org_agency)
@@ -358,6 +368,16 @@ class DashboardModels extends abstract_models_1.default {
                 from_date,
                 to_date,
             ]);
+            // const [{ total_ticket_re_issue }] = (await this.query()
+            //   .sum('airticket_purchase_price as total_ticket_re_issue')
+            //   .from('v_bsp_ticket_reissue')
+            //   .where('vendor_org_agency', this.org_agency)
+            //   .andWhere('vendor_type', 'IATA')
+            //   .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+            //     from_date,
+            //     to_date,
+            //   ])) as { total_ticket_re_issue: string }[];
+            return { ticket_re_issue };
         });
         this.getBspTicketRefundInfo = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
@@ -369,12 +389,22 @@ class DashboardModels extends abstract_models_1.default {
             return data;
         });
         this.getBspTicketRefundSummary = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
-            return yield this.query()
+            const ticket_refund = yield this.query()
                 .select('*')
                 .from('v_bsp_ticket_refund')
                 .where('vendor_org_agency', this.org_agency)
                 .andWhere('vendor_type', 'IATA')
                 .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
+            // const [{ total_ticket_refund }] = (await this.query()
+            //   .sum('vrefund_return_amount as total_ticket_refund')
+            //   .from('v_bsp_ticket_refund')
+            //   .where('vendor_org_agency', this.org_agency)
+            //   .andWhere('vendor_type', 'IATA')
+            //   .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [
+            //     from_date,
+            //     to_date,
+            //   ])) as { total_ticket_refund: string }[];
+            return { ticket_refund };
         });
         // GET ACCOUNT DETAILS BY ACCOUNT TYPE
         this.getAccountDetailsByType = (accountType, limit = 20, offset = 0) => __awaiter(this, void 0, void 0, function* () {

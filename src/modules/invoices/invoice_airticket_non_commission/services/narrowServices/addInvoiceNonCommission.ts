@@ -239,14 +239,6 @@ class AddInvoiceNonCommission extends AbstractServices {
           .map((item) => item.passport_name)
           .join(',');
 
-        let vtrxn_particular_type = 'Invoice non-commission cost. \n';
-
-        if (restAirticketItem.airticket_journey_date) {
-          const inputDate = new Date(restAirticketItem.airticket_journey_date);
-          vtrxn_particular_type +=
-            'Journey date: ' + moment(inputDate).format('DD MMM YYYY');
-        }
-
         // VENDOR TRANSACTIONS
         const VTrxnBody: IVTrxn = {
           comb_vendor: airticket_comvendor,
@@ -254,7 +246,7 @@ class AddInvoiceNonCommission extends AbstractServices {
           vtrxn_created_at: invoice_sales_date,
           vtrxn_note: invoice_note,
           vtrxn_particular_id: 147,
-          vtrxn_particular_type,
+          vtrxn_particular_type: 'NON COMM AIR TICKET PURCHASE',
           vtrxn_pax,
           vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
           vtrxn_user_id: invoice_created_by,
@@ -334,12 +326,14 @@ class AddInvoiceNonCommission extends AbstractServices {
         }
       }
 
+      const content = `INV NON COMM ADDED, VOUCHER ${invoice_no}, BDT ${invoice_net_total}/-`;
+
       const history_data: InvoiceHistory = {
         history_activity_type: 'INVOICE_CREATED',
         history_created_by: invoice_created_by,
         history_invoice_id: invoice_id,
         history_invoice_payment_amount: invoice_net_total,
-        invoicelog_content: 'Invoice airticket non comission  has been created',
+        invoicelog_content: content,
       };
 
       await common_conn.insertInvoiceHistory(history_data);
@@ -369,18 +363,16 @@ class AddInvoiceNonCommission extends AbstractServices {
 
       await new CommonSmsSendServices().sendSms(req, smsInvoiceDate, trx);
 
-      const message = `Invoice airticket non commission has been created, Voucher - ${invoice_no}, Net - ${invoice_net_total}/-`;
-
       await this.insertAudit(
         req,
         'create',
-        message,
+        content,
         invoice_created_by,
         'INVOICES'
       );
       return {
         success: true,
-        message,
+        content,
         data: invoice_id,
       };
     });

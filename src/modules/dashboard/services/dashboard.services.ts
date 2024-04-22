@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import AbstractServices from '../../../abstracts/abstract.services';
 import {
+  getDateRangeByWeek,
   getIataDateRange,
   getNext15Day,
 } from '../../../common/utils/libraries/lib';
@@ -202,18 +203,32 @@ class DashboardServices extends AbstractServices {
   public getBspBillingSummary = async (req: Request) => {
     const conn = this.models.dashboardModal(req);
 
-    const { sales_from_date, sales_to_date } = getIataDateRange();
+    const weekNumberOfMonth = req.query.week as
+      | 'first'
+      | 'second'
+      | 'third'
+      | 'fourth';
 
-    const ticket_issue = await conn.getBspTicketIssueSummary(
+    let { sales_from_date, sales_to_date } = getIataDateRange();
+
+    if (['first', 'second', 'third', 'fourth'].includes(weekNumberOfMonth)) {
+      const dateRange = getDateRangeByWeek(weekNumberOfMonth);
+
+      sales_from_date = dateRange.startDate;
+      sales_to_date = dateRange.endDate;
+    }
+
+    const issue = await conn.getBspTicketIssueSummary(
       sales_from_date,
       sales_to_date
     );
 
-    const ticket_re_issue = await conn.getBspTicketReissueSummary(
+    const reissue = await conn.getBspTicketReissueSummary(
       sales_from_date,
       sales_to_date
     );
-    const ticket_refund = await conn.getBspTicketRefundSummary(
+
+    const refund = await conn.getBspTicketRefundSummary(
       sales_from_date,
       sales_to_date
     );
@@ -224,9 +239,9 @@ class DashboardServices extends AbstractServices {
       data: {
         sales_from_date,
         sales_to_date,
-        ticket_issue,
-        ticket_re_issue,
-        ticket_refund,
+        ...issue,
+        ...reissue,
+        ...refund,
       },
     };
   };

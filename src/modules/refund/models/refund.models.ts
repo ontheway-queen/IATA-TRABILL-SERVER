@@ -9,6 +9,7 @@ import {
   IGetCleintRefund,
   IGetVendorRefund,
   IPartialRefund,
+  IPartialRefundVendorInfo,
   IRefundOther,
   IRefundOtherClient,
   IRefundOtherVendor,
@@ -16,7 +17,6 @@ import {
   IRefundTourPack,
   IRefundTourVendor,
   IVendorRefundInfo,
-  IPartialRefundVendorInfo,
   otherVendorRefundInfo,
 } from '../types/refund.interfaces';
 import {

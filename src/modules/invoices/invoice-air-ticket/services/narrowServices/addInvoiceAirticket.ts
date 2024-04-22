@@ -240,7 +240,7 @@ class AddInvoiceAirticket extends AbstractServices {
           vtrxn_created_at: invoice_sales_date,
           vtrxn_note: invoice_note,
           vtrxn_particular_id: 146,
-          vtrxn_particular_type: 'Invoice Airticket Create',
+          vtrxn_particular_type: 'INV AIR TICKET PURCHASE',
           vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
           vtrxn_user_id: invoice_created_by,
           vtrxn_voucher: invoice_no,
@@ -335,13 +335,15 @@ class AddInvoiceAirticket extends AbstractServices {
         }
       }
 
+      const content = `INV AIR TICKET ADDED, VOUCHER ${invoice_no}, BDT ${invoice_net_total}/-`;
+
       // invoice history
       const history_data: InvoiceHistory = {
         history_activity_type: 'INVOICE_CREATED',
         history_created_by: invoice_created_by,
         history_invoice_id: invoice_id,
         history_invoice_payment_amount: invoice_net_total,
-        invoicelog_content: 'Invoice airticket has been created',
+        invoicelog_content: content,
       };
 
       await common_conn.insertInvoiceHistory(history_data);
@@ -372,7 +374,6 @@ class AddInvoiceAirticket extends AbstractServices {
 
       await new CommonSmsSendServices().sendSms(req, smsInvoiceDate, trx);
 
-      const content = `Invoice airticket has been created, Voucher - ${invoice_no}, Net - ${invoice_net_total}/-`;
       await this.insertAudit(
         req,
         'create',

@@ -151,7 +151,7 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: invoice_note,
                         vtrxn_particular_id: 146,
-                        vtrxn_particular_type: 'Invoice Airticket Create',
+                        vtrxn_particular_type: 'INV AIR TICKET PURCHASE',
                         vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
                         vtrxn_user_id: invoice_created_by,
                         vtrxn_voucher: invoice_no,
@@ -203,13 +203,14 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                         yield conn.insertAirTicketAirlineCommissions(taxesCommission);
                     }
                 }
+                const content = `INV AIR TICKET ADDED, VOUCHER ${invoice_no}, BDT ${invoice_net_total}/-`;
                 // invoice history
                 const history_data = {
                     history_activity_type: 'INVOICE_CREATED',
                     history_created_by: invoice_created_by,
                     history_invoice_id: invoice_id,
                     history_invoice_payment_amount: invoice_net_total,
-                    invoicelog_content: 'Invoice airticket has been created',
+                    invoicelog_content: content,
                 };
                 yield common_conn.insertInvoiceHistory(history_data);
                 // MONEY RECEIPT
@@ -229,7 +230,6 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                     invoice_id,
                 };
                 yield new CommonSmsSend_services_1.default().sendSms(req, smsInvoiceDate, trx);
-                const content = `Invoice airticket has been created, Voucher - ${invoice_no}, Net - ${invoice_net_total}/-`;
                 yield this.insertAudit(req, 'create', content, invoice_created_by, 'INVOICES');
                 return {
                     success: true,

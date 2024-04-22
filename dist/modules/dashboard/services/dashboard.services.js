@@ -157,20 +157,21 @@ class DashboardServices extends abstract_services_1.default {
         // BSP BILLING SUMMARY
         this.getBspBillingSummary = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.dashboardModal(req);
-            const { sales_from_date, sales_to_date } = (0, lib_1.getIataDateRange)();
-            const ticket_issue = yield conn.getBspTicketIssueSummary(sales_from_date, sales_to_date);
-            const ticket_re_issue = yield conn.getBspTicketReissueSummary(sales_from_date, sales_to_date);
-            const ticket_refund = yield conn.getBspTicketRefundSummary(sales_from_date, sales_to_date);
+            const weekNumberOfMonth = req.query.week;
+            let { sales_from_date, sales_to_date } = (0, lib_1.getIataDateRange)();
+            if (['first', 'second', 'third', 'fourth'].includes(weekNumberOfMonth)) {
+                const dateRange = (0, lib_1.getDateRangeByWeek)(weekNumberOfMonth);
+                sales_from_date = dateRange.startDate;
+                sales_to_date = dateRange.endDate;
+            }
+            const issue = yield conn.getBspTicketIssueSummary(sales_from_date, sales_to_date);
+            const reissue = yield conn.getBspTicketReissueSummary(sales_from_date, sales_to_date);
+            const refund = yield conn.getBspTicketRefundSummary(sales_from_date, sales_to_date);
             return {
                 success: true,
                 message: 'the request is OK',
-                data: {
-                    sales_from_date,
-                    sales_to_date,
-                    ticket_issue,
-                    ticket_re_issue,
-                    ticket_refund,
-                },
+                data: Object.assign(Object.assign(Object.assign({ sales_from_date,
+                    sales_to_date }, issue), reissue), refund),
             };
         });
         // VENDORS / BANK Guarantee

@@ -46,7 +46,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const moment_1 = __importDefault(require("moment"));
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
@@ -155,12 +154,6 @@ class EditInvoiceNonCommission extends abstract_services_1.default {
                         ticket_details.airticket_route_or_sector.length > 0) {
                         vtrxn_route = yield common_conn.getRoutesInfo(ticket_details.airticket_route_or_sector);
                     }
-                    let vtrxn_particular_type = 'Invoice non-commission cost. \n';
-                    if (restAirticketItem.airticket_journey_date) {
-                        const inputDate = new Date(restAirticketItem.airticket_journey_date);
-                        vtrxn_particular_type +=
-                            'Journey date: ' + (0, moment_1.default)(inputDate).format('DD MMM YYYY');
-                    }
                     // VENDOR TRANSACTION
                     const VTrxnBody = {
                         comb_vendor: airticket_comvendor,
@@ -168,7 +161,7 @@ class EditInvoiceNonCommission extends abstract_services_1.default {
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: invoice_note,
                         vtrxn_particular_id: 147,
-                        vtrxn_particular_type,
+                        vtrxn_particular_type: 'NON COMM AIR TICKET PURCHASE',
                         vtrxn_pax: pax_names,
                         vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
                         vtrxn_user_id: invoice_created_by,
@@ -229,18 +222,19 @@ class EditInvoiceNonCommission extends abstract_services_1.default {
                         }
                     }
                 }
+                const content = `INV NON COMM UPDATED, VOUCHER ${invoice_no}, BDT ${invoice_net_total}/-`;
                 const history_data = {
                     history_activity_type: 'INVOICE_UPDATED',
                     history_created_by: invoice_created_by,
                     history_invoice_id: invoice_id,
                     history_invoice_payment_amount: invoice_net_total,
-                    invoicelog_content: 'Invoice airticket non comission has been updated',
+                    invoicelog_content: content,
                 };
                 yield common_conn.insertInvoiceHistory(history_data);
-                yield this.insertAudit(req, 'update', `Invoice airticket non commission has been updated, Voucher - ${invoice_no}, Net - ${invoice_net_total}/-`, invoice_created_by, 'INVOICES');
+                yield this.insertAudit(req, 'update', content, invoice_created_by, 'INVOICES');
                 return {
                     success: true,
-                    message: 'Invoice airticket non commission has been updated',
+                    message: content,
                     invoice_id,
                 };
             }));

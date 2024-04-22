@@ -245,15 +245,15 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                         yield conn.insertAirTicketAirlineCommissions(taxesCommission);
                     }
                 }
+                const content = `INV AIR TICKET UPDATED, VOUCHER ${invoice_no}, BDT ${invoice_net_total}/-`;
                 const history_data = {
                     history_activity_type: 'INVOICE_UPDATED',
                     history_created_by: invoice_created_by,
                     history_invoice_id: invoice_id,
                     history_invoice_payment_amount: invoice_net_total,
-                    invoicelog_content: 'Invoice airticket has been updated',
+                    invoicelog_content: `AIR TICKET UPDATED, BDT ${invoice_net_total}/-`,
                 };
                 yield common_conn.insertInvoiceHistory(history_data);
-                const content = `Invoice airticket has been update, Voucher - ${invoice_no}, Net - ${invoice_net_total}/-`;
                 yield this.insertAudit(req, 'update', content, invoice_created_by, 'INVOICES');
                 return {
                     success: true,

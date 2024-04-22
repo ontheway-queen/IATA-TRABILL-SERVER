@@ -51,7 +51,6 @@ const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const CommonAddMoneyReceipt_1 = __importDefault(require("../../../../../common/services/CommonAddMoneyReceipt"));
-const moment_1 = __importDefault(require("moment"));
 const CommonSmsSend_services_1 = __importDefault(require("../../../../smsSystem/utils/CommonSmsSend.services"));
 const invoice_utils_1 = require("../../../utils/invoice.utils");
 class AddInvoiceNonCommission extends abstract_services_1.default {
@@ -153,12 +152,6 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                     const vtrxn_pax = pax_passports
                         .map((item) => item.passport_name)
                         .join(',');
-                    let vtrxn_particular_type = 'Invoice non-commission cost. \n';
-                    if (restAirticketItem.airticket_journey_date) {
-                        const inputDate = new Date(restAirticketItem.airticket_journey_date);
-                        vtrxn_particular_type +=
-                            'Journey date: ' + (0, moment_1.default)(inputDate).format('DD MMM YYYY');
-                    }
                     // VENDOR TRANSACTIONS
                     const VTrxnBody = {
                         comb_vendor: airticket_comvendor,
@@ -166,7 +159,7 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: invoice_note,
                         vtrxn_particular_id: 147,
-                        vtrxn_particular_type,
+                        vtrxn_particular_type: 'NON COMM AIR TICKET PURCHASE',
                         vtrxn_pax,
                         vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
                         vtrxn_user_id: invoice_created_by,
@@ -211,12 +204,13 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                         yield conn.insertInvoiceNonComeFlightDetails(flightsDetails);
                     }
                 }
+                const content = `INV NON COMM ADDED, VOUCHER ${invoice_no}, BDT ${invoice_net_total}/-`;
                 const history_data = {
                     history_activity_type: 'INVOICE_CREATED',
                     history_created_by: invoice_created_by,
                     history_invoice_id: invoice_id,
                     history_invoice_payment_amount: invoice_net_total,
-                    invoicelog_content: 'Invoice airticket non comission  has been created',
+                    invoicelog_content: content,
                 };
                 yield common_conn.insertInvoiceHistory(history_data);
                 // MONEY RECEIPT
@@ -236,11 +230,10 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                     invoice_id,
                 };
                 yield new CommonSmsSend_services_1.default().sendSms(req, smsInvoiceDate, trx);
-                const message = `Invoice airticket non commission has been created, Voucher - ${invoice_no}, Net - ${invoice_net_total}/-`;
-                yield this.insertAudit(req, 'create', message, invoice_created_by, 'INVOICES');
+                yield this.insertAudit(req, 'create', content, invoice_created_by, 'INVOICES');
                 return {
                     success: true,
-                    message,
+                    content,
                     data: invoice_id,
                 };
             }));

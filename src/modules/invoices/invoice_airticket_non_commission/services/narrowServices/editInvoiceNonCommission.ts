@@ -1,5 +1,4 @@
 import { Request } from 'express';
-import moment from 'moment';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import InvoiceHelpers, {
@@ -231,14 +230,6 @@ class EditInvoiceNonCommission extends AbstractServices {
           );
         }
 
-        let vtrxn_particular_type = 'Invoice non-commission cost. \n';
-
-        if (restAirticketItem.airticket_journey_date) {
-          const inputDate = new Date(restAirticketItem.airticket_journey_date);
-          vtrxn_particular_type +=
-            'Journey date: ' + moment(inputDate).format('DD MMM YYYY');
-        }
-
         // VENDOR TRANSACTION
         const VTrxnBody: IVTrxn = {
           comb_vendor: airticket_comvendor,
@@ -246,7 +237,7 @@ class EditInvoiceNonCommission extends AbstractServices {
           vtrxn_created_at: invoice_sales_date,
           vtrxn_note: invoice_note,
           vtrxn_particular_id: 147,
-          vtrxn_particular_type,
+          vtrxn_particular_type: 'NON COMM AIR TICKET PURCHASE',
           vtrxn_pax: pax_names,
           vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
           vtrxn_user_id: invoice_created_by,
@@ -353,12 +344,14 @@ class EditInvoiceNonCommission extends AbstractServices {
         }
       }
 
+      const content = `INV NON COMM UPDATED, VOUCHER ${invoice_no}, BDT ${invoice_net_total}/-`;
+
       const history_data: InvoiceHistory = {
         history_activity_type: 'INVOICE_UPDATED',
         history_created_by: invoice_created_by,
         history_invoice_id: invoice_id,
         history_invoice_payment_amount: invoice_net_total,
-        invoicelog_content: 'Invoice airticket non comission has been updated',
+        invoicelog_content: content,
       };
 
       await common_conn.insertInvoiceHistory(history_data);
@@ -366,14 +359,14 @@ class EditInvoiceNonCommission extends AbstractServices {
       await this.insertAudit(
         req,
         'update',
-        `Invoice airticket non commission has been updated, Voucher - ${invoice_no}, Net - ${invoice_net_total}/-`,
+        content,
         invoice_created_by,
         'INVOICES'
       );
 
       return {
         success: true,
-        message: 'Invoice airticket non commission has been updated',
+        message: content,
         invoice_id,
       };
     });

@@ -398,7 +398,10 @@ class DashboardModels extends AbstractModels {
   };
 
   // BSP BILLING INFORMATION /: DELETE FROM SERVICE
-  public async bspBillingInformation(from_date: string, to_date: string) {
+  public async bspBillingInformation(
+    from_date: string | Date,
+    to_date: string | Date
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
@@ -423,7 +426,10 @@ class DashboardModels extends AbstractModels {
     return data;
   }
 
-  getBspTicketIssueInfo = async (from_date: string, to_date: string) => {
+  getBspTicketIssueInfo = async (
+    from_date: string | Date,
+    to_date: string | Date
+  ) => {
     const [data] = await this.query()
       .select(
         this.db.raw('sum(airticket_gross_fare) as gross_fare'),
@@ -447,8 +453,11 @@ class DashboardModels extends AbstractModels {
     return data;
   };
 
-  getBspTicketIssueSummary = async (from_date: string, to_date: string) => {
-    return await this.query()
+  getBspTicketIssueSummary = async (
+    from_date: string | Date,
+    to_date: string | Date
+  ) => {
+    const ticket_issue = await this.query()
       .select('*')
       .from('v_bsp_ticket_issue')
       .where('vendor_org_agency', this.org_agency)
@@ -457,9 +466,23 @@ class DashboardModels extends AbstractModels {
         from_date,
         to_date,
       ]);
+    // const [{ total_ticket_issue }] = (await this.query()
+    //   .sum('airticket_purchase_price as total_ticket_issue')
+    //   .from('v_bsp_ticket_issue')
+    //   .where('vendor_org_agency', this.org_agency)
+    //   .andWhere('vendor_type', 'IATA')
+    //   .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+    //     from_date,
+    //     to_date,
+    //   ])) as { total_ticket_issue: string }[];
+
+    return { ticket_issue };
   };
 
-  getBspTicketReissueInfo = async (from_date: string, to_date: string) => {
+  getBspTicketReissueInfo = async (
+    from_date: string | Date,
+    to_date: string | Date
+  ) => {
     const [data] = await this.query()
       .select(
         this.db.raw('sum(airticket_client_price) as gross_fare'),
@@ -480,8 +503,11 @@ class DashboardModels extends AbstractModels {
 
     return data;
   };
-  getBspTicketReissueSummary = async (from_date: string, to_date: string) => {
-    return await this.query()
+  getBspTicketReissueSummary = async (
+    from_date: string | Date,
+    to_date: string | Date
+  ) => {
+    const ticket_re_issue = await this.query()
       .select('*')
       .from('v_bsp_ticket_reissue')
       .where('vendor_org_agency', this.org_agency)
@@ -490,9 +516,23 @@ class DashboardModels extends AbstractModels {
         from_date,
         to_date,
       ]);
+    // const [{ total_ticket_re_issue }] = (await this.query()
+    //   .sum('airticket_purchase_price as total_ticket_re_issue')
+    //   .from('v_bsp_ticket_reissue')
+    //   .where('vendor_org_agency', this.org_agency)
+    //   .andWhere('vendor_type', 'IATA')
+    //   .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
+    //     from_date,
+    //     to_date,
+    //   ])) as { total_ticket_re_issue: string }[];
+
+    return { ticket_re_issue };
   };
 
-  getBspTicketRefundInfo = async (from_date: string, to_date: string) => {
+  getBspTicketRefundInfo = async (
+    from_date: string | Date,
+    to_date: string | Date
+  ) => {
     const [data] = await this.query()
       .sum('vrefund_return_amount as refund_amount')
       .from('v_bsp_ticket_refund')
@@ -503,13 +543,28 @@ class DashboardModels extends AbstractModels {
     return data;
   };
 
-  getBspTicketRefundSummary = async (from_date: string, to_date: string) => {
-    return await this.query()
+  getBspTicketRefundSummary = async (
+    from_date: string | Date,
+    to_date: string | Date
+  ) => {
+    const ticket_refund = await this.query()
       .select('*')
       .from('v_bsp_ticket_refund')
       .where('vendor_org_agency', this.org_agency)
       .andWhere('vendor_type', 'IATA')
       .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
+
+    // const [{ total_ticket_refund }] = (await this.query()
+    //   .sum('vrefund_return_amount as total_ticket_refund')
+    //   .from('v_bsp_ticket_refund')
+    //   .where('vendor_org_agency', this.org_agency)
+    //   .andWhere('vendor_type', 'IATA')
+    //   .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [
+    //     from_date,
+    //     to_date,
+    //   ])) as { total_ticket_refund: string }[];
+
+    return { ticket_refund };
   };
 
   public async getVendorBankGuarantee() {

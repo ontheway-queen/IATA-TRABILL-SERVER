@@ -168,10 +168,9 @@ class AddPartialRefundServices extends abstract_services_1.default {
                 // VENDOR REFUND INFO
                 let persialVendorInfos = [];
                 let vprfnd_trxn_id;
-                let vprfnd_charge_trxn_id;
                 let vprfnd_actrxn_id;
                 for (const vendor_info of vendor_refund_info) {
-                    const { vprfnd_airticket_id, vprfnd_account_id, vprfnd_payment_type, comb_vendor, vprfnd_payment_method, vendor_refundable_amount, vprfnd_ait, vprfnd_base_fare_amount, vprfnd_penalties, vprfnd_remaining_tax, vprfnd_used_airticket_tax, vprfnd_used_base_fare, vprfnd_remaining_base_fare, vprfnd_tax, vprfnd_total_commission, } = vendor_info;
+                    const { vprfnd_airticket_id, vprfnd_account_id, vprfnd_payment_type, comb_vendor, vprfnd_payment_method, vendor_refundable_amount, vprfnd_ait, vprfnd_base_fare_amount, vprfnd_penalties, vprfnd_remaining_tax, vprfnd_used_airticket_tax, vprfnd_used_base_fare, vprfnd_remaining_base_fare, vprfnd_tax, vprfnd_total_commission, vprfnd_ticket_no, } = vendor_info;
                     const { airticket_pnr, airticket_routes, passport_name, airticket_ticket_no, } = yield conn.getAitRefundInfo(vprfnd_airticket_id, invoice_category_id);
                     const { combined_id, vendor_id } = (0, common_helper_1.separateCombClientToId)(comb_vendor);
                     if (vprfnd_payment_type === 'ADJUST') {
@@ -252,6 +251,7 @@ class AddPartialRefundServices extends abstract_services_1.default {
                     const persialVendorInfo = {
                         vprfnd_refund_id: refund_id,
                         vprfnd_airticket_id,
+                        vprfnd_invoice_category_id: invoice_category_id,
                         vprfnd_account_id: vprfnd_account_id,
                         vprfnd_actrxn_id: vprfnd_actrxn_id,
                         vprfnd_charge_amount: vprfnd_penalties,
@@ -270,6 +270,7 @@ class AddPartialRefundServices extends abstract_services_1.default {
                         vprfnd_remaining_tax,
                         vprfnd_return_amount: vendor_refundable_amount,
                         vprfnd_total_amount: vprfnd_base_fare_amount,
+                        vprfnd_ticket_no,
                     };
                     persialVendorInfos.push(persialVendorInfo);
                 }

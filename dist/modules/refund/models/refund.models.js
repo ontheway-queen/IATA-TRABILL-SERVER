@@ -313,8 +313,11 @@ class RefundModel extends abstract_models_1.default {
             const offset = (page - 1) * size;
             let data = [];
             const refund_info = yield this.query()
-                .select('prfnd_id', 'prfnd_vouchar_number', this.db.raw(`COALESCE(client_name, combine_name, company_name) AS client_name`), 'prfnd_date', 'prfnd_payment_type', 'prfnd_total_amount', 'prfnd_charge_amount', 'prfnd_return_amount', 'prfnd_note', 'prfnd_profit_amount', 'prfnd_create_date')
+                .select('prfnd_id', 'prfnd_vouchar_number', this.db.raw(`COALESCE(client_name, combine_name, company_name) AS client_name`), this.db.raw(`COALESCE(vprfnd_ticket_no) AS ticket_no`), 'prfnd_date', 'prfnd_payment_type', 'prfnd_total_amount', 'prfnd_charge_amount', 'prfnd_return_amount', 'prfnd_note', 'prfnd_profit_amount', 'prfnd_create_date')
                 .from('trabill_pershial_refund')
+                .leftJoin('trabill_pershial_vendor_refund', {
+                vprfnd_refund_id: 'prfnd_id',
+            })
                 .leftJoin('trabill_clients AS tc', { 'tc.client_id': 'prfnd_client_id' })
                 .leftJoin('trabill_combined_clients AS tcc', {
                 'tcc.combine_id': 'prfnd_combine_id',
@@ -389,14 +392,17 @@ class RefundModel extends abstract_models_1.default {
         });
         this.getSinglePersialRefund = (refund_id) => __awaiter(this, void 0, void 0, function* () {
             const [refund_info] = yield this.query()
-                .select('prfnd_id', 'prfnd_invoice_id', 'invoice_no', 'prfnd_vouchar_number', 'prfnd_date', 'prfnd_client_id', 'prfnd_combine_id', this.db.raw(`COALESCE(client_name, combine_name) AS client_name`), 'client_mobile', 'prfnd_payment_type', 'prfnd_total_amount', 'prfnd_charge_amount', 'prfnd_note', 'prfnd_return_amount', 'prfnd_profit_amount', 'prfnd_create_date')
+                .select('prfnd_id', 'prfnd_invoice_id', 'invoice_no', 'prfnd_vouchar_number', 'prfnd_date', 'prfnd_client_id', 'prfnd_combine_id', this.db.raw(`COALESCE(client_name, combine_name) AS client_name`), this.db.raw(`GROUP_CONCAT(vprfnd_ticket_no) AS ticket_no`), 'client_mobile', 'prfnd_payment_type', 'prfnd_total_amount', 'prfnd_charge_amount', 'prfnd_note', 'prfnd_return_amount', 'prfnd_profit_amount', 'prfnd_create_date')
                 .from('trabill_pershial_refund')
+                .leftJoin('trabill_pershial_vendor_refund', {
+                vprfnd_refund_id: 'prfnd_id',
+            })
                 .leftJoin('trabill_invoices', { invoice_id: 'prfnd_invoice_id' })
                 .leftJoin('trabill_clients', { client_id: 'prfnd_client_id' })
                 .leftJoin('trabill_combined_clients', { combine_id: 'prfnd_combine_id' })
                 .where('prfnd_id', refund_id);
             const vendor_refund_info = yield this.query()
-                .select('vprfnd_vendor_id', 'vprfnd_combine_id', 'vprfnd_account_id', 'vprfnd_payment_type', 'vprfnd_payment_method', 'vprfnd_total_amount', 'vprfnd_return_amount', 'vprfnd_charge_amount', 'vprfnd_ait', 'vprfnd_base_fare', 'vprfnd_used_base_fare', 'vprfnd_remaining_base_fare', 'vprfnd_tax', 'vprfnd_used_tax', 'vprfnd_remaining_tax', 'vprfnd_total_commission', this.db.raw(`COALESCE(combine_name, vendor_name) as vendor_name`), this.db.raw(`COALESCE(combine_mobile, vendor_mobile) as vendor_mobile`))
+                .select('vprfnd_vendor_id', 'vprfnd_ticket_no', 'vprfnd_combine_id', 'vprfnd_account_id', 'vprfnd_payment_type', 'vprfnd_payment_method', 'vprfnd_total_amount', 'vprfnd_return_amount', 'vprfnd_charge_amount', 'vprfnd_ait', 'vprfnd_base_fare', 'vprfnd_used_base_fare', 'vprfnd_remaining_base_fare', 'vprfnd_tax', 'vprfnd_used_tax', 'vprfnd_remaining_tax', 'vprfnd_total_commission', this.db.raw(`COALESCE(combine_name, vendor_name) as vendor_name`), this.db.raw(`COALESCE(combine_mobile, vendor_mobile) as vendor_mobile`))
                 .from('trabill_pershial_vendor_refund')
                 .leftJoin('trabill_combined_clients', {
                 combine_id: 'vprfnd_combine_id',

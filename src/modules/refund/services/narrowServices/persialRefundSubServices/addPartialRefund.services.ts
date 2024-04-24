@@ -208,7 +208,6 @@ class AddPartialRefundServices extends AbstractServices {
       // VENDOR REFUND INFO
       let persialVendorInfos: IPartialRefundVendorInfo[] = [];
       let vprfnd_trxn_id;
-      let vprfnd_charge_trxn_id;
       let vprfnd_actrxn_id;
       for (const vendor_info of vendor_refund_info) {
         const {
@@ -227,6 +226,7 @@ class AddPartialRefundServices extends AbstractServices {
           vprfnd_remaining_base_fare,
           vprfnd_tax,
           vprfnd_total_commission,
+          vprfnd_ticket_no,
         } = vendor_info;
 
         const {
@@ -332,6 +332,7 @@ class AddPartialRefundServices extends AbstractServices {
         const persialVendorInfo: IPartialRefundVendorInfo = {
           vprfnd_refund_id: refund_id,
           vprfnd_airticket_id,
+          vprfnd_invoice_category_id: invoice_category_id,
           vprfnd_account_id: vprfnd_account_id,
           vprfnd_actrxn_id: vprfnd_actrxn_id as number,
           vprfnd_charge_amount: vprfnd_penalties,
@@ -350,6 +351,7 @@ class AddPartialRefundServices extends AbstractServices {
           vprfnd_remaining_tax,
           vprfnd_return_amount: vendor_refundable_amount,
           vprfnd_total_amount: vprfnd_base_fare_amount,
+          vprfnd_ticket_no,
         };
 
         persialVendorInfos.push(persialVendorInfo);

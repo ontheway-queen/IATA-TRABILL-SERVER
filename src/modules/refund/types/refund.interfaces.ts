@@ -247,6 +247,8 @@ export interface IPartialRefundVendorInfo {
   vprfnd_used_tax: number;
   vprfnd_remaining_tax: number;
   vprfnd_total_commission: number;
+  vprfnd_invoice_category_id: number;
+  vprfnd_ticket_no: string;
 }
 
 export interface IPartialRefundVendorReqInfo {
@@ -255,7 +257,7 @@ export interface IPartialRefundVendorReqInfo {
   vprfnd_account_id: number;
   vprfnd_payment_type: 'MONEY_RETURN' | 'ADJUST';
   vprfnd_payment_method: 1 | 2 | 3 | 4;
-
+  vprfnd_ticket_no: string;
   vendor_refundable_amount: number;
   vprfnd_base_fare_amount: number;
   vprfnd_used_airticket_tax: number;

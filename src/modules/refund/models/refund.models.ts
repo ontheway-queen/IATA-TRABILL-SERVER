@@ -1706,6 +1706,7 @@ class RefundModel extends AbstractModels {
         this.db.raw(
           `COALESCE(client_name, combine_name, company_name) AS client_name`
         ),
+        this.db.raw(`COALESCE(vprfnd_ticket_no) AS ticket_no`),
         'prfnd_date',
         'prfnd_payment_type',
         'prfnd_total_amount',
@@ -1716,6 +1717,9 @@ class RefundModel extends AbstractModels {
         'prfnd_create_date'
       )
       .from('trabill_pershial_refund')
+      .leftJoin('trabill_pershial_vendor_refund', {
+        vprfnd_refund_id: 'prfnd_id',
+      })
       .leftJoin('trabill_clients AS tc', { 'tc.client_id': 'prfnd_client_id' })
       .leftJoin('trabill_combined_clients AS tcc', {
         'tcc.combine_id': 'prfnd_combine_id',
@@ -1819,6 +1823,7 @@ class RefundModel extends AbstractModels {
         'prfnd_client_id',
         'prfnd_combine_id',
         this.db.raw(`COALESCE(client_name, combine_name) AS client_name`),
+        this.db.raw(`GROUP_CONCAT(vprfnd_ticket_no) AS ticket_no`),
         'client_mobile',
         'prfnd_payment_type',
         'prfnd_total_amount',
@@ -1829,6 +1834,9 @@ class RefundModel extends AbstractModels {
         'prfnd_create_date'
       )
       .from('trabill_pershial_refund')
+      .leftJoin('trabill_pershial_vendor_refund', {
+        vprfnd_refund_id: 'prfnd_id',
+      })
       .leftJoin('trabill_invoices', { invoice_id: 'prfnd_invoice_id' })
       .leftJoin('trabill_clients', { client_id: 'prfnd_client_id' })
       .leftJoin('trabill_combined_clients', { combine_id: 'prfnd_combine_id' })
@@ -1837,6 +1845,7 @@ class RefundModel extends AbstractModels {
     const vendor_refund_info = await this.query()
       .select(
         'vprfnd_vendor_id',
+        'vprfnd_ticket_no',
         'vprfnd_combine_id',
         'vprfnd_account_id',
         'vprfnd_payment_type',

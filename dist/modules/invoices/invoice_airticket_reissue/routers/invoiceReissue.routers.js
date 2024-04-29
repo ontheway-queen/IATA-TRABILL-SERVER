@@ -12,7 +12,6 @@ class ReIssueAirticketRoutes extends abstract_routers_1.default {
         this.callRouter();
     }
     callRouter() {
-        this.routers.put('/void/:invoice_id', this.controllers.voidReissue);
         // GET REISSUE TICKET INFO FOR REFUND REISSUE
         this.routers.get('/ticket-info/:invoice_id', this.controllers.getReissueTicketInfo);
         this.routers.post('/refund', this.controllers.reissueRefund);

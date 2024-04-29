@@ -232,13 +232,13 @@ class ReIssueAirticket extends abstract_models_1.default {
             }
             else if (categoryId === 2) {
                 data = yield this.query()
-                    .select('airticket_after_reissue_client_price as cl_price', 'airticket_after_reissue_purchase_price as purchase', 'airticket_after_reissue_profit as airticket_profit', 'airticket_after_reissue_taxes as taxes')
+                    .select('airticket_client_price as cl_price', 'airticket_purchase_price as purchase', 'airticket_profit', this.db.raw('0 as taxes'))
                     .from('trabill_invoice_noncom_airticket_items')
                     .where('airticket_id', airTicketId);
             }
             else if (categoryId === 3) {
                 data = yield this.query()
-                    .select('airticket_client_price as cl_price', 'airticket_purchase_price as purchase', 'airticket_profit', 'airticket_tax as taxes')
+                    .select('airticket_after_reissue_client_price as cl_price', 'airticket_after_reissue_purchase_price as purchase', 'airticket_after_reissue_profit as airticket_profit', 'airticket_after_reissue_taxes as taxes')
                     .from('trabill_invoice_reissue_airticket_items')
                     .where('airticket_id', airTicketId);
             }
@@ -268,7 +268,7 @@ class ReIssueAirticket extends abstract_models_1.default {
                 .insert(invoiceFlightDetails);
         });
     }
-    deleteAirticketReissue(invoice_id, airticket_deleted_by) {
+    deleteAirticketReissueItems(invoice_id, airticket_deleted_by) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
                 .into('trabill_invoice_reissue_airticket_items')

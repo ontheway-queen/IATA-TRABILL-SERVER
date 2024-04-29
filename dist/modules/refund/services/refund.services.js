@@ -96,7 +96,7 @@ class RefundServices extends abstract_services_1.default {
         });
         this.getAllRefunds = (req) => __awaiter(this, void 0, void 0, function* () {
             return this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
-                const { trash, page, size, search, from_date, to_date } = req.query;
+                const { page, size, search, from_date, to_date } = req.query;
                 const data = [];
                 const conn = this.models.refundModel(req, trx);
                 const items = yield conn.getAllOtherRefund(Number(page) || 1, Number(size) || 20, search, from_date, to_date);

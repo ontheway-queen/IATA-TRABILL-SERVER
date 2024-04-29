@@ -123,18 +123,7 @@ class ReIssueAirticket extends AbstractController {
       }
     }
   );
-  public voidReissue = this.assyncWrapper.wrap(
-    this.validator.deleteResissueAirticket,
-    async (req: Request, res: Response) => {
-      const data = await this.services.voidReissue(req);
 
-      if (data.success) {
-        res.status(200).json(data);
-      } else {
-        this.error();
-      }
-    }
-  );
   public getReissueTicketInfo = this.assyncWrapper.wrap(
     [],
     async (req: Request, res: Response) => {

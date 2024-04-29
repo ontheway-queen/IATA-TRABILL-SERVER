@@ -139,8 +139,7 @@ class RefundServices extends AbstractServices {
 
   public getAllRefunds = async (req: Request) => {
     return this.models.db.transaction(async (trx) => {
-      const { trash, page, size, search, from_date, to_date } = req.query as {
-        trash: string;
+      const { page, size, search, from_date, to_date } = req.query as {
         page: string;
         size: string;
         search: string;

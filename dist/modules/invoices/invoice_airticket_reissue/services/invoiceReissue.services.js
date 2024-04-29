@@ -106,7 +106,6 @@ class ReissueAirticket extends abstract_services_1.default {
         this.editReissueAirticket = new editInvoiceReissue_1.default().editReissueInvoice;
         this.editExistingCl = new editInvoiceExistingReissue_1.default().editExistingCl;
         this.deleteReissue = new deleteInvoiceReissue_1.default().deleteReissue;
-        this.voidReissue = new deleteInvoiceReissue_1.default().voidReissue;
         this.reissueRefund = new reisseuRefund_service_1.default().reissueRefund;
         this.getReissueRefundInfo = new reisseuRefund_service_1.default().getReissueRefundInfo;
     }

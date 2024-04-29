@@ -100,6 +100,7 @@ class AddExistingClient extends AbstractServices {
         invoice_total_profit: airticket_profit,
         invoice_total_vendor_price: airticket_purchase_price,
       };
+
       const invoice_id = await common_conn.insertInvoicesInfo(
         invoice_information
       );

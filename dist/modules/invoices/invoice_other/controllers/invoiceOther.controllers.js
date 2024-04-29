@@ -67,15 +67,6 @@ class InvoiceOther extends abstract_controllers_1.default {
                 throw new Error();
             }
         }));
-        this.voidInvoiceOther = this.assyncWrapper.wrap(this.validator.deleteInvoiceOthers, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.voidInvoiceOther(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                throw new Error();
-            }
-        }));
         // ============== @View ==================
         this.getForEdit = this.assyncWrapper.wrap(this.validator.readInvoiceOthers, (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.getForEdit(req);

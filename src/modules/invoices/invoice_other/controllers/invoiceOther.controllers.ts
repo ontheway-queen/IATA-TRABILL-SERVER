@@ -75,19 +75,6 @@ class InvoiceOther extends AbstractController {
     }
   );
 
-  public voidInvoiceOther = this.assyncWrapper.wrap(
-    this.validator.deleteInvoiceOthers,
-    async (req: Request, res: Response) => {
-      const data = await this.services.voidInvoiceOther(req);
-
-      if (data.success) {
-        res.status(200).json(data);
-      } else {
-        throw new Error();
-      }
-    }
-  );
-
   // ============== @View ==================
   public getForEdit = this.assyncWrapper.wrap(
     this.validator.readInvoiceOthers,

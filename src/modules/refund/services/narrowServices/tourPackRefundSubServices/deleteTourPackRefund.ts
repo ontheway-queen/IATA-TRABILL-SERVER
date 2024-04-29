@@ -1,7 +1,7 @@
 import { Request } from 'express';
+import { Knex } from 'knex';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
-import { Knex } from 'knex';
 class DeleteTourPackRefund extends AbstractServices {
   constructor() {
     super();
@@ -12,8 +12,6 @@ class DeleteTourPackRefund extends AbstractServices {
     voidTrx?: Knex.Transaction<any, any[]>
   ) => {
     const { refund_id } = req.params;
-
-    const { refund_deleted_by } = req.body as { refund_deleted_by: number };
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, voidTrx || trx);

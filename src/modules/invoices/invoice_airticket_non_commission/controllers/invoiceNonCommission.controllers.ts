@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 
 import AbstractController from '../../../../abstracts/abstract.controllers';
 import InvoiceNonCommission from '../services/invoiceNonCommission.services';
-import { voidInvoices } from '../validators/commonNonCommission.validator';
 import InvoiceNonCommissionValidators from '../validators/invoiceNonCommission.validators';
 
 class InvoiceNonCommissionController extends AbstractController {
@@ -26,19 +25,7 @@ class InvoiceNonCommissionController extends AbstractController {
       }
     }
   );
-  // GET ALL INVOICE NON COMMISSION
-  public voidNonCommission = this.assyncWrapper.wrap(
-    voidInvoices,
-    async (req: Request, res: Response): Promise<void> => {
-      const data = await this.services.voidNonCommission(req);
 
-      if (data.success) {
-        res.status(200).json(data);
-      } else {
-        this.error();
-      }
-    }
-  );
   // VIEW NON COMMISSION DETAILS
   public viewNoncommissioinDetails = this.assyncWrapper.wrap(
     this.validator.readInvoiceNonComission,

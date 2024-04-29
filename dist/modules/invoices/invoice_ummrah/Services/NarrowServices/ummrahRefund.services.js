@@ -14,8 +14,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
-const invoice_helpers_1 = require("../../../../../common/helpers/invoice.helpers");
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
+const invoice_helpers_1 = require("../../../../../common/helpers/invoice.helpers");
 const lib_1 = require("../../../../../common/utils/libraries/lib");
 class UmmrahRefundServices extends abstract_services_1.default {
     constructor() {
@@ -83,7 +83,7 @@ class UmmrahRefundServices extends abstract_services_1.default {
                         acctrxn_note: vendorContent,
                     });
                 }
-                const refund_id = yield conn.createUmmrahRefund({
+                const refund_data = {
                     refund_client_acc_id: client_payment_acc_id,
                     refund_voucher_no: voucher_no,
                     refund_client_acc_trxn_id,
@@ -102,7 +102,8 @@ class UmmrahRefundServices extends abstract_services_1.default {
                     refund_vendor_total: vendor_total_refund,
                     refund_vendor_type: vendor_refund_type,
                     refund_date,
-                });
+                };
+                const refund_id = yield conn.createUmmrahRefund(refund_data);
                 const refundItemsInfo = [];
                 for (const billing of billing_info) {
                     const { refund_quantity, vendor_charge, vendor_refund, comb_vendor, client_charge, client_refund, billing_cost_price, billing_id, billing_unit_price, } = billing;

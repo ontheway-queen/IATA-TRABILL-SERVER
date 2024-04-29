@@ -125,7 +125,6 @@ class InivoiceOther extends AbstractServices {
   public postInvoiceOther = new AddInvoiceOther().addInvoiceOther;
   public editInvoiceOther = new EditInvoiceOther().editInvoiceOther;
   public deleteInvoiceOther = new DeleteInvoiceOtehr().deleteInvoiceOther;
-  public voidInvoiceOther = new DeleteInvoiceOtehr().voidInvoiceOther;
 }
 
 export default InivoiceOther;

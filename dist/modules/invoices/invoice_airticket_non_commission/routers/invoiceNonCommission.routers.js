@@ -12,7 +12,6 @@ class InvoiceNonCommission extends abstract_routers_1.default {
         this.callRouter();
     }
     callRouter() {
-        this.routers.put('/void/:invoice_id', this.controllers.voidNonCommission);
         this.routers
             .route('/')
             .post(this.controllers.addInvoiceNonCommission)

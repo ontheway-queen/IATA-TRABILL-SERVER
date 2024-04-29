@@ -171,7 +171,6 @@ class ReissueAirticket extends AbstractServices {
   public editReissueAirticket = new EditReissueAirticket().editReissueInvoice;
   public editExistingCl = new EditExistingCl().editExistingCl;
   public deleteReissue = new DeleteReissue().deleteReissue;
-  public voidReissue = new DeleteReissue().voidReissue;
   public reissueRefund = new ReissueRefundService().reissueRefund;
   public getReissueRefundInfo = new ReissueRefundService().getReissueRefundInfo;
 }

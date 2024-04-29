@@ -99,7 +99,6 @@ class InvoiceNonCommission extends AbstractServices {
   public editInvoiceNonCommission = new EditInvoiceNonCommission()
     .editInvoiceNonCommission;
   public deleteNonComInvoice = new DeleteNonComInvoice().deleteNonComInvoice;
-  public voidNonCommission = new DeleteNonComInvoice().voidNonCommission;
 }
 
 export default InvoiceNonCommission;

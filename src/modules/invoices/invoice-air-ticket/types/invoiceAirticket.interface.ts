@@ -41,6 +41,7 @@ export interface IAirTicketTaxRefundBody {
     airticket_id: number;
     comb_vendor: string;
     refund_tax_amount: number;
+    airticket_ticket_no: string;
   }[];
   client_refund_type: 'Adjust' | 'Return';
   vendor_refund_type: 'Adjust' | 'Return';
@@ -207,4 +208,18 @@ export interface InvoiceAirTicketReqType {
   invoice_info: InvoiceInfoType;
   ticketInfo: ITicketInfo[];
   money_receipt: InvoiceMoneyReceiptType;
+}
+
+export interface IVoidReqBody {
+  client_charge: number;
+  invoice_void_date: string;
+  invoice_no: string;
+  net_total: number;
+  comb_client: string;
+  invoice_vendors: {
+    comb_vendor: string;
+    vendor_charge: number;
+    airticket_ticket_no: string;
+    cost_price: number;
+  }[];
 }

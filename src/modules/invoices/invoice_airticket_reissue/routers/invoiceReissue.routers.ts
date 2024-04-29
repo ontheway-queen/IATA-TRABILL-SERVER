@@ -10,8 +10,6 @@ class ReIssueAirticketRoutes extends AbstractRouter {
     this.callRouter();
   }
   private callRouter() {
-    this.routers.put('/void/:invoice_id', this.controllers.voidReissue);
-
     // GET REISSUE TICKET INFO FOR REFUND REISSUE
     this.routers.get(
       '/ticket-info/:invoice_id',

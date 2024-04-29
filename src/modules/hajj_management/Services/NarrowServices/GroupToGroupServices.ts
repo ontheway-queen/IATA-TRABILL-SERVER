@@ -120,7 +120,7 @@ class GroupToGroupServices extends AbstractServices {
     const { deleted_by } = req.body as { deleted_by: number };
 
     if (!id) {
-      throw new CustomError('Pleace provide an id', 400, 'Id is empty');
+      throw new CustomError('Please provide an id', 400, 'Id is empty');
     }
 
     return await this.models.db.transaction(async (trx) => {
@@ -128,7 +128,7 @@ class GroupToGroupServices extends AbstractServices {
 
       const data = await conn.deleteGroupTransaction(id, deleted_by);
       if (!data) {
-        throw new CustomError('Pleace provide an valid id', 400, 'Invalid Id');
+        throw new CustomError('Please provide an valid id', 400, 'Invalid Id');
       }
 
       await conn.deleteGroupTransTracking(id);

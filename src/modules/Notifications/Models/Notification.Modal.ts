@@ -78,7 +78,7 @@ class NotificationModals extends AbstractModels {
       return success;
     } else {
       throw new CustomError(
-        'Pleace provide valid data and valid id',
+        'Please provide valid data and valid id',
         400,
         'Invalid id'
       );

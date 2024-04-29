@@ -68,7 +68,6 @@ class InvoiceNonCommission extends abstract_services_1.default {
         this.editInvoiceNonCommission = new editInvoiceNonCommission_1.default()
             .editInvoiceNonCommission;
         this.deleteNonComInvoice = new deleteInvoiceNonCom_1.default().deleteNonComInvoice;
-        this.voidNonCommission = new deleteInvoiceNonCom_1.default().voidNonCommission;
     }
 }
 exports.default = InvoiceNonCommission;

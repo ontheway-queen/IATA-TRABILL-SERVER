@@ -17,7 +17,7 @@ class PassportValidator extends AbstractValidator {
     this.permissions.check(this.resources.passport_management, 'create'),
 
     // check('client_id').notEmpty().withMessage('Client is requierd').isString(),
-    check('passport_created_by').notEmpty().withMessage('Pleace add user id!'),
+    check('passport_created_by').notEmpty().withMessage('Please add user id!'),
 
     check('passport_info.*.passport_no')
       .isLength({ max: 35 })

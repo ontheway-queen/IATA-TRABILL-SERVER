@@ -27,7 +27,7 @@ class AdminAuthServices extends abstract_services_1.default {
             const agencyEmail = req.query.email;
             const isNotExist = yield adminConn.checkUsername('agency-email', agencyEmail);
             if (isNotExist) {
-                throw new customError_1.default('Pleace provide a valid email address', 400, 'Invalid email');
+                throw new customError_1.default('Please provide a valid email address', 400, 'Invalid email');
             }
             const otp = (0, common_helper_1.generateOTP)(6);
             const message = {

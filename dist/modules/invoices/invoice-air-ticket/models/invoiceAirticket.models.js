@@ -216,12 +216,23 @@ class InvoiceAirticketModel extends abstract_models_1.default {
         // AIR TICKET INFO
         this.selectAirTicketTax = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
             const results = yield this.query()
-                .select('airticket_id', 'airticket_client_price', 'airticket_purchase_price', 'airticket_tax', this.db.raw("coalesce(CONCAT('client-',airticket_client_id), CONCAT('combined-',airticket_combined_id)) as comb_client"), this.db.raw("coalesce(CONCAT('vendor-',airticket_vendor_id), CONCAT('combined-',airticket_vendor_combine_id)) as comb_vendor"))
+                .select('airticket_id', 'airticket_ticket_no', 'airticket_client_price', 'airticket_purchase_price', 'airticket_tax', this.db.raw("coalesce(CONCAT('client-',airticket_client_id), CONCAT('combined-',airticket_combined_id)) as comb_client"), this.db.raw("coalesce(CONCAT('vendor-',airticket_vendor_id), CONCAT('combined-',airticket_vendor_combine_id)) as comb_vendor"))
                 .from('trabill_invoice_airticket_items')
                 .where('airticket_org_agency', this.org_agency)
                 .andWhere('airticket_invoice_id', invoiceId)
                 .andWhereNot('airticket_is_refund', 1)
-                .andWhereNot('airticket_is_deleted', 1);
+                .andWhereNot('airticket_is_reissued', 1)
+                .andWhereNot('airticket_is_deleted', 1)
+                .unionAll([
+                this.db
+                    .select('airticket_id', 'airticket_ticket_no', this.db.raw('coalesce(airticket_after_reissue_client_price, airticket_client_price) as airticket_client_price'), this.db.raw('coalesce(airticket_after_reissue_purchase_price, airticket_purchase_price) as airticket_purchase_price'), this.db.raw('coalesce(airticket_after_reissue_taxes, airticket_tax) as airticket_tax'), this.db.raw("coalesce(CONCAT('client-',airticket_client_id), CONCAT('combined-',airticket_combined_id)) as comb_client"), this.db.raw("coalesce(CONCAT('vendor-',airticket_vendor_id), CONCAT('combined-',airticket_vendor_combine_id)) as comb_vendor"))
+                    .from('trabill_invoice_reissue_airticket_items')
+                    .where('airticket_org_agency', this.org_agency)
+                    .andWhere('airticket_invoice_id', invoiceId)
+                    .andWhereNot('airticket_is_refund', 1)
+                    .andWhereNot('airticket_is_reissued', 1)
+                    .andWhereNot('airticket_is_deleted', 1),
+            ]);
             return results;
         });
         this.insertAirTicketTaxRefund = (data) => __awaiter(this, void 0, void 0, function* () {
@@ -233,11 +244,19 @@ class InvoiceAirticketModel extends abstract_models_1.default {
         this.insertAirTicketTaxRefundItem = (data) => __awaiter(this, void 0, void 0, function* () {
             yield this.query().insert(data).into('trabill_airticket_tax_refund_items');
         });
-        this.updateAirTicketItemRefund = (airTicketId) => __awaiter(this, void 0, void 0, function* () {
-            yield this.query()
-                .update({ airticket_is_refund: 1 })
-                .from('trabill_invoice_airticket_items')
-                .where('airticket_id', airTicketId);
+        this.updateAirTicketItemRefund = (airTicketId, category_id) => __awaiter(this, void 0, void 0, function* () {
+            if (category_id === 1) {
+                yield this.query()
+                    .update({ airticket_is_refund: 1 })
+                    .from('trabill_invoice_airticket_items')
+                    .where('airticket_id', airTicketId);
+            }
+            else if (category_id === 3) {
+                yield this.query()
+                    .update({ airticket_is_refund: 1 })
+                    .from('trabill_invoice_reissue_airticket_items')
+                    .where('airticket_id', airTicketId);
+            }
         });
         this.updateInvoiceRefund = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
             yield this.query()
@@ -247,7 +266,7 @@ class InvoiceAirticketModel extends abstract_models_1.default {
         });
         this.viewAirTicketTaxRefund = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
             const [refunds] = yield this.query()
-                .select('refund_id', 'client_refund_type', 'vendor_refund_type', 'client_total_tax_refund', 'vendor_total_tax_refund', 'created_at', 'cl_ac.account_name as client_account', 'v_ac.account_name as vendor_account')
+                .select('refund_id', 'client_refund_type', 'vendor_refund_type', 'client_total_tax_refund', 'vendor_total_tax_refund', 'refund_profit', 'created_at', 'cl_ac.account_name as client_account', 'v_ac.account_name as vendor_account')
                 .from('trabill_airticket_tax_refund')
                 .leftJoin('trabill_accounts as cl_ac', 'cl_ac.account_id', '=', 'client_account_id')
                 .leftJoin('trabill_accounts as v_ac', 'v_ac.account_id', '=', 'vendor_account_id')
@@ -354,10 +373,21 @@ class InvoiceAirticketModel extends abstract_models_1.default {
             return data;
         });
     }
+    airticketItemsInfo(invoice_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.query()
+                .from('trabill_invoice_airticket_items')
+                .select('airticket_vendor_id as vendor_id', 'invoice_no', 'airticket_vendor_combine_id as combined_id', 'airticket_purchase_price as prev_cost_price', 'airticket_vtrxn_id as prevTrxnId', 'airticket_ticket_no as ticket_no', this.db.raw("COALESCE(CONCAT('vendor-', airticket_vendor_id), CONCAT('vendor-', airticket_vendor_combine_id)) as comb_vendor"))
+                .leftJoin('trabill_invoices', { invoice_id: 'airticket_invoice_id' })
+                .where('airticket_invoice_id', invoice_id)
+                .andWhereNot('airticket_is_deleted', 1);
+            return data;
+        });
+    }
     getInvoiceInfoForVoid(invoice_id) {
         return __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
-                .select('invoice_id', 'invoice_no', 'client_name', 'net_total')
+                .select('invoice_id', 'invoice_no', 'client_name', 'comb_client', 'net_total')
                 .from('view_invoices')
                 .where({ invoice_id });
             const vendors = yield this.query()

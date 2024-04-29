@@ -60,7 +60,7 @@ class InvoiceVisaModels extends abstract_models_1.default {
                 .update({ billing_status: status, billing_vtrxn_id })
                 .where('billing_id', billingId);
             if (!success) {
-                throw new customError_1.default('Pleace provide valid billing id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide valid billing id', 400, 'Invalid id');
             }
         });
         this.updateInvoiceClientTrxn = (invoice_cltrxn_id, invoiceId) => __awaiter(this, void 0, void 0, function* () {
@@ -69,7 +69,7 @@ class InvoiceVisaModels extends abstract_models_1.default {
                 .update({ invoice_cltrxn_id })
                 .where('invoice_id', invoiceId);
             if (!success) {
-                throw new customError_1.default('Pleace provide valid billing id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide valid billing id', 400, 'Invalid id');
             }
         });
         this.getPrevBillingApprovedAmount = (invoice_id) => __awaiter(this, void 0, void 0, function* () {

@@ -14,14 +14,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
-const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
-const common_helper_1 = require("../../../../common/helpers/common.helper");
 const customError_1 = __importDefault(require("../../../../common/utils/errors/customError"));
-const lib_1 = require("../../../../common/utils/libraries/lib");
 const addInvoiceAirticket_1 = __importDefault(require("./narrowServices/addInvoiceAirticket"));
+const air_ticket_tax_refund_1 = __importDefault(require("./narrowServices/air_ticket_tax_refund"));
 const deleteAirTicket_1 = __importDefault(require("./narrowServices/deleteAirTicket"));
 const editInvoiceAirticket_1 = __importDefault(require("./narrowServices/editInvoiceAirticket"));
 const sendMail_services_1 = __importDefault(require("./narrowServices/sendMail.services"));
+const void_invoice_1 = __importDefault(require("./narrowServices/void_invoice"));
 class InvoiceAirticketService extends abstract_services_1.default {
     constructor() {
         super();
@@ -141,122 +140,6 @@ class InvoiceAirticketService extends abstract_services_1.default {
             const data = yield conn.selectAirTicketTax(invoiceId);
             return { success: true, data };
         });
-        this.addAirTicketTax = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { refund_invoice_id, comb_client, ticket_info, client_refund_type, vendor_refund_type, client_pay_type, vendor_pay_type, client_account_id, vendor_account_id, client_total_tax_refund, vendor_total_tax_refund, refund_date, } = req.body;
-            return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
-                const conn = this.models.invoiceAirticketModel(req, trx);
-                const trxns = new Trxns_1.default(req, trx);
-                const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
-                let refund_c_trxn_id = null;
-                let client_account_trxn_id = null;
-                let vendor_account_trxn_id = null;
-                const clAccPayType = (0, lib_1.getPaymentType)(client_pay_type);
-                const VAccPayType = (0, lib_1.getPaymentType)(vendor_pay_type);
-                // CLIENT TRANSACTION
-                if (client_refund_type === 'Adjust') {
-                    const clTrxnBody = {
-                        ctrxn_type: 'CREDIT',
-                        ctrxn_amount: client_total_tax_refund,
-                        ctrxn_cl: comb_client,
-                        ctrxn_particular_id: 108,
-                        ctrxn_created_at: refund_date,
-                        ctrxn_note: '',
-                        ctrxn_particular_type: 'AIR TICKET TAX REFUND',
-                        ctrxn_pay_type: clAccPayType,
-                    };
-                    refund_c_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);
-                }
-                else {
-                    const ACTrxnBody = {
-                        acctrxn_ac_id: client_account_id,
-                        acctrxn_type: 'DEBIT',
-                        acctrxn_amount: client_total_tax_refund,
-                        acctrxn_created_at: refund_date,
-                        acctrxn_created_by: req.user_id,
-                        acctrxn_note: 'Client Refund',
-                        acctrxn_particular_id: 108,
-                        acctrxn_particular_type: 'AIR TICKET TAX REFUND',
-                        acctrxn_pay_type: clAccPayType,
-                    };
-                    client_account_trxn_id = yield trxns.AccTrxnInsert(ACTrxnBody);
-                    const clTrxnBody = {
-                        ctrxn_type: 'CREDIT',
-                        ctrxn_amount: 0,
-                        ctrxn_cl: comb_client,
-                        ctrxn_particular_id: 108,
-                        ctrxn_created_at: refund_date,
-                        ctrxn_note: `Money return : ${client_total_tax_refund}/-`,
-                        ctrxn_particular_type: 'AIR TICKET TAX REFUND',
-                        ctrxn_pay_type: clAccPayType,
-                    };
-                    refund_c_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);
-                }
-                // ACCOUNT TRANSACTION FOR VENDOR
-                if (vendor_refund_type === 'Return') {
-                    const ACTrxnBody = {
-                        acctrxn_ac_id: vendor_account_id,
-                        acctrxn_type: 'CREDIT',
-                        acctrxn_amount: vendor_total_tax_refund,
-                        acctrxn_created_at: refund_date,
-                        acctrxn_created_by: req.user_id,
-                        acctrxn_note: 'Vendor Refund',
-                        acctrxn_particular_id: 108,
-                        acctrxn_particular_type: 'AIR TICKET TAX REFUND',
-                        acctrxn_pay_type: VAccPayType,
-                    };
-                    vendor_account_trxn_id = yield trxns.AccTrxnInsert(ACTrxnBody);
-                }
-                const refundData = {
-                    refund_invoice_id,
-                    refund_agency_id: req.agency_id,
-                    refund_client_id: client_id,
-                    refund_combined_id: combined_id,
-                    refund_c_trxn_id,
-                    client_refund_type,
-                    vendor_refund_type,
-                    client_pay_type,
-                    vendor_pay_type,
-                    client_account_id,
-                    vendor_account_id,
-                    client_account_trxn_id,
-                    vendor_account_trxn_id,
-                    client_total_tax_refund,
-                    vendor_total_tax_refund,
-                };
-                const refund_id = yield conn.insertAirTicketTaxRefund(refundData);
-                // VENDOR TRANSACTION
-                for (const item of ticket_info) {
-                    const { vendor_id, combined_id } = (0, common_helper_1.separateCombClientToId)(item.comb_vendor);
-                    const VTrxnBody = {
-                        comb_vendor: item.comb_vendor,
-                        vtrxn_amount: vendor_refund_type === 'Adjust' ? item.refund_tax_amount : 0,
-                        vtrxn_created_at: refund_date,
-                        vtrxn_note: vendor_refund_type === 'Adjust'
-                            ? ''
-                            : `Money return : ${item.refund_tax_amount}/-`,
-                        vtrxn_particular_id: 108,
-                        vtrxn_particular_type: 'AIR TICKET TAX REFUND',
-                        vtrxn_type: 'CREDIT',
-                        vtrxn_user_id: req.user_id,
-                    };
-                    const refund_v_trxn_id = yield trxns.VTrxnInsert(VTrxnBody);
-                    const refundItemData = {
-                        refund_airticket_id: item.airticket_id,
-                        refund_combined_id: combined_id,
-                        refund_id,
-                        refund_tax_amount: item.refund_tax_amount,
-                        refund_vendor_id: vendor_id,
-                        refund_v_trxn_id,
-                    };
-                    yield conn.insertAirTicketTaxRefundItem(refundItemData);
-                    // update air ticket refund
-                    yield conn.updateAirTicketItemRefund(item.airticket_id);
-                }
-                // UPDATE INVOICE REFUND
-                yield conn.updateInvoiceRefund(refund_invoice_id);
-                return { success: true, msg: 'Invoice air ticket tax refunded!' };
-            }));
-        });
         this.getInvoiceInfoForVoid = (req) => __awaiter(this, void 0, void 0, function* () {
             const { invoice_id } = req.params;
             const conn = this.models.invoiceAirticketModel(req);
@@ -270,7 +153,8 @@ class InvoiceAirticketService extends abstract_services_1.default {
         this.addInvoiceAirticket = new addInvoiceAirticket_1.default().addInvoiceAirTicket;
         this.editInvoiceAirticket = new editInvoiceAirticket_1.default().editInvoiceAirTicket;
         this.deleteInvoiceAirTicket = new deleteAirTicket_1.default().deleteAirTicket;
-        this.voidInvoiceAirticket = new deleteAirTicket_1.default().voidInvoice;
+        this.voidInvoiceAirticket = new void_invoice_1.default().voidInvoice;
+        this.addAirTicketTax = new air_ticket_tax_refund_1.default().addAirTicketTax;
         this.sendEmail = new sendMail_services_1.default().sendEmail;
     }
 }

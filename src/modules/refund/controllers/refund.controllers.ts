@@ -340,10 +340,46 @@ class RefundController extends AbstractController {
       }
     }
   );
-  public getPertialAirticketInfo = this.assyncWrapper.wrap(
+  public getPartialAirticketInfo = this.assyncWrapper.wrap(
     this.validator.readPersialRefund,
     async (req: Request, res: Response) => {
-      const data = await this.services.getPertialAirticketInfo(req);
+      const data = await this.services.getPartialAirticketInfo(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('tour refund delete');
+      }
+    }
+  );
+  public allTaxRefund = this.assyncWrapper.wrap(
+    this.validator.readPersialRefund,
+    async (req: Request, res: Response) => {
+      const data = await this.services.allTaxRefund(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('tour refund delete');
+      }
+    }
+  );
+  public viewAirTicketTaxRefund = this.assyncWrapper.wrap(
+    this.validator.readPersialRefund,
+    async (req: Request, res: Response) => {
+      const data = await this.services.viewAirTicketTaxRefund(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('tour refund delete');
+      }
+    }
+  );
+  public deleteAirTicketTaxRefund = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response) => {
+      const data = await this.services.deleteAirTicketTaxRefund(req);
 
       if (data.success) {
         res.status(200).json(data);

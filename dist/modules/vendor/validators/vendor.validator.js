@@ -61,11 +61,11 @@ const commonVendorAdvanceReturn = [
     (0, express_validator_1.check)('advr_payment_type')
         .notEmpty()
         .isInt()
-        .withMessage('Pleace provide payment type.'),
+        .withMessage('Please provide payment type.'),
     (0, express_validator_1.check)('advance_amount')
         .notEmpty()
         .isFloat()
-        .withMessage('Pleace provide advance amount.'),
+        .withMessage('Please provide advance amount.'),
     (0, express_validator_1.check)('cheque_number')
         .optional()
         .isInt()

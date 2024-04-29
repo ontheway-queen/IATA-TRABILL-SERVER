@@ -87,7 +87,6 @@ class InivoiceOther extends abstract_services_1.default {
         this.postInvoiceOther = new addInvoiceOther_1.default().addInvoiceOther;
         this.editInvoiceOther = new editInvoiceOther_1.default().editInvoiceOther;
         this.deleteInvoiceOther = new deleteInvoiceOther_1.default().deleteInvoiceOther;
-        this.voidInvoiceOther = new deleteInvoiceOther_1.default().voidInvoiceOther;
     }
 }
 exports.default = InivoiceOther;

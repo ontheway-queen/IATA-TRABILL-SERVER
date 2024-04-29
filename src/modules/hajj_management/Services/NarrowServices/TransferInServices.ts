@@ -109,7 +109,7 @@ class TransferInServices extends AbstractServices {
     const { deleted_by } = req.body as { deleted_by: number };
 
     if (!id) {
-      throw new CustomError('Pleace provide  a id', 400, 'Invalid Id');
+      throw new CustomError('Please provide  a id', 400, 'Invalid Id');
     }
 
     return await this.models.db.transaction(async (trx) => {

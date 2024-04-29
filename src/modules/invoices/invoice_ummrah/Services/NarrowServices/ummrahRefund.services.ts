@@ -1,14 +1,14 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
-import { InvoiceHistory } from '../../../../../common/types/common.types';
+import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import { generateVoucherNumber } from '../../../../../common/helpers/invoice.helpers';
+import { InvoiceHistory } from '../../../../../common/types/common.types';
+import { getPaymentType } from '../../../../../common/utils/libraries/lib';
 import {
   IUmmrahRefundItems,
   IUmmrahRefundReqBody,
 } from '../../Type/invoiceUmmrah.Interfaces';
-import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
-import { getPaymentType } from '../../../../../common/utils/libraries/lib';
 
 class UmmrahRefundServices extends AbstractServices {
   constructor() {
@@ -99,7 +99,7 @@ class UmmrahRefundServices extends AbstractServices {
         });
       }
 
-      const refund_id = await conn.createUmmrahRefund({
+      const refund_data = {
         refund_client_acc_id: client_payment_acc_id,
         refund_voucher_no: voucher_no,
         refund_client_acc_trxn_id,
@@ -118,7 +118,9 @@ class UmmrahRefundServices extends AbstractServices {
         refund_vendor_total: vendor_total_refund,
         refund_vendor_type: vendor_refund_type,
         refund_date,
-      });
+      };
+
+      const refund_id = await conn.createUmmrahRefund(refund_data);
 
       const refundItemsInfo: IUmmrahRefundItems[] = [];
       for (const billing of billing_info) {

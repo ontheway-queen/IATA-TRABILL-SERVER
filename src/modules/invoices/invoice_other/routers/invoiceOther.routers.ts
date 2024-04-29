@@ -13,8 +13,6 @@ class InivoiceOtherRouters extends AbstractRouter {
     this.routers.get('/all', this.controllers.getAllInvoiceOther);
     this.routers.get('/view/:id', this.controllers.viewInvoiceOther);
 
-    this.routers.put('/void/:invoice_id', this.controllers.voidInvoiceOther);
-
     this.routers.post('/post', this.controllers.postInvoiceOther);
     this.routers.get('/transport-type', this.controllers.getTransportType);
     this.routers.get(

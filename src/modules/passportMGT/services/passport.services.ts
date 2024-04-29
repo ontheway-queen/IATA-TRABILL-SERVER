@@ -450,7 +450,7 @@ class PassportServices extends AbstractServices {
     const { passport_no } = req.params;
 
     if (!passport_no) {
-      throw new CustomError('Pleace provide a passport_no', 400, 'Empty data');
+      throw new CustomError('Please provide a passport_no', 400, 'Empty data');
     }
 
     const conn = this.models.passportModel(req);

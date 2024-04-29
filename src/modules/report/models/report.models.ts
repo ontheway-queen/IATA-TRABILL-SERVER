@@ -1804,9 +1804,8 @@ class ReportModel extends AbstractModels {
         'invoice_void_charge',
         'invoice_sales_date',
         'invoice_note',
-        this.db.raw(
-          'CONCAT(user_first_name, " "  ,user_last_name) as user_name'
-        ),
+        'user_full_name AS user_name',
+
         this.db.raw(
           "CASE WHEN invoice_is_void = 1 THEN 'VOID' ELSE 'DELETE' END AS invoices_trash_type"
         ),
@@ -1826,11 +1825,11 @@ class ReportModel extends AbstractModels {
       .leftJoin('trabill_invoice_categories', {
         invcat_id: 'invoice_category_id',
       })
-      .whereNot('invoice_is_deleted', 1)
+      .where('invoice_is_void', 1)
       .andWhere('invoice_org_agency', this.org_agency)
       .modify((builder) => {
         if (from_date && to_date) {
-          builder.andWhereRaw('Date(invoice_update_date) BETWEEN ? AND ?', [
+          builder.andWhereRaw('Date(invoice_void_date) BETWEEN ? AND ?', [
             from_date,
             to_date,
           ]);
@@ -1842,16 +1841,16 @@ class ReportModel extends AbstractModels {
     const [{ count }] = (await this.query()
       .count('* as count')
       .from('trabill_invoices')
+      .where('invoice_is_void', 1)
+      .andWhere('invoice_org_agency', this.org_agency)
       .modify((builder) => {
         if (from_date && to_date) {
-          builder.andWhereRaw('Date(invoice_update_date) BETWEEN ? AND ?', [
+          builder.andWhereRaw('Date(invoice_void_date) BETWEEN ? AND ?', [
             from_date,
             to_date,
           ]);
         }
-      })
-      .whereNot('invoice_is_deleted', 1)
-      .andWhere('invoice_org_agency', this.org_agency)) as { count: number }[];
+      })) as { count: number }[];
 
     return { count, data };
   }
@@ -2001,7 +2000,9 @@ class ReportModel extends AbstractModels {
     const total = await this.query()
       .from('view_all_airticket_details')
       .where('trabill_invoices.invoice_org_agency', this.org_agency)
-      .join('trabill_invoices', { invoice_id: 'airticket_invoice_id' })
+      .join('trabill_invoices', {
+        'trabill_invoices.invoice_id': 'airticket_invoice_id',
+      })
       .andWhereNot('trabill_invoices.invoice_is_deleted', 1)
       .modify((builder) => {
         if (airline_id !== 'all') {

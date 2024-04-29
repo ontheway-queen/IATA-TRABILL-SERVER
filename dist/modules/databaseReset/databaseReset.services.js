@@ -22,7 +22,7 @@ class DatabaseResetServices extends abstract_services_1.default {
             const pass = req.query.pass;
             const { deleted_by } = req.body;
             if (pass !== '668252') {
-                throw new customError_1.default('Pleace provide currect password', 400, 'Incorrect password');
+                throw new customError_1.default('Please provide currect password', 400, 'Incorrect password');
             }
             const conn = this.models.DatabaseResetModels(req);
             yield conn.resetAllAgencyData(agency_id);

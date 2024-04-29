@@ -15,7 +15,7 @@ class chequesValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.cheque_management, 'update'),
             (0, express_validator_1.check)('cheque_id')
                 .notEmpty()
-                .withMessage('Pleace provide cheque id')
+                .withMessage('Please provide cheque id')
                 .isInt()
                 .withMessage('cheque id must be an integer value'),
             (0, express_validator_1.check)('account_id')
@@ -36,7 +36,7 @@ class chequesValidators extends abstract_validators_1.default {
                 .withMessage('Client must be an string value'),
             (0, express_validator_1.check)('cheque_type')
                 .notEmpty()
-                .withMessage('Pleace provide cheque type')
+                .withMessage('Please provide cheque type')
                 .isIn([
                 'MR_ADVR',
                 'EXPENSE',
@@ -48,15 +48,15 @@ class chequesValidators extends abstract_validators_1.default {
                 'VENDOR_ADVR',
                 'VENDOR_PAYMENT',
             ])
-                .withMessage('Pleace provide valid cheque type'),
+                .withMessage('Please provide valid cheque type'),
             (0, express_validator_1.check)('cheque_status')
                 .notEmpty()
-                .withMessage('Pleace provide cheque status')
+                .withMessage('Please provide cheque status')
                 .isIn(['DEPOSIT', 'BOUNCE', 'RETURN'])
-                .withMessage('Pleace provide valid cheque status'),
+                .withMessage('Please provide valid cheque status'),
             (0, express_validator_1.check)('cheque_amount')
                 .notEmpty()
-                .withMessage('Pleace provide cheque amount'),
+                .withMessage('Please provide cheque amount'),
             (0, express_validator_1.check)('cheque_note')
                 .optional()
                 .customSanitizer((value) => (value === null ? undefined : value))
@@ -64,11 +64,11 @@ class chequesValidators extends abstract_validators_1.default {
                 .withMessage('Cheque not must be string value'),
             (0, express_validator_1.check)('date')
                 .notEmpty()
-                .withMessage('Date is required! pleace provide date')
+                .withMessage('Date is required! Please provide date')
                 .toDate(),
             (0, express_validator_1.check)('user_id')
                 .notEmpty()
-                .withMessage('User id is required! pleace provide user id'),
+                .withMessage('User id is required! Please provide user id'),
         ];
     }
 }

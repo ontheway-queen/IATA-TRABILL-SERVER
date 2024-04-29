@@ -12,7 +12,7 @@ class InvoiceTourValidator extends AbstractValidator {
     this.permissions.check(this.resources.invoice_tour_package, 'delete'),
     check('invoice_has_deleted_by')
       .notEmpty()
-      .withMessage('Pleace provide current user id'),
+      .withMessage('Please provide current user id'),
   ];
 
   createTourPackage = [
@@ -32,7 +32,7 @@ class InvoiceTourValidator extends AbstractValidator {
 
     check('invoice_created_by')
       .notEmpty()
-      .withMessage('Pleace provide user id')
+      .withMessage('Please provide user id')
       .isInt()
       .withMessage('User id must be numaric value'),
 

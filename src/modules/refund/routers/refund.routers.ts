@@ -69,7 +69,7 @@ class RefundRouter extends AbstractRouter {
 
     this.routers.post(
       '/get_partial_refund_info',
-      this.controllers.getPertialAirticketInfo
+      this.controllers.getPartialAirticketInfo
     );
 
     this.routers.get(
@@ -87,6 +87,15 @@ class RefundRouter extends AbstractRouter {
       this.controllers.getRefundInfoVendor
     );
 
+    this.routers.get('/tax-refunds', this.controllers.allTaxRefund);
+    this.routers.get(
+      '/tax-refunds/:refund_id',
+      this.controllers.viewAirTicketTaxRefund
+    );
+    this.routers.delete(
+      '/tax-refunds/:refund_id',
+      this.controllers.deleteAirTicketTaxRefund
+    );
     // tour refund
     this.routers.get('/invoice-tour/:client', this.controllers.getTourInvoice);
     this.routers

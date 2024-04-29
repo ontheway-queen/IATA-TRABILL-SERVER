@@ -511,7 +511,7 @@ class AdminAuthServices extends AbstractServices {
 
     if (isNotExist) {
       throw new CustomError(
-        'Pleace provide a valid email address',
+        'Please provide a valid email address',
         400,
         'Invalid email'
       );

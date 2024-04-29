@@ -16,7 +16,7 @@ class InvoiceTourValidator extends abstract_validators_1.default {
             this.permissions.check(this.resources.invoice_tour_package, 'delete'),
             (0, express_validator_1.check)('invoice_has_deleted_by')
                 .notEmpty()
-                .withMessage('Pleace provide current user id'),
+                .withMessage('Please provide current user id'),
         ];
         this.createTourPackage = [
             this.permissions.check(this.resources.invoice_tour_package, 'create'),
@@ -30,7 +30,7 @@ class InvoiceTourValidator extends abstract_validators_1.default {
             this.permissions.check(this.resources.invoice_tour_package, 'create'),
             (0, express_validator_1.check)('invoice_created_by')
                 .notEmpty()
-                .withMessage('Pleace provide user id')
+                .withMessage('Please provide user id')
                 .isInt()
                 .withMessage('User id must be numaric value'),
             (0, express_validator_1.check)('tourGuide')

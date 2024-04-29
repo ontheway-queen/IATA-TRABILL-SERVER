@@ -34,7 +34,7 @@ class TourItinerayModels extends abstract_models_1.default {
                 .where('group_id', groupId)
                 .whereNot('group_org_agency', null);
             if (!tourGroup) {
-                throw new customError_1.default('Pleace provide valid id for edit tour gorup', 400, 'Invalid group id');
+                throw new customError_1.default('Please provide valid id for edit tour gorup', 400, 'Invalid group id');
             }
         });
     }
@@ -46,7 +46,7 @@ class TourItinerayModels extends abstract_models_1.default {
                 .where('group_id', groupId)
                 .whereNot('group_org_agency', null);
             if (!tourGroup) {
-                throw new customError_1.default('Pleace provide valid id for edit tour gorup', 400, 'Invalid group id');
+                throw new customError_1.default('Please provide valid id for edit tour gorup', 400, 'Invalid group id');
             }
         });
     }
@@ -95,7 +95,7 @@ class TourItinerayModels extends abstract_models_1.default {
                 .from('trabill_tours_groups')
                 .where('group_id', groupId);
             if (!tourGroup) {
-                throw new customError_1.default('Pleace provide valid id for edit tour gorup', 400, 'Invalid group id');
+                throw new customError_1.default('Please provide valid id for edit tour gorup', 400, 'Invalid group id');
             }
             return tourGroup[0];
         });

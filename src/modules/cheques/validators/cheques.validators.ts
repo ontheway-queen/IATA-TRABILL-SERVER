@@ -10,7 +10,7 @@ class chequesValidators extends AbstractValidator {
     this.permissions.check(this.resources.cheque_management, 'update'),
     check('cheque_id')
       .notEmpty()
-      .withMessage('Pleace provide cheque id')
+      .withMessage('Please provide cheque id')
       .isInt()
       .withMessage('cheque id must be an integer value'),
     check('account_id')
@@ -31,7 +31,7 @@ class chequesValidators extends AbstractValidator {
       .withMessage('Client must be an string value'),
     check('cheque_type')
       .notEmpty()
-      .withMessage('Pleace provide cheque type')
+      .withMessage('Please provide cheque type')
       .isIn([
         'MR_ADVR',
         'EXPENSE',
@@ -43,15 +43,15 @@ class chequesValidators extends AbstractValidator {
         'VENDOR_ADVR',
         'VENDOR_PAYMENT',
       ])
-      .withMessage('Pleace provide valid cheque type'),
+      .withMessage('Please provide valid cheque type'),
     check('cheque_status')
       .notEmpty()
-      .withMessage('Pleace provide cheque status')
+      .withMessage('Please provide cheque status')
       .isIn(['DEPOSIT', 'BOUNCE', 'RETURN'])
-      .withMessage('Pleace provide valid cheque status'),
+      .withMessage('Please provide valid cheque status'),
     check('cheque_amount')
       .notEmpty()
-      .withMessage('Pleace provide cheque amount'),
+      .withMessage('Please provide cheque amount'),
     check('cheque_note')
       .optional()
       .customSanitizer((value) => (value === null ? undefined : value))
@@ -59,11 +59,11 @@ class chequesValidators extends AbstractValidator {
       .withMessage('Cheque not must be string value'),
     check('date')
       .notEmpty()
-      .withMessage('Date is required! pleace provide date')
+      .withMessage('Date is required! Please provide date')
       .toDate(),
     check('user_id')
       .notEmpty()
-      .withMessage('User id is required! pleace provide user id'),
+      .withMessage('User id is required! Please provide user id'),
   ];
 }
 export default chequesValidators;

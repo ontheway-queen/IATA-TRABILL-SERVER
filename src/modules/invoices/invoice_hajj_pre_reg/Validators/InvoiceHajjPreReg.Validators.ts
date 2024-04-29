@@ -12,7 +12,7 @@ class InvoiceHajjPreRegValidators extends AbstractValidator {
     this.permissions.check(this.resources.invoice_hajj_pre_reg, 'delete'),
     check('invoice_has_deleted_by')
       .notEmpty()
-      .withMessage('Pleace porvide who went to delete'),
+      .withMessage('Please porvide who went to delete'),
   ];
 
   hajiTrackingSerialCheck = [
@@ -30,7 +30,7 @@ class InvoiceHajjPreRegValidators extends AbstractValidator {
 
     check('invoice_no')
       .notEmpty()
-      .withMessage('Pleace provide your valid invoice number'),
+      .withMessage('Please provide your valid invoice number'),
 
     check('invoice_combclient_id').notEmpty().withMessage('Enter client id'),
 
@@ -73,7 +73,7 @@ class InvoiceHajjPreRegValidators extends AbstractValidator {
 
     check('invoice_no')
       .notEmpty()
-      .withMessage('Pleace provide your valid invoice number'),
+      .withMessage('Please provide your valid invoice number'),
 
     check('invoice_combclient_id').notEmpty().withMessage('Enter client id'),
 

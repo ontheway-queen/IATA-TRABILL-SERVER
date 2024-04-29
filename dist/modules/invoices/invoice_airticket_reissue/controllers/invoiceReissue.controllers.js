@@ -105,15 +105,6 @@ class ReIssueAirticket extends abstract_controllers_1.default {
                 this.error();
             }
         }));
-        this.voidReissue = this.assyncWrapper.wrap(this.validator.deleteResissueAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.voidReissue(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                this.error();
-            }
-        }));
         this.getReissueTicketInfo = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.getReissueTicketInfo(req);
             if (data.success) {

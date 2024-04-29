@@ -599,7 +599,7 @@ class MoneyReceiptModels extends abstract_models_1.default {
                 .where('receipt_id', receiptId)
                 .andWhereNot('receipt_has_deleted', 1);
             if (!moneyReceipt.length) {
-                throw new customError_1.default('Pleace provide a valid id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide a valid id', 400, 'Invalid id');
             }
             let newData = moneyReceipt[0];
             // =============== CHEQUES =====================
@@ -754,7 +754,7 @@ class MoneyReceiptModels extends abstract_models_1.default {
                 .select(this.db.raw('CAST(advr_amount AS DECIMAL(15,2)) AS prevAmoun'), 'advr_account_id as prevAccId', 'advr_payment_type as prevPayType', 'advr_combined_id as prevCombinedId', 'advr_actransaction_id', 'advr_ctrxn_id', this.db.raw("CASE WHEN advr_client_id IS NOT NULL THEN CONCAT('client-',advr_client_id) ELSE CONCAT('combined-',advr_combined_id) END AS prevClientId"), 'advr_trxn_charge_id')
                 .where('advr_id', id);
             if (!data.length) {
-                throw new customError_1.default('Pleace provide a valid id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide a valid id', 400, 'Invalid id');
             }
             return data[0];
         });
@@ -888,7 +888,7 @@ class MoneyReceiptModels extends abstract_models_1.default {
                 .into('trabill_invoices_extra_amounts')
                 .where('extra_amount_invoice_id', invoiceId);
             if (!success) {
-                throw new customError_1.default('Pleace provide valid invoice id', 400, 'invalid id');
+                throw new customError_1.default('Please provide valid invoice id', 400, 'invalid id');
             }
         });
     }

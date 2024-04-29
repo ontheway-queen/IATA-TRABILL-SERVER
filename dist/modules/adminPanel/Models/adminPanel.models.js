@@ -28,7 +28,7 @@ class AdminPanelModels extends abstract_models_1.default {
                 .from('trabill_modules')
                 .where('module_id', module_id);
             if (!is_update) {
-                throw new customError_1.default('Pleace provide a valid module id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide a valid module id', 400, 'Invalid id');
             }
         });
         this.deleteModules = (module_id) => __awaiter(this, void 0, void 0, function* () {
@@ -37,7 +37,7 @@ class AdminPanelModels extends abstract_models_1.default {
                 .from('trabill_modules')
                 .where('module_id', module_id);
             if (!is_del) {
-                throw new customError_1.default('Pleace provide a valid module id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide a valid module id', 400, 'Invalid id');
             }
         });
         this.getAllModules = () => __awaiter(this, void 0, void 0, function* () {
@@ -105,7 +105,7 @@ class AdminPanelModels extends abstract_models_1.default {
                 }
             }
             else {
-                throw new customError_1.default('Pleace provice valid agency id', 400, 'Invalid agency');
+                throw new customError_1.default('Please provice valid agency id', 400, 'Invalid agency');
             }
         });
         this.updateAgencyExpired = (org_subscription_expired, agency_id) => __awaiter(this, void 0, void 0, function* () {
@@ -114,7 +114,7 @@ class AdminPanelModels extends abstract_models_1.default {
                 .into('trabill_agency_organization_information')
                 .where('org_id', agency_id);
             if (!is_update) {
-                throw new customError_1.default('Pleace provice valid agency id', 400, 'Invalid agency');
+                throw new customError_1.default('Please provice valid agency id', 400, 'Invalid agency');
             }
         });
         this.updateAgencyLogo = (logo_url, agency_id) => __awaiter(this, void 0, void 0, function* () {
@@ -127,7 +127,7 @@ class AdminPanelModels extends abstract_models_1.default {
                 .into('trabill_agency_organization_information')
                 .where('org_id', agency_id);
             if (!is_update) {
-                throw new customError_1.default('Pleace provice valid agency id', 400, 'Invalid agency');
+                throw new customError_1.default('Please provice valid agency id', 400, 'Invalid agency');
             }
             return previous_logo.org_logo;
         });
@@ -280,7 +280,7 @@ class AdminPanelModels extends abstract_models_1.default {
                 .into('trabill_agency_organization_information')
                 .where('org_id', agency_id);
             if (!is_update) {
-                throw new customError_1.default('Pleace provide a valid agency id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide a valid agency id', 400, 'Invalid id');
             }
         });
     }
@@ -349,7 +349,7 @@ class AdminPanelModels extends abstract_models_1.default {
             })
                 .where('org_id', agency_id);
             if (!data) {
-                throw new customError_1.default('Pleace provide a valid agency id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide a valid agency id', 400, 'Invalid id');
             }
             const modules = yield this.query()
                 .select('agmod_module_id', 'agmod_active_status')

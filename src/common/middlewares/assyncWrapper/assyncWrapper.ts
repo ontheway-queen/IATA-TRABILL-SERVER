@@ -41,7 +41,7 @@ class AssyncWrapper {
           this.log.logger.error({
             message: 'This row is already being used and cannot be deleted',
             error: {
-              message: `Pleace provide a valid data for ${str}.`,
+              message: `Please provide a valid data for ${str}.`,
               stack: err.stack,
             },
             req: req.originalUrl,
@@ -52,7 +52,7 @@ class AssyncWrapper {
             new CustomError(
               `This row is already being used and cannot be deleted`,
               400,
-              `Pleace provide a valid data for ${str}.`
+              `Please provide a valid data for ${str}.`
             )
           );
         }
@@ -79,7 +79,7 @@ class AssyncWrapper {
           this.log.logger.error({
             message: 'Invalid data',
             error: {
-              message: `Pleace provide a valid data for ${str}.`,
+              message: `Please provide a valid data for ${str}.`,
               stack: err.stack,
             },
             req: req.originalUrl,
@@ -88,7 +88,7 @@ class AssyncWrapper {
 
           return next(
             new CustomError(
-              `Pleace provide a valid data for ${str}`,
+              `Please provide a valid data for ${str}`,
               400,
               'Invalid data'
             )

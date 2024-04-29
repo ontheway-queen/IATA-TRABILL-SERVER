@@ -3,10 +3,7 @@ import { separateCombClientToId } from '../../../../common/helpers/common.helper
 import { idType } from '../../../../common/types/common.types';
 
 import CustomError from '../../../../common/utils/errors/customError';
-import {
-  IAddClient,
-  IUpdateClient
-} from '../types/client.interfaces';
+import { IAddClient, IUpdateClient } from '../types/client.interfaces';
 
 class ClientModel extends AbstractModels {
   // INSERT CLIENT
@@ -116,10 +113,6 @@ class ClientModel extends AbstractModels {
     return client;
   }
 
-
-
-
-
   getClientCompany = async (client_id: idType) => {
     const [{ company_id }] = await this.db('trabill_client_company_information')
       .select('company_id')
@@ -129,10 +122,6 @@ class ClientModel extends AbstractModels {
     return company_id;
   };
 
-
-
-
-
   getClLastBalanceById = async (clientId: idType) => {
     const client = (await this.query()
       .select('client_lbalance')
@@ -141,7 +130,7 @@ class ClientModel extends AbstractModels {
 
     if (!client.length) {
       throw new CustomError(
-        'Pleace provide valid client id',
+        'Please provide valid client id',
         400,
         'Invalid client id'
       );

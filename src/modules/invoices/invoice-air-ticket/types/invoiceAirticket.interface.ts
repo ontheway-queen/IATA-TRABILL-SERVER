@@ -4,6 +4,8 @@ import { InvoiceMoneyReceiptType } from '../../../../common/types/common.types';
 
 export interface IAirTicketTaxRefund {
   refund_invoice_id: number;
+  refund_date: string;
+  refund_voucher: String;
   refund_agency_id: number;
   refund_client_id: number | null;
   refund_combined_id: number | null;
@@ -18,6 +20,7 @@ export interface IAirTicketTaxRefund {
   vendor_account_trxn_id: number | null;
   client_total_tax_refund: number;
   vendor_total_tax_refund: number;
+  refund_profit: number;
 }
 export interface IAirTicketTaxRefundItem {
   refund_id: number;
@@ -26,16 +29,19 @@ export interface IAirTicketTaxRefundItem {
   refund_combined_id: number | null;
   refund_v_trxn_id: number | null;
   refund_tax_amount: number;
+  refund_inv_category_id: number;
 }
 
 export interface IAirTicketTaxRefundBody {
   refund_invoice_id: number;
+  invoice_category_id: number;
   comb_client: string;
   refund_date: string;
   ticket_info: {
     airticket_id: number;
     comb_vendor: string;
     refund_tax_amount: number;
+    airticket_ticket_no: string;
   }[];
   client_refund_type: 'Adjust' | 'Return';
   vendor_refund_type: 'Adjust' | 'Return';
@@ -179,15 +185,16 @@ export interface IFlightDetailsDb extends IFlightDetail {
 }
 
 export interface ITaxesCommission {
-  airline_taxes: number
-  airline_commission: number
-  airline_tax_type: string
+  airline_taxes: number;
+  airline_commission: number;
+  airline_tax_type: string;
 }
 
 export interface ITaxesCommissionDB extends ITaxesCommission {
   airline_airticket_id: number;
   airline_invoice_id: number;
-}[]
+}
+[];
 
 export interface ITicketInfo {
   pax_passports: IPaxPassport[];
@@ -201,4 +208,18 @@ export interface InvoiceAirTicketReqType {
   invoice_info: InvoiceInfoType;
   ticketInfo: ITicketInfo[];
   money_receipt: InvoiceMoneyReceiptType;
+}
+
+export interface IVoidReqBody {
+  client_charge: number;
+  invoice_void_date: string;
+  invoice_no: string;
+  net_total: number;
+  comb_client: string;
+  invoice_vendors: {
+    comb_vendor: string;
+    vendor_charge: number;
+    airticket_ticket_no: string;
+    cost_price: number;
+  }[];
 }

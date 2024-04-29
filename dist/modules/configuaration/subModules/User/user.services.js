@@ -125,7 +125,7 @@ class UserServices extends abstract_services_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const userId = req.params.user_id;
             if (!userId) {
-                throw new customError_1.default('Pleace provide user id', 400, 'Empty user id');
+                throw new customError_1.default('Please provide user id', 400, 'Empty user id');
             }
             const { password, user_dial_code, user_email, user_first_name, user_last_name, user_role_id, user_username, user_mobile, current_password, } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {

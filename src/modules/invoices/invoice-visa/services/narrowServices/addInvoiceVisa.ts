@@ -2,9 +2,7 @@ import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import InvoiceHelpers, {
   getClientOrCombId,
-  InvoiceClientAndVendorValidate,
   MoneyReceiptAmountIsValid,
-  ValidateClientAndVendor,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
 import { IClTrxnBody } from '../../../../../common/interfaces/Trxn.interfaces';
@@ -68,7 +66,8 @@ class AddInvoiceVisa extends AbstractServices {
       for (const item of billing_information) {
         invoice_total_profit += item.billing_profit;
         invoice_total_vendor_price +=
-          item.billing_cost_price * item.billing_quantity;
+          Number(item.billing_cost_price || 0) *
+          Number(item.billing_quantity | 0);
       }
 
       if (passport_information.length) {

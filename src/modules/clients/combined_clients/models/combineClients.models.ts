@@ -18,8 +18,6 @@ class CombineClientsModels extends AbstractModels {
     return id[0];
   }
 
-
-
   public async getTraxn(combine_id: idType) {
     const [{ total }] = await this.query()
       .from(`${this.trxn}.comb_trxn`)
@@ -51,7 +49,6 @@ class CombineClientsModels extends AbstractModels {
     return Number(combine.combine_opening_trxn_id);
   };
 
-
   getCombinedLastBalance = async (combined_id: idType) => {
     const client = (await this.query()
       .select('combine_lbalance')
@@ -60,7 +57,7 @@ class CombineClientsModels extends AbstractModels {
 
     if (!client.length) {
       throw new CustomError(
-        'Pleace provide valid client id',
+        'Please provide valid client id',
         400,
         'Invalid client id'
       );
@@ -314,7 +311,7 @@ class CombineClientsModels extends AbstractModels {
 
     if (data === 0) {
       throw new CustomError(
-        'Pleace provide a valid combined id',
+        'Please provide a valid combined id',
         400,
         'Invalid id'
       );

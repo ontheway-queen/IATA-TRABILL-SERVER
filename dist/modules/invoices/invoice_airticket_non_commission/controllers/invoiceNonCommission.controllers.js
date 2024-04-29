@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_controllers_1 = __importDefault(require("../../../../abstracts/abstract.controllers"));
 const invoiceNonCommission_services_1 = __importDefault(require("../services/invoiceNonCommission.services"));
-const commonNonCommission_validator_1 = require("../validators/commonNonCommission.validator");
 const invoiceNonCommission_validators_1 = __importDefault(require("../validators/invoiceNonCommission.validators"));
 class InvoiceNonCommissionController extends abstract_controllers_1.default {
     constructor() {
@@ -24,16 +23,6 @@ class InvoiceNonCommissionController extends abstract_controllers_1.default {
         // GET ALL INVOICE NON COMMISSION
         this.getAllInvoices = this.assyncWrapper.wrap(this.validator.readInvoiceNonComission, (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.getAllInvoices(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                this.error();
-            }
-        }));
-        // GET ALL INVOICE NON COMMISSION
-        this.voidNonCommission = this.assyncWrapper.wrap(commonNonCommission_validator_1.voidInvoices, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.voidNonCommission(req);
             if (data.success) {
                 res.status(200).json(data);
             }

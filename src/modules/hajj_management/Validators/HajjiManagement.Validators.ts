@@ -67,18 +67,18 @@ class HajjimanagementValidators extends AbstractValidator {
     check('gtransfer_from')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid client id'),
+      .withMessage('Please provide a valid client id'),
     check('gtransfer_to')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid client id'),
+      .withMessage('Please provide a valid client id'),
     check('gtransfer_job_name').isString().optional(),
     check('gtransfer_tracking_no').isString().optional(),
     check('gtransfer_charge').isDecimal().optional(),
     check('gtransfer_created_by')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid user id'),
+      .withMessage('Please provide a valid user id'),
     check('ctrcknumber_number')
       .isArray({ min: 1 })
       .withMessage('At least one tracking number is required'),
@@ -120,23 +120,23 @@ class HajjimanagementValidators extends AbstractValidator {
     check('transfer_agent_id')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid client id'),
+      .withMessage('Please provide a valid client id'),
     check('transfertrack_tracking_no.*.transfertrack_maharam_id')
       .notEmpty()
       .isInt()
-      .withMessage('Pleace provide a valid muharram id'),
+      .withMessage('Please provide a valid muharram id'),
     check('transfertrack_tracking_no.*.transfertrack_passport_id')
       .notEmpty()
       .isInt()
-      .withMessage('Pleace provide a valid passport id'),
+      .withMessage('Please provide a valid passport id'),
     check('transfertrack_tracking_no.*.transfertrack_tracking_no')
       .notEmpty()
       .isInt()
-      .withMessage('Pleace provide a valid tracking no'),
+      .withMessage('Please provide a valid tracking no'),
     check('transfer_created_by')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid user id'),
+      .withMessage('Please provide a valid user id'),
   ];
 
   transferInRead = [
@@ -153,23 +153,23 @@ class HajjimanagementValidators extends AbstractValidator {
     check('transfer_agent_id')
       .optional()
       .isNumeric()
-      .withMessage('Pleace provide a valid client id'),
+      .withMessage('Please provide a valid client id'),
     check('transfertrack_tracking_no.*.transfertrack_maharam_id')
       .optional()
       .isInt()
-      .withMessage('Pleace provide a valid muharram id'),
+      .withMessage('Please provide a valid muharram id'),
     check('transfertrack_tracking_no.*.transfertrack_passport_id')
       .optional()
       .isInt()
-      .withMessage('Pleace provide a valid passport id'),
+      .withMessage('Please provide a valid passport id'),
     check('transfertrack_tracking_no.*.transfertrack_tracking_no')
       .optional()
       .isInt()
-      .withMessage('Pleace provide a valid tracking no'),
+      .withMessage('Please provide a valid tracking no'),
     check('transfer_created_by')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid user id'),
+      .withMessage('Please provide a valid user id'),
   ];
   transferInDelete = [
     this.permissions.check(
@@ -191,23 +191,23 @@ class HajjimanagementValidators extends AbstractValidator {
     check('transfer_agent_id')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid client id'),
+      .withMessage('Please provide a valid client id'),
     check('transfertrack_tracking_no.*.transfertrack_maharam_id')
       .notEmpty()
       .isInt()
-      .withMessage('Pleace provide a valid muharram id'),
+      .withMessage('Please provide a valid muharram id'),
     check('transfertrack_tracking_no.*.transfertrack_passport_id')
       .notEmpty()
       .isInt()
-      .withMessage('Pleace provide a valid passport id'),
+      .withMessage('Please provide a valid passport id'),
     check('transfertrack_tracking_no.*.transfertrack_tracking_no')
       .notEmpty()
       .isInt()
-      .withMessage('Pleace provide a valid tracking no'),
+      .withMessage('Please provide a valid tracking no'),
     check('transfer_created_by')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid user id'),
+      .withMessage('Please provide a valid user id'),
   ];
   transferOutUpdate = [
     this.permissions.check(
@@ -217,23 +217,23 @@ class HajjimanagementValidators extends AbstractValidator {
     check('transfer_agent_id')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid client id'),
+      .withMessage('Please provide a valid client id'),
     check('transfertrack_tracking_no.*.transfertrack_maharam_id')
       .optional()
       .isInt()
-      .withMessage('Pleace provide a valid muharram id'),
+      .withMessage('Please provide a valid muharram id'),
     check('transfertrack_tracking_no.*.transfertrack_passport_id')
       .optional()
       .isInt()
-      .withMessage('Pleace provide a valid passport id'),
+      .withMessage('Please provide a valid passport id'),
     check('transfertrack_tracking_no.*.transfertrack_tracking_no')
       .optional()
       .isInt()
-      .withMessage('Pleace provide a valid tracking no'),
+      .withMessage('Please provide a valid tracking no'),
     check('transfer_created_by')
       .notEmpty()
       .isNumeric()
-      .withMessage('Pleace provide a valid user id'),
+      .withMessage('Please provide a valid user id'),
   ];
   addCancelPreReg = [
     this.permissions.check(
@@ -242,8 +242,8 @@ class HajjimanagementValidators extends AbstractValidator {
     ),
     check('arr.*.cancel_tracking_number')
       .notEmpty()
-      .withMessage('Pleace provide tracking number'),
-    check('cancel_created_by').notEmpty().withMessage('Pleace provide user id'),
+      .withMessage('Please provide tracking number'),
+    check('cancel_created_by').notEmpty().withMessage('Please provide user id'),
   ];
   readCancelPreReg = [
     this.permissions.check(

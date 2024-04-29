@@ -43,13 +43,13 @@ class AssyncWrapper {
                     this.log.logger.error({
                         message: 'This row is already being used and cannot be deleted',
                         error: {
-                            message: `Pleace provide a valid data for ${str}.`,
+                            message: `Please provide a valid data for ${str}.`,
                             stack: err.stack,
                         },
                         req: req.originalUrl,
                         method: req.method,
                     });
-                    return next(new customError_1.default(`This row is already being used and cannot be deleted`, 400, `Pleace provide a valid data for ${str}.`));
+                    return next(new customError_1.default(`This row is already being used and cannot be deleted`, 400, `Please provide a valid data for ${str}.`));
                 }
                 if (err.code === 'ER_BAD_FIELD_ERROR') {
                     this.log.logger.error({
@@ -70,13 +70,13 @@ class AssyncWrapper {
                     this.log.logger.error({
                         message: 'Invalid data',
                         error: {
-                            message: `Pleace provide a valid data for ${str}.`,
+                            message: `Please provide a valid data for ${str}.`,
                             stack: err.stack,
                         },
                         req: req.originalUrl,
                         method: req.method,
                     });
-                    return next(new customError_1.default(`Pleace provide a valid data for ${str}`, 400, 'Invalid data'));
+                    return next(new customError_1.default(`Please provide a valid data for ${str}`, 400, 'Invalid data'));
                 }
                 if (err.name === 'TokenExpiredError') {
                     this.log.logger.info({

@@ -19,7 +19,6 @@ class DeleteTourPackRefund extends abstract_services_1.default {
         super();
         this.delete = (req, voidTrx) => __awaiter(this, void 0, void 0, function* () {
             const { refund_id } = req.params;
-            const { refund_deleted_by } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, voidTrx || trx);
                 const vendor_conn = this.models.vendorModel(req, voidTrx || trx);

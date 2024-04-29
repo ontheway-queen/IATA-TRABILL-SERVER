@@ -69,7 +69,7 @@ class TransferInServices extends abstract_services_1.default {
             const id = Number(req.params.id);
             const { deleted_by } = req.body;
             if (!id) {
-                throw new customError_1.default('Pleace provide  a id', 400, 'Invalid Id');
+                throw new customError_1.default('Please provide  a id', 400, 'Invalid Id');
             }
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.HajjiManagementModels(req, trx);

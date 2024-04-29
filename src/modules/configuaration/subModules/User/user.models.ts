@@ -151,7 +151,7 @@ class UserModel extends AbstractModels {
 
     if (!user) {
       throw new CustomError(
-        'Pleace provide valid user id',
+        'Please provide valid user id',
         400,
         'Invalid user id'
       );

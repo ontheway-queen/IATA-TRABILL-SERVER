@@ -24,7 +24,7 @@ class UserModel extends abstract_models_1.default {
                 .where('user_agency_id', this.org_agency)
                 .andWhere('user_id', userId);
             if (!user) {
-                throw new customError_1.default('Pleace provide valid user id', 400, 'Invalid user id');
+                throw new customError_1.default('Please provide valid user id', 400, 'Invalid user id');
             }
             return user;
         });

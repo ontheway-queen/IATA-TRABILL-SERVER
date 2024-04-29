@@ -163,8 +163,8 @@ class RefundValidator extends AbstractValidator {
       .notEmpty()
       .isString()
       .withMessage('Client must be string value'),
-    check('created_by').notEmpty().withMessage('Pleace add user id'),
-    check('invoice_id').notEmpty().withMessage('Pleace add invoice id'),
+    check('created_by').notEmpty().withMessage('Please add user id'),
+    check('invoice_id').notEmpty().withMessage('Please add invoice id'),
     check('client_refund_info.crefund_payment_type')
       .isIn(['MONEY_RETURN', 'ADJUST'])
       .withMessage('must provide  client refund payment type'),

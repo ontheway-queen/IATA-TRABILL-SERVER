@@ -31,10 +31,15 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .whereNot('invclientpayment_is_deleted', 1));
             return data.total;
         });
-        this.updateIsVoid = (invoiceId, invoice_void_charge) => __awaiter(this, void 0, void 0, function* () {
+        this.updateIsVoid = (invoiceId, invoice_void_charge, void_charge_ctrxn_id, invoice_void_date) => __awaiter(this, void 0, void 0, function* () {
             yield this.query()
-                .update({ invoice_void_charge, invoice_is_void: 1 })
-                .into('trabill_invoices_delete_void')
+                .update({
+                invoice_void_charge,
+                invoice_is_void: 1,
+                invoice_void_ctrxn_id: void_charge_ctrxn_id,
+                invoice_void_date,
+            })
+                .into('trabill_invoices')
                 .where('invoice_id', invoiceId);
         });
         this.getForEditInvoice = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
@@ -408,7 +413,7 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 extra_amount_invoice_id: 'invoice_id',
             });
             if (!data) {
-                throw new customError_1.default('Pleace provide valid invoice id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide valid invoice id', 400, 'Invalid id');
             }
             return Object.assign(Object.assign({}, data), { prevClientId: Number(data.prevClientId), prev_inv_net_total: Number(data.prev_inv_net_total) });
         });
@@ -443,19 +448,23 @@ class CommonInvoiceModel extends abstract_models_1.default {
     }
     deleteInvoices(invoiceId, invoice_has_deleted_by) {
         return __awaiter(this, void 0, void 0, function* () {
-            const has_v_pay = yield this.query()
-                .select('*')
-                .from('trabill_invoice_vendor_payments')
-                .where('invendorpay_isdeleted', 0)
-                .andWhere('invendorpay_invoice_id', invoiceId);
-            const has_c_receipt = yield this.query()
-                .select('*')
-                .from('trabill_invoice_client_payments')
-                .where('invclientpayment_is_deleted', 0)
-                .andWhere('invclientpayment_invoice_id', invoiceId);
-            if (has_c_receipt.length || has_v_pay.length) {
-                throw new customError_1.default(`You can't delete this invoice`, 400, 'Bad request');
-            }
+            // const has_v_pay = await this.query()
+            //   .select('*')
+            //   .from('trabill_invoice_vendor_payments')
+            //   .where('invendorpay_isdeleted', 0)
+            //   .andWhere('invendorpay_invoice_id', invoiceId);
+            // const has_c_receipt = await this.query()
+            //   .select('*')
+            //   .from('trabill_invoice_client_payments')
+            //   .where('invclientpayment_is_deleted', 0)
+            //   .andWhere('invclientpayment_invoice_id', invoiceId);
+            // if (has_c_receipt.length || has_v_pay.length) {
+            //   throw new CustomError(
+            //     `You can't delete this invoice`,
+            //     400,
+            //     'Bad request'
+            //   );
+            // }
             yield this.db.raw(`CALL ${this.database}.delete_invoice(?,?);`, [
                 invoiceId,
                 invoice_has_deleted_by,

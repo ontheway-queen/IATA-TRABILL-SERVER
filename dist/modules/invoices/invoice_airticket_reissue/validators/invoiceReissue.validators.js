@@ -33,9 +33,12 @@ class ReissueAirticket extends abstract_validators_1.default {
             (0, express_validator_1.check)('airticket_purchase_price').isNumeric(),
             (0, express_validator_1.check)('airticket_issue_date').optional().toDate(),
             (0, express_validator_1.check)('airticket_classes').notEmpty(),
-            (0, express_validator_1.check)('invoice_note').optional().customSanitizer((item) => {
+            (0, express_validator_1.check)('invoice_note')
+                .optional()
+                .customSanitizer((item) => {
                 item === undefined ? null : item;
-            }).isString(),
+            })
+                .isString(),
             (0, express_validator_1.check)('airticket_existing_airticket_id').optional().isInt(),
             (0, express_validator_1.check)('airticket_existing_invoiceid').notEmpty(),
         ];
@@ -43,7 +46,7 @@ class ReissueAirticket extends abstract_validators_1.default {
             this.permissions.check(this.resources.invoice_reissue, 'create'),
             (0, express_validator_1.check)('invoice_info.invoice_no')
                 .notEmpty()
-                .withMessage('Pleace provide your valid invoice number'),
+                .withMessage('Please provide your valid invoice number'),
             (0, express_validator_1.check)('invoice_info.invoice_combclient_id')
                 .notEmpty()
                 .withMessage('Enter client id'),

@@ -37,7 +37,7 @@ class CombineClientsModels extends abstract_models_1.default {
                 .from('trabill_combined_clients')
                 .where('combine_id', combined_id));
             if (!client.length) {
-                throw new customError_1.default('Pleace provide valid client id', 400, 'Invalid client id');
+                throw new customError_1.default('Please provide valid client id', 400, 'Invalid client id');
             }
             const client_total_invoice = yield this.query()
                 .from('trabill_invoices')
@@ -232,7 +232,7 @@ class CombineClientsModels extends abstract_models_1.default {
                 .where('combine_id', id)
                 .andWhere('combine_org_agency', this.org_agency);
             if (data === 0) {
-                throw new customError_1.default('Pleace provide a valid combined id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide a valid combined id', 400, 'Invalid id');
             }
             return data;
         });

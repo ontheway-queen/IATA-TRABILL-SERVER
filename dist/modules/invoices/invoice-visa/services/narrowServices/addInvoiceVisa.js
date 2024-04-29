@@ -57,7 +57,8 @@ class AddInvoiceVisa extends abstract_services_1.default {
                 for (const item of billing_information) {
                     invoice_total_profit += item.billing_profit;
                     invoice_total_vendor_price +=
-                        item.billing_cost_price * item.billing_quantity;
+                        Number(item.billing_cost_price || 0) *
+                            Number(item.billing_quantity | 0);
                 }
                 if (passport_information.length) {
                     const passport_id = passport_information.map((item) => item.passport_id);

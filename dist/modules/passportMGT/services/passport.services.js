@@ -214,7 +214,7 @@ class PassportServices extends abstract_services_1.default {
         this.passportNumberIsUnique = (req) => __awaiter(this, void 0, void 0, function* () {
             const { passport_no } = req.params;
             if (!passport_no) {
-                throw new customError_1.default('Pleace provide a passport_no', 400, 'Empty data');
+                throw new customError_1.default('Please provide a passport_no', 400, 'Empty data');
             }
             const conn = this.models.passportModel(req);
             const data = yield conn.passportNumberIsUnique(passport_no);

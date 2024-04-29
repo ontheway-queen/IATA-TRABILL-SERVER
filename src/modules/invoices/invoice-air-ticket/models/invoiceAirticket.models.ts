@@ -511,6 +511,7 @@ class InvoiceAirticketModel extends AbstractModels {
     const results = await this.query()
       .select(
         'airticket_id',
+        'airticket_ticket_no',
         'airticket_client_price',
         'airticket_purchase_price',
         'airticket_tax',
@@ -525,7 +526,36 @@ class InvoiceAirticketModel extends AbstractModels {
       .where('airticket_org_agency', this.org_agency)
       .andWhere('airticket_invoice_id', invoiceId)
       .andWhereNot('airticket_is_refund', 1)
-      .andWhereNot('airticket_is_deleted', 1);
+      .andWhereNot('airticket_is_reissued', 1)
+      .andWhereNot('airticket_is_deleted', 1)
+      .unionAll([
+        this.db
+          .select(
+            'airticket_id',
+            'airticket_ticket_no',
+            this.db.raw(
+              'coalesce(airticket_after_reissue_client_price, airticket_client_price) as airticket_client_price'
+            ),
+            this.db.raw(
+              'coalesce(airticket_after_reissue_purchase_price, airticket_purchase_price) as airticket_purchase_price'
+            ),
+            this.db.raw(
+              'coalesce(airticket_after_reissue_taxes, airticket_tax) as airticket_tax'
+            ),
+            this.db.raw(
+              "coalesce(CONCAT('client-',airticket_client_id), CONCAT('combined-',airticket_combined_id)) as comb_client"
+            ),
+            this.db.raw(
+              "coalesce(CONCAT('vendor-',airticket_vendor_id), CONCAT('combined-',airticket_vendor_combine_id)) as comb_vendor"
+            )
+          )
+          .from('trabill_invoice_reissue_airticket_items')
+          .where('airticket_org_agency', this.org_agency)
+          .andWhere('airticket_invoice_id', invoiceId)
+          .andWhereNot('airticket_is_refund', 1)
+          .andWhereNot('airticket_is_reissued', 1)
+          .andWhereNot('airticket_is_deleted', 1),
+      ]);
 
     return results;
   };
@@ -562,6 +592,7 @@ class InvoiceAirticketModel extends AbstractModels {
         'vendor_refund_type',
         'client_total_tax_refund',
         'vendor_total_tax_refund',
+        'refund_profit',
         'created_at',
         'cl_ac.account_name as client_account',
         'v_ac.account_name as vendor_account'

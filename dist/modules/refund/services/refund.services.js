@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../abstracts/abstract.services"));
+const Trxns_1 = __importDefault(require("../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../common/helpers/common.helper");
 const addAirticketRefund_1 = __importDefault(require("./narrowServices/airticketRefundSubServices/addAirticketRefund"));
 const deleteAirticketRefund_services_1 = __importDefault(require("./narrowServices/airticketRefundSubServices/deleteAirticketRefund.services"));
@@ -188,11 +189,54 @@ class RefundServices extends abstract_services_1.default {
             const data = yield conn.getSinglePersialRefund(refund_id);
             return { success: true, data };
         });
-        this.getPertialAirticketInfo = (req) => __awaiter(this, void 0, void 0, function* () {
+        this.getPartialAirticketInfo = (req) => __awaiter(this, void 0, void 0, function* () {
             const { airticket_id, invoice_id } = req.body;
             const conn = this.models.refundModel(req);
             const data = yield conn.getPartialAirticketInfo(airticket_id, invoice_id);
             return { success: true, data };
+        });
+        // ALL TAX REFUND
+        this.allTaxRefund = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { page, size, search, from_date, to_date } = req.query;
+            const conn = this.models.refundModel(req);
+            const data = yield conn.selectTaxRefund(Number(page || 1), Number(size || 20), search, from_date, to_date);
+            return Object.assign({ success: true }, data);
+        });
+        this.viewAirTicketTaxRefund = (req) => __awaiter(this, void 0, void 0, function* () {
+            const refund_id = req.params.refund_id;
+            const conn = this.models.refundModel(req);
+            const data = yield conn.viewAirTicketTaxRefund(refund_id);
+            return { success: true, data };
+        });
+        // DELETE AIR TICKET TAX REFUND
+        this.deleteAirTicketTaxRefund = (req) => __awaiter(this, void 0, void 0, function* () {
+            const refund_id = req.params.refund_id;
+            return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
+                const conn = this.models.refundModel(req, trx);
+                const trxns = new Trxns_1.default(req, trx);
+                const previousData = yield conn.selectPreviousTaxRefund(refund_id);
+                if (previousData.refund_c_trxn_id) {
+                    yield trxns.deleteClTrxn(previousData.refund_c_trxn_id, previousData.comb_client);
+                }
+                if (previousData.client_account_trxn_id) {
+                    yield trxns.deleteAccTrxn(previousData.client_account_trxn_id);
+                }
+                if (previousData.vendor_account_trxn_id) {
+                    yield trxns.deleteAccTrxn(previousData.vendor_account_trxn_id);
+                }
+                // VENDOR LEDGER DELETE
+                for (const item of previousData.ticket_info) {
+                    if (item.refund_v_trxn_id) {
+                        yield trxns.deleteVTrxn(item.refund_v_trxn_id, item.comb_vendor);
+                    }
+                    // update air ticket refund
+                    yield conn.updateAirticketItemIsRefund(item.refund_airticket_id, item.refund_inv_category_id, 0);
+                }
+                // UPDATE INVOICE REFUND
+                yield conn.updateInvoiceIsRefund(previousData.refund_invoice_id, 0);
+                yield conn.deleteAirTicketTaxRefund(refund_id);
+                return { success: true };
+            }));
         });
         this.addAirTicketRefund = new addAirticketRefund_1.default().addAirTicketRefund;
         this.deleteAirticketRefund = new deleteAirticketRefund_services_1.default().delete;

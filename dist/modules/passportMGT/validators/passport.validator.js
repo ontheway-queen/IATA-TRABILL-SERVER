@@ -20,7 +20,7 @@ class PassportValidator extends abstract_validators_1.default {
         this.addPassport = [
             this.permissions.check(this.resources.passport_management, 'create'),
             // check('client_id').notEmpty().withMessage('Client is requierd').isString(),
-            (0, express_validator_1.check)('passport_created_by').notEmpty().withMessage('Pleace add user id!'),
+            (0, express_validator_1.check)('passport_created_by').notEmpty().withMessage('Please add user id!'),
             (0, express_validator_1.check)('passport_info.*.passport_no')
                 .isLength({ max: 35 })
                 .withMessage('Passport no can be at most 35 characters'),

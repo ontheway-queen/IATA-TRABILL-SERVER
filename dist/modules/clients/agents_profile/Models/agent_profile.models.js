@@ -158,7 +158,7 @@ class AgentProfileModels extends abstract_models_1.default {
                 .update(agent)
                 .where('agent_id', id);
             if (data === 0) {
-                throw new customError_1.default('Pleace provide a valid id', 400, 'invalid id');
+                throw new customError_1.default('Please provide a valid id', 400, 'invalid id');
             }
         });
     }

@@ -46,14 +46,14 @@ class DeleteAirTicket extends abstract_services_1.default {
                 };
             }));
         });
+        // VOID INVOICES
         this.voidInvoice = (req) => __awaiter(this, void 0, void 0, function* () {
             const invoice_id = Number(req.params.invoice_id);
-            const { client_charge, invoice_vendors } = req.body;
+            const { client_charge, invoice_vendors, invoice_void_date } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { comb_client, prevInvoiceNo, invoice_category_id } = yield common_conn.getPreviousInvoices(invoice_id);
-                yield common_conn.updateIsVoid(invoice_id, client_charge || 0);
                 const clTrxnBody = {
                     ctrxn_type: 'DEBIT',
                     ctrxn_amount: client_charge || 0,
@@ -62,9 +62,9 @@ class DeleteAirTicket extends abstract_services_1.default {
                     ctrxn_particular_id: 161,
                     ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                     ctrxn_note: '',
-                    ctrxn_particular_type: 'invoice void charge',
+                    ctrxn_particular_type: 'TKT VOID CHARGE',
                 };
-                let void_charge_ctrxn_id = 0;
+                let void_charge_ctrxn_id = null;
                 if (client_charge && client_charge > 0) {
                     void_charge_ctrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                 }
@@ -96,6 +96,8 @@ class DeleteAirTicket extends abstract_services_1.default {
                 else if (invoice_category_id === 31) {
                     yield new DeleteInvoiceHajjServices_1.default().deleteInvoiceHajj(req, trx);
                 }
+                // UPDATED VOID INFORMATION
+                yield common_conn.updateIsVoid(invoice_id, client_charge || 0, void_charge_ctrxn_id, invoice_void_date);
                 const { combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
                 for (const info of invoice_vendors) {
                     if (info.vendor_charge) {
@@ -105,7 +107,7 @@ class DeleteAirTicket extends abstract_services_1.default {
                             vtrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                             vtrxn_note: '',
                             vtrxn_particular_id: 1,
-                            vtrxn_particular_type: 'Vendor Payment',
+                            vtrxn_particular_type: 'TKT VOID CHARGE',
                             vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
                             vtrxn_user_id: req.user_id,
                         };

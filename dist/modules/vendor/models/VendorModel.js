@@ -392,7 +392,7 @@ class VendorModel extends abstract_models_1.default {
                 .whereNot('invoice_is_deleted', 1)
                 .andWhereNot('invoice_is_refund', 1);
             if (!invoice_category) {
-                throw new customError_1.default('Pleace provide a valid invoice id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide a valid invoice id', 400, 'Invalid id');
             }
             let vendor_billing;
             if ([1, 2, 3].includes(invoice_category.id)) {
@@ -428,7 +428,7 @@ class VendorModel extends abstract_models_1.default {
                 .whereNot('invoice_is_deleted', 1)
                 .andWhereNot('invoice_is_refund', 1);
             if (!invoice_category) {
-                throw new customError_1.default('Pleace provide a valid invoice id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide a valid invoice id', 400, 'Invalid id');
             }
             let vendor_billing;
             if ([1, 2, 3].includes(invoice_category.id)) {

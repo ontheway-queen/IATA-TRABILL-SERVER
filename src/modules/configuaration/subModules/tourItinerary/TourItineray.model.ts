@@ -33,7 +33,7 @@ class TourItinerayModels extends AbstractModels {
 
     if (!tourGroup) {
       throw new CustomError(
-        'Pleace provide valid id for edit tour gorup',
+        'Please provide valid id for edit tour gorup',
         400,
         'Invalid group id'
       );
@@ -48,7 +48,7 @@ class TourItinerayModels extends AbstractModels {
 
     if (!tourGroup) {
       throw new CustomError(
-        'Pleace provide valid id for edit tour gorup',
+        'Please provide valid id for edit tour gorup',
         400,
         'Invalid group id'
       );
@@ -120,7 +120,7 @@ class TourItinerayModels extends AbstractModels {
 
     if (!tourGroup) {
       throw new CustomError(
-        'Pleace provide valid id for edit tour gorup',
+        'Please provide valid id for edit tour gorup',
         400,
         'Invalid group id'
       );

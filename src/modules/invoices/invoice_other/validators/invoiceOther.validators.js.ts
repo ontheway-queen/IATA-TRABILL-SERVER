@@ -11,7 +11,7 @@ class InvoiceOtherValidators extends AbstractValidator {
     this.permissions.check(this.resources.invoice_other, 'delete'),
     check('invoice_has_deleted_by')
       .notEmpty()
-      .withMessage('Pleace provide admin id invoice_has_deleted_by'),
+      .withMessage('Please provide admin id invoice_has_deleted_by'),
   ];
 
   addInvoiceOthers = [

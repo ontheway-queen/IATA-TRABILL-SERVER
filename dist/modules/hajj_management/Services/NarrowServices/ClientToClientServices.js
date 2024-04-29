@@ -99,7 +99,7 @@ class ClientToClientServices extends abstract_services_1.default {
                 const conn = this.models.HajjiManagementModels(req, trx);
                 const data = yield conn.deleteClientToClient(id, transfer_deleted_by);
                 if (!data) {
-                    throw new customError_1.default('Pleace provide an valid id', 400, 'Invalid Id');
+                    throw new customError_1.default('Please provide an valid id', 400, 'Invalid Id');
                 }
                 yield conn.deleteClToClTransaction(id, transfer_deleted_by);
                 const message = `Client to client hajj transfer deleted`;

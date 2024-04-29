@@ -297,7 +297,7 @@ class MoneyReceiptModels extends AbstractModels {
 
     if (!success) {
       throw new CustomError(
-        'Pleace provide valid invoice id',
+        'Please provide valid invoice id',
         400,
         'invalid id'
       );
@@ -1021,7 +1021,7 @@ class MoneyReceiptModels extends AbstractModels {
       .where('receipt_id', receiptId)
       .andWhereNot('receipt_has_deleted', 1);
     if (!moneyReceipt.length) {
-      throw new CustomError('Pleace provide a valid id', 400, 'Invalid id');
+      throw new CustomError('Please provide a valid id', 400, 'Invalid id');
     }
 
     let newData = moneyReceipt[0];
@@ -1470,7 +1470,7 @@ class MoneyReceiptModels extends AbstractModels {
       .where('advr_id', id);
 
     if (!data.length) {
-      throw new CustomError('Pleace provide a valid id', 400, 'Invalid id');
+      throw new CustomError('Please provide a valid id', 400, 'Invalid id');
     }
 
     return data[0] as {

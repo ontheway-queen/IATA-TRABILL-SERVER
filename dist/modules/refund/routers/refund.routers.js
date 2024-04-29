@@ -46,11 +46,14 @@ class RefundRouter extends abstract_routers_1.default {
             .delete(this.controllers.DeletePartialRefund)
             .get(this.controllers.getSinglePersialRefund);
         this.routers.get('/partial-refundable-ticket/:comb_client', this.controllers.getPersialRefundTickets);
-        this.routers.post('/get_partial_refund_info', this.controllers.getPertialAirticketInfo);
+        this.routers.post('/get_partial_refund_info', this.controllers.getPartialAirticketInfo);
         this.routers.get('/get_partial_ticket_by_invoice/:invoice_id', this.controllers.getPersialRefundTicketsByInvoice);
         // vendor refund
         this.routers.get('/other-refund/vendor/:vendor_id', this.controllers.invoiceOtherByVendor);
         this.routers.get('/other-refund-info/vendor/:vendor_id', this.controllers.getRefundInfoVendor);
+        this.routers.get('/tax-refunds', this.controllers.allTaxRefund);
+        this.routers.get('/tax-refunds/:refund_id', this.controllers.viewAirTicketTaxRefund);
+        this.routers.delete('/tax-refunds/:refund_id', this.controllers.deleteAirTicketTaxRefund);
         // tour refund
         this.routers.get('/invoice-tour/:client', this.controllers.getTourInvoice);
         this.routers

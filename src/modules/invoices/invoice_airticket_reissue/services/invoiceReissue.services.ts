@@ -34,7 +34,7 @@ class ReissueAirticket extends AbstractServices {
 
     return {
       success: true,
-      message: 'All Invoices Airticket Reissue',
+      message: 'All Invoices Air ticket Reissue',
       ...data,
     };
   };
@@ -61,10 +61,13 @@ class ReissueAirticket extends AbstractServices {
 
     const flights = await conn.getFlightDetails(invoice_id);
 
+    const reissued = await common_conn.getReissuedItemByInvId(invoice_id);
+
     return {
       success: true,
       data: {
         ...invoice,
+        reissued,
         refunds,
         airticket_information,
         flights,

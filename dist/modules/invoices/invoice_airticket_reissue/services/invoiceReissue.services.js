@@ -26,7 +26,7 @@ class ReissueAirticket extends abstract_services_1.default {
             const { page, size, search, from_date, to_date } = req.query;
             const conn = this.models.CommonInvoiceModel(req);
             const data = yield conn.getAllInvoices(3, Number(page) || 1, Number(size) || 20, search, from_date, to_date);
-            return Object.assign({ success: true, message: 'All Invoices Airticket Reissue' }, data);
+            return Object.assign({ success: true, message: 'All Invoices Air ticket Reissue' }, data);
         });
         // VIEW INVOICE REISSUE
         this.viewInvoiceReissue = (req) => __awaiter(this, void 0, void 0, function* () {
@@ -40,9 +40,11 @@ class ReissueAirticket extends abstract_services_1.default {
             const pax_details = yield common_conn.getInvoiceAirTicketPaxDetails(invoice_id);
             const airticket_information = yield conn.getReissueAirticketInfo(invoice_id);
             const flights = yield conn.getFlightDetails(invoice_id);
+            const reissued = yield common_conn.getReissuedItemByInvId(invoice_id);
             return {
                 success: true,
-                data: Object.assign(Object.assign({}, invoice), { refunds,
+                data: Object.assign(Object.assign({}, invoice), { reissued,
+                    refunds,
                     airticket_information,
                     flights,
                     pax_details }),

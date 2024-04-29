@@ -172,7 +172,7 @@ class InvoiceVisaModels extends AbstractModels {
       .where('billing_id', billingId);
     if (!success) {
       throw new CustomError(
-        'Pleace provide valid billing id',
+        'Please provide valid billing id',
         400,
         'Invalid id'
       );
@@ -189,7 +189,7 @@ class InvoiceVisaModels extends AbstractModels {
       .where('invoice_id', invoiceId);
     if (!success) {
       throw new CustomError(
-        'Pleace provide valid billing id',
+        'Please provide valid billing id',
         400,
         'Invalid id'
       );

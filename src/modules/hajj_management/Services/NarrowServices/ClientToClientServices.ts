@@ -155,7 +155,7 @@ class ClientToClientServices extends AbstractServices {
 
       const data = await conn.deleteClientToClient(id, transfer_deleted_by);
       if (!data) {
-        throw new CustomError('Pleace provide an valid id', 400, 'Invalid Id');
+        throw new CustomError('Please provide an valid id', 400, 'Invalid Id');
       }
 
       await conn.deleteClToClTransaction(id, transfer_deleted_by);

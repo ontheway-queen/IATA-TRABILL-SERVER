@@ -1272,7 +1272,7 @@ class ReportModel extends abstract_models_1.default {
             size = Number(size);
             const page_number = (Number(page) - 1) * size;
             const data = yield this.query()
-                .select('invoice_id', 'invoice_category_id', 'invoice_client_id', 'invoice_combined_id', this.db.raw('coalesce(cl.client_name,comb.combine_name , company_name) as client_name'), 'invoice_reissue_client_type', 'invoice_no', 'invoice_hajj_session', 'invcat_title', 'invoice_sub_total', 'invoice_net_total', 'invoice_void_charge', 'invoice_sales_date', 'invoice_note', this.db.raw('CONCAT(user_first_name, " "  ,user_last_name) as user_name'), this.db.raw("CASE WHEN invoice_is_void = 1 THEN 'VOID' ELSE 'DELETE' END AS invoices_trash_type"), 'invoice_create_date')
+                .select('invoice_id', 'invoice_category_id', 'invoice_client_id', 'invoice_combined_id', this.db.raw('coalesce(cl.client_name,comb.combine_name , company_name) as client_name'), 'invoice_reissue_client_type', 'invoice_no', 'invoice_hajj_session', 'invcat_title', 'invoice_sub_total', 'invoice_net_total', 'invoice_void_charge', 'invoice_sales_date', 'invoice_note', 'user_full_name AS user_name', this.db.raw("CASE WHEN invoice_is_void = 1 THEN 'VOID' ELSE 'DELETE' END AS invoices_trash_type"), 'invoice_create_date')
                 .from('trabill_invoices')
                 .leftJoin('trabill_users', { user_id: 'invoice_created_by' })
                 .leftJoin('trabill_client_company_information', {
@@ -1287,11 +1287,11 @@ class ReportModel extends abstract_models_1.default {
                 .leftJoin('trabill_invoice_categories', {
                 invcat_id: 'invoice_category_id',
             })
-                .whereNot('invoice_is_deleted', 1)
+                .where('invoice_is_void', 1)
                 .andWhere('invoice_org_agency', this.org_agency)
                 .modify((builder) => {
                 if (from_date && to_date) {
-                    builder.andWhereRaw('Date(invoice_update_date) BETWEEN ? AND ?', [
+                    builder.andWhereRaw('Date(invoice_void_date) BETWEEN ? AND ?', [
                         from_date,
                         to_date,
                     ]);
@@ -1302,16 +1302,16 @@ class ReportModel extends abstract_models_1.default {
             const [{ count }] = (yield this.query()
                 .count('* as count')
                 .from('trabill_invoices')
+                .where('invoice_is_void', 1)
+                .andWhere('invoice_org_agency', this.org_agency)
                 .modify((builder) => {
                 if (from_date && to_date) {
-                    builder.andWhereRaw('Date(invoice_update_date) BETWEEN ? AND ?', [
+                    builder.andWhereRaw('Date(invoice_void_date) BETWEEN ? AND ?', [
                         from_date,
                         to_date,
                     ]);
                 }
-            })
-                .whereNot('invoice_is_deleted', 1)
-                .andWhere('invoice_org_agency', this.org_agency));
+            }));
             return { count, data };
         });
     }
@@ -1413,7 +1413,9 @@ class ReportModel extends abstract_models_1.default {
             const total = yield this.query()
                 .from('view_all_airticket_details')
                 .where('trabill_invoices.invoice_org_agency', this.org_agency)
-                .join('trabill_invoices', { invoice_id: 'airticket_invoice_id' })
+                .join('trabill_invoices', {
+                'trabill_invoices.invoice_id': 'airticket_invoice_id',
+            })
                 .andWhereNot('trabill_invoices.invoice_is_deleted', 1)
                 .modify((builder) => {
                 if (airline_id !== 'all') {

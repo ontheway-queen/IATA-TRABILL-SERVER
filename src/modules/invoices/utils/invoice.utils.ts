@@ -30,8 +30,7 @@ export class InvoiceUtils {
       Number(body.invoice_net_total) + Number(body.invoice_discount || 0);
 
     const ctrxn_particular_type =
-      'Invoices create(Gross fare)' + extra_particular &&
-      '-' + extra_particular;
+      'Invoice create(Gross fare)' + extra_particular || '-' + extra_particular;
 
     const clTrxnBody: IClTrxnBody = {
       ctrxn_type: 'DEBIT',

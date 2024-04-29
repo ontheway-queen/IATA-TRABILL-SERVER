@@ -147,7 +147,7 @@ class AgentProfileModels extends AbstractModels {
       .update(agent)
       .where('agent_id', id);
     if (data === 0) {
-      throw new CustomError('Pleace provide a valid id', 400, 'invalid id');
+      throw new CustomError('Please provide a valid id', 400, 'invalid id');
     }
   }
 
@@ -176,8 +176,6 @@ class AgentProfileModels extends AbstractModels {
       );
     }
   }
-
-
 
   public async updateAgentsStatus(
     agent_id: idType,
@@ -211,8 +209,6 @@ class AgentProfileModels extends AbstractModels {
     return id[0];
   };
 
-
-
   updateAgentTransaction = async (data: IAgentProfileTransaction) => {
     await this.query()
       .insert(data)
@@ -231,10 +227,6 @@ class AgentProfileModels extends AbstractModels {
       .where('agtrxn_invoice_id', invoiceId)
       .andWhere('agtrxn_agency_id', this.org_agency);
   };
-
-
-
-
 
   public async getAgentIncentive(page: number, size: number) {
     const page_number = (page - 1) * size;

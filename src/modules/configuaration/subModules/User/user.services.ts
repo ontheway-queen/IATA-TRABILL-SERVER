@@ -82,7 +82,7 @@ class UserServices extends AbstractServices {
     const userId = req.params.user_id;
 
     if (!userId) {
-      throw new CustomError('Pleace provide user id', 400, 'Empty user id');
+      throw new CustomError('Please provide user id', 400, 'Empty user id');
     }
 
     const {

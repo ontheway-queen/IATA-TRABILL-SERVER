@@ -18,7 +18,7 @@ class InvoiceCostValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.money_receipt, 'delete'),
             (0, express_validator_1.check)('receipt_deleted_by')
                 .notEmpty()
-                .withMessage('Pleace porvide who went to delete'),
+                .withMessage('Please porvide who went to delete'),
         ];
         /**
          * @Invoice_Hajj_Post
@@ -32,14 +32,14 @@ class InvoiceCostValidators extends abstract_validators_1.default {
                 .isString(),
             (0, express_validator_1.check)('invoice_created_by')
                 .notEmpty()
-                .withMessage('Pleace provide user id'),
+                .withMessage('Please provide user id'),
             (0, express_validator_1.check)('money_receipt.receipt_payment_type')
                 .notEmpty()
-                .withMessage('Pleace provide payment method'),
+                .withMessage('Please provide payment method'),
             (0, express_validator_1.check)('money_receipt.account_id')
                 .optional()
                 .isInt()
-                .withMessage('Pleace provide account id'),
+                .withMessage('Please provide account id'),
             (0, express_validator_1.check)('money_receipt.receipt_payment_date')
                 .notEmpty()
                 .withMessage('Payment date not be empty')
@@ -56,9 +56,9 @@ class InvoiceCostValidators extends abstract_validators_1.default {
         ];
         this.chequeStatusUpdate = [
             this.permissions.check(this.resources.money_receipt, 'create'),
-            (0, express_validator_1.check)('created_by').notEmpty().withMessage('Pleace provide user id'),
-            (0, express_validator_1.check)('receipt_id').notEmpty().withMessage('Pleace provide receipt_id'),
-            (0, express_validator_1.check)('payment_date').notEmpty().withMessage('Pleace provide payment_date'),
+            (0, express_validator_1.check)('created_by').notEmpty().withMessage('Please provide user id'),
+            (0, express_validator_1.check)('receipt_id').notEmpty().withMessage('Please provide receipt_id'),
+            (0, express_validator_1.check)('payment_date').notEmpty().withMessage('Please provide payment_date'),
             (0, express_validator_1.check)('cheque_status')
                 .notEmpty()
                 .isIn(['DEPOSIT', 'BOUNCE', 'RETURN'])
@@ -103,15 +103,15 @@ class InvoiceCostValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.money_receipt, 'create'),
             (0, express_validator_1.check)('receipt_payment_type')
                 .notEmpty()
-                .withMessage('Pleace provide payment method'),
+                .withMessage('Please provide payment method'),
             (0, express_validator_1.check)('receipt_agent_id')
                 .notEmpty()
-                .withMessage('Pleace provide agent id')
+                .withMessage('Please provide agent id')
                 .isInt()
                 .withMessage('Agent id must be an integer value'),
             (0, express_validator_1.check)('receipt_agent_amount')
                 .notEmpty()
-                .withMessage('Pleace provide agent amount'),
+                .withMessage('Please provide agent amount'),
             (0, express_validator_1.check)('invoice_id')
                 .optional()
                 .isInt()
@@ -139,11 +139,11 @@ class InvoiceCostValidators extends abstract_validators_1.default {
             (0, express_validator_1.check)('advr_payment_type')
                 .notEmpty()
                 .isInt()
-                .withMessage('Pleace provide Payment Type'),
+                .withMessage('Please provide Payment Type'),
             (0, express_validator_1.check)('advr_created_by')
                 .notEmpty()
                 .isInt()
-                .withMessage('Pleace provide who create this money receipt'),
+                .withMessage('Please provide who create this money receipt'),
             (0, express_validator_1.check)('advr_account_id').optional().isInt().withMessage('Enter account id'),
             (0, express_validator_1.check)('advr_amount')
                 .isNumeric()

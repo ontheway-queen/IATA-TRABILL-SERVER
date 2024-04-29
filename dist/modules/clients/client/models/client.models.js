@@ -59,7 +59,7 @@ class ClientModel extends abstract_models_1.default {
                 .from('trabill_clients')
                 .where('client_id', clientId));
             if (!client.length) {
-                throw new customError_1.default('Pleace provide valid client id', 400, 'Invalid client id');
+                throw new customError_1.default('Please provide valid client id', 400, 'Invalid client id');
             }
             const client_total_invoice = yield this.query()
                 .from('trabill_invoices')

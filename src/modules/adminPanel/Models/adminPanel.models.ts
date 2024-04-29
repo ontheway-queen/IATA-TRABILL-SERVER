@@ -35,7 +35,7 @@ class AdminPanelModels extends AbstractModels {
 
     if (!is_update) {
       throw new CustomError(
-        'Pleace provide a valid module id',
+        'Please provide a valid module id',
         400,
         'Invalid id'
       );
@@ -49,7 +49,7 @@ class AdminPanelModels extends AbstractModels {
 
     if (!is_del) {
       throw new CustomError(
-        'Pleace provide a valid module id',
+        'Please provide a valid module id',
         400,
         'Invalid id'
       );
@@ -81,7 +81,7 @@ class AdminPanelModels extends AbstractModels {
 
     if (!is_update) {
       throw new CustomError(
-        'Pleace provide a valid agency id',
+        'Please provide a valid agency id',
         400,
         'Invalid id'
       );
@@ -258,7 +258,7 @@ class AdminPanelModels extends AbstractModels {
 
     if (!data) {
       throw new CustomError(
-        'Pleace provide a valid agency id',
+        'Please provide a valid agency id',
         400,
         'Invalid id'
       );
@@ -331,7 +331,7 @@ class AdminPanelModels extends AbstractModels {
       }
     } else {
       throw new CustomError(
-        'Pleace provice valid agency id',
+        'Please provice valid agency id',
         400,
         'Invalid agency'
       );
@@ -349,7 +349,7 @@ class AdminPanelModels extends AbstractModels {
 
     if (!is_update) {
       throw new CustomError(
-        'Pleace provice valid agency id',
+        'Please provice valid agency id',
         400,
         'Invalid agency'
       );
@@ -369,7 +369,7 @@ class AdminPanelModels extends AbstractModels {
 
     if (!is_update) {
       throw new CustomError(
-        'Pleace provice valid agency id',
+        'Please provice valid agency id',
         400,
         'Invalid agency'
       );

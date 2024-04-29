@@ -33,12 +33,12 @@ class UserValidator extends AbstractValidator {
     check('user_first_name')
       .isString()
       .notEmpty()
-      .withMessage('Pleace add your first name'),
+      .withMessage('Please add your first name'),
 
     check('user_last_name')
       .optional()
       .isString()
-      .withMessage('Pleace add your last name'),
+      .withMessage('Please add your last name'),
 
     check('user_email')
       .optional()
@@ -58,7 +58,7 @@ class UserValidator extends AbstractValidator {
     check('user_username')
       .isString()
       .notEmpty()
-      .withMessage('Pleace add your user name')
+      .withMessage('Please add your user name')
       .customSanitizer((value) => {
         return value.replace(/\s/g, '');
       }),
@@ -74,12 +74,12 @@ class UserValidator extends AbstractValidator {
     check('user_first_name')
       .isString()
       .notEmpty()
-      .withMessage('Pleace add your first name'),
+      .withMessage('Please add your first name'),
 
     check('user_last_name')
       .optional()
       .isString()
-      .withMessage('Pleace add your last name'),
+      .withMessage('Please add your last name'),
 
     check('user_email')
       .optional()
@@ -97,7 +97,7 @@ class UserValidator extends AbstractValidator {
     check('user_username')
       .isString()
       .notEmpty()
-      .withMessage('Pleace add your user name'),
+      .withMessage('Please add your user name'),
   ];
   deleteUser = [];
   resetPassword = [

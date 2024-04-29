@@ -23,7 +23,7 @@ class InvoiceVisaValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.invoice_visa, 'delete'),
             (0, express_validator_1.check)('invoice_has_deleted_by')
                 .notEmpty()
-                .withMessage('Pleace provide admin id invoice_has_deleted_by'),
+                .withMessage('Please provide admin id invoice_has_deleted_by'),
         ];
         this.addInvoiceVisa = [
             this.permissions.check(this.resources.invoice_visa, 'create'),

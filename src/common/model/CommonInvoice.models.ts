@@ -262,7 +262,7 @@ class CommonInvoiceModel extends AbstractModels {
 
     if (!data) {
       throw new CustomError(
-        'Pleace provide valid invoice id',
+        'Please provide valid invoice id',
         400,
         'Invalid id'
       );
@@ -287,10 +287,20 @@ class CommonInvoiceModel extends AbstractModels {
     };
   }
 
-  updateIsVoid = async (invoiceId: idType, invoice_void_charge: number) => {
+  updateIsVoid = async (
+    invoiceId: idType,
+    invoice_void_charge: number,
+    void_charge_ctrxn_id: null | number,
+    invoice_void_date: string
+  ) => {
     await this.query()
-      .update({ invoice_void_charge, invoice_is_void: 1 })
-      .into('trabill_invoices_delete_void')
+      .update({
+        invoice_void_charge,
+        invoice_is_void: 1,
+        invoice_void_ctrxn_id: void_charge_ctrxn_id,
+        invoice_void_date,
+      })
+      .into('trabill_invoices')
       .where('invoice_id', invoiceId);
   };
 
@@ -334,25 +344,25 @@ class CommonInvoiceModel extends AbstractModels {
     invoiceId: idType,
     invoice_has_deleted_by: idType
   ) {
-    const has_v_pay = await this.query()
-      .select('*')
-      .from('trabill_invoice_vendor_payments')
-      .where('invendorpay_isdeleted', 0)
-      .andWhere('invendorpay_invoice_id', invoiceId);
+    // const has_v_pay = await this.query()
+    //   .select('*')
+    //   .from('trabill_invoice_vendor_payments')
+    //   .where('invendorpay_isdeleted', 0)
+    //   .andWhere('invendorpay_invoice_id', invoiceId);
 
-    const has_c_receipt = await this.query()
-      .select('*')
-      .from('trabill_invoice_client_payments')
-      .where('invclientpayment_is_deleted', 0)
-      .andWhere('invclientpayment_invoice_id', invoiceId);
+    // const has_c_receipt = await this.query()
+    //   .select('*')
+    //   .from('trabill_invoice_client_payments')
+    //   .where('invclientpayment_is_deleted', 0)
+    //   .andWhere('invclientpayment_invoice_id', invoiceId);
 
-    if (has_c_receipt.length || has_v_pay.length) {
-      throw new CustomError(
-        `You can't delete this invoice`,
-        400,
-        'Bad request'
-      );
-    }
+    // if (has_c_receipt.length || has_v_pay.length) {
+    //   throw new CustomError(
+    //     `You can't delete this invoice`,
+    //     400,
+    //     'Bad request'
+    //   );
+    // }
 
     await this.db.raw(`CALL ${this.database}.delete_invoice(?,?);`, [
       invoiceId,

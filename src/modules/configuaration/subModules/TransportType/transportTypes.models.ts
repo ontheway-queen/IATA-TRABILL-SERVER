@@ -93,7 +93,7 @@ class TransportTypeModels extends AbstractModels {
       .andWhereNot('ttype_has_deleted', 1);
 
     if (isSuccess === 0) {
-      throw new CustomError('Pleace provide valid id', 400, 'Bad request');
+      throw new CustomError('Please provide valid id', 400, 'Bad request');
     }
   }
 }

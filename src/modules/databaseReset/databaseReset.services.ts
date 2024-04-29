@@ -14,7 +14,7 @@ class DatabaseResetServices extends AbstractServices {
 
     if (pass !== '668252') {
       throw new CustomError(
-        'Pleace provide currect password',
+        'Please provide currect password',
         400,
         'Incorrect password'
       );

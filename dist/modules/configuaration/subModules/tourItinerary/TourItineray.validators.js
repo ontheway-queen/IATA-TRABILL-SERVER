@@ -27,7 +27,7 @@ class TourItinerayValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.tour_itinerary, 'create'),
             (0, express_validator_1.check)('arr.*.group_name')
                 .notEmpty()
-                .withMessage('Pleace provide group name.'),
+                .withMessage('Please provide group name.'),
             (0, express_validator_1.check)('arr.*.group_maximum_pax_allowed')
                 .notEmpty()
                 .withMessage('Provide maximum pax '),
@@ -38,7 +38,7 @@ class TourItinerayValidators extends abstract_validators_1.default {
         ];
         this.updateTourGroups = [
             this.permissions.check(this.resources.tour_itinerary, 'update'),
-            (0, express_validator_1.check)('group_name').notEmpty().withMessage('Pleace provide group name.'),
+            (0, express_validator_1.check)('group_name').notEmpty().withMessage('Please provide group name.'),
             (0, express_validator_1.check)('group_maximum_pax_allowed')
                 .notEmpty()
                 .withMessage('Provide maximum pax '),
@@ -51,7 +51,7 @@ class TourItinerayValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.tour_itinerary, 'create'),
             (0, express_validator_1.check)('arr.*.city_country_id')
                 .notEmpty()
-                .withMessage('Pleace provide county id.'),
+                .withMessage('Please provide county id.'),
             (0, express_validator_1.check)('arr.*.city_name').notEmpty().withMessage('City name '),
             (0, express_validator_1.check)('arr.*.city_created_by')
                 .notEmpty()
@@ -62,7 +62,7 @@ class TourItinerayValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.tour_itinerary, 'update'),
             (0, express_validator_1.check)('city_country_id')
                 .notEmpty()
-                .withMessage('Pleace provide county id.'),
+                .withMessage('Please provide county id.'),
             (0, express_validator_1.check)('city_name').notEmpty().withMessage('City name '),
             (0, express_validator_1.check)('city_updated_by').notEmpty().isInt().withMessage('Provide user id '),
         ];
@@ -70,7 +70,7 @@ class TourItinerayValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.tour_itinerary, 'create'),
             (0, express_validator_1.check)('arr.*.itinerary_place_id')
                 .notEmpty()
-                .withMessage('Pleace provide place id.'),
+                .withMessage('Please provide place id.'),
             (0, express_validator_1.check)('arr.*.itinerary_particular')
                 .notEmpty()
                 .withMessage('Enter itinerary particular '),
@@ -83,7 +83,7 @@ class TourItinerayValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.tour_itinerary, 'update'),
             (0, express_validator_1.check)('itinerary_place_id')
                 .notEmpty()
-                .withMessage('Pleace provide place id.'),
+                .withMessage('Please provide place id.'),
             (0, express_validator_1.check)('itinerary_particular')
                 .notEmpty()
                 .withMessage('Enter itinerary particular '),
@@ -96,13 +96,13 @@ class TourItinerayValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.tour_itinerary, 'create'),
             (0, express_validator_1.check)('arr.*.accommodation_country_id')
                 .notEmpty()
-                .withMessage('Pleace provide country id.'),
+                .withMessage('Please provide country id.'),
             (0, express_validator_1.check)('arr.*.accommodation_city_id')
                 .notEmpty()
-                .withMessage('Pleace provide city id.'),
+                .withMessage('Please provide city id.'),
             (0, express_validator_1.check)('arr.*.accommodation_room_type_id')
                 .notEmpty()
-                .withMessage('Pleace provide room type id.'),
+                .withMessage('Please provide room type id.'),
             (0, express_validator_1.check)('arr.*.accommodation_status')
                 .notEmpty()
                 .withMessage('Enter account status '),
@@ -115,13 +115,13 @@ class TourItinerayValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.tour_itinerary, 'update'),
             (0, express_validator_1.check)('accommodation_country_id')
                 .notEmpty()
-                .withMessage('Pleace provide country id.'),
+                .withMessage('Please provide country id.'),
             (0, express_validator_1.check)('accommodation_city_id')
                 .notEmpty()
-                .withMessage('Pleace provide city id.'),
+                .withMessage('Please provide city id.'),
             (0, express_validator_1.check)('accommodation_room_type_id')
                 .notEmpty()
-                .withMessage('Pleace provide room type id.'),
+                .withMessage('Please provide room type id.'),
             (0, express_validator_1.check)('accommodation_status')
                 .notEmpty()
                 .withMessage('Enter account status '),
@@ -134,13 +134,13 @@ class TourItinerayValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.tour_itinerary, 'create'),
             (0, express_validator_1.check)('arr.*.place_country_id')
                 .notEmpty()
-                .withMessage('Pleace provide country id.'),
+                .withMessage('Please provide country id.'),
             (0, express_validator_1.check)('arr.*.place_city_id')
                 .notEmpty()
-                .withMessage('Pleace provide city id.'),
+                .withMessage('Please provide city id.'),
             (0, express_validator_1.check)('arr.*.place_name')
                 .notEmpty()
-                .withMessage('Pleace enter place name.'),
+                .withMessage('Please enter place name.'),
             (0, express_validator_1.check)('arr.*.place_status').notEmpty().withMessage('Enter place status '),
             (0, express_validator_1.check)('arr.*.place_created_by')
                 .notEmpty()
@@ -151,9 +151,9 @@ class TourItinerayValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.tour_itinerary, 'update'),
             (0, express_validator_1.check)('place_country_id')
                 .notEmpty()
-                .withMessage('Pleace provide country id.'),
-            (0, express_validator_1.check)('place_city_id').notEmpty().withMessage('Pleace provide city id.'),
-            (0, express_validator_1.check)('place_name').notEmpty().withMessage('Pleace enter place name.'),
+                .withMessage('Please provide country id.'),
+            (0, express_validator_1.check)('place_city_id').notEmpty().withMessage('Please provide city id.'),
+            (0, express_validator_1.check)('place_name').notEmpty().withMessage('Please enter place name.'),
             (0, express_validator_1.check)('place_status').notEmpty().withMessage('Enter place status '),
             (0, express_validator_1.check)('place_created_by')
                 .notEmpty()

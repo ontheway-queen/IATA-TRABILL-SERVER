@@ -431,7 +431,7 @@ class VendorModel extends AbstractModels {
 
     if (!invoice_category) {
       throw new CustomError(
-        'Pleace provide a valid invoice id',
+        'Please provide a valid invoice id',
         400,
         'Invalid id'
       );
@@ -493,7 +493,7 @@ class VendorModel extends AbstractModels {
 
     if (!invoice_category) {
       throw new CustomError(
-        'Pleace provide a valid invoice id',
+        'Please provide a valid invoice id',
         400,
         'Invalid id'
       );

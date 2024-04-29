@@ -46,7 +46,7 @@ class RefundModel extends abstract_models_1.default {
         this.getInvoiceDuePayment = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
             const [[[invoice_pay]]] = yield this.db.raw(`call ${this.database}.get_invoice_due(${invoiceId});`);
             if (!invoice_pay) {
-                throw new customError_1.default('Pleace provide valid invoice id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide valid invoice id', 400, 'Invalid id');
             }
             return invoice_pay;
         });
@@ -210,7 +210,7 @@ class RefundModel extends abstract_models_1.default {
                 .whereNot('invoice_is_deleted', 1)
                 .andWhereNot('invoice_is_refund', 1);
             if (!data.length) {
-                throw new customError_1.default('No data found', 404, 'Pleace provide valid client id');
+                throw new customError_1.default('No data found', 404, 'Please provide valid client id');
             }
             return data;
         });
@@ -422,6 +422,119 @@ class RefundModel extends abstract_models_1.default {
                 .andWhere('airticket_id', airticket_id);
             return data;
         });
+        // SELECT TAX REFUND
+        this.selectTaxRefund = (page, size, search, from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            search && search.toLowerCase();
+            const offset = (page - 1) * size;
+            const data = yield this.query()
+                .select('refund_id', 'refund_voucher', 'invoice_id', 'invoice_category_id', 'invoice_no', this.db.raw(`COALESCE(tc.client_name, tcc.combine_name) AS client_name`), 'refund_profit', 'refund_date', 'client_refund_type', 'client_total_tax_refund', 'vendor_total_tax_refund', 'created_at')
+                .from('trabill_airticket_tax_refund')
+                .leftJoin('trabill_invoices', {
+                invoice_id: 'refund_invoice_id',
+            })
+                .leftJoin('trabill_clients AS tc', { 'tc.client_id': 'refund_client_id' })
+                .leftJoin('trabill_combined_clients AS tcc', {
+                'tcc.combine_id': 'refund_combined_id',
+            })
+                .modify((build) => {
+                build
+                    .andWhere('refund_agency_id', this.org_agency)
+                    .andWhere(function () {
+                    if (search) {
+                        this.andWhereRaw(`LOWER(refund_voucher) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(tc.client_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(tcc.combine_name) LIKE ?`, [`%${search}%`]);
+                    }
+                    if (from_date && to_date) {
+                        this.andWhereRaw(`DATE_FORMAT(refund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [from_date, to_date]);
+                    }
+                });
+            })
+                .andWhere('is_deleted', 0)
+                .andWhere('refund_agency_id', this.org_agency)
+                .orderBy('refund_id', 'desc')
+                .limit(size)
+                .offset(offset);
+            const [{ count }] = yield this.query()
+                .select(this.db.raw(`COUNT(*) AS count`))
+                .from('trabill_airticket_tax_refund')
+                .leftJoin('trabill_invoices', {
+                invoice_id: 'refund_invoice_id',
+            })
+                .leftJoin('trabill_clients AS tc', { 'tc.client_id': 'refund_client_id' })
+                .leftJoin('trabill_combined_clients AS tcc', {
+                'tcc.combine_id': 'refund_combined_id',
+            })
+                .modify((build) => {
+                build
+                    .andWhere('refund_agency_id', this.org_agency)
+                    .andWhere(function () {
+                    if (search) {
+                        this.andWhereRaw(`LOWER(refund_voucher) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(tc.client_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(tcc.combine_name) LIKE ?`, [`%${search}%`]);
+                    }
+                    if (from_date && to_date) {
+                        this.andWhereRaw(`DATE_FORMAT(refund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [from_date, to_date]);
+                    }
+                });
+            })
+                .andWhere('is_deleted', 0)
+                .andWhere('refund_agency_id', this.org_agency);
+            return { count, data };
+        });
+        this.viewAirTicketTaxRefund = (refund_id) => __awaiter(this, void 0, void 0, function* () {
+            const [refunds] = yield this.query()
+                .select('refund_id', 'refund_voucher', 'client_refund_type', 'vendor_refund_type', 'client_total_tax_refund', 'vendor_total_tax_refund', 'refund_profit', 'created_at', 'cl_ac.account_name as client_account', 'v_ac.account_name as vendor_account', this.db.raw(`COALESCE(client_name, combine_name) AS client_name`))
+                .from('trabill_airticket_tax_refund')
+                .leftJoin('trabill_clients AS tc', { 'tc.client_id': 'refund_client_id' })
+                .leftJoin('trabill_combined_clients AS tcc', {
+                'tcc.combine_id': 'refund_combined_id',
+            })
+                .leftJoin('trabill_accounts as cl_ac', 'cl_ac.account_id', '=', 'client_account_id')
+                .leftJoin('trabill_accounts as v_ac', 'v_ac.account_id', '=', 'vendor_account_id')
+                .where({
+                refund_agency_id: this.org_agency,
+                refund_id: refund_id,
+                is_deleted: 0,
+            });
+            if (refunds) {
+                const ticket_info = yield this.query()
+                    .select('airticket_ticket_no', 'airticket_gds_id', 'refund_tax_amount', this.db.raw('coalesce(vendor_name, combine_name) as vendor_name'))
+                    .from('trabill_airticket_tax_refund_items')
+                    .leftJoin('trabill_invoice_airticket_items', 'airticket_id', '=', 'refund_airticket_id')
+                    .leftJoin('trabill_vendors', 'vendor_id', '=', 'refund_vendor_id')
+                    .leftJoin('trabill_combined_clients', 'combine_id', '=', 'refund_combined_id')
+                    .where('refund_id', refunds.refund_id);
+                return Object.assign(Object.assign({}, refunds), { ticket_info });
+            }
+            return {};
+        });
+        this.deleteAirTicketTaxRefund = (refund_id) => __awaiter(this, void 0, void 0, function* () {
+            yield this.query()
+                .update({ is_deleted: 1 })
+                .from('trabill_airticket_tax_refund')
+                .where({
+                refund_agency_id: this.org_agency,
+                refund_id: refund_id,
+                is_deleted: 0,
+            });
+        });
+        this.selectPreviousTaxRefund = (refund_id) => __awaiter(this, void 0, void 0, function* () {
+            const [refunds] = (yield this.query()
+                .select('refund_id', 'refund_voucher', 'refund_invoice_id', 'refund_client_id', 'refund_combined_id', 'refund_c_trxn_id', 'client_account_id', 'client_account_trxn_id', 'vendor_account_id', 'refund_profit', 'vendor_account_trxn_id', 'client_total_tax_refund', 'vendor_total_tax_refund', this.db.raw("COALESCE(CONCAT('client-',refund_client_id), CONCAT('combined-',refund_combined_id)) as comb_client"))
+                .from('trabill_airticket_tax_refund')
+                .where({
+                refund_agency_id: this.org_agency,
+                refund_id: refund_id,
+                is_deleted: 0,
+            }));
+            const ticket_info = (yield this.query()
+                .select('refund_vendor_id', 'refund_airticket_id', 'refund_combined_id', 'refund_v_trxn_id', 'refund_inv_category_id', this.db.raw("COALESCE(CONCAT('vendor-', refund_vendor_id), CONCAT('combined-', refund_combined_id)) as comb_vendor"))
+                .from('trabill_airticket_tax_refund_items')
+                .where('refund_id', refunds.refund_id));
+            return Object.assign(Object.assign({}, refunds), { ticket_info });
+        });
     }
     updateTourVendorsProductIsRefund(invoice_id, refund) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -610,7 +723,7 @@ class RefundModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(combClient);
             const ticket_infos = yield this.query()
-                .select('airticket_invoice_id as invoice_id', 'invoice_no as invoice_no', 'airticket_ticket_no as ticket_no')
+                .select('airticket_invoice_id as invoice_id', 'invoice_category_id', 'invoice_no as invoice_no', 'airticket_ticket_no as ticket_no')
                 .from('view_all_airticket_details')
                 .whereNot('airticket_is_refund', 1)
                 .whereNot('airticket_is_reissued', 1)

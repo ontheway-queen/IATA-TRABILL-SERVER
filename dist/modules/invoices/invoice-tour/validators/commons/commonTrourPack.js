@@ -98,18 +98,18 @@ exports.commonTourPackValidator = [
         .toFloat(),
     (0, express_validator_1.check)('invoice_created_by')
         .notEmpty()
-        .withMessage('Pleace provide user id')
+        .withMessage('Please provide user id')
         .isInt()
         .withMessage('User id must be numaric value'),
     // BILLING
     (0, express_validator_1.check)('tourBilling.*.billing_product_id')
         .notEmpty()
-        .withMessage('Pleace provide billing product id')
+        .withMessage('Please provide billing product id')
         .isInt()
         .withMessage('Billing product id must be integer'),
     (0, express_validator_1.check)('tourBilling.*.billing_total_sales')
         .notEmpty()
-        .withMessage('Pleace provide sales price'),
+        .withMessage('Please provide sales price'),
     (0, express_validator_1.check)('tourFoods')
         .optional()
         .isArray()

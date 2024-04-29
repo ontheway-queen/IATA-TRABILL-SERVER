@@ -16,7 +16,7 @@ class InvoiceHajjValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.invoice_hajj, 'delete'),
             (0, express_validator_1.check)('invoice_has_deleted_by')
                 .notEmpty()
-                .withMessage('Pleace porvide who went to delete'),
+                .withMessage('Please porvide who went to delete'),
         ];
         this.postInvoiceHajj = [
             this.permissions.check(this.resources.invoice_hajj, 'create'),

@@ -18,7 +18,7 @@ class InvoiceHajjPreRegValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.invoice_hajj_pre_reg, 'delete'),
             (0, express_validator_1.check)('invoice_has_deleted_by')
                 .notEmpty()
-                .withMessage('Pleace porvide who went to delete'),
+                .withMessage('Please porvide who went to delete'),
         ];
         this.hajiTrackingSerialCheck = [
             this.permissions.check(this.resources.invoice_hajj_pre_reg, 'read'),
@@ -32,7 +32,7 @@ class InvoiceHajjPreRegValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.invoice_hajj_pre_reg, 'create'),
             (0, express_validator_1.check)('invoice_no')
                 .notEmpty()
-                .withMessage('Pleace provide your valid invoice number'),
+                .withMessage('Please provide your valid invoice number'),
             (0, express_validator_1.check)('invoice_combclient_id').notEmpty().withMessage('Enter client id'),
             (0, express_validator_1.check)('invoice_sales_man_id').notEmpty().withMessage('Enter sales man id'),
             (0, express_validator_1.check)('invoice_sales_date')
@@ -68,7 +68,7 @@ class InvoiceHajjPreRegValidators extends abstract_validators_1.default {
             this.permissions.check(this.resources.invoice_hajj_pre_reg, 'create'),
             (0, express_validator_1.check)('invoice_no')
                 .notEmpty()
-                .withMessage('Pleace provide your valid invoice number'),
+                .withMessage('Please provide your valid invoice number'),
             (0, express_validator_1.check)('invoice_combclient_id').notEmpty().withMessage('Enter client id'),
             (0, express_validator_1.check)('invoice_sales_man_id').notEmpty().withMessage('Enter sales man id'),
             (0, express_validator_1.check)('invoice_sales_date')

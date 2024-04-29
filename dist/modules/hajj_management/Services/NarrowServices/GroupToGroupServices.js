@@ -87,13 +87,13 @@ class GroupToGroupServices extends abstract_services_1.default {
             const id = Number(req.params.id);
             const { deleted_by } = req.body;
             if (!id) {
-                throw new customError_1.default('Pleace provide an id', 400, 'Id is empty');
+                throw new customError_1.default('Please provide an id', 400, 'Id is empty');
             }
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.HajjiManagementModels(req, trx);
                 const data = yield conn.deleteGroupTransaction(id, deleted_by);
                 if (!data) {
-                    throw new customError_1.default('Pleace provide an valid id', 400, 'Invalid Id');
+                    throw new customError_1.default('Please provide an valid id', 400, 'Invalid Id');
                 }
                 yield conn.deleteGroupTransTracking(id);
                 yield this.insertAudit(req, 'delete', `Group to group transfer deleted`, deleted_by, 'HAJJ_MGT');

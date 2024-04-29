@@ -3,6 +3,7 @@ import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
 import Trxns from '../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../common/helpers/common.helper';
+import { generateVoucherNumber } from '../../../../common/helpers/invoice.helpers';
 import {
   IAcTrxn,
   IClTrxnBody,
@@ -220,9 +221,11 @@ class InvoiceAirticketService extends AbstractServices {
     return { success: true, data };
   };
 
+  // AIR TICKET TAX REFUND
   addAirTicketTax = async (req: Request) => {
     const {
       refund_invoice_id,
+      invoice_category_id,
       comb_client,
       ticket_info,
       client_refund_type,
@@ -236,11 +239,15 @@ class InvoiceAirticketService extends AbstractServices {
       refund_date,
     } = req.body as IAirTicketTaxRefundBody;
 
+    const profit = vendor_total_tax_refund - client_total_tax_refund;
+
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.invoiceAirticketModel(req, trx);
       const trxns = new Trxns(req, trx);
 
       const { client_id, combined_id } = separateCombClientToId(comb_client);
+
+      const refund_voucher = generateVoucherNumber(6, 'TRF');
 
       let refund_c_trxn_id = null;
       let client_account_trxn_id = null;
@@ -259,6 +266,7 @@ class InvoiceAirticketService extends AbstractServices {
           ctrxn_note: '',
           ctrxn_particular_type: 'AIR TICKET TAX REFUND',
           ctrxn_pay_type: clAccPayType,
+          ctrxn_voucher: refund_voucher,
         };
 
         refund_c_trxn_id = await trxns.clTrxnInsert(clTrxnBody);
@@ -273,6 +281,7 @@ class InvoiceAirticketService extends AbstractServices {
           acctrxn_particular_id: 108,
           acctrxn_particular_type: 'AIR TICKET TAX REFUND',
           acctrxn_pay_type: clAccPayType,
+          acctrxn_voucher: refund_voucher,
         };
 
         client_account_trxn_id = await trxns.AccTrxnInsert(ACTrxnBody);
@@ -286,6 +295,7 @@ class InvoiceAirticketService extends AbstractServices {
           ctrxn_note: `Money return : ${client_total_tax_refund}/-`,
           ctrxn_particular_type: 'AIR TICKET TAX REFUND',
           ctrxn_pay_type: clAccPayType,
+          ctrxn_voucher: refund_voucher,
         };
 
         refund_c_trxn_id = await trxns.clTrxnInsert(clTrxnBody);
@@ -303,13 +313,17 @@ class InvoiceAirticketService extends AbstractServices {
           acctrxn_particular_id: 108,
           acctrxn_particular_type: 'AIR TICKET TAX REFUND',
           acctrxn_pay_type: VAccPayType,
+          acctrxn_voucher: refund_voucher,
         };
 
         vendor_account_trxn_id = await trxns.AccTrxnInsert(ACTrxnBody);
       }
 
       const refundData: IAirTicketTaxRefund = {
+        refund_date,
+        refund_profit: profit,
         refund_invoice_id,
+        refund_voucher,
         refund_agency_id: req.agency_id,
         refund_client_id: client_id,
         refund_combined_id: combined_id,
@@ -359,6 +373,7 @@ class InvoiceAirticketService extends AbstractServices {
           refund_tax_amount: item.refund_tax_amount,
           refund_vendor_id: vendor_id,
           refund_v_trxn_id,
+          refund_inv_category_id: invoice_category_id,
         };
 
         await conn.insertAirTicketTaxRefundItem(refundItemData);

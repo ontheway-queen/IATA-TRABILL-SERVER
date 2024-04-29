@@ -61,7 +61,7 @@ class NotificationModals extends abstract_models_1.default {
                 return success;
             }
             else {
-                throw new customError_1.default('Pleace provide valid data and valid id', 400, 'Invalid id');
+                throw new customError_1.default('Please provide valid data and valid id', 400, 'Invalid id');
             }
         });
         this.getExpirePassport = (today, priorDate) => __awaiter(this, void 0, void 0, function* () {

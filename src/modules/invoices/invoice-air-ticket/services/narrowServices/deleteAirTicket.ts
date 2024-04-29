@@ -52,11 +52,13 @@ class DeleteAirTicket extends AbstractServices {
     });
   };
 
+  // VOID INVOICES
   public voidInvoice = async (req: Request) => {
     const invoice_id = Number(req.params.invoice_id);
 
-    const { client_charge, invoice_vendors } = req.body as {
+    const { client_charge, invoice_vendors, invoice_void_date } = req.body as {
       client_charge: number;
+      invoice_void_date: string;
       invoice_vendors: {
         comb_vendor: string;
         vendor_charge: number;
@@ -70,8 +72,6 @@ class DeleteAirTicket extends AbstractServices {
       const { comb_client, prevInvoiceNo, invoice_category_id } =
         await common_conn.getPreviousInvoices(invoice_id);
 
-      await common_conn.updateIsVoid(invoice_id, client_charge || 0);
-
       const clTrxnBody: IClTrxnBody = {
         ctrxn_type: 'DEBIT',
         ctrxn_amount: client_charge || 0,
@@ -80,10 +80,10 @@ class DeleteAirTicket extends AbstractServices {
         ctrxn_particular_id: 161,
         ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
         ctrxn_note: '',
-        ctrxn_particular_type: 'invoice void charge',
+        ctrxn_particular_type: 'TKT VOID CHARGE',
       };
 
-      let void_charge_ctrxn_id: number = 0;
+      let void_charge_ctrxn_id = null;
       if (client_charge && client_charge > 0) {
         void_charge_ctrxn_id = await trxns.clTrxnInsert(clTrxnBody);
       }
@@ -109,6 +109,14 @@ class DeleteAirTicket extends AbstractServices {
         await new DeleteInvoiceHajj().deleteInvoiceHajj(req, trx);
       }
 
+      // UPDATED VOID INFORMATION
+      await common_conn.updateIsVoid(
+        invoice_id,
+        client_charge || 0,
+        void_charge_ctrxn_id,
+        invoice_void_date
+      );
+
       const { combined_id } = separateCombClientToId(comb_client);
 
       for (const info of invoice_vendors) {
@@ -119,7 +127,7 @@ class DeleteAirTicket extends AbstractServices {
             vtrxn_created_at: dayjs().format('YYYY-MM-DD'),
             vtrxn_note: '',
             vtrxn_particular_id: 1,
-            vtrxn_particular_type: 'Vendor Payment',
+            vtrxn_particular_type: 'TKT VOID CHARGE',
             vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
             vtrxn_user_id: req.user_id,
           };

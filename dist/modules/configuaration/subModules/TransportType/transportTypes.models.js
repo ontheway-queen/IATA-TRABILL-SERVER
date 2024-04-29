@@ -86,7 +86,7 @@ class TransportTypeModels extends abstract_models_1.default {
                 .whereNotNull('ttype_org_agency')
                 .andWhereNot('ttype_has_deleted', 1);
             if (isSuccess === 0) {
-                throw new customError_1.default('Pleace provide valid id', 400, 'Bad request');
+                throw new customError_1.default('Please provide valid id', 400, 'Bad request');
             }
         });
     }

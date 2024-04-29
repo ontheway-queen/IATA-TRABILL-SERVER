@@ -50,18 +50,18 @@ class HajjimanagementValidators extends abstract_validators_1.default {
             (0, express_validator_1.check)('gtransfer_from')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid client id'),
+                .withMessage('Please provide a valid client id'),
             (0, express_validator_1.check)('gtransfer_to')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid client id'),
+                .withMessage('Please provide a valid client id'),
             (0, express_validator_1.check)('gtransfer_job_name').isString().optional(),
             (0, express_validator_1.check)('gtransfer_tracking_no').isString().optional(),
             (0, express_validator_1.check)('gtransfer_charge').isDecimal().optional(),
             (0, express_validator_1.check)('gtransfer_created_by')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid user id'),
+                .withMessage('Please provide a valid user id'),
             (0, express_validator_1.check)('ctrcknumber_number')
                 .isArray({ min: 1 })
                 .withMessage('At least one tracking number is required'),
@@ -86,23 +86,23 @@ class HajjimanagementValidators extends abstract_validators_1.default {
             (0, express_validator_1.check)('transfer_agent_id')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid client id'),
+                .withMessage('Please provide a valid client id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_maharam_id')
                 .notEmpty()
                 .isInt()
-                .withMessage('Pleace provide a valid muharram id'),
+                .withMessage('Please provide a valid muharram id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_passport_id')
                 .notEmpty()
                 .isInt()
-                .withMessage('Pleace provide a valid passport id'),
+                .withMessage('Please provide a valid passport id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_tracking_no')
                 .notEmpty()
                 .isInt()
-                .withMessage('Pleace provide a valid tracking no'),
+                .withMessage('Please provide a valid tracking no'),
             (0, express_validator_1.check)('transfer_created_by')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid user id'),
+                .withMessage('Please provide a valid user id'),
         ];
         this.transferInRead = [
             this.permissions.check(this.resources.hajji_management_transfer_inout, 'read'),
@@ -112,23 +112,23 @@ class HajjimanagementValidators extends abstract_validators_1.default {
             (0, express_validator_1.check)('transfer_agent_id')
                 .optional()
                 .isNumeric()
-                .withMessage('Pleace provide a valid client id'),
+                .withMessage('Please provide a valid client id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_maharam_id')
                 .optional()
                 .isInt()
-                .withMessage('Pleace provide a valid muharram id'),
+                .withMessage('Please provide a valid muharram id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_passport_id')
                 .optional()
                 .isInt()
-                .withMessage('Pleace provide a valid passport id'),
+                .withMessage('Please provide a valid passport id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_tracking_no')
                 .optional()
                 .isInt()
-                .withMessage('Pleace provide a valid tracking no'),
+                .withMessage('Please provide a valid tracking no'),
             (0, express_validator_1.check)('transfer_created_by')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid user id'),
+                .withMessage('Please provide a valid user id'),
         ];
         this.transferInDelete = [
             this.permissions.check(this.resources.hajji_management_transfer_inout, 'delete'),
@@ -143,53 +143,53 @@ class HajjimanagementValidators extends abstract_validators_1.default {
             (0, express_validator_1.check)('transfer_agent_id')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid client id'),
+                .withMessage('Please provide a valid client id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_maharam_id')
                 .notEmpty()
                 .isInt()
-                .withMessage('Pleace provide a valid muharram id'),
+                .withMessage('Please provide a valid muharram id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_passport_id')
                 .notEmpty()
                 .isInt()
-                .withMessage('Pleace provide a valid passport id'),
+                .withMessage('Please provide a valid passport id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_tracking_no')
                 .notEmpty()
                 .isInt()
-                .withMessage('Pleace provide a valid tracking no'),
+                .withMessage('Please provide a valid tracking no'),
             (0, express_validator_1.check)('transfer_created_by')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid user id'),
+                .withMessage('Please provide a valid user id'),
         ];
         this.transferOutUpdate = [
             this.permissions.check(this.resources.hajji_management_transfer_inout, 'create'),
             (0, express_validator_1.check)('transfer_agent_id')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid client id'),
+                .withMessage('Please provide a valid client id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_maharam_id')
                 .optional()
                 .isInt()
-                .withMessage('Pleace provide a valid muharram id'),
+                .withMessage('Please provide a valid muharram id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_passport_id')
                 .optional()
                 .isInt()
-                .withMessage('Pleace provide a valid passport id'),
+                .withMessage('Please provide a valid passport id'),
             (0, express_validator_1.check)('transfertrack_tracking_no.*.transfertrack_tracking_no')
                 .optional()
                 .isInt()
-                .withMessage('Pleace provide a valid tracking no'),
+                .withMessage('Please provide a valid tracking no'),
             (0, express_validator_1.check)('transfer_created_by')
                 .notEmpty()
                 .isNumeric()
-                .withMessage('Pleace provide a valid user id'),
+                .withMessage('Please provide a valid user id'),
         ];
         this.addCancelPreReg = [
             this.permissions.check(this.resources.hajji_management_cancel_pre_reg, 'create'),
             (0, express_validator_1.check)('arr.*.cancel_tracking_number')
                 .notEmpty()
-                .withMessage('Pleace provide tracking number'),
-            (0, express_validator_1.check)('cancel_created_by').notEmpty().withMessage('Pleace provide user id'),
+                .withMessage('Please provide tracking number'),
+            (0, express_validator_1.check)('cancel_created_by').notEmpty().withMessage('Please provide user id'),
         ];
         this.readCancelPreReg = [
             this.permissions.check(this.resources.hajji_management_cancel_pre_reg, 'read'),

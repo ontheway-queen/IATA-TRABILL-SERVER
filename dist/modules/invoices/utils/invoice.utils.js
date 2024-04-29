@@ -15,8 +15,7 @@ class InvoiceUtils {
         this.clientTrans = (trxns, invoice_no, ctrxn_pnr, ctrxn_route, ticket_no, extra_particular = '') => __awaiter(this, void 0, void 0, function* () {
             const body = this.invoice;
             const base_fare = Number(body.invoice_net_total) + Number(body.invoice_discount || 0);
-            const ctrxn_particular_type = 'Invoices create(Gross fare)' + extra_particular &&
-                '-' + extra_particular;
+            const ctrxn_particular_type = 'Invoice create(Gross fare)' + extra_particular || '-' + extra_particular;
             const clTrxnBody = {
                 ctrxn_type: 'DEBIT',
                 ctrxn_amount: base_fare,

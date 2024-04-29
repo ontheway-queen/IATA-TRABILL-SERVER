@@ -12,7 +12,7 @@ class InvoiceCostValidators extends AbstractValidator {
     this.permissions.check(this.resources.money_receipt, 'delete'),
     check('receipt_deleted_by')
       .notEmpty()
-      .withMessage('Pleace porvide who went to delete'),
+      .withMessage('Please porvide who went to delete'),
   ];
 
   /**
@@ -30,16 +30,16 @@ class InvoiceCostValidators extends AbstractValidator {
 
     check('invoice_created_by')
       .notEmpty()
-      .withMessage('Pleace provide user id'),
+      .withMessage('Please provide user id'),
 
     check('money_receipt.receipt_payment_type')
       .notEmpty()
-      .withMessage('Pleace provide payment method'),
+      .withMessage('Please provide payment method'),
 
     check('money_receipt.account_id')
       .optional()
       .isInt()
-      .withMessage('Pleace provide account id'),
+      .withMessage('Please provide account id'),
 
     check('money_receipt.receipt_payment_date')
       .notEmpty()
@@ -59,9 +59,9 @@ class InvoiceCostValidators extends AbstractValidator {
   chequeStatusUpdate = [
     this.permissions.check(this.resources.money_receipt, 'create'),
 
-    check('created_by').notEmpty().withMessage('Pleace provide user id'),
-    check('receipt_id').notEmpty().withMessage('Pleace provide receipt_id'),
-    check('payment_date').notEmpty().withMessage('Pleace provide payment_date'),
+    check('created_by').notEmpty().withMessage('Please provide user id'),
+    check('receipt_id').notEmpty().withMessage('Please provide receipt_id'),
+    check('payment_date').notEmpty().withMessage('Please provide payment_date'),
     check('cheque_status')
       .notEmpty()
       .isIn(['DEPOSIT', 'BOUNCE', 'RETURN'])
@@ -112,15 +112,15 @@ class InvoiceCostValidators extends AbstractValidator {
     this.permissions.check(this.resources.money_receipt, 'create'),
     check('receipt_payment_type')
       .notEmpty()
-      .withMessage('Pleace provide payment method'),
+      .withMessage('Please provide payment method'),
     check('receipt_agent_id')
       .notEmpty()
-      .withMessage('Pleace provide agent id')
+      .withMessage('Please provide agent id')
       .isInt()
       .withMessage('Agent id must be an integer value'),
     check('receipt_agent_amount')
       .notEmpty()
-      .withMessage('Pleace provide agent amount'),
+      .withMessage('Please provide agent amount'),
     check('invoice_id')
       .optional()
       .isInt()
@@ -150,11 +150,11 @@ class InvoiceCostValidators extends AbstractValidator {
     check('advr_payment_type')
       .notEmpty()
       .isInt()
-      .withMessage('Pleace provide Payment Type'),
+      .withMessage('Please provide Payment Type'),
     check('advr_created_by')
       .notEmpty()
       .isInt()
-      .withMessage('Pleace provide who create this money receipt'),
+      .withMessage('Please provide who create this money receipt'),
     check('advr_account_id').optional().isInt().withMessage('Enter account id'),
     check('advr_amount')
       .isNumeric()

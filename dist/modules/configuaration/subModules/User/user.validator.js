@@ -35,11 +35,11 @@ class UserValidator extends abstract_validators_1.default {
             (0, express_validator_1.check)('user_first_name')
                 .isString()
                 .notEmpty()
-                .withMessage('Pleace add your first name'),
+                .withMessage('Please add your first name'),
             (0, express_validator_1.check)('user_last_name')
                 .optional()
                 .isString()
-                .withMessage('Pleace add your last name'),
+                .withMessage('Please add your last name'),
             (0, express_validator_1.check)('user_email')
                 .optional()
                 .customSanitizer((value) => {
@@ -55,7 +55,7 @@ class UserValidator extends abstract_validators_1.default {
             (0, express_validator_1.check)('user_username')
                 .isString()
                 .notEmpty()
-                .withMessage('Pleace add your user name')
+                .withMessage('Please add your user name')
                 .customSanitizer((value) => {
                 return value.replace(/\s/g, '');
             }),
@@ -69,11 +69,11 @@ class UserValidator extends abstract_validators_1.default {
             (0, express_validator_1.check)('user_first_name')
                 .isString()
                 .notEmpty()
-                .withMessage('Pleace add your first name'),
+                .withMessage('Please add your first name'),
             (0, express_validator_1.check)('user_last_name')
                 .optional()
                 .isString()
-                .withMessage('Pleace add your last name'),
+                .withMessage('Please add your last name'),
             (0, express_validator_1.check)('user_email')
                 .optional()
                 .customSanitizer((value) => (value === null ? undefined : value))
@@ -87,7 +87,7 @@ class UserValidator extends abstract_validators_1.default {
             (0, express_validator_1.check)('user_username')
                 .isString()
                 .notEmpty()
-                .withMessage('Pleace add your user name'),
+                .withMessage('Please add your user name'),
         ];
         this.deleteUser = [];
         this.resetPassword = [

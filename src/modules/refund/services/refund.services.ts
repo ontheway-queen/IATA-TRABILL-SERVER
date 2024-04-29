@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import AbstractServices from '../../../abstracts/abstract.services';
+import Trxns from '../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../common/helpers/common.helper';
 import AddAirTicketRefund from './narrowServices/airticketRefundSubServices/addAirticketRefund';
 import DeleteAirTicketRefund from './narrowServices/airticketRefundSubServices/deleteAirticketRefund.services';
@@ -325,7 +326,7 @@ class RefundServices extends AbstractServices {
     return { success: true, data };
   };
 
-  public getPertialAirticketInfo = async (req: Request) => {
+  public getPartialAirticketInfo = async (req: Request) => {
     const { airticket_id, invoice_id } = req.body as {
       airticket_id: number;
       invoice_id: number;
@@ -336,6 +337,87 @@ class RefundServices extends AbstractServices {
     const data = await conn.getPartialAirticketInfo(airticket_id, invoice_id);
 
     return { success: true, data };
+  };
+
+  // ALL TAX REFUND
+  allTaxRefund = async (req: Request) => {
+    const { page, size, search, from_date, to_date } = req.query as {
+      page: string;
+      size: string;
+      search: string;
+      from_date: string;
+      to_date: string;
+    };
+
+    const conn = this.models.refundModel(req);
+
+    const data = await conn.selectTaxRefund(
+      Number(page || 1),
+      Number(size || 20),
+      search,
+      from_date,
+      to_date
+    );
+
+    return { success: true, ...data };
+  };
+
+  viewAirTicketTaxRefund = async (req: Request) => {
+    const refund_id = req.params.refund_id;
+
+    const conn = this.models.refundModel(req);
+
+    const data = await conn.viewAirTicketTaxRefund(refund_id);
+
+    return { success: true, data };
+  };
+
+  // DELETE AIR TICKET TAX REFUND
+  deleteAirTicketTaxRefund = async (req: Request) => {
+    const refund_id = req.params.refund_id;
+
+    return await this.models.db.transaction(async (trx) => {
+      const conn = this.models.refundModel(req, trx);
+      const trxns = new Trxns(req, trx);
+
+      const previousData = await conn.selectPreviousTaxRefund(refund_id);
+
+      if (previousData.refund_c_trxn_id) {
+        await trxns.deleteClTrxn(
+          previousData.refund_c_trxn_id,
+          previousData.comb_client
+        );
+      }
+
+      if (previousData.client_account_trxn_id) {
+        await trxns.deleteAccTrxn(previousData.client_account_trxn_id);
+      }
+
+      if (previousData.vendor_account_trxn_id) {
+        await trxns.deleteAccTrxn(previousData.vendor_account_trxn_id);
+      }
+
+      // VENDOR LEDGER DELETE
+      for (const item of previousData.ticket_info) {
+        if (item.refund_v_trxn_id) {
+          await trxns.deleteVTrxn(item.refund_v_trxn_id, item.comb_vendor);
+        }
+
+        // update air ticket refund
+        await conn.updateAirticketItemIsRefund(
+          item.refund_airticket_id,
+          item.refund_inv_category_id,
+          0
+        );
+      }
+
+      // UPDATE INVOICE REFUND
+      await conn.updateInvoiceIsRefund(previousData.refund_invoice_id, 0);
+
+      await conn.deleteAirTicketTaxRefund(refund_id);
+
+      return { success: true };
+    });
   };
 
   public addAirTicketRefund = new AddAirTicketRefund().addAirTicketRefund;

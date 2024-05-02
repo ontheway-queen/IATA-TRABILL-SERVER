@@ -424,6 +424,7 @@ class AddAirTicketRefund extends AbstractServices {
           vrefund_charge_vtrxn_id,
           vrefund_account_id,
           vrefund_acctrxn_id,
+          vrefund_tkt_cl_discount: item.adjust_client_discount,
         };
 
         airticketVendorRefunds.push(airticketVendorRefund);

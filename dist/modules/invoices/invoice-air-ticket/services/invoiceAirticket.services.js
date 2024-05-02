@@ -149,6 +149,15 @@ class InvoiceAirticketService extends abstract_services_1.default {
                 data,
             };
         });
+        this.getInvoiceDiscount = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { invoice_id } = req.params;
+            const conn = this.models.CommonInvoiceModel(req);
+            const data = yield conn.getInvoiceDiscount(invoice_id);
+            return {
+                success: true,
+                data,
+            };
+        });
         // ============= narrow services ==============
         this.addInvoiceAirticket = new addInvoiceAirticket_1.default().addInvoiceAirTicket;
         this.editInvoiceAirticket = new editInvoiceAirticket_1.default().editInvoiceAirTicket;

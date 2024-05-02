@@ -861,6 +861,19 @@ class CommonInvoiceModel extends AbstractModels {
   insertAdvanceMr = async (data: IAdvanceMrInsert) => {
     await this.query().insert(data).into('trabill_invoice_client_payments');
   };
+
+  getInvoiceDiscount = async (invoiceId: idType) => {
+    const [data] = await this.query()
+      .select(
+        'invoice_vat',
+        'invoice_discount',
+        'invoice_service_charge as service_charge'
+      )
+      .from('trabill_invoices_extra_amounts')
+      .where('extra_amount_invoice_id', invoiceId);
+
+    return data;
+  };
 }
 
 export default CommonInvoiceModel;

@@ -67,6 +67,11 @@ class InvoiceAirTicketRouter extends AbstractRouter {
       this.controllers.selectAirTicketTax
     );
     this.routers.post('/tax-refund', this.controllers.addAirTicketTax);
+
+    this.routers.get(
+      '/discount/:invoice_id',
+      this.controllers.getInvoiceDiscount
+    );
   }
 }
 

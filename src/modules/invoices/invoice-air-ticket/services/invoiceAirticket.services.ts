@@ -222,6 +222,19 @@ class InvoiceAirticketService extends AbstractServices {
     };
   };
 
+  public getInvoiceDiscount = async (req: Request) => {
+    const { invoice_id } = req.params as { invoice_id: string };
+
+    const conn = this.models.CommonInvoiceModel(req);
+
+    const data = await conn.getInvoiceDiscount(invoice_id);
+
+    return {
+      success: true,
+      data,
+    };
+  };
+
   // ============= narrow services ==============
   public addInvoiceAirticket = new AddInvoiceAirticket().addInvoiceAirTicket;
   public editInvoiceAirticket = new EditInvoiceAirticket().editInvoiceAirTicket;

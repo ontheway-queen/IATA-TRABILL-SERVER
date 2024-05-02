@@ -53,6 +53,7 @@ export interface IVendorRefundReq {
   vrefund_payment_type: paymentType;
   withdraw_date: string;
   vrefund_note: string;
+  adjust_client_discount: number;
 }
 
 export interface IVendorRefundInfo {
@@ -71,6 +72,7 @@ export interface IVendorRefundInfo {
   vrefund_created_by: number;
   vrefund_account_id: number;
   vrefund_acctrxn_id: number | null;
+  vrefund_tkt_cl_discount: number;
 }
 
 export interface IAirTicketRefund {

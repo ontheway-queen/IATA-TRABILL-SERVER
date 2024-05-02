@@ -255,6 +255,13 @@ class CommonInvoiceModel extends abstract_models_1.default {
         this.insertAdvanceMr = (data) => __awaiter(this, void 0, void 0, function* () {
             yield this.query().insert(data).into('trabill_invoice_client_payments');
         });
+        this.getInvoiceDiscount = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .select('invoice_vat', 'invoice_discount', 'invoice_service_charge as service_charge')
+                .from('trabill_invoices_extra_amounts')
+                .where('extra_amount_invoice_id', invoiceId);
+            return data;
+        });
     }
     getAllInvoices(category_id, page, size, search_text = '', from_date, to_date) {
         return __awaiter(this, void 0, void 0, function* () {

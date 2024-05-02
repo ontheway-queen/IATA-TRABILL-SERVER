@@ -36,6 +36,7 @@ class InvoiceAirTicketRouter extends abstract_routers_1.default {
         // AIR TICKET TAX REFUND
         this.routers.get('/tax-refund/:invoice_id', this.controllers.selectAirTicketTax);
         this.routers.post('/tax-refund', this.controllers.addAirTicketTax);
+        this.routers.get('/discount/:invoice_id', this.controllers.getInvoiceDiscount);
     }
 }
 exports.default = InvoiceAirTicketRouter;

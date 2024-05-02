@@ -28,9 +28,9 @@ class VoidInvoice extends AbstractServices {
         invoice_id
       );
 
-      const content = `VOUCHER ${body.invoice_no} BDT ${
-        body.net_total
-      }/- CHARGE BDT ${body.client_charge || 0}/-`;
+      const content = `BDT ${body.net_total}/- \nCHARGE BDT ${
+        body.client_charge || 0
+      }/-`;
 
       const ticket_nos = body.invoice_vendors
         .map((item) => item.airticket_ticket_no)
@@ -51,21 +51,20 @@ class VoidInvoice extends AbstractServices {
 
       await trxns.clTrxnInsert(clientNetTotalTrans);
 
-      const voidChargeClTrans: IClTrxnBody = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: body.client_charge || 0,
-        ctrxn_cl: body.comb_client,
-        ctrxn_voucher: body.invoice_no,
-        ctrxn_particular_id: 161,
-        ctrxn_created_at: body.invoice_void_date,
-        ctrxn_note: '',
-        ctrxn_particular_type: 'TKT VOID CHARGE',
-        ctrxn_airticket_no: ticket_nos,
-      };
-
       let void_charge_ctrxn_id = null;
 
       if (body.client_charge) {
+        const voidChargeClTrans: IClTrxnBody = {
+          ctrxn_type: 'DEBIT',
+          ctrxn_amount: body.client_charge,
+          ctrxn_cl: body.comb_client,
+          ctrxn_voucher: body.invoice_no,
+          ctrxn_particular_id: 161,
+          ctrxn_created_at: body.invoice_void_date,
+          ctrxn_note: '',
+          ctrxn_particular_type: 'TKT VOID CHARGE',
+          ctrxn_airticket_no: ticket_nos,
+        };
         void_charge_ctrxn_id = await trxns.clTrxnInsert(voidChargeClTrans);
       }
 
@@ -102,22 +101,22 @@ class VoidInvoice extends AbstractServices {
       for (const item of body.invoice_vendors) {
         const { vendor_id } = separateCombClientToId(item.comb_vendor);
 
+        const vendorPurchaseVoidTrans: IVTrxn = {
+          comb_vendor: item.comb_vendor,
+          vtrxn_amount: item.cost_price,
+          vtrxn_created_at: body.invoice_void_date,
+          vtrxn_note: `BDT ${item.cost_price}/- \nCHARGE BDT ${item.vendor_charge}/-`,
+          vtrxn_particular_id: 1,
+          vtrxn_particular_type: 'TKT VOID',
+          vtrxn_type: vendor_id ? 'CREDIT' : 'DEBIT',
+          vtrxn_user_id: req.user_id,
+          vtrxn_voucher: body.invoice_no,
+          vtrxn_airticket_no: item.airticket_ticket_no,
+        };
+
+        await trxns.VTrxnInsert(vendorPurchaseVoidTrans);
+
         if (item.vendor_charge) {
-          const vendorPurchaseVoidTrans: IVTrxn = {
-            comb_vendor: item.comb_vendor,
-            vtrxn_amount: item.cost_price,
-            vtrxn_created_at: body.invoice_void_date,
-            vtrxn_note: `TKT ${item.airticket_ticket_no} BDT ${item.cost_price}/- CHARGE BDT ${item.vendor_charge}/-`,
-            vtrxn_particular_id: 1,
-            vtrxn_particular_type: 'TKT VOID',
-            vtrxn_type: vendor_id ? 'CREDIT' : 'DEBIT',
-            vtrxn_user_id: req.user_id,
-            vtrxn_voucher: body.invoice_no,
-            vtrxn_airticket_no: item.airticket_ticket_no,
-          };
-
-          await trxns.VTrxnInsert(vendorPurchaseVoidTrans);
-
           const vendorVoidCharge: IVTrxn = {
             comb_vendor: item.comb_vendor,
             vtrxn_amount: item.vendor_charge,

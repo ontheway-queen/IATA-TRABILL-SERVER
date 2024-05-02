@@ -228,6 +228,16 @@ class InvoiceAirticketController extends AbstractController {
       }
     }
   );
+  public getInvoiceDiscount = this.assyncWrapper.wrap(
+    this.validator.readInvoiceAirticket,
+    async (req: Request, res: Response) => {
+      const data = await this.services.getInvoiceDiscount(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
 }
 
 export default InvoiceAirticketController;

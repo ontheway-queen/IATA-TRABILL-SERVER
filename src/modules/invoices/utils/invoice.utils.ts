@@ -30,7 +30,8 @@ export class InvoiceUtils {
       Number(body.invoice_net_total) + Number(body.invoice_discount || 0);
 
     const ctrxn_particular_type =
-      'Invoice create(Gross fare)' + extra_particular || '-' + extra_particular;
+      'Invoice air ticket(Gross fare)' + extra_particular ||
+      '-' + extra_particular;
 
     const clTrxnBody: IClTrxnBody = {
       ctrxn_type: 'DEBIT',
@@ -54,7 +55,7 @@ export class InvoiceUtils {
       ctrxn_particular_id: 90,
       ctrxn_created_at: body.invoice_sales_date,
       ctrxn_note: body.invoice_note,
-      ctrxn_particular_type,
+      ctrxn_particular_type: 'Air ticket(Discount)',
       ctrxn_pnr,
       ctrxn_route,
       ctrxn_airticket_no: ticket_no,

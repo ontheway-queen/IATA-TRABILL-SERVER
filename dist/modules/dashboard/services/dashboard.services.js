@@ -140,6 +140,10 @@ class DashboardServices extends abstract_services_1.default {
             // BILLING DATE
             const billing_from_date = (0, lib_1.getNext15Day)(sales_from_date);
             const billing_to_date = (0, lib_1.getNext15Day)(sales_to_date);
+            console.log({
+                sales_from_date,
+                billing_from_date,
+            });
             return {
                 success: true,
                 message: 'the request is OK',

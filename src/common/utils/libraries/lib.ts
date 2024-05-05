@@ -192,8 +192,10 @@ export const getNext15Day = (inputDate: string | Date) => {
     date = new Date(nextYear, nextMonth, 16).toISOString();
   } else if (currentDate.getDate() === 15) {
     date = new Date(nextYear, nextMonth, lastDayOfMonth).toISOString();
+  } else if (currentDate.getDate() === 16) {
+    date = new Date(nextYear, nextMonth, lastDayOfMonth + 1).toISOString();
   } else if (currentDate.getDate() === lastDayOfMonth) {
-    date = new Date(currentYear, currentMonth + 1, 16).toISOString();
+    date = new Date(currentYear, currentMonth + 1, 15).toISOString();
   }
 
   return date;

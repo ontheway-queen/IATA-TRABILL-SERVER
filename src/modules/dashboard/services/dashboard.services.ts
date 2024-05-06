@@ -184,11 +184,6 @@ class DashboardServices extends AbstractServices {
     const billing_from_date = getNext15Day(sales_from_date);
     const billing_to_date = getNext15Day(sales_to_date);
 
-    console.log({
-      sales_from_date,
-      billing_from_date,
-    });
-
     return {
       success: true,
       message: 'the request is OK',

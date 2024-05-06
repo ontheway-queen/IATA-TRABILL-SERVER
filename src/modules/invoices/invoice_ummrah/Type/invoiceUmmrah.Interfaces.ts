@@ -16,6 +16,10 @@ export interface PassengetInfo {
   ticket_route?: number[];
 }
 
+export interface TaxBreakdown {
+  [key: string]: number;
+}
+
 export interface IInvoiceUmmrahReq {
   invoice_vat: number;
   invoice_agent_com_amount: number;

@@ -386,6 +386,20 @@ class CommonInvoiceModel extends AbstractModels {
     }
   };
 
+  getIataVendorId = async () => {
+    const [vendor_id] = await this.query()
+      .select('vendor_id')
+      .from('trabill_vendors')
+      .where('vendor_type', 'IATA')
+      .andWhere('vendor_org_agency', this.org_agency)
+      .andWhereNot('vendor_is_deleted', 1);
+
+    if (vendor_id) {
+      return 'vendor-' + vendor_id?.vendor_id;
+    }
+    return null;
+  };
+
   getProductById = async (productId: idType) => {
     const data = await this.query()
       .select('product_name')

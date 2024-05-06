@@ -1,12 +1,11 @@
-import axios from 'axios';
 import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
 import { idType } from '../../../../common/types/common.types';
-import CustomError from '../../../../common/utils/errors/customError';
 import AddInvoiceAirticket from './narrowServices/addInvoiceAirticket';
 import AirTicketTaxRefund from './narrowServices/air_ticket_tax_refund';
 import DeleteAirTicket from './narrowServices/deleteAirTicket';
 import EditInvoiceAirticket from './narrowServices/editInvoiceAirticket';
+import PnrDetailsService from './narrowServices/pnr_details.service';
 import SendMail from './narrowServices/sendMail.services';
 import VoidInvoice from './narrowServices/void_invoice';
 
@@ -14,26 +13,6 @@ class InvoiceAirticketService extends AbstractServices {
   constructor() {
     super();
   }
-
-  // GET PNR DETAILS
-  pnrDetails = async (req: Request) => {
-    const pnrId = req.params.pnr;
-
-    const apiUrl = `http://192.168.0.235:9008/api/v1/btob/flight/booking-details/${pnrId}`;
-
-    try {
-      const response = await axios.get(apiUrl);
-
-      const data = response.data;
-
-      if (data.success) {
-        return data;
-      }
-      return { success: true, data: [] };
-    } catch (error: any) {
-      throw new CustomError('PNR details not found!', 404, error.message);
-    }
-  };
 
   public getAllInvoices = async (req: Request) => {
     const { page, size, search, from_date, to_date } = req.query as {
@@ -236,6 +215,7 @@ class InvoiceAirticketService extends AbstractServices {
   };
 
   // ============= narrow services ==============
+  pnrDetails = new PnrDetailsService().pnrDetails;
   public addInvoiceAirticket = new AddInvoiceAirticket().addInvoiceAirTicket;
   public editInvoiceAirticket = new EditInvoiceAirticket().editInvoiceAirTicket;
   public deleteInvoiceAirTicket = new DeleteAirTicket().deleteAirTicket;

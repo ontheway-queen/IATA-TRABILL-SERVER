@@ -31,33 +31,15 @@ class EditPayroll extends abstract_services_1.default {
                     const data = yield conn.payrollImagesUrl(payrollId);
                     yield this.deleteFile.delete_image(data === null || data === void 0 ? void 0 : data.payroll_image_url);
                 }
-                const payrollData = Object.assign({ payment_month,
-                    gross_salary,
-                    daily_salary,
-                    payroll_profit_share,
-                    payroll_employee_id,
+                const payrollData = Object.assign({ payroll_employee_id,
                     payroll_account_id,
                     payroll_pay_type,
-                    payroll_salary,
-                    payroll_mobile_bill,
-                    payroll_food_bill,
-                    payroll_bonus,
-                    payroll_commission,
-                    payroll_fastival_bonus,
-                    payroll_ta,
-                    payroll_advance,
-                    payroll_net_amount,
+                    payment_month,
+                    gross_salary,
+                    daily_salary, payroll_profit_share: payroll_profit_share || 0, payroll_salary: payroll_salary || 0, payroll_mobile_bill: payroll_mobile_bill || 0, payroll_food_bill: payroll_food_bill || 0, payroll_bonus: payroll_bonus || 0, payroll_commission: payroll_commission || 0, payroll_fastival_bonus: payroll_fastival_bonus || 0, payroll_ta: payroll_ta || 0, payroll_advance: payroll_advance || 0, payroll_accommodation: payroll_accommodation || 0, payroll_attendance: payroll_attendance || 0, payroll_health: payroll_health || 0, payroll_incentive: payroll_incentive || 0, payroll_provident: payroll_provident || 0, payroll_other1: payroll_other1 || 0, payroll_other2: payroll_other2 || 0, payroll_other3: payroll_other3 || 0, payroll_net_amount,
                     payroll_date,
                     payroll_note,
-                    payroll_updated_by,
-                    payroll_accommodation,
-                    payroll_attendance,
-                    payroll_health,
-                    payroll_incentive,
-                    payroll_provident,
-                    payroll_other1,
-                    payroll_other2,
-                    payroll_other3 }, imageUrlObj);
+                    payroll_updated_by }, imageUrlObj);
                 let payroll_acctrxn_id;
                 if (payroll_pay_type !== 4) {
                     const AccTrxnBody = {

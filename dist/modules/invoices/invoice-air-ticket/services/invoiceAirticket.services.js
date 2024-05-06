@@ -12,34 +12,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const axios_1 = __importDefault(require("axios"));
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
-const customError_1 = __importDefault(require("../../../../common/utils/errors/customError"));
 const addInvoiceAirticket_1 = __importDefault(require("./narrowServices/addInvoiceAirticket"));
 const air_ticket_tax_refund_1 = __importDefault(require("./narrowServices/air_ticket_tax_refund"));
 const deleteAirTicket_1 = __importDefault(require("./narrowServices/deleteAirTicket"));
 const editInvoiceAirticket_1 = __importDefault(require("./narrowServices/editInvoiceAirticket"));
+const pnr_details_service_1 = __importDefault(require("./narrowServices/pnr_details.service"));
 const sendMail_services_1 = __importDefault(require("./narrowServices/sendMail.services"));
 const void_invoice_1 = __importDefault(require("./narrowServices/void_invoice"));
 class InvoiceAirticketService extends abstract_services_1.default {
     constructor() {
         super();
-        // GET PNR DETAILS
-        this.pnrDetails = (req) => __awaiter(this, void 0, void 0, function* () {
-            const pnrId = req.params.pnr;
-            const apiUrl = `http://192.168.0.235:9008/api/v1/btob/flight/booking-details/${pnrId}`;
-            try {
-                const response = yield axios_1.default.get(apiUrl);
-                const data = response.data;
-                if (data.success) {
-                    return data;
-                }
-                return { success: true, data: [] };
-            }
-            catch (error) {
-                throw new customError_1.default('PNR details not found!', 404, error.message);
-            }
-        });
         this.getAllInvoices = (req) => __awaiter(this, void 0, void 0, function* () {
             const { page, size, search, from_date, to_date } = req.query;
             const conn = this.models.CommonInvoiceModel(req);
@@ -159,6 +142,7 @@ class InvoiceAirticketService extends abstract_services_1.default {
             };
         });
         // ============= narrow services ==============
+        this.pnrDetails = new pnr_details_service_1.default().pnrDetails;
         this.addInvoiceAirticket = new addInvoiceAirticket_1.default().addInvoiceAirTicket;
         this.editInvoiceAirticket = new editInvoiceAirticket_1.default().editInvoiceAirTicket;
         this.deleteInvoiceAirTicket = new deleteAirTicket_1.default().deleteAirTicket;

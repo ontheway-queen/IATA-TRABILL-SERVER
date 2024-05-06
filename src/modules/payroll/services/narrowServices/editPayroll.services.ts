@@ -2,6 +2,7 @@ import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
 import Trxns from '../../../../common/helpers/Trxns';
 import { IAcTrxnUpdate } from '../../../../common/interfaces/Trxn.interfaces';
+import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 import {
   ICreatePayroll,
   IEditPayrollDeduction,
@@ -9,7 +10,6 @@ import {
   IPayrollDeductions,
   IPayrollEditReqBody,
 } from '../../types/payroll.interfaces';
-import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 
 class EditPayroll extends AbstractServices {
   constructor() {
@@ -77,33 +77,33 @@ class EditPayroll extends AbstractServices {
       }
 
       const payrollData = {
-        payment_month,
-        gross_salary,
-        daily_salary,
-        payroll_profit_share,
         payroll_employee_id,
         payroll_account_id,
         payroll_pay_type,
-        payroll_salary,
-        payroll_mobile_bill,
-        payroll_food_bill,
-        payroll_bonus,
-        payroll_commission,
-        payroll_fastival_bonus,
-        payroll_ta,
-        payroll_advance,
+        payment_month,
+        gross_salary,
+        daily_salary,
+        payroll_profit_share: payroll_profit_share || 0,
+        payroll_salary: payroll_salary || 0,
+        payroll_mobile_bill: payroll_mobile_bill || 0,
+        payroll_food_bill: payroll_food_bill || 0,
+        payroll_bonus: payroll_bonus || 0,
+        payroll_commission: payroll_commission || 0,
+        payroll_fastival_bonus: payroll_fastival_bonus || 0,
+        payroll_ta: payroll_ta || 0,
+        payroll_advance: payroll_advance || 0,
+        payroll_accommodation: payroll_accommodation || 0,
+        payroll_attendance: payroll_attendance || 0,
+        payroll_health: payroll_health || 0,
+        payroll_incentive: payroll_incentive || 0,
+        payroll_provident: payroll_provident || 0,
+        payroll_other1: payroll_other1 || 0,
+        payroll_other2: payroll_other2 || 0,
+        payroll_other3: payroll_other3 || 0,
         payroll_net_amount,
         payroll_date,
         payroll_note,
         payroll_updated_by,
-        payroll_accommodation,
-        payroll_attendance,
-        payroll_health,
-        payroll_incentive,
-        payroll_provident,
-        payroll_other1,
-        payroll_other2,
-        payroll_other3,
         ...imageUrlObj,
       };
 
@@ -210,13 +210,13 @@ class EditPayroll extends AbstractServices {
           await conn.createPayrollDeductions(deductionInfo);
       }
 
-      const payrollNewData: ICreatePayroll = {
+      const payrollNewData = {
         ...payrollData,
         payroll_acctrxn_id,
         payroll_charge_id,
       };
 
-      await conn.updatePayroll(payrollId, payrollNewData);
+      await conn.updatePayroll(payrollId, payrollNewData as ICreatePayroll);
 
       await this.insertAudit(
         req,

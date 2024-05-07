@@ -24,7 +24,7 @@ class PnrDetailsService extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const pnr = req.params.pnr;
                 if (pnr !== 'SQBSCN') {
-                    return { success: true };
+                    throw new customError_1.default('No data found', 404, 'Bad request');
                 }
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const iata_vendor = yield common_conn.getIataVendorId();

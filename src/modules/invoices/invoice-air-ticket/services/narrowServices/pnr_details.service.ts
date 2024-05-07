@@ -16,7 +16,7 @@ class PnrDetailsService extends AbstractServices {
       const pnr = req.params.pnr;
 
       if (pnr !== 'SQBSCN') {
-        return { success: true };
+        throw new CustomError('No data found', 404, 'Bad request');
       }
 
       const common_conn = this.models.CommonInvoiceModel(req, trx);

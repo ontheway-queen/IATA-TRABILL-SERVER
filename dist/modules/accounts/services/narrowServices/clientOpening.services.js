@@ -33,6 +33,7 @@ class AddClientOpeningService extends abstract_services_1.default {
                     ctrxn_particular_type: 'Client opening balance',
                     ctrxn_type: transaction_type,
                     ctrxn_voucher: '',
+                    ctrxn_user_id: req.user_id,
                 };
                 const op_cltrxn_id = yield trxn_conn.insertClTrxn(clTrxnBody);
                 const openingBalData = {

@@ -68,6 +68,7 @@ class Trxns extends AbstractServices {
         ctrxn_voucher,
         ctrxn_airticket_no,
         ctrxn_pay_type,
+        ctrxn_user_id: this.req.user_id,
       };
 
       trxnId = await this.conn.insertClTrxn(clTrxnBody);

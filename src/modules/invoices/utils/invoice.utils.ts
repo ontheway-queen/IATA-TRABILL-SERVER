@@ -62,6 +62,7 @@ export class InvoiceUtils {
     };
 
     const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
+
     let invoice_discount_cltrxn_id = null;
     if (body.invoice_discount) {
       invoice_discount_cltrxn_id = await trxns.clTrxnInsert(

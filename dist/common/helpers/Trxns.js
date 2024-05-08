@@ -37,6 +37,7 @@ class Trxns extends abstract_services_1.default {
                     ctrxn_voucher,
                     ctrxn_airticket_no,
                     ctrxn_pay_type,
+                    ctrxn_user_id: this.req.user_id,
                 };
                 trxnId = yield this.conn.insertClTrxn(clTrxnBody);
             }

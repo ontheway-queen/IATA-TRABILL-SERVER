@@ -37,6 +37,7 @@ export interface IComTrxn {
 
 export interface IClTrxn extends Omit<IClTrxnBody, 'ctrxn_cl'> {
   ctrxn_cl_id: number;
+  ctrxn_user_id: number;
 }
 export interface IClTrxnUpdate extends Omit<IClTrxnBody, 'ctrxn_user_id'> {
   ctrxn_trxn_id: idType;

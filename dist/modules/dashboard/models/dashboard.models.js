@@ -350,7 +350,7 @@ class DashboardModels extends abstract_models_1.default {
             const [data] = yield this.query()
                 .select(this.db.raw('sum(airticket_client_price) as gross_fare'), this.db.raw('sum(airticket_tax) as tax'), this.db.raw('sum(airticket_fare_difference) * 0.07 as iata_commission'), this.db.raw('0 as taxes_commission'), this.db.raw('SUM(airticket_ait) as ait'), this.db.raw('sum(airticket_purchase_price) as purchase_amount'), this.db.raw('sum(airticket_profit) as overall_profit'))
                 .from('v_bsp_ticket_reissue')
-                .where('vendor_org_agency', this.org_agency)
+                .where('airticket_org_agency', this.org_agency)
                 .andWhere('vendor_type', 'IATA')
                 .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
                 from_date,
@@ -362,21 +362,12 @@ class DashboardModels extends abstract_models_1.default {
             const ticket_re_issue = yield this.query()
                 .select('*')
                 .from('v_bsp_ticket_reissue')
-                .where('vendor_org_agency', this.org_agency)
+                .where('airticket_org_agency', this.org_agency)
                 .andWhere('vendor_type', 'IATA')
                 .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
                 from_date,
                 to_date,
             ]);
-            // const [{ total_ticket_re_issue }] = (await this.query()
-            //   .sum('airticket_purchase_price as total_ticket_re_issue')
-            //   .from('v_bsp_ticket_reissue')
-            //   .where('vendor_org_agency', this.org_agency)
-            //   .andWhere('vendor_type', 'IATA')
-            //   .andWhereRaw(`DATE(airticket_sales_date) BETWEEN ? AND ?`, [
-            //     from_date,
-            //     to_date,
-            //   ])) as { total_ticket_re_issue: string }[];
             return { ticket_re_issue };
         });
         this.getBspTicketRefundInfo = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {

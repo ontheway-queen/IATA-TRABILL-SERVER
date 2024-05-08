@@ -1,10 +1,10 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
+import { IClTrxn } from '../../../../common/interfaces/Trxn.interfaces';
 import {
   IClientOpeningBalanceReqBody,
   IOpeningBalance,
 } from '../../types/account.interfaces';
-import { IClTrxn } from '../../../../common/interfaces/Trxn.interfaces';
 
 class AddClientOpeningService extends AbstractServices {
   constructor() {
@@ -37,6 +37,7 @@ class AddClientOpeningService extends AbstractServices {
         ctrxn_particular_type: 'Client opening balance',
         ctrxn_type: transaction_type,
         ctrxn_voucher: '',
+        ctrxn_user_id: req.user_id,
       };
 
       const op_cltrxn_id = await trxn_conn.insertClTrxn(clTrxnBody);

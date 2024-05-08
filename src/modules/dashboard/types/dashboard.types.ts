@@ -6,3 +6,8 @@ export interface IAirTicketSummary {
   profit_amount: number;
   payment_amount: number;
 }
+
+export type BspBillingSummaryQueryType = {
+  billingType: 'previous' | 'upcoming';
+  week: 'previous' | 'previous_next' | 'first' | 'second' | 'third' | 'fourth';
+};

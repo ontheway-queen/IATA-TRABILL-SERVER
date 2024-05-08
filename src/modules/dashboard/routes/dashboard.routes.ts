@@ -34,10 +34,7 @@ class DashboardRoutes extends AbstractRouter {
     );
 
     // BSP BILLING
-    this.routers.get(
-      '/air_ticket-summary',
-      this.controllers.getAirTicketSummary
-    );
+    this.routers.get('/bsp-billing', this.controllers.getBSPBilling);
     this.routers.get('/bsp-summary', this.controllers.getBspBillingSummary);
     this.routers.get('/vendors', this.controllers.getVendorBankGuarantee);
     this.routers.get('/best-clients', this.controllers.getBestClients);

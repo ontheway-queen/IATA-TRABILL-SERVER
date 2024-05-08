@@ -124,10 +124,10 @@ class DashboardControllers extends AbstractController {
   );
 
   // BSP BILLING
-  getAirTicketSummary = this.assyncWrapper.wrap(
+  getBSPBilling = this.assyncWrapper.wrap(
     [],
     async (req: Request, res: Response) => {
-      const data = await this.services.getAirTicketSummary(req);
+      const data = await this.services.getBSPBilling(req);
 
       if (data.success) {
         res.status(200).json(data);

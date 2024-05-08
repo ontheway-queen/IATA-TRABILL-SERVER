@@ -1,10 +1,11 @@
 import { Request } from 'express';
 import AbstractServices from '../../../abstracts/abstract.services';
 import {
+  getBspBillingDate,
   getDateRangeByWeek,
-  getIataDateRange,
   getNext15Day,
 } from '../../../common/utils/libraries/lib';
+import { BspBillingSummaryQueryType } from '../types/dashboard.types';
 
 class DashboardServices extends AbstractServices {
   constructor() {
@@ -162,36 +163,34 @@ class DashboardServices extends AbstractServices {
   };
 
   // BSP BILLING
-  public getAirTicketSummary = async (req: Request) => {
+  public getBSPBilling = async (req: Request) => {
     const conn = this.models.dashboardModal(req);
 
-    const { sales_from_date, sales_to_date } = getIataDateRange();
+    const billingType = req.query?.billingType as 'previous' | 'upcoming';
 
-    const ticket_issue = await conn.getBspTicketIssueInfo(
-      sales_from_date,
-      sales_to_date
-    );
+    let { from_date, to_date } = getBspBillingDate(billingType);
+
+    const ticket_issue = await conn.getBspTicketIssueInfo(from_date, to_date);
+
     const ticket_re_issue = await conn.getBspTicketReissueInfo(
-      sales_from_date,
-      sales_to_date
+      from_date,
+      to_date
     );
-    const ticket_refund = await conn.getBspTicketRefundInfo(
-      sales_from_date,
-      sales_to_date
-    );
+
+    const ticket_refund = await conn.getBspTicketRefundInfo(from_date, to_date);
 
     // BILLING DATE
-    const billing_from_date = getNext15Day(sales_from_date);
-    const billing_to_date = getNext15Day(sales_to_date);
+    const billing_from_date = getNext15Day(from_date);
+    const billing_to_date = getNext15Day(to_date);
 
     return {
       success: true,
-      message: 'the request is OK',
+      message: 'The request is OK',
       data: {
         billing_from_date,
         billing_to_date,
-        sales_from_date,
-        sales_to_date,
+        sales_from_date: from_date,
+        sales_to_date: to_date,
         ticket_issue,
         ticket_re_issue,
         ticket_refund,
@@ -203,42 +202,38 @@ class DashboardServices extends AbstractServices {
   public getBspBillingSummary = async (req: Request) => {
     const conn = this.models.dashboardModal(req);
 
-    const weekNumberOfMonth = req.query.week as
-      | 'first'
-      | 'second'
-      | 'third'
-      | 'fourth';
+    const { billingType, week } = req.query as BspBillingSummaryQueryType;
 
-    let { sales_from_date, sales_to_date } = getIataDateRange();
+    let { from_date, to_date } = getBspBillingDate(billingType);
 
-    if (['first', 'second', 'third', 'fourth'].includes(weekNumberOfMonth)) {
-      const dateRange = getDateRangeByWeek(weekNumberOfMonth);
+    if (
+      [
+        'previous',
+        'previous_next',
+        'first',
+        'second',
+        'third',
+        'fourth',
+      ].includes(week)
+    ) {
+      const dateRange = getDateRangeByWeek(week);
 
-      sales_from_date = dateRange.startDate;
-      sales_to_date = dateRange.endDate;
+      from_date = dateRange.startDate;
+      to_date = dateRange.endDate;
     }
 
-    const issue = await conn.getBspTicketIssueSummary(
-      sales_from_date,
-      sales_to_date
-    );
+    const issue = await conn.getBspTicketIssueSummary(from_date, to_date);
 
-    const reissue = await conn.getBspTicketReissueSummary(
-      sales_from_date,
-      sales_to_date
-    );
+    const reissue = await conn.getBspTicketReissueSummary(from_date, to_date);
 
-    const refund = await conn.getBspTicketRefundSummary(
-      sales_from_date,
-      sales_to_date
-    );
+    const refund = await conn.getBspTicketRefundSummary(from_date, to_date);
 
     return {
       success: true,
       message: 'the request is OK',
       data: {
-        sales_from_date,
-        sales_to_date,
+        sales_from_date: from_date,
+        sales_to_date: to_date,
         ...issue,
         ...reissue,
         ...refund,

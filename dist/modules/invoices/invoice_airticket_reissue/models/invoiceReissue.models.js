@@ -340,7 +340,8 @@ class ReIssueAirticket extends abstract_models_1.default {
                 .andWhere('airticket_combined_id', combined_id)
                 .andWhereNot('airticket_is_deleted', 1)
                 .andWhereNot('airticket_is_refund', 1)
-                .andWhereNot('airticket_is_reissued', 1);
+                .andWhereNot('airticket_is_reissued', 1)
+                .groupBy('airticket_id');
             return data1;
         });
     }

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDateRangeByWeek = exports.getNext15Day = exports.getIataDateRange = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
+exports.getDateRangeByWeek = exports.getNext15Day = exports.getIataDateRange = exports.getBspBillingDate = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
 const axios_1 = __importDefault(require("axios"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const dayjs_1 = __importDefault(require("dayjs"));
@@ -120,6 +120,34 @@ const getPaymentType = (type) => {
     return paymentTypeMap[type] || paymentTypeMap.default;
 };
 exports.getPaymentType = getPaymentType;
+const getBspBillingDate = (dateType) => {
+    const currentDate = new Date();
+    const currentMonth = currentDate.getMonth();
+    let from_date, to_date;
+    // PREVIOUS DATE
+    if (dateType === 'previous') {
+        if (currentDate.getDate() >= 15) {
+            from_date = new Date(currentDate.getFullYear(), currentMonth, 1);
+            to_date = new Date(currentDate.getFullYear(), currentMonth, 15);
+        }
+        else {
+            from_date = new Date(currentDate.getFullYear(), currentMonth - 1, 16);
+            to_date = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+        }
+    }
+    else {
+        if (currentDate.getDate() <= 15) {
+            from_date = new Date(currentDate.getFullYear(), currentMonth, 1);
+            to_date = new Date(currentDate.getFullYear(), currentMonth, 15);
+        }
+        else {
+            from_date = new Date(currentDate.getFullYear(), currentMonth, 16);
+            to_date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+        }
+    }
+    return { from_date, to_date };
+};
+exports.getBspBillingDate = getBspBillingDate;
 const getIataDateRange = () => {
     const new_date = new Date();
     const today = (0, dayjs_1.default)().format('YYYY-MM-DD');
@@ -167,6 +195,14 @@ const getDateRangeByWeek = (input) => {
     const currentMonth = currentDate.getMonth() + 1;
     let startDate = null, endDate = null;
     switch (input) {
+        case 'previous':
+            startDate = new Date(currentDate.getFullYear(), currentMonth - 2, 1);
+            endDate = new Date(currentDate.getFullYear(), currentMonth - 2, 15);
+            break;
+        case 'previous_next':
+            startDate = new Date(currentDate.getFullYear(), currentMonth - 2, 16);
+            endDate = new Date(currentDate.getFullYear(), currentMonth - 2, new Date(currentDate.getFullYear(), currentMonth - 1, 0).getDate());
+            break;
         case 'first':
             startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 1);
             endDate = new Date(currentDate.getFullYear(), currentMonth - 1, 8);

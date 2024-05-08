@@ -3,7 +3,7 @@ import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import CustomError from '../../../../../common/utils/errors/customError';
 import { TaxBreakdown } from '../../../invoice_ummrah/Type/invoiceUmmrah.Interfaces';
-import { pnrDetails } from '../../demo/data';
+import { pnrDetails3 } from '../../demo/data';
 
 class PnrDetailsService extends AbstractServices {
   constructor() {
@@ -15,7 +15,7 @@ class PnrDetailsService extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const pnr = req.params.pnr;
 
-      if (pnr !== 'SQBSCN') {
+      if (pnr !== 'SYUSWR') {
         throw new CustomError('No data found', 404, 'Bad request');
       }
 
@@ -23,7 +23,7 @@ class PnrDetailsService extends AbstractServices {
 
       const iata_vendor = await common_conn.getIataVendorId();
 
-      const pax_passports = pnrDetails.travelers.map((traveler) => {
+      const pax_passports = pnrDetails3.travelers.map((traveler: any) => {
         return {
           passport_name: traveler.givenName + ' ' + traveler.surname,
           passport_person_type: traveler.type,
@@ -34,7 +34,7 @@ class PnrDetailsService extends AbstractServices {
         };
       });
 
-      const flight_details = pnrDetails.flights.map((flight) => {
+      const flight_details = pnrDetails3.flights.map((flight) => {
         return {
           fltdetails_from_airport_id: 2061, // flight.fromAirportCode,
           fltdetails_to_airport_id: 210, // flight.toAirportCode,
@@ -46,15 +46,15 @@ class PnrDetailsService extends AbstractServices {
         };
       });
 
-      const airticket_route_or_sector = pnrDetails.journeys.map(
+      const airticket_route_or_sector = pnrDetails3.journeys.map(
         (journey) => journey.firstAirportCode
       );
       airticket_route_or_sector.push(
-        pnrDetails.journeys[pnrDetails.journeys.length - 1].lastAirportCode
+        pnrDetails3.journeys[pnrDetails3.journeys.length - 1].lastAirportCode
       );
 
       // TAXES BREAKDOWN
-      const taxesBreakdown: TaxBreakdown[] = pnrDetails.fares.map((tax) => {
+      const taxesBreakdown: TaxBreakdown[] = pnrDetails3.fares.map((tax) => {
         const breakdown: TaxBreakdown = tax.taxBreakdown.reduce(
           (acc: TaxBreakdown, current) => {
             acc[current.taxCode] = Number(current.taxAmount.amount);
@@ -73,10 +73,10 @@ class PnrDetailsService extends AbstractServices {
       }
 
       // FLIGHT TICKET NUMBER
-      const airticket_classes = pnrDetails.flights[0].cabinTypeName;
-      const cabin_type = pnrDetails.flights[0].cabinTypeCode;
+      const airticket_classes = pnrDetails3.flights[0].cabinTypeName;
+      const cabin_type = pnrDetails3.flights[0].cabinTypeCode;
 
-      const ticket_details = pnrDetails.flightTickets.map((ticket, index) => {
+      const ticket_details = pnrDetails3.flightTickets.map((ticket, index) => {
         const baseFareCommission = Number(ticket.payment.subtotal) * 0.07;
         const countryTaxAit = Number(totalCountryTax || 0) * 0.003;
         const grossAit = Number(ticket.payment.total || 0) * 0.003;
@@ -96,8 +96,8 @@ class PnrDetailsService extends AbstractServices {
           cabin_type,
           airticket_tax: ticket.payment.taxes,
           currency: ticket.payment.currencyCode,
-          airticket_segment: pnrDetails.allSegments.length,
-          airticket_journey_date: pnrDetails.startDate,
+          airticket_segment: pnrDetails3.allSegments.length,
+          airticket_journey_date: pnrDetails3.startDate,
           airticket_commission_percent_total: baseFareCommission,
           airticket_route_or_sector: [210, 2061, 210], // add later
           airticket_airline_id: 63, // add later

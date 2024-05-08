@@ -1,64 +1,40 @@
-export const pnrDetails = {
-  startDate: '2024-02-09',
-  endDate: '2024-02-13',
+export const pnrDetails3 = {
+  bookingId: 'SYUSWR',
+  startDate: '2024-06-20',
+  endDate: '2024-06-26',
   isTicketed: true,
   creationDetails: {
-    creationUserSine: 'AWS',
-    creationDate: '2024-01-01',
-    creationTime: '23:07',
+    creationUserSine: 'AFS',
+    creationDate: '2024-05-08',
+    creationTime: '00:47',
     userWorkPcc: 'N4PL',
     userHomePcc: 'N4PL',
     primeHostId: '1B',
   },
   contactInfo: {
-    phones: ['01705511718-H-1.1', '01705511718-H-2.1'],
+    phones: [' DAC'],
   },
   travelers: [
     {
-      givenName: 'NAZMUL',
-      surname: 'AHMED',
+      givenName: 'NAMZUL MR',
+      surname: 'KING',
       type: 'ADULT',
       passengerCode: 'ADT',
-      emails: ['NAZMUL.M360ICT@GMAIL.COM'],
-      phones: [
-        {
-          number: '01705511718',
-          label: 'H',
-        },
-      ],
+      nameAssociationId: '1',
       identityDocuments: [
         {
-          documentType: 'SECURE_FLIGHT_PASSENGER_DATA',
-          givenName: 'NAZMUL',
-          surname: 'AHMED',
-          birthDate: '1990-01-01',
+          documentNumber: 'BF09876234',
+          documentType: 'PASSPORT',
+          expiryDate: '2024-06-28',
+          issuingCountryCode: 'BGD',
+          residenceCountryCode: 'BGD',
+          givenName: 'NAMZUL',
+          surname: 'KING',
+          birthDate: '1992-06-23',
           gender: 'MALE',
+          isPrimaryDocumentHolder: false,
           itemId:
-            'd25ad406e6b29492ff0eac297844a76880055a9c82fc89484d336fee016dd6d06db3a31cf93d1a18b0492b43a1a4d781f769c6196af6458943f3ef6931e75e94',
-        },
-      ],
-    },
-    {
-      givenName: 'MOON',
-      surname: 'AHMED',
-      type: 'ADULT',
-      passengerCode: 'ADT',
-      emails: ['MOON.M360ICT@GMAIL.COM'],
-      phones: [
-        {
-          number: '01705511718',
-          label: 'H',
-        },
-      ],
-      identityDocuments: [
-        {
-          documentType: 'SECURE_FLIGHT_PASSENGER_DATA',
-          givenName: 'MOON',
-          surname: 'AHMED',
-          birthDate: '2014-01-01',
-          gender: 'MALE',
-          itemId:
-            '221e984a73396672128e308d42eac9acca1cbc4a289f2a7b8057017b574a9e0b8dee5b8308ca52af9431c24a6c194854c807e0bec3e993a5b558b41a377fc79f',
+            '01b6d8c1041a9f89f5d67884c069d95221e4ee44b9ba0fe955ddde916510bc8f8423adaf523d97281ff3cb9dd1c6a1e77c14e679f2163b61d528b80ecfa35218',
         },
       ],
     },
@@ -66,96 +42,101 @@ export const pnrDetails = {
   flights: [
     {
       itemId: '12',
-      confirmationId: 'SONRSV',
+      confirmationId: 'TANZWC',
       sourceType: 'ATPCO',
-      flightNumber: 437,
+      flightNumber: 147,
       airlineCode: 'BG',
       airlineName: 'BIMAN BANGLADESH',
-      operatingFlightNumber: 437,
+      operatingFlightNumber: 147,
       operatingAirlineCode: 'BG',
       operatingAirlineName: 'BIMAN BANGLADESH',
       fromAirportCode: 'DAC',
-      toAirportCode: 'CXB',
-      departureDate: '2024-02-09',
-      departureTime: '14:20:00',
-      departureTerminalName: 'DOMESTIC TERMINAL',
-      departureGate: 'D',
-      arrivalDate: '2024-02-09',
-      arrivalTime: '15:15:00',
-      numberOfSeats: 2,
+      toAirportCode: 'DXB',
+      departureDate: '2024-06-20',
+      departureTime: '17:25:00',
+      arrivalDate: '2024-06-20',
+      arrivalTime: '22:15:00',
+      numberOfSeats: 1,
       cabinTypeName: 'ECONOMY',
       cabinTypeCode: 'Y',
-      aircraftTypeCode: 'DH8',
-      aircraftTypeName: 'DEHAVILLAND DASH 8',
-      bookingClass: 'Y',
+      aircraftTypeCode: '788',
+      aircraftTypeName: 'BOEING 787-8',
+      bookingClass: 'K',
       meals: [
         {
-          code: 'S',
-          description: 'Snack',
+          code: 'M',
+          description: 'Meal',
         },
       ],
       flightStatusCode: 'HK',
       flightStatusName: 'Confirmed',
-      durationInMinutes: 55,
-      distanceInMiles: 189,
-      travelerIndices: [1, 2],
+      durationInMinutes: 350,
+      distanceInMiles: 2451,
+      hiddenStopAirportCode: 'CGP',
+      hiddenStopArrivalDate: '2024-06-20',
+      hiddenStopArrivalTime: '18:10',
+      hiddenStopDepartureDate: '2024-06-20',
+      hiddenStopDepartureTime: '19:10',
+      hiddenStops: [
+        {
+          airportCode: 'CGP',
+          departureDate: '2024-06-20',
+          departureTime: '19:10',
+          arrivalDate: '2024-06-20',
+          arrivalTime: '18:10',
+          durationInMinutes: 60,
+        },
+      ],
+      travelerIndices: [1],
       identityDocuments: [
         {
           itemId:
-            'd25ad406e6b29492ff0eac297844a76880055a9c82fc89484d336fee016dd6d06db3a31cf93d1a18b0492b43a1a4d781f769c6196af6458943f3ef6931e75e94',
-          status: 'Confirmed',
-        },
-        {
-          itemId:
-            '221e984a73396672128e308d42eac9acca1cbc4a289f2a7b8057017b574a9e0b8dee5b8308ca52af9431c24a6c194854c807e0bec3e993a5b558b41a377fc79f',
+            '01b6d8c1041a9f89f5d67884c069d95221e4ee44b9ba0fe955ddde916510bc8f8423adaf523d97281ff3cb9dd1c6a1e77c14e679f2163b61d528b80ecfa35218',
           status: 'Confirmed',
         },
       ],
     },
     {
       itemId: '13',
-      confirmationId: 'SONRSV',
+      confirmationId: 'TANZWC',
       sourceType: 'ATPCO',
-      flightNumber: 438,
+      flightNumber: 348,
       airlineCode: 'BG',
       airlineName: 'BIMAN BANGLADESH',
-      operatingFlightNumber: 438,
+      operatingFlightNumber: 348,
       operatingAirlineCode: 'BG',
       operatingAirlineName: 'BIMAN BANGLADESH',
-      fromAirportCode: 'CXB',
+      fromAirportCode: 'DXB',
       toAirportCode: 'DAC',
-      departureDate: '2024-02-13',
-      departureTime: '15:55:00',
-      arrivalDate: '2024-02-13',
-      arrivalTime: '16:50:00',
-      arrivalTerminalName: 'DOMESTIC TERMINAL',
-      arrivalGate: 'D',
-      numberOfSeats: 2,
+      departureDate: '2024-06-26',
+      departureTime: '00:05:00',
+      departureTerminalName: 'TERMINAL 1',
+      departureGate: '1',
+      arrivalDate: '2024-06-26',
+      arrivalTime: '06:55:00',
+      arrivalTerminalName: 'TERMINAL 2',
+      arrivalGate: '2',
+      numberOfSeats: 1,
       cabinTypeName: 'ECONOMY',
       cabinTypeCode: 'Y',
-      aircraftTypeCode: 'DH8',
-      aircraftTypeName: 'DEHAVILLAND DASH 8',
-      bookingClass: 'Y',
+      aircraftTypeCode: '788',
+      aircraftTypeName: 'BOEING 787-8',
+      bookingClass: 'K',
       meals: [
         {
-          code: 'S',
-          description: 'Snack',
+          code: 'M',
+          description: 'Meal',
         },
       ],
       flightStatusCode: 'HK',
       flightStatusName: 'Confirmed',
-      durationInMinutes: 55,
-      distanceInMiles: 189,
-      travelerIndices: [1, 2],
+      durationInMinutes: 290,
+      distanceInMiles: 2202,
+      travelerIndices: [1],
       identityDocuments: [
         {
           itemId:
-            'd25ad406e6b29492ff0eac297844a76880055a9c82fc89484d336fee016dd6d06db3a31cf93d1a18b0492b43a1a4d781f769c6196af6458943f3ef6931e75e94',
-          status: 'Confirmed',
-        },
-        {
-          itemId:
-            '221e984a73396672128e308d42eac9acca1cbc4a289f2a7b8057017b574a9e0b8dee5b8308ca52af9431c24a6c194854c807e0bec3e993a5b558b41a377fc79f',
+            '01b6d8c1041a9f89f5d67884c069d95221e4ee44b9ba0fe955ddde916510bc8f8423adaf523d97281ff3cb9dd1c6a1e77c14e679f2163b61d528b80ecfa35218',
           status: 'Confirmed',
         },
       ],
@@ -164,15 +145,15 @@ export const pnrDetails = {
   journeys: [
     {
       firstAirportCode: 'DAC',
-      departureDate: '2024-02-09',
-      departureTime: '14:20',
-      lastAirportCode: 'CXB',
+      departureDate: '2024-06-20',
+      departureTime: '17:25',
+      lastAirportCode: 'DXB',
       numberOfFlights: 1,
     },
     {
-      firstAirportCode: 'CXB',
-      departureDate: '2024-02-13',
-      departureTime: '15:55',
+      firstAirportCode: 'DXB',
+      departureDate: '2024-06-26',
+      departureTime: '00:05',
       lastAirportCode: 'DAC',
       numberOfFlights: 1,
     },
@@ -189,7 +170,7 @@ export const pnrDetails = {
           applicability: 'BEFORE_DEPARTURE',
           conditionsApply: false,
           penalty: {
-            amount: '2000',
+            amount: '15400',
             currencyCode: 'BDT',
           },
         },
@@ -197,7 +178,7 @@ export const pnrDetails = {
           applicability: 'AFTER_DEPARTURE',
           conditionsApply: false,
           penalty: {
-            amount: '2000',
+            amount: '15400',
             currencyCode: 'BDT',
           },
         },
@@ -208,7 +189,7 @@ export const pnrDetails = {
           applicability: 'BEFORE_DEPARTURE',
           conditionsApply: false,
           penalty: {
-            amount: '3000',
+            amount: '11000',
             currencyCode: 'BDT',
           },
         },
@@ -216,7 +197,7 @@ export const pnrDetails = {
           applicability: 'AFTER_DEPARTURE',
           conditionsApply: false,
           penalty: {
-            amount: '3000',
+            amount: '11000',
             currencyCode: 'BDT',
           },
         },
@@ -236,7 +217,7 @@ export const pnrDetails = {
         totalWeightInKilograms: 7,
       },
       checkedBaggageAllowance: {
-        totalWeightInKilograms: 20,
+        totalWeightInKilograms: 30,
       },
       cabinBaggageCharges: [
         {
@@ -246,749 +227,7 @@ export const pnrDetails = {
           maximumWeightInKilograms: 7,
           numberOfPieces: 1,
           fee: {
-            amount: '1000',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          maximumSizeInInches: 41,
-          maximumSizeInCentimeters: 105,
-          maximumWeightInPounds: 15,
-          maximumWeightInKilograms: 7,
-          numberOfPieces: 1,
-          fee: {
-            amount: '100.00',
-            currencyCode: 'USD',
-          },
-        },
-      ],
-      checkedBaggageCharges: [
-        {
-          maximumWeightInPounds: 50,
-          maximumWeightInKilograms: 23,
-          numberOfPieces: 1,
-          specialItemDescription: 'PET IN HOLD UP TO 23KG',
-          fee: {
-            amount: '200.00',
-            currencyCode: 'USD',
-          },
-        },
-        {
-          maximumWeightInPounds: 100,
-          maximumWeightInKilograms: 45,
-          numberOfPieces: 1,
-          specialItemDescription: 'PET IN HOLD UP TO 45 KG',
-          fee: {
-            amount: '100.00',
-            currencyCode: 'USD',
-          },
-        },
-        {
-          maximumWeightInPounds: 22,
-          maximumWeightInKilograms: 10,
-          numberOfPieces: 1,
-          fee: {
-            amount: '999',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          maximumWeightInPounds: 100,
-          maximumWeightInKilograms: 45,
-          numberOfPieces: 1,
-          specialItemDescription: 'MM STROLLER OR PUSCHAIR',
-          fee: {
-            amount: '1.00',
-            currencyCode: 'USD',
-          },
-        },
-      ],
-    },
-    {
-      travelerIndices: [1],
-      flights: [
-        {
-          itemId: '13',
-        },
-      ],
-      cabinBaggageAllowance: {
-        maximumPieces: 1,
-        totalWeightInKilograms: 7,
-      },
-      checkedBaggageAllowance: {
-        totalWeightInKilograms: 20,
-      },
-      cabinBaggageCharges: [
-        {
-          maximumSizeInInches: 41,
-          maximumSizeInCentimeters: 105,
-          maximumWeightInPounds: 15,
-          maximumWeightInKilograms: 7,
-          numberOfPieces: 1,
-          fee: {
-            amount: '1000',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          maximumSizeInInches: 41,
-          maximumSizeInCentimeters: 105,
-          maximumWeightInPounds: 15,
-          maximumWeightInKilograms: 7,
-          numberOfPieces: 1,
-          fee: {
-            amount: '100.00',
-            currencyCode: 'USD',
-          },
-        },
-      ],
-      checkedBaggageCharges: [
-        {
-          maximumWeightInPounds: 50,
-          maximumWeightInKilograms: 23,
-          numberOfPieces: 1,
-          specialItemDescription: 'PET IN HOLD UP TO 23KG',
-          fee: {
-            amount: '200.00',
-            currencyCode: 'USD',
-          },
-        },
-        {
-          maximumWeightInPounds: 100,
-          maximumWeightInKilograms: 45,
-          numberOfPieces: 1,
-          specialItemDescription: 'PET IN HOLD UP TO 45 KG',
-          fee: {
-            amount: '100.00',
-            currencyCode: 'USD',
-          },
-        },
-        {
-          maximumWeightInPounds: 22,
-          maximumWeightInKilograms: 10,
-          numberOfPieces: 1,
-          fee: {
-            amount: '999',
-            currencyCode: 'BDT',
-          },
-        },
-      ],
-    },
-  ],
-  fares: [
-    {
-      creationDetails: {
-        creationUserSine: 'AWS',
-        creationDate: '2024-01-01',
-        creationTime: '23:07',
-        purchaseDeadlineDate: '2024-01-03',
-        purchaseDeadlineTime: '23:59',
-        userWorkPcc: 'N4PL',
-        userHomePcc: 'N4PL',
-      },
-      airlineCode: 'BG',
-      fareCalculationLine: 'DAC BG CXB8425BG DAC8425BDT16850END',
-      isNegotiatedFare: false,
-      travelerIndices: [1],
-      fareConstruction: [
-        {
-          flights: [
-            {
-              itemId: '12',
-            },
-          ],
-          flightIndices: [1],
-          fareBasisCode: 'YDACFR',
-          baseRate: {
-            amount: '8425',
-            currencyCode: 'BDT',
-          },
-          isCurrentItinerary: true,
-          checkedBaggageAllowance: {
-            totalWeightInKilograms: 20,
-          },
-        },
-        {
-          flights: [
-            {
-              itemId: '13',
-            },
-          ],
-          flightIndices: [2],
-          fareBasisCode: 'YDACFR',
-          baseRate: {
-            amount: '8425',
-            currencyCode: 'BDT',
-          },
-          isCurrentItinerary: true,
-          checkedBaggageAllowance: {
-            totalWeightInKilograms: 20,
-          },
-        },
-      ],
-      taxBreakdown: [
-        {
-          taxCode: 'BD',
-          taxAmount: {
-            amount: '50',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'UT',
-          taxAmount: {
-            amount: '400',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'OW',
-          taxAmount: {
-            amount: '1000',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'E5',
-          taxAmount: {
-            amount: '60',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'YQ',
-          taxAmount: {
-            amount: '100',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'P8',
-          taxAmount: {
-            amount: '140',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'P7',
-          taxAmount: {
-            amount: '200',
-            currencyCode: 'BDT',
-          },
-        },
-      ],
-      totals: {
-        subtotal: '16850',
-        taxes: '1950',
-        total: '18800',
-        currencyCode: 'BDT',
-      },
-      pricingTypeCode: 'S',
-      pricingTypeName: 'System',
-      pricingStatusCode: 'A',
-      pricingStatusName: 'Active',
-      requestedTravelerType: 'ADT',
-      pricedTravelerType: 'ADT',
-      recordTypeCode: 'PQ',
-      recordTypeName: 'Price Quote',
-      recordId: '1',
-    },
-    {
-      creationDetails: {
-        creationUserSine: 'AWS',
-        creationDate: '2024-01-01',
-        creationTime: '23:07',
-        purchaseDeadlineDate: '2024-01-03',
-        purchaseDeadlineTime: '23:59',
-        userWorkPcc: 'N4PL',
-        userHomePcc: 'N4PL',
-      },
-      airlineCode: 'BG',
-      fareCalculationLine: 'DAC BG CXB6319BG DAC6319BDT12638END',
-      isNegotiatedFare: false,
-      travelerIndices: [2],
-      fareConstruction: [
-        {
-          flights: [
-            {
-              itemId: '12',
-            },
-          ],
-          flightIndices: [1],
-          fareBasisCode: 'YDACFR/CH25',
-          baseRate: {
-            amount: '6319',
-            currencyCode: 'BDT',
-          },
-          isCurrentItinerary: true,
-          checkedBaggageAllowance: {
-            totalWeightInKilograms: 20,
-          },
-        },
-        {
-          flights: [
-            {
-              itemId: '13',
-            },
-          ],
-          flightIndices: [2],
-          fareBasisCode: 'YDACFR/CH25',
-          baseRate: {
-            amount: '6319',
-            currencyCode: 'BDT',
-          },
-          isCurrentItinerary: true,
-          checkedBaggageAllowance: {
-            totalWeightInKilograms: 20,
-          },
-        },
-      ],
-      taxBreakdown: [
-        {
-          taxCode: 'BD',
-          taxAmount: {
-            amount: '50',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'UT',
-          taxAmount: {
-            amount: '200',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'OW',
-          taxAmount: {
-            amount: '1000',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'E5',
-          taxAmount: {
-            amount: '60',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'YQ',
-          taxAmount: {
-            amount: '100',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'P8',
-          taxAmount: {
-            amount: '140',
-            currencyCode: 'BDT',
-          },
-        },
-        {
-          taxCode: 'P7',
-          taxAmount: {
-            amount: '200',
-            currencyCode: 'BDT',
-          },
-        },
-      ],
-      totals: {
-        subtotal: '12638',
-        taxes: '1750',
-        total: '14388',
-        currencyCode: 'BDT',
-      },
-      pricingTypeCode: 'S',
-      pricingTypeName: 'System',
-      pricingStatusCode: 'A',
-      pricingStatusName: 'Active',
-      requestedTravelerType: 'CNN',
-      pricedTravelerType: 'CNN',
-      recordTypeCode: 'PQ',
-      recordTypeName: 'Price Quote',
-      recordId: '2',
-    },
-  ],
-  remarks: [
-    {
-      type: 'ITINERARY',
-      text: 'THE FARE IS NOT GUARANTEED UNTIL THE TICKET HAS BEEN ISSUED.',
-    },
-    {
-      type: 'ITINERARY',
-      text: 'IF YOU DONT COMPLETE THE PAYMENT TRANSACTION WITH 30 MINUTES',
-    },
-    {
-      type: 'ITINERARY',
-      text: 'OF THE RESERVATION, YOUR BOOKING WILL BE CANCELED AUTOMATICALLY.',
-    },
-    {
-      type: 'ITINERARY',
-      text: 'YOUR TICKET IS NOT FULLY REFUNDABLE.',
-    },
-    {
-      type: 'ITINERARY',
-      text: 'PLEASE REPORT TO THE AIRPORT 4 HOURS PRIOR TO EACH DEPARTURE FLIGHT',
-    },
-    {
-      type: 'ITINERARY',
-      text: 'FOR TIME TO COMPLETE ALL FORMALITIES AND SECURITY CHECKS.',
-    },
-    {
-      type: 'ITINERARY',
-      text: 'FOR DATE CHANGE CHARGES WILL BE APPLICABLE.',
-    },
-    {
-      type: 'ITINERARY',
-      text: 'PLEASE RECONFIRM YOUR FLIGHT DETAILS 15 DAYS BEFORE OF DEPARTURE',
-    },
-    {
-      type: 'GENERAL',
-      text: 'XXTAW/',
-    },
-  ],
-  allSegments: [
-    {
-      id: '12',
-      type: 'FLIGHT',
-      text: '437',
-      vendorCode: 'BG',
-      startDate: '2024-02-09',
-      startTime: '14:20:00',
-      startLocationCode: 'DAC',
-      endDate: '2024-02-09',
-      endTime: '15:15:00',
-      endLocationCode: 'CXB',
-    },
-    {
-      id: '13',
-      type: 'FLIGHT',
-      text: '438',
-      vendorCode: 'BG',
-      startDate: '2024-02-13',
-      startTime: '15:55:00',
-      startLocationCode: 'CXB',
-      endDate: '2024-02-13',
-      endTime: '16:50:00',
-      endLocationCode: 'DAC',
-    },
-  ],
-  flightTickets: [
-    {
-      number: '9972936069573',
-      date: '2024-01-02',
-      travelerIndex: 1,
-      flightCoupons: [
-        {
-          itemId: '12',
-          couponStatus: 'Not Flown',
-          couponStatusCode: 'I',
-        },
-        {
-          itemId: '13',
-          couponStatus: 'Not Flown',
-          couponStatusCode: 'I',
-        },
-      ],
-      payment: {
-        subtotal: '16850',
-        taxes: '1950',
-        total: '18800',
-        currencyCode: 'BDT',
-      },
-      ticketStatusName: 'Issued',
-      ticketStatusCode: 'TE',
-      ticketingPcc: 'N4PL',
-    },
-    {
-      number: '9972936069574',
-      date: '2024-01-02',
-      travelerIndex: 1,
-      flightCoupons: [
-        {
-          itemId: '12',
-          couponStatus: 'Not Flown',
-          couponStatusCode: 'I',
-        },
-        {
-          itemId: '13',
-          couponStatus: 'Not Flown',
-          couponStatusCode: 'I',
-        },
-      ],
-      payment: {
-        subtotal: '16850',
-        taxes: '1950',
-        total: '18800',
-        currencyCode: 'BDT',
-      },
-      ticketStatusName: 'Issued',
-      ticketStatusCode: 'TE',
-      ticketingPcc: 'N4PL',
-    },
-  ],
-  payments: {
-    flightTotals: [
-      {
-        subtotal: '33700',
-        taxes: '3900',
-        total: '37600',
-        currencyCode: 'BDT',
-      },
-    ],
-    flightCurrentTotals: [
-      {
-        subtotal: '33700',
-        taxes: '3900',
-        total: '37600',
-        currencyCode: 'BDT',
-      },
-    ],
-  },
-  otherServices: [
-    {
-      airlineCode: '1B',
-      serviceMessage: 'PLEASE TICKET FARE AS PER TKT/TL IN PQ',
-    },
-    {
-      airlineCode: '1B',
-      serviceMessage: 'PLEASE TICKET FARE AS PER TKT/TL IN PQ',
-    },
-  ],
-  specialServices: [
-    {
-      travelerIndices: [1],
-      code: 'DOCS',
-      name: 'API-Passenger Travel Document',
-      message: '/DB/01JAN1990/M/AHMED/NAZMUL',
-      statusCode: 'HK',
-      statusName: 'Confirmed',
-    },
-    {
-      travelerIndices: [2],
-      code: 'DOCS',
-      name: 'API-Passenger Travel Document',
-      message: '/DB/01JAN2014/M/AHMED/MOON',
-      statusCode: 'HK',
-      statusName: 'Confirmed',
-    },
-    {
-      travelerIndices: [1],
-      flights: [
-        {
-          itemId: '13',
-        },
-      ],
-      code: 'TKNE',
-      message: '/9972936069574C2',
-      statusCode: 'HK',
-      statusName: 'Confirmed',
-    },
-    {
-      travelerIndices: [1],
-      flights: [
-        {
-          itemId: '12',
-        },
-      ],
-      code: 'TKNE',
-      message: '/9972936069574C1',
-      statusCode: 'HK',
-      statusName: 'Confirmed',
-    },
-    {
-      travelerIndices: [1],
-      flights: [
-        {
-          itemId: '13',
-        },
-      ],
-      code: 'TKNE',
-      message: '/9972936069573C2',
-      statusCode: 'HK',
-      statusName: 'Confirmed',
-    },
-    {
-      travelerIndices: [1],
-      flights: [
-        {
-          itemId: '12',
-        },
-      ],
-      code: 'TKNE',
-      message: '/9972936069573C1',
-      statusCode: 'HK',
-      statusName: 'Confirmed',
-    },
-  ],
-  timestamp: '2024-01-02T05:09:23',
-  bookingSignature:
-    '5cfca8f9f1bb8d51f41778c920cc256159c197bc6cd27036468b626bd1f2e8dd5104976fece8557b1809e3bd7438dd0510e408a96e5a0d6c2ad762401ffcc578',
-  request: {
-    confirmationId: 'SQBSCN',
-  },
-};
-
-export const pnrDetails2 = {
-  bookingId: 'OZJQRH',
-  startDate: '2024-06-20',
-  endDate: '2024-06-20',
-  isTicketed: true,
-  creationDetails: {
-    creationUserSine: 'AFS',
-    creationDate: '2024-05-05',
-    creationTime: '23:56',
-    userWorkPcc: 'N4PL',
-    userHomePcc: 'N4PL',
-    primeHostId: '1B',
-  },
-  contactInfo: {
-    phones: [' DAC'],
-  },
-  travelers: [
-    {
-      givenName: 'SHAHEB MR',
-      surname: 'MOON',
-      type: 'ADULT',
-      passengerCode: 'ADT',
-      nameAssociationId: '1',
-      emails: ['NAZMUL.M360ICT@GMAIL.COM'],
-      phones: [
-        {
-          number: '01705511718',
-          label: 'H',
-        },
-      ],
-      identityDocuments: [
-        {
-          documentNumber: 'BF0987623',
-          documentType: 'PASSPORT',
-          expiryDate: '2025-06-28',
-          issuingCountryCode: 'BGD',
-          residenceCountryCode: 'BGD',
-          givenName: 'SHAHEB',
-          surname: 'MOON',
-          birthDate: '1982-06-23',
-          gender: 'MALE',
-          isPrimaryDocumentHolder: false,
-          itemId:
-            'c5c5823a2fef596edbe212b78e5ef179f85e023e0bd6704af15b660c04020cc7653684d6657310eb8006804dcbd622fea3aa4db828e46846a442f5f8e4f18542',
-        },
-      ],
-    },
-  ],
-  flights: [
-    {
-      itemId: '26',
-      confirmationId: 'ODPAXO',
-      sourceType: 'ATPCO',
-      flightNumber: 371,
-      airlineCode: 'BG',
-      airlineName: 'BIMAN BANGLADESH',
-      operatingFlightNumber: 371,
-      operatingAirlineCode: 'BG',
-      operatingAirlineName: 'BIMAN BANGLADESH',
-      fromAirportCode: 'DAC',
-      toAirportCode: 'KTM',
-      departureDate: '2024-06-20',
-      departureTime: '10:15:00',
-      departureTerminalName: 'TERMINAL 2',
-      departureGate: '2',
-      arrivalDate: '2024-06-20',
-      arrivalTime: '11:35:00',
-      arrivalTerminalName: 'TERMINAL I - INTERNATIONAL',
-      arrivalGate: 'I',
-      numberOfSeats: 1,
-      cabinTypeName: 'ECONOMY',
-      cabinTypeCode: 'Y',
-      aircraftTypeCode: '738',
-      aircraftTypeName: 'BOEING 737-800',
-      bookingClass: 'K',
-      meals: [
-        {
-          code: 'S',
-          description: 'Snack',
-        },
-      ],
-      flightStatusCode: 'HK',
-      flightStatusName: 'Confirmed',
-      durationInMinutes: 95,
-      distanceInMiles: 413,
-      travelerIndices: [1],
-      identityDocuments: [
-        {
-          itemId:
-            'c5c5823a2fef596edbe212b78e5ef179f85e023e0bd6704af15b660c04020cc7653684d6657310eb8006804dcbd622fea3aa4db828e46846a442f5f8e4f18542',
-          status: 'Confirmed',
-        },
-      ],
-    },
-  ],
-  journeys: [
-    {
-      firstAirportCode: 'DAC',
-      departureDate: '2024-06-20',
-      departureTime: '10:15',
-      lastAirportCode: 'KTM',
-      numberOfFlights: 1,
-    },
-  ],
-  fareRules: [
-    {
-      originAirportCode: 'DAC',
-      destinationAirportCode: 'KTM',
-      owningAirlineCode: 'BG',
-      passengerCode: 'ADT',
-      isRefundable: true,
-      refundPenalties: [
-        {
-          applicability: 'BEFORE_DEPARTURE',
-          conditionsApply: false,
-          penalty: {
-            amount: '3850',
-            currencyCode: 'BDT',
-          },
-        },
-      ],
-      isChangeable: true,
-      exchangePenalties: [
-        {
-          applicability: 'BEFORE_DEPARTURE',
-          conditionsApply: false,
-          penalty: {
-            amount: '2200',
-            currencyCode: 'BDT',
-          },
-        },
-      ],
-    },
-  ],
-  fareOffers: [
-    {
-      travelerIndices: [1],
-      flights: [
-        {
-          itemId: '26',
-        },
-      ],
-      cabinBaggageAllowance: {
-        maximumPieces: 1,
-        totalWeightInKilograms: 7,
-      },
-      checkedBaggageAllowance: {
-        totalWeightInKilograms: 20,
-      },
-      cabinBaggageCharges: [
-        {
-          maximumSizeInInches: 41,
-          maximumSizeInCentimeters: 105,
-          maximumWeightInPounds: 15,
-          maximumWeightInKilograms: 7,
-          numberOfPieces: 1,
-          fee: {
-            amount: '100.00',
+            amount: '50.00',
             currencyCode: 'USD',
           },
         },
@@ -1004,6 +243,93 @@ export const pnrDetails2 = {
             currencyCode: 'USD',
           },
         },
+        {
+          maximumWeightInPounds: 50,
+          maximumWeightInKilograms: 23,
+          numberOfPieces: 1,
+          fee: {
+            amount: '450.00',
+            currencyCode: 'USD',
+          },
+        },
+        {
+          maximumSizeInInches: 80,
+          maximumSizeInCentimeters: 203,
+          numberOfPieces: 1,
+          fee: {
+            amount: '50.00',
+            currencyCode: 'USD',
+          },
+        },
+      ],
+    },
+    {
+      travelerIndices: [1],
+      flights: [
+        {
+          itemId: '13',
+        },
+      ],
+      cabinBaggageAllowance: {
+        maximumPieces: 1,
+        totalWeightInKilograms: 7,
+      },
+      checkedBaggageAllowance: {
+        totalWeightInKilograms: 50,
+      },
+      cabinBaggageCharges: [
+        {
+          maximumSizeInInches: 41,
+          maximumSizeInCentimeters: 105,
+          maximumWeightInPounds: 15,
+          maximumWeightInKilograms: 7,
+          numberOfPieces: 1,
+          fee: {
+            amount: '50.00',
+            currencyCode: 'USD',
+          },
+        },
+      ],
+      checkedBaggageCharges: [
+        {
+          maximumWeightInPounds: 100,
+          maximumWeightInKilograms: 45,
+          numberOfPieces: 1,
+          specialItemDescription: 'PET IN HOLD UP TO 45 KG',
+          fee: {
+            amount: '300.00',
+            currencyCode: 'USD',
+          },
+        },
+        {
+          maximumWeightInPounds: 22,
+          maximumWeightInKilograms: 10,
+          numberOfPieces: 1,
+          fee: {
+            amount: '250',
+            currencyCode: 'AED',
+          },
+        },
+        {
+          maximumSizeInInches: 62,
+          maximumSizeInCentimeters: 158,
+          maximumWeightInPounds: 44,
+          maximumWeightInKilograms: 20,
+          numberOfPieces: 1,
+          fee: {
+            amount: '400',
+            currencyCode: 'AED',
+          },
+        },
+        {
+          maximumSizeInInches: 80,
+          maximumSizeInCentimeters: 203,
+          numberOfPieces: 1,
+          fee: {
+            amount: '50.00',
+            currencyCode: 'USD',
+          },
+        },
       ],
     },
   ],
@@ -1011,26 +337,49 @@ export const pnrDetails2 = {
     {
       creationDetails: {
         creationUserSine: 'AFS',
-        creationDate: '2024-05-06',
-        creationTime: '04:27',
-        purchaseDeadlineDate: '2024-05-09',
+        creationDate: '2024-05-08',
+        creationTime: '00:48',
+        purchaseDeadlineDate: '2024-05-12',
         purchaseDeadlineTime: '23:59',
         userWorkPcc: 'N4PL',
         userHomePcc: 'N4PL',
       },
       airlineCode: 'BG',
-      fareCalculationLine: 'DAC BG KTM165.00NUC165.00END ROE1.00',
+      fareCalculationLine: 'DAC BG DXB235.00BG DAC235.00NUC470.00END ROE1.00',
       isNegotiatedFare: false,
       fareConstruction: [
         {
-          fareBasisCode: 'KBDO',
+          flights: [
+            {
+              itemId: '12',
+            },
+          ],
+          flightIndices: [1],
+          fareBasisCode: 'KSALBD6M',
           baseRate: {
-            amount: '165.00',
+            amount: '235.00',
             currencyCode: 'NUC',
           },
           isCurrentItinerary: true,
           checkedBaggageAllowance: {
-            totalWeightInKilograms: 20,
+            totalWeightInKilograms: 30,
+          },
+        },
+        {
+          flights: [
+            {
+              itemId: '13',
+            },
+          ],
+          flightIndices: [2],
+          fareBasisCode: 'KSALBD6M',
+          baseRate: {
+            amount: '235.00',
+            currencyCode: 'NUC',
+          },
+          isCurrentItinerary: true,
+          checkedBaggageAllowance: {
+            totalWeightInKilograms: 50,
           },
         },
       ],
@@ -1045,43 +394,71 @@ export const pnrDetails2 = {
         {
           taxCode: 'UT',
           taxAmount: {
-            amount: '2000',
+            amount: '4000',
             currencyCode: 'BDT',
           },
         },
         {
           taxCode: 'OW',
           taxAmount: {
-            amount: '500',
+            amount: '2000',
             currencyCode: 'BDT',
           },
         },
         {
           taxCode: 'E5',
           taxAmount: {
-            amount: '257',
+            amount: '405',
+            currencyCode: 'BDT',
+          },
+        },
+        {
+          taxCode: 'AE',
+          taxAmount: {
+            amount: '2247',
+            currencyCode: 'BDT',
+          },
+        },
+        {
+          taxCode: 'TP',
+          taxAmount: {
+            amount: '150',
+            currencyCode: 'BDT',
+          },
+        },
+        {
+          taxCode: 'ZR',
+          taxAmount: {
+            amount: '300',
+            currencyCode: 'BDT',
+          },
+        },
+        {
+          taxCode: 'F6',
+          taxAmount: {
+            amount: '1199',
             currencyCode: 'BDT',
           },
         },
         {
           taxCode: 'P8',
           taxAmount: {
-            amount: '660',
+            amount: '1100',
             currencyCode: 'BDT',
           },
         },
         {
           taxCode: 'P7',
           taxAmount: {
-            amount: '550',
+            amount: '1100',
             currencyCode: 'BDT',
           },
         },
       ],
       totals: {
-        subtotal: '18150',
-        taxes: '4467',
-        total: '22617',
+        subtotal: '51700',
+        taxes: '13001',
+        total: '64701',
         currencyCode: 'BDT',
       },
       pricingTypeCode: 'S',
@@ -1103,42 +480,59 @@ export const pnrDetails2 = {
   ],
   allSegments: [
     {
-      id: '26',
+      id: '12',
       type: 'FLIGHT',
-      text: '371',
+      text: '147',
       vendorCode: 'BG',
       startDate: '2024-06-20',
-      startTime: '10:15:00',
+      startTime: '17:25:00',
       startLocationCode: 'DAC',
       endDate: '2024-06-20',
-      endTime: '11:35:00',
-      endLocationCode: 'KTM',
+      endTime: '22:15:00',
+      endLocationCode: 'DXB',
+    },
+    {
+      id: '13',
+      type: 'FLIGHT',
+      text: '348',
+      vendorCode: 'BG',
+      startDate: '2024-06-26',
+      startTime: '00:05:00',
+      startLocationCode: 'DXB',
+      endDate: '2024-06-26',
+      endTime: '06:55:00',
+      endLocationCode: 'DAC',
     },
   ],
   flightTickets: [
     {
-      number: '9976661716847',
-      date: '2024-05-06',
+      number: '9976661716848',
+      date: '2024-05-08',
       agencyIataNumber: '42343862',
       travelerIndex: 1,
       flightCoupons: [
         {
-          itemId: '26',
+          itemId: '12',
+          couponStatus: 'Not Flown',
+          couponStatusCode: 'I',
+        },
+        {
+          itemId: '13',
           couponStatus: 'Not Flown',
           couponStatusCode: 'I',
         },
       ],
       payment: {
-        subtotal: '18150',
-        taxes: '4467',
-        total: '22617',
+        subtotal: '51700',
+        taxes: '13001',
+        total: '64701',
         currencyCode: 'BDT',
       },
       ticketStatusName: 'Issued',
       ticketStatusCode: 'TE',
       ticketingPcc: 'N4PL',
       commission: {
-        commissionAmount: '1271',
+        commissionAmount: '3619',
         currencyCode: 'BDT',
         commissionPercentage: '7.00',
       },
@@ -1147,17 +541,17 @@ export const pnrDetails2 = {
   payments: {
     flightTotals: [
       {
-        subtotal: '18150',
-        taxes: '4467',
-        total: '22617',
+        subtotal: '51700',
+        taxes: '13001',
+        total: '64701',
         currencyCode: 'BDT',
       },
     ],
     flightCurrentTotals: [
       {
-        subtotal: '18150',
-        taxes: '4467',
-        total: '22617',
+        subtotal: '51700',
+        taxes: '13001',
+        total: '64701',
         currencyCode: 'BDT',
       },
     ],
@@ -1167,41 +561,13 @@ export const pnrDetails2 = {
       airlineCode: '1B',
       serviceMessage: 'PLEASE TICKET FARE AS PER TKT/TL IN PQ',
     },
-    {
-      airlineCode: '1B',
-      serviceMessage: 'PLEASE TICKET FARE AS PER TKT/TL IN PQ',
-    },
   ],
   specialServices: [
-    {
-      code: 'ADTK',
-      message: 'BS // TTL FOR AUTO CANX FIXED FOR 08MAY24 AT 0918 GMT',
-    },
-    {
-      code: 'ADTK',
-      message: 'BS // TTL FOR AUTO CANX FIXED FOR 08MAY24 AT 0457 GMT',
-    },
-    {
-      travelerIndices: [1],
-      code: 'CTCE',
-      name: 'Passenger contact information e-mail address',
-      message: '/FAHIM19RATUL//GMAIL.COM',
-      statusCode: 'HK',
-      statusName: 'Confirmed',
-    },
-    {
-      travelerIndices: [1],
-      code: 'CTCM',
-      name: 'Passenger contact information mobile phone number',
-      message: '/01888798798',
-      statusCode: 'HK',
-      statusName: 'Confirmed',
-    },
     {
       travelerIndices: [1],
       code: 'DOCS',
       name: 'API-Passenger Travel Document',
-      message: '/P/BGD/BF0987623/BGD/23JUN82/M/28JUN25/MOON/SHAHEB',
+      message: '/P/BGD/BF09876234/BGD/23JUN92/M/28JUN24/KING/NAMZUL',
       statusCode: 'HK',
       statusName: 'Confirmed',
     },
@@ -1209,11 +575,23 @@ export const pnrDetails2 = {
       travelerIndices: [1],
       flights: [
         {
-          itemId: '26',
+          itemId: '13',
         },
       ],
       code: 'TKNE',
-      message: '/9976661716847C1',
+      message: '/9976661716848C2',
+      statusCode: 'HK',
+      statusName: 'Confirmed',
+    },
+    {
+      travelerIndices: [1],
+      flights: [
+        {
+          itemId: '12',
+        },
+      ],
+      code: 'TKNE',
+      message: '/9976661716848C1',
       statusCode: 'HK',
       statusName: 'Confirmed',
     },
@@ -1223,20 +601,20 @@ export const pnrDetails2 = {
       fareApplicationType: 'Single Traveler',
       formOfPaymentType: 'Cash',
       airlineCode: 'BG',
-      ticketNumber: '9976661716847',
+      ticketNumber: '9976661716848',
       commission: {
-        commissionAmount: '1271',
+        commissionAmount: '3619',
       },
-      fareAmount: '18150',
-      taxAmount: '4467',
+      fareAmount: '51700',
+      taxAmount: '13001',
       travelerIndices: [1],
       tariffBasisType: 'Foreign',
     },
   ],
-  timestamp: '2024-05-06T11:27:50',
+  timestamp: '2024-05-08T05:52:20',
   bookingSignature:
-    'c3c45c6d05d9acd4c681bbdcf97ff04b3ebcd1030a7eec739308539667106315b1cf70d738ea31ce05da24ae5cfc595ade2a1695917019aa388800e28475ec88',
+    '74f2cb666e883f21ab28c093dfbf59d6676faf09064b92fa832e980caf86fa8ca15eba47fa794f0817acb025f0d0775d797d25f4e0d4121ee77fb2db693e1887',
   request: {
-    confirmationId: 'OZJQRH',
+    confirmationId: 'SYUSWR',
   },
 };

@@ -143,6 +143,37 @@ export const getPaymentType = (type: number) => {
   return paymentTypeMap[type] || paymentTypeMap.default;
 };
 
+export const getBspBillingDate = (dateType?: 'previous' | 'upcoming') => {
+  const currentDate = new Date();
+  const currentMonth = currentDate.getMonth();
+  let from_date, to_date;
+
+  // PREVIOUS DATE
+  if (dateType === 'previous') {
+    if (currentDate.getDate() >= 15) {
+      from_date = new Date(currentDate.getFullYear(), currentMonth, 1);
+      to_date = new Date(currentDate.getFullYear(), currentMonth, 15);
+    } else {
+      from_date = new Date(currentDate.getFullYear(), currentMonth - 1, 16);
+      to_date = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+    }
+  } else {
+    if (currentDate.getDate() <= 15) {
+      from_date = new Date(currentDate.getFullYear(), currentMonth, 1);
+      to_date = new Date(currentDate.getFullYear(), currentMonth, 15);
+    } else {
+      from_date = new Date(currentDate.getFullYear(), currentMonth, 16);
+      to_date = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        0
+      );
+    }
+  }
+
+  return { from_date, to_date };
+};
+
 export const getIataDateRange = () => {
   const new_date = new Date();
   const today = dayjs().format('YYYY-MM-DD');
@@ -202,7 +233,7 @@ export const getNext15Day = (inputDate: string | Date) => {
 };
 
 export const getDateRangeByWeek = (
-  input: 'first' | 'second' | 'third' | 'fourth'
+  input: 'previous' | 'previous_next' | 'first' | 'second' | 'third' | 'fourth'
 ) => {
   const currentDate = new Date();
   const currentMonth = currentDate.getMonth() + 1;
@@ -210,6 +241,19 @@ export const getDateRangeByWeek = (
     endDate = null;
 
   switch (input) {
+    case 'previous':
+      startDate = new Date(currentDate.getFullYear(), currentMonth - 2, 1);
+      endDate = new Date(currentDate.getFullYear(), currentMonth - 2, 15);
+      break;
+    case 'previous_next':
+      startDate = new Date(currentDate.getFullYear(), currentMonth - 2, 16);
+      endDate = new Date(
+        currentDate.getFullYear(),
+        currentMonth - 2,
+        new Date(currentDate.getFullYear(), currentMonth - 1, 0).getDate()
+      );
+      break;
+
     case 'first':
       startDate = new Date(currentDate.getFullYear(), currentMonth - 1, 1);
       endDate = new Date(currentDate.getFullYear(), currentMonth - 1, 8);

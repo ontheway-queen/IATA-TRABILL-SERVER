@@ -131,25 +131,23 @@ class DashboardServices extends abstract_services_1.default {
             };
         });
         // BSP BILLING
-        this.getBSPBilling = (req) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
+        this.getAirTicketSummary = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.dashboardModal(req);
-            const billingType = (_a = req.query) === null || _a === void 0 ? void 0 : _a.billingType;
-            let { from_date, to_date } = (0, lib_1.getBspBillingDate)(billingType);
-            const ticket_issue = yield conn.getBspTicketIssueInfo(from_date, to_date);
-            const ticket_re_issue = yield conn.getBspTicketReissueInfo(from_date, to_date);
-            const ticket_refund = yield conn.getBspTicketRefundInfo(from_date, to_date);
+            const { sales_from_date, sales_to_date } = (0, lib_1.getIataDateRange)();
+            const ticket_issue = yield conn.getBspTicketIssueInfo(sales_from_date, sales_to_date);
+            const ticket_re_issue = yield conn.getBspTicketReissueInfo(sales_from_date, sales_to_date);
+            const ticket_refund = yield conn.getBspTicketRefundInfo(sales_from_date, sales_to_date);
             // BILLING DATE
-            const billing_from_date = (0, lib_1.getNext15Day)(from_date);
-            const billing_to_date = (0, lib_1.getNext15Day)(to_date);
+            const billing_from_date = (0, lib_1.getNext15Day)(sales_from_date);
+            const billing_to_date = (0, lib_1.getNext15Day)(sales_to_date);
             return {
                 success: true,
-                message: 'The request is OK',
+                message: 'the request is OK',
                 data: {
                     billing_from_date,
                     billing_to_date,
-                    sales_from_date: from_date,
-                    sales_to_date: to_date,
+                    sales_from_date,
+                    sales_to_date,
                     ticket_issue,
                     ticket_re_issue,
                     ticket_refund,
@@ -159,27 +157,21 @@ class DashboardServices extends abstract_services_1.default {
         // BSP BILLING SUMMARY
         this.getBspBillingSummary = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.dashboardModal(req);
-            const { billingType, week } = req.query;
-            let { from_date, to_date } = (0, lib_1.getBspBillingDate)(billingType);
-            if ([
-                'previous',
-                'previous_next',
-                'first',
-                'second',
-                'third',
-                'fourth',
-            ].includes(week)) {
-                const dateRange = (0, lib_1.getDateRangeByWeek)(week);
-                from_date = dateRange.startDate;
-                to_date = dateRange.endDate;
+            const weekNumberOfMonth = req.query.week;
+            let { sales_from_date, sales_to_date } = (0, lib_1.getIataDateRange)();
+            if (['first', 'second', 'third', 'fourth'].includes(weekNumberOfMonth)) {
+                const dateRange = (0, lib_1.getDateRangeByWeek)(weekNumberOfMonth);
+                sales_from_date = dateRange.startDate;
+                sales_to_date = dateRange.endDate;
             }
-            const issue = yield conn.getBspTicketIssueSummary(from_date, to_date);
-            const reissue = yield conn.getBspTicketReissueSummary(from_date, to_date);
-            const refund = yield conn.getBspTicketRefundSummary(from_date, to_date);
+            const issue = yield conn.getBspTicketIssueSummary(sales_from_date, sales_to_date);
+            const reissue = yield conn.getBspTicketReissueSummary(sales_from_date, sales_to_date);
+            const refund = yield conn.getBspTicketRefundSummary(sales_from_date, sales_to_date);
             return {
                 success: true,
                 message: 'the request is OK',
-                data: Object.assign(Object.assign(Object.assign({ sales_from_date: from_date, sales_to_date: to_date }, issue), reissue), refund),
+                data: Object.assign(Object.assign(Object.assign({ sales_from_date,
+                    sales_to_date }, issue), reissue), refund),
             };
         });
         // VENDORS / BANK Guarantee

@@ -23,7 +23,7 @@ class DashboardRoutes extends abstract_routers_1.default {
         this.routers.get('/monthly-pay-pur', this.controllers.getMonthlyPaymentPurchase);
         this.routers.get('/yearly-pay-pur', this.controllers.getYearlyPaymentPurchase);
         // BSP BILLING
-        this.routers.get('/bsp-billing', this.controllers.getBSPBilling);
+        this.routers.get('/air_ticket-summary', this.controllers.getAirTicketSummary);
         this.routers.get('/bsp-summary', this.controllers.getBspBillingSummary);
         this.routers.get('/vendors', this.controllers.getVendorBankGuarantee);
         this.routers.get('/best-clients', this.controllers.getBestClients);

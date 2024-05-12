@@ -73,7 +73,7 @@ class AddVendorServices extends abstract_services_1.default {
                     };
                     yield acc_conn.insertOpeningBal(openingBalData);
                 }
-                const message = 'vendor created successfully';
+                const message = `ADDED VENDOR, NAME ${vendor_name}`;
                 yield this.insertAudit(req, 'create', message, vendor_created_by, 'VENDOR');
                 return {
                     success: true,

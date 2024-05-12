@@ -18,7 +18,6 @@ import {
 import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 import { smsInvoiceData } from '../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../smsSystem/utils/CommonSmsSend.services';
-import CustomError from '../../../../common/utils/errors/customError';
 class AddMoneyReceipt extends AbstractServices {
   constructor() {
     super();
@@ -251,7 +250,7 @@ class AddMoneyReceipt extends AbstractServices {
             history_invoice_id: invoice_id,
             history_created_by: receipt_created_by,
             history_invoice_payment_amount: payment_amount,
-            invoicelog_content: 'Money receipt hass been deleted',
+            invoicelog_content: 'Money receipt has been deleted',
           };
 
           await common_conn.insertInvoiceHistory(history_data);
@@ -291,7 +290,7 @@ class AddMoneyReceipt extends AbstractServices {
       await this.insertAudit(
         req,
         'create',
-        `Money receipt added ,Voucher - ${receipt_payment_to}, Net - ${receipt_total_amount}/- `,
+        `ADDED MONEY RECEIPT ,VOUCHER ${receipt_vouchar_no}, BDT ${receipt_total_amount}/- `,
         receipt_created_by,
         'MONEY_RECEIPT'
       );

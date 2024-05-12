@@ -223,3 +223,23 @@ export interface ImagesTypes {
   tac_sig_url?: string;
   tac_wtr_mark_url?: string;
 }
+
+// SIGNATURE
+export interface ISignatureReqBody {
+  sig_employee_id: number;
+  sig_user_id: number;
+  sig_type: 'AUTHORITY' | 'SALES' | 'PREPARE';
+  sig_name_title: string;
+  sig_position: string;
+  sig_company_name: string;
+  sig_address: string;
+  sig_city: string;
+  sig_state: string;
+  sig_zip_code: string;
+  sig_email: string;
+  sig_signature: string | null;
+}
+export interface ISignatureDB extends ISignatureReqBody {
+  sig_org_id: number;
+  sig_created_by: number;
+}

@@ -66,7 +66,7 @@ class QuotationServices extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.quotationModel(req, trx);
       const { invoice_client_id, invoice_combined_id } =
-        await getClientOrCombId(client_id);
+        getClientOrCombId(client_id);
 
       const quotationInfo: IQuotation = {
         quotation_client_id: invoice_client_id as number,
@@ -89,7 +89,7 @@ class QuotationServices extends AbstractServices {
 
       await conn.insertBillInfo(billInfo);
 
-      const message = `Quotation has been created`;
+      const message = `ADDED QUOTATION, VOUCHER ${q_number}`;
       await this.insertAudit(
         req,
         'create',
@@ -172,7 +172,6 @@ class QuotationServices extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.invoiceOtherModel(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
-      const combined_conn = this.models.combineClientModel(req, trx);
       const qu_conn = this.models.quotationModel(req, trx);
       const trxns = new Trxns(req, trx);
 
@@ -188,7 +187,7 @@ class QuotationServices extends AbstractServices {
         ctrxn_particular_id: 145,
         ctrxn_created_at: invoice_sales_date,
         ctrxn_note: invoice_note,
-        ctrxn_particular_type: 'quotation invoice',
+        ctrxn_particular_type: 'Confirm Quotation Invoice',
       };
 
       const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
@@ -263,7 +262,7 @@ class QuotationServices extends AbstractServices {
           vtrxn_created_at: invoice_sales_date,
           vtrxn_note: invoice_note,
           vtrxn_particular_id: 154,
-          vtrxn_particular_type: 'Quotation inovice',
+          vtrxn_particular_type: 'Confirm Quotation Invoice',
           vtrxn_type: 'DEBIT',
           vtrxn_user_id: invoice_created_by,
           vtrxn_voucher: invoice_no,
@@ -307,7 +306,7 @@ class QuotationServices extends AbstractServices {
 
       await this.updateVoucher(req, 'QT');
 
-      const message = `Invoice quotation has been created`;
+      const message = `ADDED QUOTATION, VOUCHER ${invoice_no}, BDT ${invoice_net_total}/-`;
 
       await this.insertAudit(
         req,
@@ -353,7 +352,7 @@ class QuotationServices extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.quotationModel(req, trx);
       const { invoice_client_id, invoice_combined_id } =
-        await getClientOrCombId(client_id);
+        getClientOrCombId(client_id);
 
       const quotationInfo: IQuotation = {
         quotation_client_id: invoice_client_id as number,
@@ -377,7 +376,7 @@ class QuotationServices extends AbstractServices {
 
       await conn.insertBillInfo(billInfo);
 
-      const message = `Quotation has been updated`;
+      const message = `UPDATED QUOTATION/:${quotation_id}`;
       await this.insertAudit(
         req,
         'update',
@@ -415,7 +414,7 @@ class QuotationServices extends AbstractServices {
 
       await conn.deleteBillInfo(+quotation_id, quotation_deleted_by);
 
-      const message = `Quotation has been deleted`;
+      const message = `DELETED QUOTATION/:${quotation_id}`;
       await this.insertAudit(
         req,
         'delete',
@@ -426,7 +425,7 @@ class QuotationServices extends AbstractServices {
 
       return {
         success: true,
-        message: 'Quotation deleted successfull',
+        message: 'Quotation deleted successfully',
       };
     });
   };

@@ -214,6 +214,20 @@ class InvoiceAirticketService extends AbstractServices {
     };
   };
 
+  // INVOICE CLIENT PAYMENT
+  public getInvoiceClientPayment = async (req: Request) => {
+    const { invoice_id } = req.params as { invoice_id: string };
+
+    const conn = this.models.invoiceAirticketModel(req);
+
+    const data = await conn.getInvoiceClientPayment(invoice_id);
+
+    return {
+      success: true,
+      data,
+    };
+  };
+
   // ============= narrow services ==============
   pnrDetails = new PnrDetailsService().pnrDetails;
   public addInvoiceAirticket = new AddInvoiceAirticket().addInvoiceAirTicket;

@@ -2,10 +2,7 @@ import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
-import {
-  addAdvanceMr,
-  isEmpty,
-} from '../../../../../common/helpers/invoice.helpers';
+import { addAdvanceMr } from '../../../../../common/helpers/invoice.helpers';
 import {
   IClTrxnBody,
   IVTrxn,
@@ -52,7 +49,18 @@ class AddExistingClient extends AbstractServices {
       const conn = this.models.reissueAirticket(req, trx);
       const trxns = new Trxns(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
+      const combined_conn = this.models.combineClientModel(req, trx);
       const invoice_no = await this.generateVoucher(req, 'ARI');
+
+      const { client_id, combined_id } = separateCombClientToId(
+        invoice_combclient_id
+      );
+
+      const invoice_client_previous_due =
+        await combined_conn.getClientLastBalanceById(
+          client_id as number,
+          combined_id as number
+        );
 
       // TOOLS
       const prevInvCateId = await conn.getExistingInvCateId(
@@ -79,10 +87,6 @@ class AddExistingClient extends AbstractServices {
 
       const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
 
-      const { client_id, combined_id } = separateCombClientToId(
-        invoice_combclient_id
-      );
-
       const invoice_information: IInvoiceInfoDb = {
         invoice_combined_id: combined_id,
         invoice_client_id: client_id,
@@ -99,6 +103,7 @@ class AddExistingClient extends AbstractServices {
         invoice_cltrxn_id,
         invoice_total_profit: airticket_profit,
         invoice_total_vendor_price: airticket_purchase_price,
+        invoice_client_previous_due,
       };
 
       const invoice_id = await common_conn.insertInvoicesInfo(
@@ -106,13 +111,14 @@ class AddExistingClient extends AbstractServices {
       );
 
       // ADVANCE MR
-      if (isEmpty(req.body.money_receipt)) {
+      if (invoice_client_previous_due > 0) {
         await addAdvanceMr(
           common_conn,
           invoice_id,
           client_id,
           combined_id,
-          airticket_client_price
+          airticket_client_price,
+          invoice_client_previous_due
         );
       }
 

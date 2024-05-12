@@ -141,10 +141,10 @@ const ValidateCreditLimit = (vendor_id) => __awaiter(void 0, void 0, void 0, fun
 });
 exports.ValidateCreditLimit = ValidateCreditLimit;
 // ADD ADVANCE MONEY RECEIPT
-const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total) => __awaiter(void 0, void 0, void 0, function* () {
+const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total, advance_amount) => __awaiter(void 0, void 0, void 0, function* () {
     const data = yield common_conn.getAdvanceMrById(cl_id, com_id);
     let need_to_payment = Number(net_total);
-    if (data.length) {
+    if (data === null || data === void 0 ? void 0 : data.length) {
         for (const item of data) {
             if (need_to_payment === 0) {
                 break;
@@ -162,6 +162,17 @@ const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total) => __awaite
             yield common_conn.insertAdvanceMr(invClPay);
             need_to_payment -= Number(payment_amount);
         }
+    }
+    if (need_to_payment > 0) {
+        const invClPay = {
+            invclientpayment_moneyreceipt_id: null,
+            invclientpayment_amount: need_to_payment,
+            invclientpayment_invoice_id: inv_id,
+            invclientpayment_client_id: cl_id,
+            invclientpayment_combined_id: com_id,
+            invclientpayment_purpose: 'ADVANCE PAY',
+        };
+        yield common_conn.insertAdvanceMr(invClPay);
     }
 });
 exports.addAdvanceMr = addAdvanceMr;

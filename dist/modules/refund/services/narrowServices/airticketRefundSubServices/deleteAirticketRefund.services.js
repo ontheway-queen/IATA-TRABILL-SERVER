@@ -63,7 +63,7 @@ class DeleteAirTicketRefund extends abstract_services_1.default {
                 }
                 yield conn.updateInvoiceAirticketIsRefund(atrefund_invoice_id, 0);
                 yield conn.deleteAirTicketRefund(refund_id, deleted_by);
-                yield this.insertAudit(req, 'delete', 'Air ticket refund has been deleted', deleted_by, 'REFUND');
+                yield this.insertAudit(req, 'delete', `DELETED  INVOICE AIR TICKET REFUND/:${refund_id}`, deleted_by, 'REFUND');
                 return {
                     success: true,
                     message: 'Air ticket refund has been deleted',

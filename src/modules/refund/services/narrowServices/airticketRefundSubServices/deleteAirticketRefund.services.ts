@@ -91,7 +91,7 @@ class DeleteAirTicketRefund extends AbstractServices {
       await this.insertAudit(
         req,
         'delete',
-        'Air ticket refund has been deleted',
+        `DELETED  INVOICE AIR TICKET REFUND/:${refund_id}`,
         deleted_by,
         'REFUND'
       );

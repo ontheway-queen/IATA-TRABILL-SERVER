@@ -16,57 +16,6 @@ const abstract_services_1 = __importDefault(require("../../../../abstracts/abstr
 class AppConfigServices extends abstract_services_1.default {
     constructor() {
         super();
-        this.getAllOffice = (req) => __awaiter(this, void 0, void 0, function* () {
-            const conn = this.models.configModel.appConfig(req);
-            const data = yield conn.getAllOffice();
-            return Object.assign({ success: true }, data);
-        });
-        this.getAllClientByOffice = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { page, size, search } = req.query;
-            const { office_id } = req.params;
-            const conn = this.models.configModel.appConfig(req);
-            const data = yield conn.getAllClientByOffice(Number(page) || 1, Number(size) || 20, search, office_id);
-            return Object.assign({ success: true }, data);
-        });
-        this.getAllOfficeForEdit = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { office_id } = req.params;
-            const conn = this.models.configModel.appConfig(req);
-            const data = yield conn.getAllOfficeForEdit(office_id);
-            return { success: true, data };
-        });
-        this.viewAllOffice = (req) => __awaiter(this, void 0, void 0, function* () {
-            const conn = this.models.configModel.appConfig(req);
-            const data = yield conn.viewAllOffice();
-            return { success: true, data };
-        });
-        this.createOffice = (req) => __awaiter(this, void 0, void 0, function* () {
-            const body = req.body;
-            const { office_created_by } = req.body;
-            const conn = this.models.configModel.appConfig(req);
-            const data = yield conn.createOffice(body);
-            const message = 'Office has been created';
-            yield this.insertAudit(req, 'create', message, office_created_by, 'RCM');
-            return { success: true, message: 'Office created successfully', data };
-        });
-        this.editOffice = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { office_id } = req.params;
-            const body = req.body;
-            const { office_updated_by } = req.body;
-            const conn = this.models.configModel.appConfig(req);
-            yield conn.editOffice(body, office_id);
-            const message = 'Office has been updated';
-            yield this.insertAudit(req, 'update', message, office_updated_by, 'RCM');
-            return { success: true, message: 'Office updated successfully' };
-        });
-        this.deleteOffice = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { office_id } = req.params;
-            const { deleted_by } = req.body;
-            const conn = this.models.configModel.appConfig(req);
-            yield conn.deleteOffice(office_id);
-            const message = 'Office has been deleted';
-            yield this.insertAudit(req, 'delete', message, deleted_by, 'RCM');
-            return { success: true, message: 'Office deleted successfully' };
-        });
         this.getAppConfig = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.configModel.appConfig(req);
             const data = yield conn.getAppConfig();
@@ -91,6 +40,73 @@ class AppConfigServices extends abstract_services_1.default {
             const conn = this.models.configModel.appConfig(req);
             yield conn.updateAppConfigSignature(customBody);
             return { success: true, message: 'App configuration updated successfully' };
+        });
+        // SIGNATURE
+        this.addSignature = (req) => __awaiter(this, void 0, void 0, function* () {
+            const conn = this.models.configModel.appConfig(req);
+            const body = req.body;
+            const imageList = req.imgUrl;
+            const imageUrlObj = Object.assign({}, ...imageList);
+            const sig_data = {
+                sig_employee_id: body.sig_employee_id,
+                sig_user_id: body.sig_user_id,
+                sig_type: body.sig_type,
+                sig_name_title: body.sig_name_title,
+                sig_position: body.sig_position,
+                sig_company_name: body.sig_company_name,
+                sig_address: body.sig_address,
+                sig_city: body.sig_city,
+                sig_state: body.sig_state,
+                sig_zip_code: body.sig_zip_code,
+                sig_email: body.sig_email,
+                sig_signature: imageUrlObj.sig_signature,
+                sig_org_id: req.agency_id,
+                sig_created_by: req.user_id,
+            };
+            yield conn.insertSignature(sig_data);
+            return { success: true, imageUrlObj };
+        });
+        this.updateSignature = (req) => __awaiter(this, void 0, void 0, function* () {
+            const sig_id = req.params.sig_id;
+            const conn = this.models.configModel.appConfig(req);
+            const body = req.body;
+            const imageList = req.imgUrl;
+            const imageUrlObj = Object.assign({}, ...imageList);
+            const sig_data = {
+                sig_employee_id: body.sig_employee_id,
+                sig_user_id: body.sig_user_id,
+                sig_type: body.sig_type,
+                sig_name_title: body.sig_name_title,
+                sig_position: body.sig_position,
+                sig_company_name: body.sig_company_name,
+                sig_address: body.sig_address,
+                sig_city: body.sig_city,
+                sig_state: body.sig_state,
+                sig_zip_code: body.sig_zip_code,
+                sig_email: body.sig_email,
+                sig_signature: (body === null || body === void 0 ? void 0 : body.sig_signature) || (imageUrlObj === null || imageUrlObj === void 0 ? void 0 : imageUrlObj.sig_signature) || null,
+                sig_org_id: req.agency_id,
+                sig_created_by: req.user_id,
+            };
+            yield conn.updateSignature(sig_data, sig_id);
+            // DELETE PREVIOUS SIGNATURE
+            if (!(body === null || body === void 0 ? void 0 : body.sig_signature)) {
+                const signature = yield conn.previousSignature(sig_id);
+                yield this.deleteFile.delete_image(signature);
+            }
+            return { success: true, imageUrlObj };
+        });
+        this.updateSignatureStatus = (req) => __awaiter(this, void 0, void 0, function* () {
+            const sig_id = req.params.sig_id;
+            const conn = this.models.configModel.appConfig(req);
+            const { status } = req.body;
+            yield conn.updateSignatureStatus(status, sig_id);
+            return { success: true };
+        });
+        this.getSignatures = (req) => __awaiter(this, void 0, void 0, function* () {
+            const conn = this.models.configModel.appConfig(req);
+            const data = yield conn.selectSignature();
+            return Object.assign({ success: true }, data);
         });
     }
 }

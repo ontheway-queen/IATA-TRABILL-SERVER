@@ -36,10 +36,10 @@ class DeletePayroll extends abstract_services_1.default {
                 }
                 yield conn.deletePayroll(payrollId, payroll_deleted_by);
                 yield conn.deleteAllPayrollDeductions(payrollId, payroll_deleted_by);
-                yield this.insertAudit(req, 'delete', `Payroll has been delete ${previous_net_balance}/-`, payroll_deleted_by, 'PAYROLL');
+                yield this.insertAudit(req, 'delete', `DELETED PAYROLL/:${payrollId}`, payroll_deleted_by, 'PAYROLL');
                 return {
                     success: true,
-                    message: 'Payroll deleted successfuly',
+                    message: 'Payroll deleted successfully',
                 };
             }));
         });

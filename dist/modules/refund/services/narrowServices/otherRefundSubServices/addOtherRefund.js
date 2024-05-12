@@ -254,10 +254,10 @@ class AddOtherRefund extends abstract_services_1.default {
                     yield conn.refundOtherVendor(otherClientRefund);
                 }
                 yield conn.updateInvoiceIsRefund(invoice_id, 1);
-                yield this.insertAudit(req, 'delete', 'Other refund has been created', created_by, 'REFUND');
+                yield this.insertAudit(req, 'delete', `REFUNDED INVOICE OTHER, VOUCHER ${other_vouchar_number}, BDT ${total_refund_amount}/-, RETURN BDT ${total_return_amount}/-`, created_by, 'REFUND');
                 return {
                     success: true,
-                    message: 'Other refund has been created successfuly',
+                    message: 'Other refund has been created successfully',
                     refund_id,
                 };
             }));

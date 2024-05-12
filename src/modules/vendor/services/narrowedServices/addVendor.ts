@@ -100,7 +100,7 @@ class AddVendorServices extends AbstractServices {
         await acc_conn.insertOpeningBal(openingBalData);
       }
 
-      const message = 'vendor created successfully';
+      const message = `ADDED VENDOR, NAME ${vendor_name}`;
 
       await this.insertAudit(
         req,

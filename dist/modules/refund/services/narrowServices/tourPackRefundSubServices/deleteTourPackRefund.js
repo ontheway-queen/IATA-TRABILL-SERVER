@@ -56,7 +56,7 @@ class DeleteTourPackRefund extends abstract_services_1.default {
                         yield trxns.deleteAccTrxn(vrefund_acctrxn_id);
                     }
                 }
-                const message = 'Tour refund has been deleted';
+                const message = `DELETED REFUND TOUR PACKAGE/:${refund_id}`;
                 yield this.insertAudit(req, 'update', message, req.user_id, 'INVOICES');
                 return {
                     success: true,

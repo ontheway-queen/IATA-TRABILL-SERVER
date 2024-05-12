@@ -437,7 +437,7 @@ class AddAirTicketRefund extends AbstractServices {
       }
 
       // insert audit
-      const audit_content = `Air ticket has been refunded! Voucher no : ${voucher_number}`;
+      const audit_content = `REFUNDED AIR TICKET, VOUCHER ${voucher_number}, BDT ${crefund_total_amount}/-, RETURN BDT ${crefund_return_amount}/-`;
 
       await this.insertAudit(
         req,

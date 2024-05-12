@@ -321,13 +321,14 @@ class ExpenseModel extends AbstractModels {
         'expense.expense_total_amount',
         'account_name'
       )
+      .from('trabill_expense_details')
+
       .leftJoin(
         'trabill_expense_head',
         'trabill_expense_head.head_id',
         'trabill_expense_details.expdetails_head_id'
       )
 
-      .from('trabill_expense_details')
       .leftJoin('trabill_expenses as expense', {
         'expense.expense_id': 'expdetails_expense_id',
       })
@@ -337,8 +338,9 @@ class ExpenseModel extends AbstractModels {
       .leftJoin('trabill_expense_cheque_details', {
         expcheque_expense_id: 'expense_id',
       })
-      .where('head_org_agency', this.org_agency)
-      .andWhere('expdetails_expense_id', expens_id)
+      .where('expense.expense_org_agency', this.org_agency)
+      .andWhere('expense.expense_id', expens_id)
+      .andWhereNot('expense.expense_is_deleted', 1)
       .andWhereNot('expdetails_is_deleted', 1);
 
     return infos;

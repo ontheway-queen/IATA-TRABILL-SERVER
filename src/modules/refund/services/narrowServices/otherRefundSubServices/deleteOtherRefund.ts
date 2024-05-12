@@ -1,7 +1,7 @@
 import { Request } from 'express';
+import { Knex } from 'knex';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
-import { Knex } from 'knex';
 
 class DeleteOtherRefund extends AbstractServices {
   constructor() {
@@ -87,7 +87,7 @@ class DeleteOtherRefund extends AbstractServices {
       await this.insertAudit(
         req,
         'delete',
-        'Other refund has been deleted',
+        `DELETED OTHER REFUND/:${refund_id}`,
         req.user_id,
         'REFUND'
       );

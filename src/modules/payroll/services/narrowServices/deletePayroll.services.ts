@@ -43,13 +43,13 @@ class DeletePayroll extends AbstractServices {
       await this.insertAudit(
         req,
         'delete',
-        `Payroll has been delete ${previous_net_balance}/-`,
+        `DELETED PAYROLL/:${payrollId}`,
         payroll_deleted_by,
         'PAYROLL'
       );
       return {
         success: true,
-        message: 'Payroll deleted successfuly',
+        message: 'Payroll deleted successfully',
       };
     });
   };

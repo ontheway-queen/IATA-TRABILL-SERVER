@@ -168,7 +168,7 @@ class ServicesVendor extends AbstractServices {
 
     const data = await conn.updateVendorStatus(vendor_activity_status, id);
 
-    const message = `Vendor status has been updated`;
+    const message = `UPDATED VENDOR STATUS/:${id}`;
 
     await this.insertAudit(req, 'update', message, updated_by, 'VENDOR');
 
@@ -198,7 +198,7 @@ class ServicesVendor extends AbstractServices {
       );
     }
 
-    const message = `Vendor status has been deleted`;
+    const message = `DELETED A VENDOR/:${id}`;
 
     await this.insertAudit(req, 'delete', message, vendor_deleted_by, 'VENDOR');
     return { success: true, message };
@@ -249,7 +249,7 @@ class ServicesVendor extends AbstractServices {
         await conn.deleteOnlineTrxnCharge(prev_transaction_charge_id);
       }
       // insert audit
-      const message = `Vendor advance return has been deleted ${prev_return_amount}/-`;
+      const message = `DELETED VENDOR ADVANCE RETURN/:${id}, BDT ${prev_return_amount}/-`;
 
       await this.insertAudit(
         req,
@@ -371,7 +371,7 @@ class ServicesVendor extends AbstractServices {
         }
       }
 
-      const message = `Vendor payment deleted ${previousPaymentAmount}/-`;
+      const message = `DELETED VENDOR PAP/:${vpay_id}, BDT ${previousPaymentAmount}/-`;
 
       await this.insertAudit(
         req,

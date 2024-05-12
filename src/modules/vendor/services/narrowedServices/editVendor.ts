@@ -99,7 +99,7 @@ class EditVendorService extends AbstractServices {
         vendor_id
       );
 
-      const message = 'Vendor updated successfully';
+      const message = `UPDATED VENDOR, NAME ${vendor_name}`;
 
       await this.insertAudit(
         req,

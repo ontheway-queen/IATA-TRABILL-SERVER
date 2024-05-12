@@ -201,8 +201,8 @@ class ExpenseModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const infos = yield this.query()
                 .select('head_name', 'expdetails_amount', 'expense.expense_payment_type', this.db.raw('CASE WHEN expense_payment_type = 4 THEN "Cheque" WHEN expense_payment_type = 1 THEN "Cash" WHEN expense_payment_type = 2 THEN "Bank" WHEN expense_payment_type = 3 THEN "Mobile banking"  ELSE NULL END AS expense_pay_type'), 'expense.expense_note', 'expense_cheque_no', 'expcheque_withdraw_date', 'expcheque_bank_name', 'expense.expense_vouchar_no', 'expense.expense_total_amount', 'account_name')
-                .leftJoin('trabill_expense_head', 'trabill_expense_head.head_id', 'trabill_expense_details.expdetails_head_id')
                 .from('trabill_expense_details')
+                .leftJoin('trabill_expense_head', 'trabill_expense_head.head_id', 'trabill_expense_details.expdetails_head_id')
                 .leftJoin('trabill_expenses as expense', {
                 'expense.expense_id': 'expdetails_expense_id',
             })
@@ -212,8 +212,9 @@ class ExpenseModel extends abstract_models_1.default {
                 .leftJoin('trabill_expense_cheque_details', {
                 expcheque_expense_id: 'expense_id',
             })
-                .where('head_org_agency', this.org_agency)
-                .andWhere('expdetails_expense_id', expens_id)
+                .where('expense.expense_org_agency', this.org_agency)
+                .andWhere('expense.expense_id', expens_id)
+                .andWhereNot('expense.expense_is_deleted', 1)
                 .andWhereNot('expdetails_is_deleted', 1);
             return infos;
         });

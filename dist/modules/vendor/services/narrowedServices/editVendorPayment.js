@@ -193,7 +193,7 @@ class EditVendorPayment extends abstract_services_1.default {
                     yield conn.updateVendorPaymentPassport(paymentPassportData);
                 }
                 yield conn.updateVendorPayment(paymentData, vpay_id);
-                const message = `Payment updated to Vendor (acc_last_balance = ${payment_amount})/-`;
+                const message = `UPDATED VENDOR PAY, VOUCHER ${vouchar_no}, BDT ${payment_amount}/-`;
                 yield this.insertAudit(req, 'update', message, created_by, 'VENDOR_PAYMENT');
                 return { success: true, message };
             }));

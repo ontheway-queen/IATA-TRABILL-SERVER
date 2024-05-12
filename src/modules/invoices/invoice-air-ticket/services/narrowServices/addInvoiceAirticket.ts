@@ -5,7 +5,6 @@ import { separateCombClientToId } from '../../../../../common/helpers/common.hel
 import InvoiceHelpers, {
   addAdvanceMr,
   getClientOrCombId,
-  isEmpty,
   isNotEmpty,
   MoneyReceiptAmountIsValid,
   ValidateClientAndVendor,
@@ -88,11 +87,10 @@ class AddInvoiceAirticket extends AbstractServices {
 
       const invoice_no = await this.generateVoucher(req, 'AIT');
 
-      const invoice_client_previous_due =
-        await combined_conn.getClientLastBalanceById(
-          invoice_client_id as number,
-          invoice_combined_id as number
-        );
+      const cl_preset_balance = await combined_conn.getClientLastBalanceById(
+        invoice_client_id as number,
+        invoice_combined_id as number
+      );
 
       const ctrxn_pnr =
         ticketInfo.length &&
@@ -137,7 +135,7 @@ class AddInvoiceAirticket extends AbstractServices {
         invoice_sub_total,
         invoice_note,
         invoice_created_by,
-        invoice_client_previous_due,
+        invoice_client_previous_due: cl_preset_balance,
         invoice_walking_customer_name,
         invoice_reference,
         invoice_total_profit,
@@ -147,13 +145,14 @@ class AddInvoiceAirticket extends AbstractServices {
       const invoice_id = await common_conn.insertInvoicesInfo(invoiceData);
 
       // ADVANCE MR
-      if (isEmpty(req.body.money_receipt)) {
+      if (cl_preset_balance > 0) {
         await addAdvanceMr(
           common_conn,
           invoice_id,
           invoice_client_id,
           invoice_combined_id,
-          invoice_net_total
+          invoice_net_total,
+          cl_preset_balance
         );
       }
 

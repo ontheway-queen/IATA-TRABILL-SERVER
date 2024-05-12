@@ -184,14 +184,14 @@ class CreatePayroll extends AbstractServices {
       await this.insertAudit(
         req,
         'create',
-        `Payroll has been created ${payroll_net_amount}/-`,
+        `ADDED PAYROLL, VOUCHER ${payroll_vouchar_no}, SALARY BDT ${payroll_net_amount}/-`,
         payroll_created_by as number,
         'PAYROLL'
       );
 
       return {
         success: true,
-        message: 'Payroll created successfuly',
+        message: 'Payroll created successfully',
         data: payroll_id,
       };
     });

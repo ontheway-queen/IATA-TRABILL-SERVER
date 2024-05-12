@@ -29,12 +29,18 @@ class InvoiceAirTicketRouter extends AbstractRouter {
       this.controllers.getInvoiceAcitivity
     );
 
-    // ========= INVOICE AIRTICKET ==============
+    // ========= INVOICE AIR TICKET ==============
 
     this.routers.get(
       '/invoice-details-for-void/:invoice_id',
       this.controllers.getInvoiceInfoForVoid
     );
+
+    this.routers.get(
+      '/payment/:invoice_id',
+      this.controllers.getInvoiceClientPayment
+    );
+
     this.routers.put(
       '/void/:invoice_id',
       this.controllers.voidInvoiceAirticket

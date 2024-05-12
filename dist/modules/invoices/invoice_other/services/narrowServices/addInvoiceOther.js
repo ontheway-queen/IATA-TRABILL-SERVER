@@ -57,6 +57,7 @@ class AddInvoiceOther extends abstract_services_1.default {
                 var _a;
                 const conn = this.models.invoiceOtherModel(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
+                const combined_conn = this.models.combineClientModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const productsIds = billing_information.map((item) => item.billing_product_id);
                 let productName = '';
@@ -70,6 +71,7 @@ class AddInvoiceOther extends abstract_services_1.default {
                 const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
                 // CLIENT TRANSACTIONS
                 const clientTransId = yield utils.clientTrans(trxns, invoice_no, ctrxn_pnr, ticketInfo && ((_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route), ctrxn_ticket, productName);
+                const invoice_client_previous_due = yield combined_conn.getClientLastBalanceById(invoice_client_id, invoice_combined_id);
                 const invoieInfo = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_combined_id,
                     invoice_created_by,
@@ -79,11 +81,12 @@ class AddInvoiceOther extends abstract_services_1.default {
                     invoice_sub_total,
                     invoice_total_profit,
                     invoice_total_vendor_price,
-                    invoice_reference });
+                    invoice_reference,
+                    invoice_client_previous_due });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoieInfo);
                 // ADVANCE MR
-                if ((0, invoice_helpers_1.isEmpty)(req.body.money_receipt)) {
-                    yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, invoice_client_id, invoice_combined_id, invoice_net_total);
+                if (invoice_client_previous_due > 0) {
+                    yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, invoice_client_id, invoice_combined_id, invoice_net_total, invoice_client_previous_due);
                 }
                 // AGENT TRANSACTION
                 yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 98, 'INVOICE OTHER');

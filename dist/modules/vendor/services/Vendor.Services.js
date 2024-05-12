@@ -119,7 +119,7 @@ class ServicesVendor extends abstract_services_1.default {
             const { vendor_activity_status, updated_by } = req.body;
             const conn = this.models.vendorModel(req);
             const data = yield conn.updateVendorStatus(vendor_activity_status, id);
-            const message = `Vendor status has been updated`;
+            const message = `UPDATED VENDOR STATUS/:${id}`;
             yield this.insertAudit(req, 'update', message, updated_by, 'VENDOR');
             return { success: true, data };
         });
@@ -137,7 +137,7 @@ class ServicesVendor extends abstract_services_1.default {
             else {
                 throw new customError_1.default('Account has a valid transaction', 400, 'Bad Request');
             }
-            const message = `Vendor status has been deleted`;
+            const message = `DELETED A VENDOR/:${id}`;
             yield this.insertAudit(req, 'delete', message, vendor_deleted_by, 'VENDOR');
             return { success: true, message };
         });
@@ -166,7 +166,7 @@ class ServicesVendor extends abstract_services_1.default {
                     yield conn.deleteOnlineTrxnCharge(prev_transaction_charge_id);
                 }
                 // insert audit
-                const message = `Vendor advance return has been deleted ${prev_return_amount}/-`;
+                const message = `DELETED VENDOR ADVANCE RETURN/:${id}, BDT ${prev_return_amount}/-`;
                 yield this.insertAudit(req, 'delete', message, deleted_by, 'VENDOR_ADVANCE_RETURN');
                 return {
                     success: true,
@@ -237,7 +237,7 @@ class ServicesVendor extends abstract_services_1.default {
                         }
                     }
                 }
-                const message = `Vendor payment deleted ${previousPaymentAmount}/-`;
+                const message = `DELETED VENDOR PAP/:${vpay_id}, BDT ${previousPaymentAmount}/-`;
                 yield this.insertAudit(req, 'delete', message, updated_by, 'VENDOR_PAYMENT');
                 return { success: true, message };
             }));

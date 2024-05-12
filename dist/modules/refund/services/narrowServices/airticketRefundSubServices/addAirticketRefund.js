@@ -310,7 +310,7 @@ class AddAirTicketRefund extends abstract_services_1.default {
                     yield conn.insertVendorRefundInfo(airticketVendorRefunds);
                 }
                 // insert audit
-                const audit_content = `Air ticket has been refunded! Voucher no : ${voucher_number}`;
+                const audit_content = `REFUNDED AIR TICKET, VOUCHER ${voucher_number}, BDT ${crefund_total_amount}/-, RETURN BDT ${crefund_return_amount}/-`;
                 yield this.insertAudit(req, 'create', audit_content, created_by, 'REFUND');
                 return {
                     success: true,

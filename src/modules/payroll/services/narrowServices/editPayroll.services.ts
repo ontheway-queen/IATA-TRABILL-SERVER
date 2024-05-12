@@ -221,7 +221,7 @@ class EditPayroll extends AbstractServices {
       await this.insertAudit(
         req,
         'update',
-        `Payroll has been updated ${previous_net_balance}/- to ${payroll_net_amount}/-`,
+        `UPDATED PAYROLL, SALARY BDT ${previous_net_balance}/- TO ${payroll_net_amount}/-`,
         payroll_updated_by as number,
         'PAYROLL'
       );

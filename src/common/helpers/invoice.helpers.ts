@@ -1,8 +1,5 @@
 import AgentProfileModels from '../../modules/clients/agents_profile/Models/agent_profile.models';
 import { IAgentProfileTransaction } from '../../modules/clients/agents_profile/Type/agent_profile.interfaces';
-import CombineClientsModels from '../../modules/clients/combined_clients/models/combineClients.models';
-import VendorModel from '../../modules/vendor/models/VendorModel';
-import { IDeletePreviousVendor } from '../interfaces/commonInterfaces';
 import CommonInvoiceModel from '../model/CommonInvoice.models';
 import {
   ClientComType,
@@ -208,13 +205,14 @@ export const addAdvanceMr = async (
   inv_id: number,
   cl_id: number | null,
   com_id: number | null,
-  net_total: number
+  net_total: number,
+  advance_amount: number
 ) => {
   const data = await common_conn.getAdvanceMrById(cl_id, com_id);
 
   let need_to_payment = Number(net_total);
 
-  if (data.length) {
+  if (data?.length) {
     for (const item of data) {
       if (need_to_payment === 0) {
         break;
@@ -237,5 +235,18 @@ export const addAdvanceMr = async (
 
       need_to_payment -= Number(payment_amount);
     }
+  }
+
+  if (need_to_payment > 0) {
+    const invClPay = {
+      invclientpayment_moneyreceipt_id: null,
+      invclientpayment_amount: need_to_payment,
+      invclientpayment_invoice_id: inv_id,
+      invclientpayment_client_id: cl_id,
+      invclientpayment_combined_id: com_id,
+      invclientpayment_purpose: 'ADVANCE PAY',
+    };
+
+    await common_conn.insertAdvanceMr(invClPay);
   }
 };

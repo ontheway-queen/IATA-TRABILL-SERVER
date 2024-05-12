@@ -12,12 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.uploadImageToAzure_trabill = void 0;
+exports.signatureUploadToAzure = exports.uploadImageToAzure_trabill = void 0;
 const storage_blob_1 = require("@azure/storage-blob");
 const config_1 = __importDefault(require("../../config/config"));
 const containerName = 'trabillcontainer';
 const blobServiceClient = storage_blob_1.BlobServiceClient.fromConnectionString(config_1.default.AZURE_STORAGE_CONNECTION_STRING);
 const containerClient = blobServiceClient.getContainerClient(containerName);
+// IMAGE UPLOAD
 const uploadImageToAzure_trabill = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req.files) {
         return res.status(400).send('No image uploaded');
@@ -42,4 +43,36 @@ const uploadImageToAzure_trabill = (req, res, next) => __awaiter(void 0, void 0,
     next();
 });
 exports.uploadImageToAzure_trabill = uploadImageToAzure_trabill;
+// SIGNATURE UPLOAD
+const signatureUploadToAzure = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req.files) {
+        return res.status(400).send('No image uploaded');
+    }
+    const images = req.files;
+    const imageURLlist = [];
+    for (const key in images) {
+        if (Object.prototype.hasOwnProperty.call(images, key)) {
+            const element = images[key];
+            const image = element[0];
+            const currentDateTime = Date.now();
+            const uniqueName = 'signatures/' + currentDateTime + image.originalname;
+            const blockBlobClient = containerClient.getBlockBlobClient(uniqueName);
+            try {
+                yield blockBlobClient.upload(image.buffer, image.size);
+                console.log([uniqueName]);
+            }
+            catch (error) {
+                console.log({ error });
+            }
+            const imageUrl = `https://trabillteststorage.blob.core.windows.net/${containerName}/${uniqueName}`;
+            console.log([imageUrl]);
+            const myObject = {};
+            myObject[key] = imageUrl;
+            imageURLlist.push(myObject);
+        }
+    }
+    req.imgUrl = imageURLlist;
+    next();
+});
+exports.signatureUploadToAzure = signatureUploadToAzure;
 //# sourceMappingURL=ImageUploadToAzure_trabill.js.map

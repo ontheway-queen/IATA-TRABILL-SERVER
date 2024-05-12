@@ -142,7 +142,7 @@ class AddAdvanceReturn extends AbstractServices {
       }
 
       // insert audit
-      const message = 'Advance return created successfully';
+      const message = `ADDED VENDOR ADVANCE RETURN, VOUCHER ${advr_vouchar_no}, BDT ${advance_amount}/-`;
 
       await this.insertAudit(
         req,

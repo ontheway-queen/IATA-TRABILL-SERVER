@@ -155,13 +155,14 @@ class AddInvoiceNonCommission extends AbstractServices {
       const invoice_id = await common_conn.insertInvoicesInfo(invoiceData);
 
       // ADVANCE MR
-      if (isEmpty(req.body.money_receipt)) {
+      if (invoice_client_previous_due > 0) {
         await addAdvanceMr(
           common_conn,
           invoice_id,
           invoice_client_id,
           invoice_combined_id,
-          invoice_net_total
+          invoice_net_total,
+          invoice_client_previous_due
         );
       }
 

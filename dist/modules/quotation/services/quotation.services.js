@@ -60,7 +60,7 @@ class QuotationServices extends abstract_services_1.default {
             const { client_id, q_number, date, bill_info, note, sub_total, discount, net_total, created_by, } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.quotationModel(req, trx);
-                const { invoice_client_id, invoice_combined_id } = yield (0, invoice_helpers_1.getClientOrCombId)(client_id);
+                const { invoice_client_id, invoice_combined_id } = (0, invoice_helpers_1.getClientOrCombId)(client_id);
                 const quotationInfo = {
                     quotation_client_id: invoice_client_id,
                     quotation_combined_id: invoice_combined_id,
@@ -74,7 +74,7 @@ class QuotationServices extends abstract_services_1.default {
                 const quotationId = yield conn.insertQuotation(quotationInfo);
                 const billInfo = quotationHelper_1.default.parseBillInfo(bill_info, sub_total, quotationId);
                 yield conn.insertBillInfo(billInfo);
-                const message = `Quotation has been created`;
+                const message = `ADDED QUOTATION, VOUCHER ${q_number}`;
                 yield this.insertAudit(req, 'create', message, created_by, 'QUOTATION');
                 return {
                     success: true,
@@ -103,7 +103,6 @@ class QuotationServices extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.invoiceOtherModel(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
-                const combined_conn = this.models.combineClientModel(req, trx);
                 const qu_conn = this.models.quotationModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const quotationId = req.params.quotation_id;
@@ -116,7 +115,7 @@ class QuotationServices extends abstract_services_1.default {
                     ctrxn_particular_id: 145,
                     ctrxn_created_at: invoice_sales_date,
                     ctrxn_note: invoice_note,
-                    ctrxn_particular_type: 'quotation invoice',
+                    ctrxn_particular_type: 'Confirm Quotation Invoice',
                 };
                 const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                 const invoieInfo = {
@@ -159,7 +158,7 @@ class QuotationServices extends abstract_services_1.default {
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: invoice_note,
                         vtrxn_particular_id: 154,
-                        vtrxn_particular_type: 'Quotation inovice',
+                        vtrxn_particular_type: 'Confirm Quotation Invoice',
                         vtrxn_type: 'DEBIT',
                         vtrxn_user_id: invoice_created_by,
                         vtrxn_voucher: invoice_no,
@@ -192,7 +191,7 @@ class QuotationServices extends abstract_services_1.default {
                 yield new CommonAddMoneyReceipt_1.default().commonAddMoneyReceipt(req, moneyReceiptInvoice, trx);
                 yield qu_conn.confirmQuotation(quotationId);
                 yield this.updateVoucher(req, 'QT');
-                const message = `Invoice quotation has been created`;
+                const message = `ADDED QUOTATION, VOUCHER ${invoice_no}, BDT ${invoice_net_total}/-`;
                 yield this.insertAudit(req, 'create', message, invoice_created_by, 'INVOICES');
                 return {
                     success: true,
@@ -212,7 +211,7 @@ class QuotationServices extends abstract_services_1.default {
             const { client_id, q_number, date, bill_info, note, sub_total, discount, net_total, updated_by, } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.quotationModel(req, trx);
-                const { invoice_client_id, invoice_combined_id } = yield (0, invoice_helpers_1.getClientOrCombId)(client_id);
+                const { invoice_client_id, invoice_combined_id } = (0, invoice_helpers_1.getClientOrCombId)(client_id);
                 const quotationInfo = {
                     quotation_client_id: invoice_client_id,
                     quotation_combined_id: invoice_combined_id,
@@ -227,7 +226,7 @@ class QuotationServices extends abstract_services_1.default {
                 const billInfo = quotationHelper_1.default.parseBillInfo(bill_info, sub_total, +quotation_id);
                 yield conn.deleteBillInfo(+quotation_id, updated_by);
                 yield conn.insertBillInfo(billInfo);
-                const message = `Quotation has been updated`;
+                const message = `UPDATED QUOTATION/:${quotation_id}`;
                 yield this.insertAudit(req, 'update', message, updated_by, 'QUOTATION');
                 return {
                     success: true,
@@ -245,11 +244,11 @@ class QuotationServices extends abstract_services_1.default {
                     throw new customError_1.default('Please provide a valid id to delete a quotation', 400, 'Invalid quotation id');
                 }
                 yield conn.deleteBillInfo(+quotation_id, quotation_deleted_by);
-                const message = `Quotation has been deleted`;
+                const message = `DELETED QUOTATION/:${quotation_id}`;
                 yield this.insertAudit(req, 'delete', message, quotation_deleted_by, 'QUOTATION');
                 return {
                     success: true,
-                    message: 'Quotation deleted successfull',
+                    message: 'Quotation deleted successfully',
                 };
             }));
         });

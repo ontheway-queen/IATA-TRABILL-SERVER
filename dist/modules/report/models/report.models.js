@@ -1616,7 +1616,7 @@ class ReportModel extends abstract_models_1.default {
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const page_number = (page - 1) * size;
             const data = yield this.query()
-                .select('audit_id', 'audit_user_id', 'audit_action', 'audit_content', 'audit_action_date_time', this.db.raw("CONCAT(user_first_name, ' ', user_last_name) AS user_name"))
+                .select('audit_id', 'audit_user_id', 'audit_action', 'audit_content', 'audit_module_type', 'audit_action_date_time', this.db.raw("CONCAT(user_first_name, ' ', user_last_name) AS user_name"))
                 .from('trabill_audit_history')
                 .leftJoin('trabill_users', { user_id: 'audit_user_id' })
                 .modify((builder) => {

@@ -2296,6 +2296,7 @@ class ReportModel extends AbstractModels {
         'audit_user_id',
         'audit_action',
         'audit_content',
+        'audit_module_type',
         'audit_action_date_time',
         this.db.raw("CONCAT(user_first_name, ' ', user_last_name) AS user_name")
       )

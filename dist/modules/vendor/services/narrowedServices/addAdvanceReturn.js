@@ -114,7 +114,7 @@ class AddAdvanceReturn extends abstract_services_1.default {
                     yield conn.insetAdvanceReturnCheque(addAdvanceReturnChqueData);
                 }
                 // insert audit
-                const message = 'Advance return created successfully';
+                const message = `ADDED VENDOR ADVANCE RETURN, VOUCHER ${advr_vouchar_no}, BDT ${advance_amount}/-`;
                 yield this.insertAudit(req, 'update', message, advr_created_by, 'VENDOR_ADVANCE_RETURN');
                 return {
                     success: true,

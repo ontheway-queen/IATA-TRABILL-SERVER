@@ -133,7 +133,7 @@ class EditAdvanceReturn extends abstract_services_1.default {
                     yield conn.updateAdvanceReturnCheque(updateAdvanceReturnData, advr_id);
                 }
                 // insert audit
-                const message = 'Advance return updated successfully';
+                const message = `UPDATED VENDOR ADVANCE RETURN, VOUCHER ${prev_voucher_no}, BDT ${advance_amount}/-`;
                 yield this.insertAudit(req, 'update', message, advr_created_by, 'VENDOR_ADVANCE_RETURN');
                 return {
                     success: true,

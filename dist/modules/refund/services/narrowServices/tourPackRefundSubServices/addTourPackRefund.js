@@ -334,7 +334,7 @@ class AddTourPackRefund extends abstract_services_1.default {
                 yield conn.updateInvoiceIsRefund(invoice_id, 1);
                 // update vendor product is refund
                 yield conn.updateTourVendorsProductIsRefund(invoice_id, 1);
-                const message = 'Tour refund created successfully';
+                const message = `REFUNDED TOUR PACKAGE VOUCHER ${tour_vouchar_number}, BDT ${crefund_total_amount}/-, RETURN BDT ${crefund_return_amount}/-`;
                 yield this.insertAudit(req, 'create', message, created_by, 'REFUND');
                 return {
                     success: true,

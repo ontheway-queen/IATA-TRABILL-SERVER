@@ -233,7 +233,7 @@ class AddVendorPayment extends AbstractServices {
 
       // insert audit
 
-      const message = `Payment added to Vendor (acc_last_balance = ${payment_amount})/-`;
+      const message = `ADDED VENDOR PAY, VOUCHER ${vouchar_no}, BDT ${payment_amount}/-`;
 
       await this.insertAudit(
         req,

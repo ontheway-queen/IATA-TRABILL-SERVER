@@ -11,19 +11,12 @@ class AppConfigValidators extends abstract_validators_1.default {
         this.readOffice = [
             this.permissions.check(this.resources.configuration_module, 'read'),
         ];
-        this.createOffice = [
+        this.updateSignatureStatus = [
             this.permissions.check(this.resources.configuration_module, 'create'),
-            (0, express_validator_1.check)('office_name').notEmpty().withMessage('Please enter office name'),
-            (0, express_validator_1.check)('office_address').optional(),
-            (0, express_validator_1.check)('office_email')
-                .optional()
-                .isEmail()
-                .withMessage('Please enter a valid email'),
-            (0, express_validator_1.check)('office_created_by')
+            (0, express_validator_1.check)('status')
                 .notEmpty()
-                .withMessage('Please enter office created by')
-                .isInt()
-                .withMessage('office created by must be an integer value'),
+                .withMessage('Please enter status')
+                .isIn(['ACTIVE', 'INACTIVE']),
         ];
         this.editOffice = [
             this.permissions.check(this.resources.configuration_module, 'update'),

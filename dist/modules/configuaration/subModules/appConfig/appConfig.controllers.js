@@ -20,69 +20,6 @@ class AppConfigControllers extends abstract_controllers_1.default {
         super();
         this.services = new appConfig_services_1.default();
         this.validator = new appConfig_validators_1.default();
-        this.getAllOffice = this.assyncWrapper.wrap(this.validator.readOffice, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.getAllOffice(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                this.error('');
-            }
-        }));
-        this.getAllOfficeForEdit = this.assyncWrapper.wrap(this.validator.readOffice, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.getAllOfficeForEdit(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                this.error('');
-            }
-        }));
-        this.getAllClientByOffice = this.assyncWrapper.wrap(this.validator.readOffice, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.getAllClientByOffice(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                this.error('');
-            }
-        }));
-        this.viewAllOffice = this.assyncWrapper.wrap(this.validator.readOffice, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.viewAllOffice(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                this.error('');
-            }
-        }));
-        this.createOffice = this.assyncWrapper.wrap(this.validator.createOffice, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.createOffice(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                this.error('');
-            }
-        }));
-        this.editOffice = this.assyncWrapper.wrap(this.validator.editOffice, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.editOffice(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                this.error('');
-            }
-        }));
-        this.deleteOffice = this.assyncWrapper.wrap(this.validator.deleteOffice, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.deleteOffice(req);
-            if (data.success) {
-                res.status(200).json(data);
-            }
-            else {
-                this.error('');
-            }
-        }));
         this.getAppConfig = this.assyncWrapper.wrap(this.validator.readAppConfig, (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.getAppConfig(req);
             if (data.success) {
@@ -103,6 +40,42 @@ class AppConfigControllers extends abstract_controllers_1.default {
         }));
         this.updateAppConfigSignature = this.assyncWrapper.wrap(this.validator.readAppConfig, (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.updateAppConfigSignature(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('');
+            }
+        }));
+        this.addSignature = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.addSignature(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('');
+            }
+        }));
+        this.updateSignature = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.updateSignature(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('');
+            }
+        }));
+        this.updateSignatureStatus = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.updateSignatureStatus(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('');
+            }
+        }));
+        this.getSignatures = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getSignatures(req);
             if (data.success) {
                 res.status(200).json(data);
             }

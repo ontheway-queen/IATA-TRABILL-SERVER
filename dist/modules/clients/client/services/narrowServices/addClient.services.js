@@ -58,7 +58,7 @@ class AddClientService extends abstract_services_1.default {
                 }
                 yield this.updateVoucher(req, 'CL');
                 // insert audit
-                const message = `Client has been created,cl-id:${clientId}`;
+                const message = `ADDED CLIENT, NAME ${client_name}, ENTRY ${client_entry_id}`;
                 yield this.insertAudit(req, 'create', message, client_created_by, 'ACCOUNTS');
                 return {
                     success: true,

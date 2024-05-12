@@ -9,6 +9,7 @@ const blobServiceClient = BlobServiceClient.fromConnectionString(
 );
 const containerClient = blobServiceClient.getContainerClient(containerName);
 
+// IMAGE UPLOAD
 export const uploadImageToAzure_trabill = async (
   req: Request,
   res: Response,
@@ -35,6 +36,53 @@ export const uploadImageToAzure_trabill = async (
       await blockBlobClient.upload(image.buffer, image.buffer.length);
 
       const imageUrl = `https://trabillteststorage.blob.core.windows.net/${containerName}/${uniqueName}`;
+
+      const myObject: { [key: string]: any } = {};
+      myObject[key] = imageUrl;
+
+      imageURLlist.push(myObject);
+    }
+  }
+
+  req.imgUrl = imageURLlist;
+
+  next();
+};
+
+// SIGNATURE UPLOAD
+export const signatureUploadToAzure = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (!req.files) {
+    return res.status(400).send('No image uploaded');
+  }
+
+  const images = req.files as any;
+  const imageURLlist: any[] = [];
+
+  for (const key in images) {
+    if (Object.prototype.hasOwnProperty.call(images, key)) {
+      const element = images[key];
+
+      const image = element[0];
+
+      const currentDateTime = Date.now();
+      const uniqueName = 'signatures/' + currentDateTime + image.originalname;
+      const blockBlobClient = containerClient.getBlockBlobClient(uniqueName);
+
+      try {
+        await blockBlobClient.upload(image.buffer, image.size);
+
+        console.log([uniqueName]);
+      } catch (error) {
+        console.log({ error });
+      }
+
+      const imageUrl = `https://trabillteststorage.blob.core.windows.net/${containerName}/${uniqueName}`;
+
+      console.log([imageUrl]);
 
       const myObject: { [key: string]: any } = {};
       myObject[key] = imageUrl;

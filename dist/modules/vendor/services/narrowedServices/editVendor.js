@@ -68,7 +68,7 @@ class EditVendorService extends abstract_services_1.default {
                 //format existing vendor working categories, working countries and product data
                 yield conn.formatVendorDetailForUpdate(vendor_id, vendor_updated_by);
                 yield lib_1.default.insertProducts(conn, vendor_products_id, vendor_commission_rate, vendor_id);
-                const message = 'Vendor updated successfully';
+                const message = `UPDATED VENDOR, NAME ${vendor_name}`;
                 yield this.insertAudit(req, 'update', message, vendor_updated_by, 'VENDOR');
                 return { success: true, message };
             }));

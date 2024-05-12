@@ -59,7 +59,7 @@ class PassportServices extends abstract_services_1.default {
                 }
                 const passport_id = yield conn.addPassport(PassportData);
                 // insert audit
-                const message = `Passport added successfully`;
+                const message = `ADDED PASSPORT, PASSPORT NO ${passportParseInfo.passport_no}`;
                 yield this.insertAudit(req, 'create', message, passport_created_by, 'PASSPORT');
                 return {
                     success: true,
@@ -104,7 +104,7 @@ class PassportServices extends abstract_services_1.default {
                 }));
                 const passport_ids = yield conn.editPassport(passportInfo, passport_id);
                 // insert audit
-                const message = `Passport updated successfully`;
+                const message = `UPDATED PASSPORT, PASSPORT NO ${passport_no}`;
                 yield this.insertAudit(req, 'update', message, passport_created_by, 'PASSPORT');
                 return {
                     success: true,
@@ -190,7 +190,7 @@ class PassportServices extends abstract_services_1.default {
                 yield conn.statusPassport(passporStatusUpdateInfo, passport_id);
                 yield conn.smsLog(smsInfo);
                 yield conn.updatePstatusId(status_pstatus_id, passport_id);
-                const message = `Passport status changed successfully`;
+                const message = `UPDATED PASSPORT STATUS`;
                 yield this.insertAudit(req, 'update', message, status_created_by, 'PASSPORT');
                 return {
                     success: true,

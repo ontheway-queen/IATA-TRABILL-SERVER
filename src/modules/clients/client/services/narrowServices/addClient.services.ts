@@ -75,7 +75,7 @@ class AddClientService extends AbstractServices {
       await this.updateVoucher(req, 'CL');
 
       // insert audit
-      const message = `Client has been created,cl-id:${clientId}`;
+      const message = `ADDED CLIENT, NAME ${client_name}, ENTRY ${client_entry_id}`;
       await this.insertAudit(
         req,
         'create',

@@ -126,7 +126,7 @@ class EditPayroll extends abstract_services_1.default {
                 const payrollNewData = Object.assign(Object.assign({}, payrollData), { payroll_acctrxn_id,
                     payroll_charge_id });
                 yield conn.updatePayroll(payrollId, payrollNewData);
-                yield this.insertAudit(req, 'update', `Payroll has been updated ${previous_net_balance}/- to ${payroll_net_amount}/-`, payroll_updated_by, 'PAYROLL');
+                yield this.insertAudit(req, 'update', `UPDATED PAYROLL, SALARY BDT ${previous_net_balance}/- TO ${payroll_net_amount}/-`, payroll_updated_by, 'PAYROLL');
                 return {
                     success: true,
                     message: 'Payroll updated successfully',

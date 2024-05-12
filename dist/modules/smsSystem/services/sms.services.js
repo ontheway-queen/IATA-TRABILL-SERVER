@@ -62,7 +62,7 @@ class SmsServices extends abstract_services_1.default {
                 });
                 yield conn.smsLogArr(smsLogInfoArray);
                 // insert audit
-                yield this.insertAudit(req, 'update', message, smsInfoArr[0].created_by, 'SMS');
+                yield this.insertAudit(req, 'update', `SEND A MESSAGE, MESSAGE ${message}`, smsInfoArr[0].created_by, 'SMS');
                 return {
                     success: true,
                     message,

@@ -25,7 +25,10 @@ class AddExistingClient extends abstract_services_1.default {
                 const conn = this.models.reissueAirticket(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
+                const combined_conn = this.models.combineClientModel(req, trx);
                 const invoice_no = yield this.generateVoucher(req, 'ARI');
+                const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(invoice_combclient_id);
+                const invoice_client_previous_due = yield combined_conn.getClientLastBalanceById(client_id, combined_id);
                 // TOOLS
                 const prevInvCateId = yield conn.getExistingInvCateId(airticket_existing_invoiceid);
                 const previousData = yield conn.getPreviousAirTicketData(prevInvCateId, airticket_existing_airticket_id);
@@ -42,7 +45,6 @@ class AddExistingClient extends abstract_services_1.default {
                     ctrxn_airticket_no: airticket_ticket_no,
                 };
                 const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
-                const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(invoice_combclient_id);
                 const invoice_information = {
                     invoice_combined_id: combined_id,
                     invoice_client_id: client_id,
@@ -59,11 +61,12 @@ class AddExistingClient extends abstract_services_1.default {
                     invoice_cltrxn_id,
                     invoice_total_profit: airticket_profit,
                     invoice_total_vendor_price: airticket_purchase_price,
+                    invoice_client_previous_due,
                 };
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoice_information);
                 // ADVANCE MR
-                if ((0, invoice_helpers_1.isEmpty)(req.body.money_receipt)) {
-                    yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, client_id, combined_id, airticket_client_price);
+                if (invoice_client_previous_due > 0) {
+                    yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, client_id, combined_id, airticket_client_price, invoice_client_previous_due);
                 }
                 const { combined_id: airticket_vendor_combine_id, vendor_id: airticket_vendor_id, } = (0, common_helper_1.separateCombClientToId)(comb_vendor);
                 // VENDOR TRANSACTIONS

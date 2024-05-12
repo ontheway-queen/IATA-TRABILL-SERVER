@@ -287,6 +287,26 @@ class InvoiceAirticketModel extends abstract_models_1.default {
             }
             return {};
         });
+        // INVOICE CLIENT PAYMENT
+        this.getInvoiceClientPayment = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .select('invclientpayment_moneyreceipt_id', 'invclientpayment_amount as receipt_total_amount', 'receipt_payment_date', 'user_full_name as received_by', 'acctype_name', this.db.raw('COALESCE(cl.client_name, ccl.combine_name) AS client_name'), this.db.raw('COALESCE(mr.receipt_money_receipt_no, mr.receipt_vouchar_no) AS receipt_money_receipt_no'), 'mr.receipt_payment_to', this.db.raw("COALESCE(mr.receipt_note, 'N/A') AS receipt_note "))
+                .from('trabill_invoice_client_payments')
+                .join('trabill_users', { user_id: 'invclientpayment_collected_by' })
+                .leftJoin('trabill_money_receipts as mr', {
+                receipt_id: 'invclientpayment_moneyreceipt_id',
+            })
+                .leftJoin('trabill_accounts_type', {
+                acctype_id: 'receipt_payment_type',
+            })
+                .leftJoin('trabill_clients as cl', {
+                invclientpayment_client_id: 'cl.client_id',
+            })
+                .leftJoin('trabill_combined_clients as ccl', 'ccl.combine_id', 'invclientpayment_combined_id')
+                .where('invclientpayment_invoice_id', invoice_id)
+                .andWhereNot('invclientpayment_is_deleted', 1)
+                .andWhereNot('receipt_has_deleted', 1);
+        });
     }
     // INVOICE AIRTICKET ITEM
     insertInvoiceAirticketItem(invoiceAirticketItems) {

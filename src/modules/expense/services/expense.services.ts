@@ -381,6 +381,8 @@ class ExpneseService extends AbstractServices {
 
     const data = await conn.headInfos(expense_id);
 
+    console.log({ data, expense_id });
+
     return { success: true, data };
   };
 

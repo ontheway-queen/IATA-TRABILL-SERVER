@@ -17,8 +17,9 @@ class InvoiceAirTicketRouter extends abstract_routers_1.default {
         this.routers.get('/client-due/:id', this.controllers.getClientDue);
         this.routers.get('/is-exist/:ticket', this.controllers.isTicketAlreadyExist);
         this.routers.get('/view-invoice-activity/:id', this.controllers.getInvoiceAcitivity);
-        // ========= INVOICE AIRTICKET ==============
+        // ========= INVOICE AIR TICKET ==============
         this.routers.get('/invoice-details-for-void/:invoice_id', this.controllers.getInvoiceInfoForVoid);
+        this.routers.get('/payment/:invoice_id', this.controllers.getInvoiceClientPayment);
         this.routers.put('/void/:invoice_id', this.controllers.voidInvoiceAirticket);
         this.routers
             .route('/')

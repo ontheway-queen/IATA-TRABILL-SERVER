@@ -127,10 +127,10 @@ class CreatePayroll extends abstract_services_1.default {
                     if (deductionInfo.length)
                         yield conn.createPayrollDeductions(deductionInfo);
                 }
-                yield this.insertAudit(req, 'create', `Payroll has been created ${payroll_net_amount}/-`, payroll_created_by, 'PAYROLL');
+                yield this.insertAudit(req, 'create', `ADDED PAYROLL, VOUCHER ${payroll_vouchar_no}, SALARY BDT ${payroll_net_amount}/-`, payroll_created_by, 'PAYROLL');
                 return {
                     success: true,
-                    message: 'Payroll created successfuly',
+                    message: 'Payroll created successfully',
                     data: payroll_id,
                 };
             }));

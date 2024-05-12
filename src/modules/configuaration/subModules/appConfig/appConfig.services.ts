@@ -1,9 +1,9 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
 import {
-  CreateIOffices,
-  EditIOffices,
   IAppConfig,
+  ISignatureDB,
+  ISignatureReqBody,
   ImagesTypes,
 } from '../../types/configuration.interfaces';
 
@@ -11,100 +11,6 @@ class AppConfigServices extends AbstractServices {
   constructor() {
     super();
   }
-
-  public getAllOffice = async (req: Request) => {
-    const conn = this.models.configModel.appConfig(req);
-
-    const data = await conn.getAllOffice();
-
-    return { success: true, ...data };
-  };
-
-  public getAllClientByOffice = async (req: Request) => {
-    const { page, size, search } = req.query as {
-      page: string;
-      size: string;
-      search: string;
-    };
-
-    const { office_id } = req.params as { office_id: string };
-
-    const conn = this.models.configModel.appConfig(req);
-
-    const data = await conn.getAllClientByOffice(
-      Number(page) || 1,
-      Number(size) || 20,
-      search,
-      office_id
-    );
-
-    return { success: true, ...data };
-  };
-
-  public getAllOfficeForEdit = async (req: Request) => {
-    const { office_id } = req.params as { office_id: string };
-
-    const conn = this.models.configModel.appConfig(req);
-
-    const data = await conn.getAllOfficeForEdit(office_id);
-
-    return { success: true, data };
-  };
-
-  public viewAllOffice = async (req: Request) => {
-    const conn = this.models.configModel.appConfig(req);
-
-    const data = await conn.viewAllOffice();
-
-    return { success: true, data };
-  };
-
-  public createOffice = async (req: Request) => {
-    const body = req.body as CreateIOffices;
-
-    const { office_created_by } = req.body as { office_created_by: number };
-
-    const conn = this.models.configModel.appConfig(req);
-
-    const data = await conn.createOffice(body);
-
-    const message = 'Office has been created';
-    await this.insertAudit(req, 'create', message, office_created_by, 'RCM');
-
-    return { success: true, message: 'Office created successfully', data };
-  };
-
-  public editOffice = async (req: Request) => {
-    const { office_id } = req.params as { office_id: string };
-
-    const body = req.body as EditIOffices;
-
-    const { office_updated_by } = req.body as { office_updated_by: number };
-
-    const conn = this.models.configModel.appConfig(req);
-
-    await conn.editOffice(body, office_id);
-
-    const message = 'Office has been updated';
-    await this.insertAudit(req, 'update', message, office_updated_by, 'RCM');
-
-    return { success: true, message: 'Office updated successfully' };
-  };
-
-  public deleteOffice = async (req: Request) => {
-    const { office_id } = req.params as { office_id: string };
-
-    const { deleted_by } = req.body as { deleted_by: number };
-
-    const conn = this.models.configModel.appConfig(req);
-
-    await conn.deleteOffice(office_id);
-
-    const message = 'Office has been deleted';
-    await this.insertAudit(req, 'delete', message, deleted_by, 'RCM');
-
-    return { success: true, message: 'Office deleted successfully' };
-  };
 
   public getAppConfig = async (req: Request) => {
     const conn = this.models.configModel.appConfig(req);
@@ -147,6 +53,98 @@ class AppConfigServices extends AbstractServices {
     await conn.updateAppConfigSignature(customBody);
 
     return { success: true, message: 'App configuration updated successfully' };
+  };
+
+  // SIGNATURE
+  public addSignature = async (req: Request) => {
+    const conn = this.models.configModel.appConfig(req);
+    const body = req.body as ISignatureReqBody;
+
+    const imageList = req.imgUrl;
+
+    const imageUrlObj: {
+      sig_signature: string;
+    } = Object.assign({}, ...imageList);
+
+    const sig_data: ISignatureDB = {
+      sig_employee_id: body.sig_employee_id,
+      sig_user_id: body.sig_user_id,
+      sig_type: body.sig_type,
+      sig_name_title: body.sig_name_title,
+      sig_position: body.sig_position,
+      sig_company_name: body.sig_company_name,
+      sig_address: body.sig_address,
+      sig_city: body.sig_city,
+      sig_state: body.sig_state,
+      sig_zip_code: body.sig_zip_code,
+      sig_email: body.sig_email,
+      sig_signature: imageUrlObj.sig_signature,
+      sig_org_id: req.agency_id,
+      sig_created_by: req.user_id,
+    };
+
+    await conn.insertSignature(sig_data);
+
+    return { success: true, imageUrlObj };
+  };
+
+  public updateSignature = async (req: Request) => {
+    const sig_id = req.params.sig_id;
+    const conn = this.models.configModel.appConfig(req);
+    const body = req.body as ISignatureReqBody;
+
+    const imageList = req.imgUrl;
+
+    const imageUrlObj: {
+      sig_signature: string;
+    } = Object.assign({}, ...imageList);
+
+    const sig_data: ISignatureDB = {
+      sig_employee_id: body.sig_employee_id,
+      sig_user_id: body.sig_user_id,
+      sig_type: body.sig_type,
+      sig_name_title: body.sig_name_title,
+      sig_position: body.sig_position,
+      sig_company_name: body.sig_company_name,
+      sig_address: body.sig_address,
+      sig_city: body.sig_city,
+      sig_state: body.sig_state,
+      sig_zip_code: body.sig_zip_code,
+      sig_email: body.sig_email,
+      sig_signature: body?.sig_signature || imageUrlObj?.sig_signature || null,
+      sig_org_id: req.agency_id,
+      sig_created_by: req.user_id,
+    };
+
+    await conn.updateSignature(sig_data, sig_id);
+
+    // DELETE PREVIOUS SIGNATURE
+    if (!body?.sig_signature) {
+      const signature = await conn.previousSignature(sig_id);
+
+      await this.deleteFile.delete_image(signature);
+    }
+
+    return { success: true, imageUrlObj };
+  };
+
+  public updateSignatureStatus = async (req: Request) => {
+    const sig_id = req.params.sig_id;
+    const conn = this.models.configModel.appConfig(req);
+
+    const { status } = req.body as { status: 'ACTIVE' | 'INACTIVE' };
+
+    await conn.updateSignatureStatus(status, sig_id);
+
+    return { success: true };
+  };
+
+  public getSignatures = async (req: Request) => {
+    const conn = this.models.configModel.appConfig(req);
+
+    const data = await conn.selectSignature();
+
+    return { success: true, ...data };
   };
 }
 export default AppConfigServices;

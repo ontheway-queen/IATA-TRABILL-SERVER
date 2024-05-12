@@ -72,7 +72,7 @@ class DeleteTourPackRefund extends AbstractServices {
         }
       }
 
-      const message = 'Tour refund has been deleted';
+      const message = `DELETED REFUND TOUR PACKAGE/:${refund_id}`;
 
       await this.insertAudit(req, 'update', message, req.user_id, 'INVOICES');
       return {

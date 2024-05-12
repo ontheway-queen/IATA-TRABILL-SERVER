@@ -177,7 +177,7 @@ class AddVendorPayment extends abstract_services_1.default {
                     yield conn.insertVendorPaymentPassport(paymentPassportData);
                 }
                 // insert audit
-                const message = `Payment added to Vendor (acc_last_balance = ${payment_amount})/-`;
+                const message = `ADDED VENDOR PAY, VOUCHER ${vouchar_no}, BDT ${payment_amount}/-`;
                 yield this.insertAudit(req, 'create', message, created_by, 'VENDOR_PAYMENT');
                 return { success: true, message, vpay_id };
             }));

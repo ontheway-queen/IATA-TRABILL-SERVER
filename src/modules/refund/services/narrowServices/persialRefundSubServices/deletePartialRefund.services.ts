@@ -79,7 +79,7 @@ class DeletePartialRefund extends AbstractServices {
 
       await conn.updateInvoiceAirticketIsRefund(prfnd_invoice_id, 0);
 
-      const audit_content = `Persial refund deleted voucher no: ${prfnd_vouchar_number}`;
+      const audit_content = `DELETED PARTIAL REFUND, VOUCHER ${prfnd_vouchar_number}`;
       await this.insertAudit(
         req,
         'delete',
@@ -87,7 +87,7 @@ class DeletePartialRefund extends AbstractServices {
         deleted_by,
         'REFUND'
       );
-      return { success: true, message: 'Persial refund deleted successfuly' };
+      return { success: true, message: 'Partial refund deleted successfully' };
     });
   };
 }

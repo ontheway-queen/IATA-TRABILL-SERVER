@@ -7,7 +7,6 @@ import InvoiceHelpers, {
   MoneyReceiptAmountIsValid,
   addAdvanceMr,
   getClientOrCombId,
-  isEmpty,
   isNotEmpty,
 } from '../../../../../common/helpers/invoice.helpers';
 import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
@@ -76,6 +75,7 @@ class AddInvoiceOther extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.invoiceOtherModel(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
+      const combined_conn = this.models.combineClientModel(req, trx);
 
       const trxns = new Trxns(req, trx);
 
@@ -108,6 +108,12 @@ class AddInvoiceOther extends AbstractServices {
         productName
       );
 
+      const invoice_client_previous_due =
+        await combined_conn.getClientLastBalanceById(
+          invoice_client_id as number,
+          invoice_combined_id as number
+        );
+
       const invoieInfo: IInvoiceInfoDb = {
         ...clientTransId,
         invoice_client_id,
@@ -124,18 +130,20 @@ class AddInvoiceOther extends AbstractServices {
         invoice_total_profit,
         invoice_total_vendor_price,
         invoice_reference,
+        invoice_client_previous_due,
       };
 
       const invoice_id = await common_conn.insertInvoicesInfo(invoieInfo);
 
       // ADVANCE MR
-      if (isEmpty(req.body.money_receipt)) {
+      if (invoice_client_previous_due > 0) {
         await addAdvanceMr(
           common_conn,
           invoice_id,
           invoice_client_id,
           invoice_combined_id,
-          invoice_net_total
+          invoice_net_total,
+          invoice_client_previous_due
         );
       }
 

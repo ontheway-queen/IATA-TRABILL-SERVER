@@ -182,7 +182,7 @@ class EditAdvanceReturn extends AbstractServices {
 
       // insert audit
 
-      const message = 'Advance return updated successfully';
+      const message = `UPDATED VENDOR ADVANCE RETURN, VOUCHER ${prev_voucher_no}, BDT ${advance_amount}/-`;
 
       await this.insertAudit(
         req,

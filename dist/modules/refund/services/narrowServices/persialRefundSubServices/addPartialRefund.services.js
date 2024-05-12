@@ -276,7 +276,7 @@ class AddPartialRefundServices extends abstract_services_1.default {
                 }
                 yield conn.addPartialRefundVendorInfo(persialVendorInfos);
                 yield conn.updateInvoiceAirticketIsRefund(invoice_id, 1);
-                const audit_content = `Partial refund has been created voucher no:${voucher_no}`;
+                const audit_content = `ADDED AIR TICKET PARTIAL REFUND, VOUCHER ${voucher_no}, BDT ${prfnd_total_amount}/-, RETURN BDT ${prfnd_return_amount}/-`;
                 yield this.insertAudit(req, 'create', audit_content, created_by, 'REFUND');
                 return {
                     success: true,

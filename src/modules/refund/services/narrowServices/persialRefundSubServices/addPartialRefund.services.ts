@@ -361,7 +361,7 @@ class AddPartialRefundServices extends AbstractServices {
 
       await conn.updateInvoiceAirticketIsRefund(invoice_id, 1);
 
-      const audit_content = `Partial refund has been created voucher no:${voucher_no}`;
+      const audit_content = `ADDED AIR TICKET PARTIAL REFUND, VOUCHER ${voucher_no}, BDT ${prfnd_total_amount}/-, RETURN BDT ${prfnd_return_amount}/-`;
 
       await this.insertAudit(
         req,

@@ -64,7 +64,7 @@ class DeleteOtherRefund extends abstract_services_1.default {
                 const remaining_quantity = billing_remaining_quantity + vrefund_quantity;
                 yield conn.updateRemainingQty(refund_invoice_id, 1, remaining_quantity);
                 yield conn.deleteOtherRefund(refund_id, req.user_id);
-                yield this.insertAudit(req, 'delete', 'Other refund has been deleted', req.user_id, 'REFUND');
+                yield this.insertAudit(req, 'delete', `DELETED OTHER REFUND/:${refund_id}`, req.user_id, 'REFUND');
                 return {
                     success: true,
                     message: 'Other refund deleted successfully',

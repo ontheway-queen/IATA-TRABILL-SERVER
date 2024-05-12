@@ -17,15 +17,6 @@ class AppConfigRoutes extends abstract_routers_1.default {
     }
     callRoute() {
         this.routers
-            .route('/')
-            .get(this.controllers.getAllOffice)
-            .post(this.controllers.createOffice);
-        this.routers.get('/view_all', this.controllers.viewAllOffice);
-        // This for Get all client based on manpower
-        this.routers
-            .route('/all-client/:office_id')
-            .get(this.controllers.getAllClientByOffice);
-        this.routers
             .route('/app-config')
             .get(this.controllers.getAppConfig)
             .patch(this.controllers.updateAppConfig);
@@ -33,11 +24,15 @@ class AppConfigRoutes extends abstract_routers_1.default {
             { name: 'tac_sig_url', maxCount: 1 },
             { name: 'tac_wtr_mark_url', maxCount: 1 },
         ]), ImageUploadToAzure_trabill_1.uploadImageToAzure_trabill, this.controllers.updateAppConfigSignature);
+        // SIGNATURE
         this.routers
-            .route('/:office_id')
-            .get(this.controllers.getAllOfficeForEdit)
-            .patch(this.controllers.editOffice)
-            .delete(this.controllers.deleteOffice);
+            .route('/signature')
+            .post(upload.fields([{ name: 'sig_signature', maxCount: 1 }]), ImageUploadToAzure_trabill_1.signatureUploadToAzure, this.controllers.addSignature)
+            .get(this.controllers.getSignatures);
+        this.routers
+            .route('/signature/:sig_id')
+            .patch(upload.fields([{ name: 'sig_signature', maxCount: 1 }]), ImageUploadToAzure_trabill_1.signatureUploadToAzure, this.controllers.updateSignature)
+            .put(this.controllers.updateSignatureStatus);
     }
 }
 exports.default = AppConfigRoutes;

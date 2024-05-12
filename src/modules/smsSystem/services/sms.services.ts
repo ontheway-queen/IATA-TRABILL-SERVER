@@ -91,7 +91,7 @@ class SmsServices extends AbstractServices {
       await this.insertAudit(
         req,
         'update',
-        message,
+        `SEND A MESSAGE, MESSAGE ${message}`,
         smsInfoArr[0].created_by,
         'SMS'
       );

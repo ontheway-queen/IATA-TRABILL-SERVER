@@ -141,6 +141,16 @@ class InvoiceAirticketService extends abstract_services_1.default {
                 data,
             };
         });
+        // INVOICE CLIENT PAYMENT
+        this.getInvoiceClientPayment = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { invoice_id } = req.params;
+            const conn = this.models.invoiceAirticketModel(req);
+            const data = yield conn.getInvoiceClientPayment(invoice_id);
+            return {
+                success: true,
+                data,
+            };
+        });
         // ============= narrow services ==============
         this.pnrDetails = new pnr_details_service_1.default().pnrDetails;
         this.addInvoiceAirticket = new addInvoiceAirticket_1.default().addInvoiceAirTicket;

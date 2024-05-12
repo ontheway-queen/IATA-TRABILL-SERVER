@@ -39,9 +39,10 @@ export interface IAdvanceMr {
   payable_amount: number;
 }
 export interface IAdvanceMrInsert {
-  invclientpayment_moneyreceipt_id: number;
+  invclientpayment_moneyreceipt_id: number | null;
   invclientpayment_amount: number;
   invclientpayment_invoice_id: number;
   invclientpayment_client_id: number | null;
   invclientpayment_combined_id: number | null;
+  invclientpayment_purpose?: string;
 }

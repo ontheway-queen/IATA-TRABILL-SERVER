@@ -189,7 +189,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                             history_invoice_id: invoice_id,
                             history_created_by: receipt_created_by,
                             history_invoice_payment_amount: payment_amount,
-                            invoicelog_content: 'Money receipt hass been deleted',
+                            invoicelog_content: 'Money receipt has been deleted',
                         };
                         yield common_conn.insertInvoiceHistory(history_data);
                         paidAmountNow += payment_amount;
@@ -220,7 +220,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                     receipt_id,
                 };
                 yield new CommonSmsSend_services_1.default().sendSms(req, smsInvoiceDate, trx);
-                yield this.insertAudit(req, 'create', `Money receipt added ,Voucher - ${receipt_payment_to}, Net - ${receipt_total_amount}/- `, receipt_created_by, 'MONEY_RECEIPT');
+                yield this.insertAudit(req, 'create', `ADDED MONEY RECEIPT ,VOUCHER ${receipt_vouchar_no}, BDT ${receipt_total_amount}/- `, receipt_created_by, 'MONEY_RECEIPT');
                 yield this.updateVoucher(req, 'MR');
                 return {
                     success: true,

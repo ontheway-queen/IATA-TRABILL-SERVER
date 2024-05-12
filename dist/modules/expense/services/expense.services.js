@@ -219,6 +219,7 @@ class ExpneseService extends abstract_services_1.default {
             const { expense_id } = req.params;
             const conn = this.models.expenseModel(req);
             const data = yield conn.headInfos(expense_id);
+            console.log({ data, expense_id });
             return { success: true, data };
         });
         this.expenseCheques = (req) => __awaiter(this, void 0, void 0, function* () {

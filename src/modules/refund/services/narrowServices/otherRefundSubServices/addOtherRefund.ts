@@ -359,14 +359,14 @@ class AddOtherRefund extends AbstractServices {
       await this.insertAudit(
         req,
         'delete',
-        'Other refund has been created',
+        `REFUNDED INVOICE OTHER, VOUCHER ${other_vouchar_number}, BDT ${total_refund_amount}/-, RETURN BDT ${total_return_amount}/-`,
         created_by,
         'REFUND'
       );
 
       return {
         success: true,
-        message: 'Other refund has been created successfuly',
+        message: 'Other refund has been created successfully',
         refund_id,
       };
     });

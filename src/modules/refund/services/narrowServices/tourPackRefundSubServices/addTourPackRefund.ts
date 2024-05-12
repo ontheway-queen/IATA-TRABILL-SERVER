@@ -413,7 +413,7 @@ class AddTourPackRefund extends AbstractServices {
       // update vendor product is refund
       await conn.updateTourVendorsProductIsRefund(invoice_id, 1);
 
-      const message = 'Tour refund created successfully';
+      const message = `REFUNDED TOUR PACKAGE VOUCHER ${tour_vouchar_number}, BDT ${crefund_total_amount}/-, RETURN BDT ${crefund_return_amount}/-`;
 
       await this.insertAudit(req, 'create', message, created_by, 'REFUND');
 

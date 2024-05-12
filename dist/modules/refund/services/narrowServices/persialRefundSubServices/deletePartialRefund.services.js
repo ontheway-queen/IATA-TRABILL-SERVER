@@ -56,9 +56,9 @@ class DeletePartialRefund extends abstract_services_1.default {
                 yield conn.DeletePartialRefund(refund_id, deleted_by);
                 yield conn.deletePartialVendorRefund(refund_id, deleted_by);
                 yield conn.updateInvoiceAirticketIsRefund(prfnd_invoice_id, 0);
-                const audit_content = `Persial refund deleted voucher no: ${prfnd_vouchar_number}`;
+                const audit_content = `DELETED PARTIAL REFUND, VOUCHER ${prfnd_vouchar_number}`;
                 yield this.insertAudit(req, 'delete', audit_content, deleted_by, 'REFUND');
-                return { success: true, message: 'Persial refund deleted successfuly' };
+                return { success: true, message: 'Partial refund deleted successfully' };
             }));
         });
     }

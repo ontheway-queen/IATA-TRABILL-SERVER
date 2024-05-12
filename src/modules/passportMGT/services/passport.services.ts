@@ -121,7 +121,7 @@ class PassportServices extends AbstractServices {
       const passport_id = await conn.addPassport(PassportData);
 
       // insert audit
-      const message = `Passport added successfully`;
+      const message = `ADDED PASSPORT, PASSPORT NO ${passportParseInfo.passport_no}`;
       await this.insertAudit(
         req,
         'create',
@@ -216,7 +216,7 @@ class PassportServices extends AbstractServices {
       const passport_ids = await conn.editPassport(passportInfo, passport_id);
 
       // insert audit
-      const message = `Passport updated successfully`;
+      const message = `UPDATED PASSPORT, PASSPORT NO ${passport_no}`;
       await this.insertAudit(
         req,
         'update',
@@ -415,7 +415,7 @@ class PassportServices extends AbstractServices {
 
       await conn.updatePstatusId(status_pstatus_id, passport_id);
 
-      const message = `Passport status changed successfully`;
+      const message = `UPDATED PASSPORT STATUS`;
       await this.insertAudit(
         req,
         'update',

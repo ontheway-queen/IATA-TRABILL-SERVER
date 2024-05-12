@@ -76,7 +76,7 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                 const trxns = new Trxns_1.default(req, trx);
                 const utils = new invoice_utils_1.InvoiceUtils(invoice_info, common_conn);
                 const invoice_no = yield this.generateVoucher(req, 'AIT');
-                const invoice_client_previous_due = yield combined_conn.getClientLastBalanceById(invoice_client_id, invoice_combined_id);
+                const cl_preset_balance = yield combined_conn.getClientLastBalanceById(invoice_client_id, invoice_combined_id);
                 const ctrxn_pnr = ticketInfo.length &&
                     ticketInfo.map((item) => item.ticket_details.airticket_pnr).join(', ');
                 const ticket_no = ticketInfo[0] &&
@@ -98,16 +98,14 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                     invoice_sales_man_id,
                     invoice_sub_total,
                     invoice_note,
-                    invoice_created_by,
-                    invoice_client_previous_due,
-                    invoice_walking_customer_name,
+                    invoice_created_by, invoice_client_previous_due: cl_preset_balance, invoice_walking_customer_name,
                     invoice_reference,
                     invoice_total_profit,
                     invoice_total_vendor_price });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoiceData);
                 // ADVANCE MR
-                if ((0, invoice_helpers_1.isEmpty)(req.body.money_receipt)) {
-                    yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, invoice_client_id, invoice_combined_id, invoice_net_total);
+                if (cl_preset_balance > 0) {
+                    yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, invoice_client_id, invoice_combined_id, invoice_net_total, cl_preset_balance);
                 }
                 // AGENT TRANSACTION
                 yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 90, 'INVOICE AIR TICKET');

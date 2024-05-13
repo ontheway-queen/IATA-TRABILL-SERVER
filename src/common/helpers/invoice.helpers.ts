@@ -237,10 +237,13 @@ export const addAdvanceMr = async (
     }
   }
 
-  if (need_to_payment > 0) {
+  const clHaveAdvance =
+    advance_amount > need_to_payment ? need_to_payment : advance_amount;
+
+  if (clHaveAdvance  > 0) {
     const invClPay = {
       invclientpayment_moneyreceipt_id: null,
-      invclientpayment_amount: need_to_payment,
+      invclientpayment_amount: clHaveAdvance ,
       invclientpayment_invoice_id: inv_id,
       invclientpayment_client_id: cl_id,
       invclientpayment_combined_id: com_id,

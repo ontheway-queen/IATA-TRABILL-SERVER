@@ -106,6 +106,9 @@ class AddAirTicketRefund extends abstract_services_1.default {
                         ctrxn_route: airticketRoute.join(', '),
                     };
                     crefund_charge_ctrxnid = yield trxns.clTrxnInsert(clRefundChargeTrxnBody);
+                    // PAYMENT TO CLIENT INVOICE DUE
+                    if (+crefund_return_amount > 0) {
+                    }
                 }
                 // MONEY RETURN
                 else {

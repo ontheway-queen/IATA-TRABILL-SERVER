@@ -968,7 +968,13 @@ class ReportModel extends AbstractModels {
       : (date = moment(new Date(date)).format('YYYY-MM'));
 
     const data = await this.query()
-      .select('head_name', 'expdetails_amount', 'expense_vouchar_no')
+      .select(
+        'head_name',
+        'expdetails_amount',
+        'expense_vouchar_no',
+        'expense_note',
+        'expense_note'
+      )
       .from('trabill_expense_details')
       .leftJoin('trabill_expense_head', { head_id: 'expdetails_head_id' })
       .leftJoin('trabill_expenses', { expense_id: 'expdetails_expense_id' })

@@ -4,6 +4,9 @@ CHANGE COLUMN `vendor_registration_date` `vendor_registration_date` TIMESTAMP NU
 ALTER TABLE `trabill`.`trabill_invoice_client_payments` 
 ADD COLUMN `invclientpayment_purpose` VARCHAR(45) NULL AFTER `invclientpayment_ticket_number`;
 
+ALTER TABLE `trabill`.`trabill_invoice_client_payments` 
+CHANGE COLUMN `invclientpayment_purpose` `invclientpayment_purpose` VARCHAR(45) NULL DEFAULT NULL AFTER `invclientpayment_date`;
+
 
 
 

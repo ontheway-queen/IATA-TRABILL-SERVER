@@ -704,7 +704,7 @@ class ReportModel extends abstract_models_1.default {
                 ? (date = (0, moment_1.default)(date).format('YYYY-MM-DD'))
                 : (date = (0, moment_1.default)(new Date(date)).format('YYYY-MM'));
             const data = yield this.query()
-                .select('head_name', 'expdetails_amount', 'expense_vouchar_no')
+                .select('head_name', 'expdetails_amount', 'expense_vouchar_no', 'expense_note', 'expense_note')
                 .from('trabill_expense_details')
                 .leftJoin('trabill_expense_head', { head_id: 'expdetails_head_id' })
                 .leftJoin('trabill_expenses', { expense_id: 'expdetails_expense_id' })

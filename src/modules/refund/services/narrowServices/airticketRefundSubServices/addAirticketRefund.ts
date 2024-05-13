@@ -162,6 +162,11 @@ class AddAirTicketRefund extends AbstractServices {
         crefund_charge_ctrxnid = await trxns.clTrxnInsert(
           clRefundChargeTrxnBody
         );
+
+        // PAYMENT TO CLIENT INVOICE DUE
+        if(+crefund_return_amount>0){
+          
+        }
       }
 
       // MONEY RETURN

@@ -19,7 +19,6 @@ class AppConfigModels extends AbstractModels {
         `tac_inv_mob`,
         `tac_ait_cal`,
         `tac_wtr_mark`,
-        'tac_airticket_type',
         `tac_sig_url`,
         `tac_wtr_mark_url`,
         `tac_signtr`,
@@ -51,7 +50,6 @@ class AppConfigModels extends AbstractModels {
       tac_invoice_footer_note: string;
       tac_inv_curr_sym: string;
       tac_auto_email: 0 | 1;
-      tac_airticket_type: 'IATA' | 'NON_IATA';
       tac_wk_day: number;
     }[];
 

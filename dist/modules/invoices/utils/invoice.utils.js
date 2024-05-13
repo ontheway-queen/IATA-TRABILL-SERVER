@@ -27,7 +27,6 @@ class InvoiceUtils {
                 ctrxn_pnr: value.ctrxn_pnr,
                 ctrxn_route: value.ctrxn_route,
                 ctrxn_airticket_no: value.ticket_no,
-                ctrxn_pax: value.ctrxn_pax,
             };
             const clDiscountTransBody = {
                 ctrxn_type: 'CREDIT',
@@ -41,7 +40,6 @@ class InvoiceUtils {
                 ctrxn_pnr: value.ctrxn_pnr,
                 ctrxn_route: value.ctrxn_route,
                 ctrxn_airticket_no: value.ticket_no,
-                ctrxn_pax: value.ctrxn_pax,
             };
             const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
             let invoice_discount_cltrxn_id = null;
@@ -66,7 +64,6 @@ class InvoiceUtils {
                 ctrxn_airticket_no: value.ticket_no,
                 ctrxn_pnr: value.ctrxn_pnr,
                 ctrxn_route: value.ctrxn_route,
-                ctrxn_pax: value.ctrxn_pax,
             };
             const clDiscountTransBody = {
                 ctrxn_trxn_id: value.prevClChargeTransId,
@@ -81,7 +78,6 @@ class InvoiceUtils {
                 ctrxn_airticket_no: value.ticket_no,
                 ctrxn_pnr: value.ctrxn_pnr,
                 ctrxn_route: value.ctrxn_route,
-                ctrxn_pax: value.ctrxn_pax,
             };
             yield trxns.clTrxnUpdate(clTrxnBody);
             let invoice_discount_cltrxn_id = value.prevClChargeTransId;

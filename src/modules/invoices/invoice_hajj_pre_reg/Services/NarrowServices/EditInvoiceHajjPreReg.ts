@@ -68,10 +68,6 @@ class EditInvoiceHajjpre extends AbstractServices {
       const { prevCtrxnId, prevClChargeTransId } =
         await common_conn.getPreviousInvoices(invoice_id);
 
-      const ctrxn_pax = billing_information
-        .map((item) => item.pax_name)
-        .join(' ,');
-
       const productsIds = billing_information.map(
         (item) => item.billing_product_id
       );
@@ -89,7 +85,6 @@ class EditInvoiceHajjpre extends AbstractServices {
         prevCtrxnId,
         invoice_no,
         extra_particular: 'Hajj Pre Reg',
-        ctrxn_pax,
         note,
       });
 

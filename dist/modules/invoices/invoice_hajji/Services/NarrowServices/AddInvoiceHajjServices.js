@@ -58,8 +58,6 @@ class AddInvoiceHajjServices extends abstract_services_1.default {
                 const trxns = new Trxns_1.default(req, trx);
                 const invoice_no = yield this.generateVoucher(req, 'IH');
                 // CLIENT COMBINED TRANSACTIONS
-                const ctrxn_pax = billing_information[0] &&
-                    billing_information.map((item) => item.pax_name).join(' ,');
                 const ctrxn_pnr = pilgrims_information[0] &&
                     pilgrims_information.map((item) => item.ticket_pnr).join(', ');
                 const ctrnx_ticket_no = pilgrims_information[0] &&
@@ -82,7 +80,6 @@ class AddInvoiceHajjServices extends abstract_services_1.default {
                     extra_particular: 'Hajj',
                     invoice_no,
                     ticket_no: ctrnx_ticket_no,
-                    ctrxn_pax,
                     ctrxn_pnr,
                     ctrxn_route,
                     note,

@@ -134,7 +134,7 @@ class EditInvoiceVisa extends abstract_services_1.default {
                     invoice_created_by,
                     invoice_id: invoice_id,
                 };
-                yield new InsertVisaBilling_1.default().insertVisaBilling(req, commonVisaData, ctrxn_pax_name, trx);
+                yield new InsertVisaBilling_1.default().insertVisaBilling(req, commonVisaData, trx);
                 // Invoice history
                 const history_data = {
                     history_activity_type: 'INVOICE_UPDATED',

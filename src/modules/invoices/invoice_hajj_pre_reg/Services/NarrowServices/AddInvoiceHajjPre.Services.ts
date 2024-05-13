@@ -74,10 +74,6 @@ class AddInvoiceHajjpre extends AbstractServices {
 
       const invoice_no = await this.generateVoucher(req, 'IHP');
 
-      const ctrxn_pax = billing_information
-        .map((item) => item.pax_name)
-        .join(' ,');
-
       const productsIds = billing_information.map(
         (item) => item.billing_product_id
       );
@@ -93,7 +89,6 @@ class AddInvoiceHajjpre extends AbstractServices {
       const clientTransId = await utils.clientTrans(trxns, {
         invoice_no,
         extra_particular: 'Hajj Pre Reg',
-        ctrxn_pax,
         note,
       });
 

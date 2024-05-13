@@ -58,7 +58,6 @@ class AddInvoiceVisa extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
-      let ctrxn_pax_name = null;
 
       let invoice_total_profit = 0;
       let invoice_total_vendor_price = 0;
@@ -74,12 +73,6 @@ class AddInvoiceVisa extends AbstractServices {
         const passport_id = passport_information.map(
           (item) => item.passport_id
         );
-
-        if (passport_id[0]) {
-          ctrxn_pax_name = await common_conn.getPassportName(
-            passport_id as number[]
-          );
-        }
       }
 
       const invoice_no = await this.generateVoucher(req, 'IV');
@@ -111,7 +104,6 @@ class AddInvoiceVisa extends AbstractServices {
         const clientTransId = await utils.clientTrans(trxns, {
           extra_particular: 'Air Ticket',
           invoice_no,
-          ctrxn_pax: ctrxn_pax_name as string,
           note,
         });
         invoice_cltrxn_id = clientTransId.invoice_cltrxn_id;
@@ -174,12 +166,7 @@ class AddInvoiceVisa extends AbstractServices {
         invoice_created_by,
         invoice_id,
       };
-      await new InsertVisaBilling().insertVisaBilling(
-        req,
-        commonVisaData,
-        ctrxn_pax_name as string,
-        trx
-      );
+      await new InsertVisaBilling().insertVisaBilling(req, commonVisaData, trx);
 
       // MONEY RECEIPT
       const moneyReceiptInvoice: ICommonMoneyReceiptInvoiceData = {

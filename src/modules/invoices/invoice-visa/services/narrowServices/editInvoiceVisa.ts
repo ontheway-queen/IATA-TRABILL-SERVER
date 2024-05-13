@@ -183,12 +183,7 @@ class EditInvoiceVisa extends AbstractServices {
         invoice_created_by,
         invoice_id: invoice_id as number,
       };
-      await new InsertVisaBilling().insertVisaBilling(
-        req,
-        commonVisaData,
-        ctrxn_pax_name as string,
-        trx
-      );
+      await new InsertVisaBilling().insertVisaBilling(req, commonVisaData, trx);
 
       // Invoice history
       const history_data: InvoiceHistory = {

@@ -33,7 +33,6 @@ export class InvoiceUtils {
         | 'Ummrah Package'
         | 'Hajj Pre Reg';
       note?: string;
-      ctrxn_pax?: string;
     }
   ) => {
     const body = this.invoice;
@@ -53,7 +52,6 @@ export class InvoiceUtils {
       ctrxn_pnr: value.ctrxn_pnr,
       ctrxn_route: value.ctrxn_route,
       ctrxn_airticket_no: value.ticket_no,
-      ctrxn_pax: value.ctrxn_pax,
     };
 
     const clDiscountTransBody: IClTrxnBody = {
@@ -68,7 +66,6 @@ export class InvoiceUtils {
       ctrxn_pnr: value.ctrxn_pnr,
       ctrxn_route: value.ctrxn_route,
       ctrxn_airticket_no: value.ticket_no,
-      ctrxn_pax: value.ctrxn_pax,
     };
 
     const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
@@ -103,7 +100,6 @@ export class InvoiceUtils {
         | 'Hajj Pre Reg';
       note?: string;
       ctrxn_route?: string;
-      ctrxn_pax?: string;
     }
   ) => {
     const body = this.invoice;
@@ -124,7 +120,6 @@ export class InvoiceUtils {
       ctrxn_airticket_no: value.ticket_no,
       ctrxn_pnr: value.ctrxn_pnr,
       ctrxn_route: value.ctrxn_route,
-      ctrxn_pax: value.ctrxn_pax,
     };
 
     const clDiscountTransBody: IClTrxnUpdate = {
@@ -140,7 +135,6 @@ export class InvoiceUtils {
       ctrxn_airticket_no: value.ticket_no,
       ctrxn_pnr: value.ctrxn_pnr,
       ctrxn_route: value.ctrxn_route,
-      ctrxn_pax: value.ctrxn_pax,
     };
 
     await trxns.clTrxnUpdate(clTrxnBody);

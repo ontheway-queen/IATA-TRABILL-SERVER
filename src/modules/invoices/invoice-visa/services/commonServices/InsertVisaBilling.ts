@@ -24,7 +24,6 @@ class InsertVisaBilling extends AbstractServices {
   public insertVisaBilling = async (
     req: Request,
     commonVisaData: ICommonVisaData,
-    vtrxn_pax: string | null,
     trx: Knex.Transaction<any, any[]>
   ) => {
     const {
@@ -42,7 +41,6 @@ class InsertVisaBilling extends AbstractServices {
       const trxns = new Trxns(req, trx);
 
       for (const billing_info of billing_information) {
-
         const {
           billing_id,
           billing_product_id,
@@ -87,11 +85,11 @@ class InsertVisaBilling extends AbstractServices {
         const billingExist:
           | undefined
           | {
-            billing_invoice_id: number;
-            prevComvendor: string;
-            prevTrxnId: number;
-            billing_status: string;
-          } = await conn.billingIsExist(billing_id as number);
+              billing_invoice_id: number;
+              prevComvendor: string;
+              prevTrxnId: number;
+              billing_status: string;
+            } = await conn.billingIsExist(billing_id as number);
 
         // IF VENDOR AND COST PRICE EXIST
         if (billing_cost_price && billing_comvendor) {
@@ -113,7 +111,6 @@ class InsertVisaBilling extends AbstractServices {
             vtrxn_type: combined_id ? 'CREDIT' : 'DEBIT',
             vtrxn_user_id: invoice_created_by,
             vtrxn_voucher: invoice_no,
-            vtrxn_pax,
           };
 
           if (billing_status === 'Approved') {

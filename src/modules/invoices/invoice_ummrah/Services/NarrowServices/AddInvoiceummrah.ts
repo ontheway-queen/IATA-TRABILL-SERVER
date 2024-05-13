@@ -78,10 +78,6 @@ class AddInvoiceUmmrah extends AbstractServices {
 
       const invoice_no = await this.generateVoucher(req, 'IU');
 
-      const ctrxn_pax =
-        billing_information[0] &&
-        billing_information.map((item) => item.pax_name).join(' ,');
-
       const ctrxn_pnr =
         passenget_info[0] &&
         passenget_info.map((item) => item.ticket_pnr).join(', ');
@@ -115,7 +111,6 @@ class AddInvoiceUmmrah extends AbstractServices {
       const clientTransId = await utils.clientTrans(trxns, {
         invoice_no,
         ctrxn_pnr,
-        ctrxn_pax,
         ctrxn_route,
         extra_particular: 'Ummrah Package',
         note,

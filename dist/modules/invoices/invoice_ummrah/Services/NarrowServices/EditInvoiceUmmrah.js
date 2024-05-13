@@ -56,9 +56,6 @@ class EditInvoiceUmmrah extends abstract_services_1.default {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
-                const ctrxn_pax = billing_information
-                    .map((item) => item.pax_name)
-                    .join(' ,');
                 const ctrxn_pnr = passenget_info[0] &&
                     passenget_info.map((item) => item.ticket_pnr).join(', ');
                 const tickets_no = passenget_info
@@ -83,7 +80,6 @@ class EditInvoiceUmmrah extends abstract_services_1.default {
                     prevCtrxnId,
                     invoice_no,
                     ctrxn_pnr,
-                    ctrxn_pax,
                     ctrxn_route,
                     extra_particular: 'Ummrah Package',
                     note,

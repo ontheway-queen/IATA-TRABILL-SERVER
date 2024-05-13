@@ -74,10 +74,6 @@ class EditInvoiceUmmrah extends AbstractServices {
       const { prevCtrxnId, prevClChargeTransId } =
         await common_conn.getPreviousInvoices(invoice_id);
 
-      const ctrxn_pax = billing_information
-        .map((item) => item.pax_name)
-        .join(' ,');
-
       const ctrxn_pnr =
         passenget_info[0] &&
         passenget_info.map((item) => item.ticket_pnr).join(', ');
@@ -113,7 +109,6 @@ class EditInvoiceUmmrah extends AbstractServices {
         prevCtrxnId,
         invoice_no,
         ctrxn_pnr,
-        ctrxn_pax,
         ctrxn_route,
         extra_particular: 'Ummrah Package',
         note,

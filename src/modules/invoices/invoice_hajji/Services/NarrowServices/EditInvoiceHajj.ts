@@ -65,9 +65,6 @@ class EditInvoiceHajj extends AbstractServices {
 
       const { prevCtrxnId, prevClChargeTransId } =
         await common_conn.getPreviousInvoices(invoice_id);
-      const ctrxn_pax =
-        billing_information[0] &&
-        billing_information.map((item) => item.pax_name).join(' ,');
 
       const ctrxn_pnr =
         pilgrims_information[0] &&
@@ -105,7 +102,6 @@ class EditInvoiceHajj extends AbstractServices {
         extra_particular: 'Hajj',
         invoice_no,
         ticket_no: ctrnx_ticket_no,
-        ctrxn_pax,
         ctrxn_pnr,
         ctrxn_route,
         note,

@@ -58,9 +58,6 @@ class AddInvoiceHajjpre extends abstract_services_1.default {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const invoice_no = yield this.generateVoucher(req, 'IHP');
-                const ctrxn_pax = billing_information
-                    .map((item) => item.pax_name)
-                    .join(' ,');
                 const productsIds = billing_information.map((item) => item.billing_product_id);
                 let note = '';
                 if (productsIds.length) {
@@ -71,7 +68,6 @@ class AddInvoiceHajjpre extends abstract_services_1.default {
                 const clientTransId = yield utils.clientTrans(trxns, {
                     invoice_no,
                     extra_particular: 'Hajj Pre Reg',
-                    ctrxn_pax,
                     note,
                 });
                 // ============= invoice information

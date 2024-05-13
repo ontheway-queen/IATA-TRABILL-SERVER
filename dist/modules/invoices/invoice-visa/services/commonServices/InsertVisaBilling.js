@@ -19,7 +19,7 @@ const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 class InsertVisaBilling extends abstract_services_1.default {
     constructor() {
         super();
-        this.insertVisaBilling = (req, commonVisaData, vtrxn_pax, trx) => __awaiter(this, void 0, void 0, function* () {
+        this.insertVisaBilling = (req, commonVisaData, trx) => __awaiter(this, void 0, void 0, function* () {
             const { passport_information, invoice_sales_date, billing_information, invoice_note, invoice_no, } = req.body;
             const { invoice_created_by, invoice_id } = commonVisaData;
             return yield this.models.db.transaction(() => __awaiter(this, void 0, void 0, function* () {
@@ -65,7 +65,6 @@ class InsertVisaBilling extends abstract_services_1.default {
                             vtrxn_type: combined_id ? 'CREDIT' : 'DEBIT',
                             vtrxn_user_id: invoice_created_by,
                             vtrxn_voucher: invoice_no,
-                            vtrxn_pax,
                         };
                         if (billing_status === 'Approved') {
                             if (billingExist === null || billingExist === void 0 ? void 0 : billingExist.prevTrxnId) {

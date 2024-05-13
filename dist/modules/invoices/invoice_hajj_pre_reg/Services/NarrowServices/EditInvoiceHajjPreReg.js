@@ -54,9 +54,6 @@ class EditInvoiceHajjpre extends abstract_services_1.default {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
-                const ctrxn_pax = billing_information
-                    .map((item) => item.pax_name)
-                    .join(' ,');
                 const productsIds = billing_information.map((item) => item.billing_product_id);
                 let note = '';
                 if (productsIds.length) {
@@ -69,7 +66,6 @@ class EditInvoiceHajjpre extends abstract_services_1.default {
                     prevCtrxnId,
                     invoice_no,
                     extra_particular: 'Hajj Pre Reg',
-                    ctrxn_pax,
                     note,
                 });
                 const invoice_information = Object.assign(Object.assign({}, clientTransId), { invoice_sub_total,

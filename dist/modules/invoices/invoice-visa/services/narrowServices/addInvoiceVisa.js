@@ -52,7 +52,6 @@ class AddInvoiceVisa extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                let ctrxn_pax_name = null;
                 let invoice_total_profit = 0;
                 let invoice_total_vendor_price = 0;
                 for (const item of billing_information) {
@@ -63,9 +62,6 @@ class AddInvoiceVisa extends abstract_services_1.default {
                 }
                 if (passport_information.length) {
                     const passport_id = passport_information.map((item) => item.passport_id);
-                    if (passport_id[0]) {
-                        ctrxn_pax_name = yield common_conn.getPassportName(passport_id);
-                    }
                 }
                 const invoice_no = yield this.generateVoucher(req, 'IV');
                 let approvedSum = 0;
@@ -87,7 +83,6 @@ class AddInvoiceVisa extends abstract_services_1.default {
                     const clientTransId = yield utils.clientTrans(trxns, {
                         extra_particular: 'Air Ticket',
                         invoice_no,
-                        ctrxn_pax: ctrxn_pax_name,
                         note,
                     });
                     invoice_cltrxn_id = clientTransId.invoice_cltrxn_id;
@@ -132,7 +127,7 @@ class AddInvoiceVisa extends abstract_services_1.default {
                     invoice_created_by,
                     invoice_id,
                 };
-                yield new InsertVisaBilling_1.default().insertVisaBilling(req, commonVisaData, ctrxn_pax_name, trx);
+                yield new InsertVisaBilling_1.default().insertVisaBilling(req, commonVisaData, trx);
                 // MONEY RECEIPT
                 const moneyReceiptInvoice = {
                     invoice_client_id,

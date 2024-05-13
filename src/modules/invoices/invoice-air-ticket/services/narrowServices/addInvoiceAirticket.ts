@@ -114,13 +114,13 @@ class AddInvoiceAirticket extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      const clientTransId = await utils.clientTrans(
-        trxns,
+      const clientTransId = await utils.clientTrans(trxns, {
+        ctrxn_pnr: ctrxn_pnr as string,
+        ctrxn_route: ctrxn_route as string,
+        extra_particular: 'Air Ticket',
         invoice_no,
-        ctrxn_pnr as string,
-        ctrxn_route as string,
-        ticket_no
-      );
+        ticket_no,
+      });
 
       const invoiceData: IInvoiceInfoDb = {
         ...clientTransId,

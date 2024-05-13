@@ -70,6 +70,11 @@ class EditInvoiceVisa extends abstract_services_1.default {
                 });
                 if (approvedSum && approvedSum > 0) {
                     const { prevCtrxnId } = yield common_conn.getPreviousInvoices(invoice_id);
+                    const productsIds = billing_information.map((item) => item.billing_product_id);
+                    let note = '';
+                    if (productsIds.length) {
+                        note = yield common_conn.getProductsName(productsIds);
+                    }
                     const clTrxnBody = {
                         ctrxn_type: 'DEBIT',
                         ctrxn_amount: invoice_net_total,
@@ -77,7 +82,7 @@ class EditInvoiceVisa extends abstract_services_1.default {
                         ctrxn_voucher: invoice_no,
                         ctrxn_particular_id: prevCtrxnId ? 96 : 97,
                         ctrxn_created_at: invoice_sales_date,
-                        ctrxn_note: invoice_note,
+                        ctrxn_note: invoice_note || note,
                         ctrxn_particular_type: prevCtrxnId
                             ? 'Invoice visa update'
                             : 'Invoice visa create',

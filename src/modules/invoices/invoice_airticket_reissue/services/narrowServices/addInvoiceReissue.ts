@@ -4,7 +4,6 @@ import { separateCombClientToId } from '../../../../../common/helpers/common.hel
 import InvoiceHelpers, {
   addAdvanceMr,
   getClientOrCombId,
-  isEmpty,
   isNotEmpty,
   MoneyReceiptAmountIsValid,
   ValidateClientAndVendor,
@@ -119,10 +118,14 @@ class AddReissueAirticket extends AbstractServices {
       // CLIENT TRANSACTIONS
       const clientTransId = await utils.clientTrans(
         trxns,
-        invoice_no,
-        ctrxn_pnr as string,
-        ctrxn_route as string,
-        ticket_no
+
+        {
+          ctrxn_pnr: ctrxn_pnr as string,
+          extra_particular: 'Air Ticket Reissue',
+          invoice_no,
+          ticket_no,
+          ctrxn_route: ctrxn_route,
+        }
       );
 
       const invoice_information: IInvoiceInfoDb = {

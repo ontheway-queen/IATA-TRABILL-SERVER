@@ -101,12 +101,16 @@ class EditInvoiceNonCommission extends AbstractServices {
 
       await utils.updateClientTrans(
         trxns,
-        prevCtrxnId,
-        prevClChargeTransId,
-        invoice_no,
-        ctrxn_pnr as string,
-        ctrxn_route as string,
-        ticket_no
+
+        {
+          prevCtrxnId,
+          prevClChargeTransId,
+          invoice_no,
+          ctrxn_pnr: ctrxn_pnr as string,
+          ctrxn_route: ctrxn_route as string,
+          ticket_no,
+          extra_particular: 'Air Ticket Non-Com',
+        }
       );
 
       const prevBillingInfo = await conn.getPrevNonComVendor(invoice_id);

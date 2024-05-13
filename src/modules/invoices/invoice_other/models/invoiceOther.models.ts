@@ -150,37 +150,6 @@ class InvoiceOther extends AbstractModels {
       .where('transport_id', transport_id);
   }
 
-
-
-
-
-
-  getProductsName = async (productIds: number[]) => {
-    if (productIds.length) {
-
-      const names = await this.query()
-        .select(this.db.raw('GROUP_CONCAT(product_name) as productsName'))
-        .from("trabill_products")
-        .whereIn('product_id', productIds);
-
-      return names[0].productsName
-    }
-
-    return ''
-
-
-
-  }
-
-
-
-
-
-
-
-
-
-
   public async deleteBillingInfo(
     invocieId: idType,
     billing_deleted_by: idType
@@ -546,25 +515,17 @@ class InvoiceOther extends AbstractModels {
               );
             }
 
-
             if (search_text) {
               this.andWhereRaw(`LOWER(invoice_no) LIKE ?`, [
                 `%${search_text}%`,
-              ]).orWhereRaw(`LOWER(client_name) LIKE ?`, [
-                `%${search_text}%`,
-              ]);
+              ]).orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search_text}%`]);
             }
-
-
           })
           .andWhere('invoice_org_agency', this.org_agency);
       })
       .where('invoice_org_agency', this.org_agency)
       .limit(size)
       .offset(offset);
-
-
-
 
     const [total] = (await this.query()
       .count('* as count')

@@ -72,10 +72,11 @@ class EditInvoiceOther extends AbstractServices {
       const productsIds = billing_information.map(
         (item) => item.billing_product_id
       );
-      let productName = '';
+
+      let note = '';
 
       if (productsIds.length) {
-        productName = await conn.getProductsName(productsIds);
+        note = await common_conn.getProductsName(productsIds);
       }
 
       const { prevCtrxnId, prevClChargeTransId } =
@@ -87,16 +88,16 @@ class EditInvoiceOther extends AbstractServices {
 
       const utils = new InvoiceUtils(req.body, common_conn);
       // CLIENT TRANSACTIONS
-      const clientTransId = await utils.updateClientTrans(
-        trxns,
-        prevCtrxnId,
+      const clientTransId = await utils.updateClientTrans(trxns, {
         prevClChargeTransId,
+        prevCtrxnId,
+        ctrxn_pnr: ctrxn_pnr as string,
+        extra_particular: 'Air Ticket',
         invoice_no,
-        ctrxn_pnr as string,
-        ticketInfo && (ticketInfo[0]?.ticket_route as string),
-        ctrxn_ticket as string,
-        productName
-      );
+        ticket_no: ctrxn_ticket,
+        note,
+        ctrxn_route: ticketInfo && (ticketInfo[0]?.ticket_route as string),
+      });
 
       // UPDATE INVOICE INFORMATION
       const invoiceInfo: IUpdateInvoiceInfoDb = {

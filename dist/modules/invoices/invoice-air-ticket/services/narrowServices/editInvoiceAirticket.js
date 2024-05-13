@@ -95,7 +95,15 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
                 // CLIENT TRANSACTIONS
-                const clientTransId = yield utils.updateClientTrans(trxns, prevCtrxnId, prevClChargeTransId, invoice_no, ctrxn_pnr, ctrxn_route, ticket_no);
+                const clientTransId = yield utils.updateClientTrans(trxns, {
+                    ctrxn_pnr: ctrxn_pnr,
+                    ctrxn_route: ctrxn_route,
+                    extra_particular: 'Air Ticket',
+                    invoice_no,
+                    prevClChargeTransId,
+                    prevCtrxnId,
+                    ticket_no,
+                });
                 // AGENT TRANSACTION
                 if (invoice_agent_id) {
                     yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'UPDATE', 91, 'INVOICE AIR TICKET');

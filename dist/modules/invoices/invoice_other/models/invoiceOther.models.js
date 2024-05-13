@@ -39,16 +39,6 @@ class InvoiceOther extends abstract_models_1.default {
                 .into('trabill_other_invoices_passport')
                 .where('other_pass_invoice_id', invoiceId);
         });
-        this.getProductsName = (productIds) => __awaiter(this, void 0, void 0, function* () {
-            if (productIds.length) {
-                const names = yield this.query()
-                    .select(this.db.raw('GROUP_CONCAT(product_name) as productsName'))
-                    .from("trabill_products")
-                    .whereIn('product_id', productIds);
-                return names[0].productsName;
-            }
-            return '';
-        });
         this.getPreviousBillingInfo = (billing_id) => __awaiter(this, void 0, void 0, function* () {
             return yield this.db('trabill_other_invoices_billing')
                 .select('billing_combined_id as combined_id', 'billing_vendor_id as vendor_id', 'billing_vtrxn_id as prevTrxnId')
@@ -202,9 +192,7 @@ class InvoiceOther extends abstract_models_1.default {
                     if (search_text) {
                         this.andWhereRaw(`LOWER(invoice_no) LIKE ?`, [
                             `%${search_text}%`,
-                        ]).orWhereRaw(`LOWER(client_name) LIKE ?`, [
-                            `%${search_text}%`,
-                        ]);
+                        ]).orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search_text}%`]);
                     }
                 })
                     .andWhere('invoice_org_agency', this.org_agency);

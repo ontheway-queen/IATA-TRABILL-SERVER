@@ -6,16 +6,14 @@ import InvoiceHelpers, {
   InvoiceClientAndVendorValidate,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
-import {
-  IClTrxnUpdate,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
 import {
   InvoiceExtraAmount,
   IUpdateInvoiceInfoDb,
 } from '../../../../../common/types/Invoice.common.interface';
 import { IOtherBillingInfoDb } from '../../../invoice_other/types/invoiceOther.interface';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   IHajiInformationDb,
   IInvoiceHajiPreReg,
@@ -67,28 +65,36 @@ class EditInvoiceHajjpre extends AbstractServices {
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const { prevCtrxnId } = await common_conn.getPreviousInvoices(invoice_id);
+      const { prevCtrxnId, prevClChargeTransId } =
+        await common_conn.getPreviousInvoices(invoice_id);
 
       const ctrxn_pax = billing_information
         .map((item) => item.pax_name)
         .join(' ,');
 
-      const clTrxnBody: IClTrxnUpdate = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 103,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type: 'Invoice hajj pre reg update',
-        ctrxn_pax,
-        ctrxn_trxn_id: prevCtrxnId,
-      };
+      const productsIds = billing_information.map(
+        (item) => item.billing_product_id
+      );
 
-      await trxns.clTrxnUpdate(clTrxnBody);
+      let note = '';
+
+      if (productsIds.length) {
+        note = await common_conn.getProductsName(productsIds);
+      }
+
+      // CLIENT TRANSACTIONS
+      const utils = new InvoiceUtils(req.body, common_conn);
+      const clientTransId = await utils.updateClientTrans(trxns, {
+        prevClChargeTransId,
+        prevCtrxnId,
+        invoice_no,
+        extra_particular: 'Hajj Pre Reg',
+        ctrxn_pax,
+        note,
+      });
 
       const invoice_information: IUpdateInvoiceInfoDb = {
+        ...clientTransId,
         invoice_sub_total,
         invoice_sales_man_id,
         invoice_net_total,
@@ -100,7 +106,8 @@ class EditInvoiceHajjpre extends AbstractServices {
         invoice_combined_id,
         invoice_haji_group_id,
         invoice_reference,
-        invoice_total_profit, invoice_total_vendor_price
+        invoice_total_profit,
+        invoice_total_vendor_price,
       };
 
       await common_conn.updateInvoiceInformation(

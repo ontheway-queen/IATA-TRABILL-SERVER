@@ -95,7 +95,13 @@ class AddInvoiceNonCommission extends abstract_services_1.default {
                 if (flattenedRoutes.length > 0) {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
-                const clientTransId = yield utils.clientTrans(trxns, invoice_no, ctrxn_pnr, ctrxn_route, ticket_no);
+                const clientTransId = yield utils.clientTrans(trxns, {
+                    invoice_no,
+                    ctrxn_pnr: ctrxn_pnr,
+                    ctrxn_route: ctrxn_route,
+                    ticket_no,
+                    extra_particular: 'Air Ticket Non-Com',
+                });
                 const invoiceData = Object.assign(Object.assign({}, clientTransId), { invoice_category_id: 2, invoice_client_id,
                     invoice_net_total, invoice_no: invoice_no, invoice_combined_id,
                     invoice_sales_date,

@@ -8,10 +8,7 @@ import InvoiceHelpers, {
   MoneyReceiptAmountIsValid,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
-import {
-  IClTrxnBody,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
 import CommonAddMoneyReceipt from '../../../../../common/services/CommonAddMoneyReceipt';
 import {
   ICommonMoneyReceiptInvoiceData,
@@ -22,9 +19,10 @@ import {
   IInvoiceInfoDb,
   InvoiceExtraAmount,
 } from '../../../../../common/types/Invoice.common.interface';
-import { IOtherBillingInfoDb } from '../../../invoice_other/types/invoiceOther.interface';
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
+import { IOtherBillingInfoDb } from '../../../invoice_other/types/invoiceOther.interface';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   IInvoiceUmmrahReq,
   IUmmrahPassenger,
@@ -102,25 +100,30 @@ class AddInvoiceUmmrah extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      // CLIENT COMBINED TRANSACTIONS
-      const clTrxnBody: IClTrxnBody = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 106,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type: 'Invoice umrah create',
-        ctrxn_pax,
-        ctrxn_pnr,
-        ctrxn_airticket_no: tickets_no,
-        ctrxn_route,
-      };
+      const productsIds = billing_information.map(
+        (item) => item.billing_product_id
+      );
 
-      const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
+      let note = '';
+
+      if (productsIds.length) {
+        note = await common_conn.getProductsName(productsIds);
+      }
+
+      // CLIENT TRANSACTIONS
+      const utils = new InvoiceUtils(req.body, common_conn);
+      const clientTransId = await utils.clientTrans(trxns, {
+        invoice_no,
+        ctrxn_pnr,
+        ctrxn_pax,
+        ctrxn_route,
+        extra_particular: 'Ummrah Package',
+        note,
+        ticket_no: tickets_no,
+      });
 
       const invoice_information: IInvoiceInfoDb = {
+        ...clientTransId,
         invoice_client_id,
         invoice_combined_id,
         invoice_no: invoice_no as string,
@@ -134,7 +137,6 @@ class AddInvoiceUmmrah extends AbstractServices {
         invoice_due_date,
         invoice_created_by,
         invoice_note,
-        invoice_cltrxn_id,
         invoice_total_profit,
         invoice_total_vendor_price,
         invoice_reference,

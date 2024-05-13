@@ -40,6 +40,7 @@ const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
 const CommonAddMoneyReceipt_1 = __importDefault(require("../../../../../common/services/CommonAddMoneyReceipt"));
 const CommonSmsSend_services_1 = __importDefault(require("../../../../smsSystem/utils/CommonSmsSend.services"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 const CommonHajjDetailsInsert_1 = __importDefault(require("../commonServices/CommonHajjDetailsInsert"));
 class AddInvoiceHajjServices extends abstract_services_1.default {
     constructor() {
@@ -70,41 +71,33 @@ class AddInvoiceHajjServices extends abstract_services_1.default {
                 if (flattenedRoutes.length > 0) {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
-                const clTrxnBody = {
-                    ctrxn_type: 'DEBIT',
-                    ctrxn_amount: invoice_net_total,
-                    ctrxn_cl: invoice_combclient_id,
-                    ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 104,
-                    ctrxn_created_at: invoice_sales_date,
-                    ctrxn_note: invoice_note,
-                    ctrxn_particular_type: 'Invoice hajj create',
+                const productsIds = billing_information.map((item) => item.billing_product_id);
+                let note = '';
+                if (productsIds.length) {
+                    note = yield common_conn.getProductsName(productsIds);
+                }
+                // CLIENT TRANSACTIONS
+                const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
+                const clientTransId = yield utils.clientTrans(trxns, {
+                    extra_particular: 'Hajj',
+                    invoice_no,
+                    ticket_no: ctrnx_ticket_no,
                     ctrxn_pax,
                     ctrxn_pnr,
-                    ctrxn_airticket_no: ctrnx_ticket_no,
                     ctrxn_route,
-                };
-                const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
-                const invoice_information = {
-                    invoice_client_id,
-                    invoice_no: invoice_no,
-                    invoice_sub_total,
-                    invoice_category_id: 31,
-                    invoice_sales_man_id,
+                    note,
+                });
+                const invoice_information = Object.assign(Object.assign({}, clientTransId), { invoice_client_id, invoice_no: invoice_no, invoice_sub_total, invoice_category_id: 31, invoice_sales_man_id,
                     invoice_net_total,
                     invoice_client_previous_due,
                     invoice_haji_group_id,
                     invoice_sales_date,
                     invoice_due_date,
-                    invoice_created_by,
-                    invoice_hajj_session: new Date(invoice_hajj_session).getFullYear(),
-                    invoice_note,
+                    invoice_created_by, invoice_hajj_session: new Date(invoice_hajj_session).getFullYear(), invoice_note,
                     invoice_combined_id,
-                    invoice_cltrxn_id,
                     invoice_total_profit,
                     invoice_total_vendor_price,
-                    invoice_reference,
-                };
+                    invoice_reference });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoice_information);
                 // AGENT TRANSACTION
                 yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 104, 'INVOICE HAJJ');

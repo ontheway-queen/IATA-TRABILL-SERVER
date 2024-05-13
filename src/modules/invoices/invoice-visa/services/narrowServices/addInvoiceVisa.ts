@@ -5,7 +5,6 @@ import InvoiceHelpers, {
   MoneyReceiptAmountIsValid,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
-import { IClTrxnBody } from '../../../../../common/interfaces/Trxn.interfaces';
 import CommonAddMoneyReceipt from '../../../../../common/services/CommonAddMoneyReceipt';
 import {
   ICommonMoneyReceiptInvoiceData,
@@ -17,6 +16,7 @@ import {
 } from '../../../../../common/types/Invoice.common.interface';
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   ICommonVisaData,
   InvoiceVisaReq,
@@ -84,7 +84,6 @@ class AddInvoiceVisa extends AbstractServices {
 
       const invoice_no = await this.generateVoucher(req, 'IV');
 
-      let invoice_cltrxn_id: number | null = null;
       let approvedSum = 0;
 
       billing_information.forEach((item) => {
@@ -93,23 +92,35 @@ class AddInvoiceVisa extends AbstractServices {
         }
       });
 
-      if (approvedSum && approvedSum > 0) {
-        const clTrxnBody: IClTrxnBody = {
-          ctrxn_type: 'DEBIT',
-          ctrxn_amount: invoice_net_total,
-          ctrxn_cl: invoice_combclient_id,
-          ctrxn_voucher: invoice_no,
-          ctrxn_particular_id: 96,
-          ctrxn_created_at: invoice_sales_date,
-          ctrxn_note: invoice_note,
-          ctrxn_particular_type: 'Invoice visa create',
-          ctrxn_pax: ctrxn_pax_name,
-        };
+      let invoice_cltrxn_id: number | null = null;
+      let invoice_discount_cltrxn_id: number | null = null;
 
-        invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
+      const productsIds = billing_information.map(
+        (item) => item.billing_product_id
+      );
+
+      let note = '';
+
+      if (productsIds.length) {
+        note = await common_conn.getProductsName(productsIds);
+      }
+
+      if (approvedSum && approvedSum > 0) {
+        // CLIENT TRANSACTIONS
+        const utils = new InvoiceUtils(req.body, common_conn);
+        const clientTransId = await utils.clientTrans(trxns, {
+          extra_particular: 'Air Ticket',
+          invoice_no,
+          ctrxn_pax: ctrxn_pax_name as string,
+          note,
+        });
+        invoice_cltrxn_id = clientTransId.invoice_cltrxn_id;
+        invoice_discount_cltrxn_id = clientTransId.invoice_discount_cltrxn_id;
       }
 
       const invoice_information: IInvoiceInfoDb = {
+        invoice_cltrxn_id,
+        invoice_discount_cltrxn_id,
         invoice_client_id,
         invoice_no: invoice_no as string,
         invoice_sub_total,
@@ -121,7 +132,6 @@ class AddInvoiceVisa extends AbstractServices {
         invoice_due_date,
         invoice_created_by,
         invoice_note,
-        invoice_cltrxn_id,
         invoice_reference,
         invoice_total_profit,
         invoice_total_vendor_price,

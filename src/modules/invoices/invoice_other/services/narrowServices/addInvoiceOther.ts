@@ -83,10 +83,10 @@ class AddInvoiceOther extends AbstractServices {
         (item) => item.billing_product_id
       );
 
-      let productName = '';
+      let note = '';
 
       if (productsIds.length) {
-        productName = await conn.getProductsName(productsIds);
+        note = await common_conn.getProductsName(productsIds);
       }
 
       const invoice_no = await this.generateVoucher(req, 'IO');
@@ -97,16 +97,16 @@ class AddInvoiceOther extends AbstractServices {
 
       const ctrxn_pnr = ticketInfo.map((item) => item.ticket_pnr).join(', ');
 
-      const utils = new InvoiceUtils(req.body, common_conn);
       // CLIENT TRANSACTIONS
-      const clientTransId = await utils.clientTrans(
-        trxns,
+      const utils = new InvoiceUtils(req.body, common_conn);
+      const clientTransId = await utils.clientTrans(trxns, {
         invoice_no,
-        ctrxn_pnr as string,
-        ticketInfo && (ticketInfo[0]?.ticket_route as string),
-        ctrxn_ticket as string,
-        productName
-      );
+        ctrxn_pnr: ctrxn_pnr as string,
+        ctrxn_route: ticketInfo && (ticketInfo[0]?.ticket_route as string),
+        extra_particular: 'Invoice Other',
+        ticket_no: ctrxn_ticket as string,
+        note,
+      });
 
       const invoice_client_previous_due =
         await combined_conn.getClientLastBalanceById(

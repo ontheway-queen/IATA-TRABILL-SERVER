@@ -38,6 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 const CommonHajjDetailsInsert_1 = __importDefault(require("../commonServices/CommonHajjDetailsInsert"));
 class EditInvoiceHajj extends abstract_services_1.default {
     constructor() {
@@ -52,7 +53,7 @@ class EditInvoiceHajj extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const { prevCtrxnId } = yield common_conn.getPreviousInvoices(invoice_id);
+                const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
                 const ctrxn_pax = billing_information[0] &&
                     billing_information.map((item) => item.pax_name).join(' ,');
                 const ctrxn_pnr = pilgrims_information[0] &&
@@ -66,39 +67,36 @@ class EditInvoiceHajj extends abstract_services_1.default {
                 if (flattenedRoutes.length > 0) {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
-                const clTrxnBody = {
-                    ctrxn_type: 'DEBIT',
-                    ctrxn_amount: invoice_net_total,
-                    ctrxn_cl: invoice_combclient_id,
-                    ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 105,
-                    ctrxn_created_at: invoice_sales_date,
-                    ctrxn_note: invoice_note,
-                    ctrxn_particular_type: 'Invoice Other Update',
+                const productsIds = billing_information.map((item) => item.billing_product_id);
+                let note = '';
+                if (productsIds.length) {
+                    note = yield common_conn.getProductsName(productsIds);
+                }
+                // CLIENT TRANSACTIONS
+                const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
+                const clientTransId = yield utils.updateClientTrans(trxns, {
+                    prevClChargeTransId,
+                    prevCtrxnId,
+                    extra_particular: 'Hajj',
+                    invoice_no,
+                    ticket_no: ctrnx_ticket_no,
                     ctrxn_pax,
                     ctrxn_pnr,
-                    ctrxn_airticket_no: ctrnx_ticket_no,
                     ctrxn_route,
-                    ctrxn_trxn_id: prevCtrxnId,
-                };
-                yield trxns.clTrxnUpdate(clTrxnBody);
-                const invoice_information = {
-                    invoice_client_id,
+                    note,
+                });
+                const invoice_information = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_sub_total,
                     invoice_sales_man_id,
                     invoice_net_total,
                     invoice_client_previous_due,
                     invoice_haji_group_id,
                     invoice_sales_date,
-                    invoice_due_date,
-                    invoice_updated_by: invoice_created_by,
-                    invoice_hajj_session: new Date(invoice_hajj_session).getFullYear(),
-                    invoice_note,
+                    invoice_due_date, invoice_updated_by: invoice_created_by, invoice_hajj_session: new Date(invoice_hajj_session).getFullYear(), invoice_note,
                     invoice_combined_id,
                     invoice_reference,
                     invoice_total_profit,
-                    invoice_total_vendor_price,
-                };
+                    invoice_total_vendor_price });
                 yield common_conn.updateInvoiceInformation(invoice_id, invoice_information);
                 // AGENT TRANSACTIONS
                 if (invoice_agent_id) {

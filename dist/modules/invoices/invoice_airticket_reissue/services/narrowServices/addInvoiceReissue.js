@@ -95,7 +95,13 @@ class AddReissueAirticket extends abstract_services_1.default {
                 }
                 const utils = new invoice_utils_1.InvoiceUtils(invoice_info, common_conn);
                 // CLIENT TRANSACTIONS
-                const clientTransId = yield utils.clientTrans(trxns, invoice_no, ctrxn_pnr, ctrxn_route, ticket_no);
+                const clientTransId = yield utils.clientTrans(trxns, {
+                    ctrxn_pnr: ctrxn_pnr,
+                    extra_particular: 'Air Ticket Reissue',
+                    invoice_no,
+                    ticket_no,
+                    ctrxn_route: ctrxn_route,
+                });
                 const invoice_information = Object.assign(Object.assign({}, clientTransId), { invoice_combined_id,
                     invoice_client_id,
                     invoice_created_by,

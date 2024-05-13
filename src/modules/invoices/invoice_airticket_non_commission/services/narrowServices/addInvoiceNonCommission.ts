@@ -4,7 +4,6 @@ import { separateCombClientToId } from '../../../../../common/helpers/common.hel
 import InvoiceHelpers, {
   addAdvanceMr,
   getClientOrCombId,
-  isEmpty,
   isNotEmpty,
   MoneyReceiptAmountIsValid,
   ValidateClientAndVendor,
@@ -21,7 +20,6 @@ import {
   InvoiceExtraAmount,
 } from '../../../../../common/types/Invoice.common.interface';
 
-import moment from 'moment';
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
 import { InvoiceAirticketPreType } from '../../../invoice-air-ticket/types/invoiceAirticket.interface';
@@ -127,10 +125,14 @@ class AddInvoiceNonCommission extends AbstractServices {
 
       const clientTransId = await utils.clientTrans(
         trxns,
-        invoice_no,
-        ctrxn_pnr as string,
-        ctrxn_route as string,
-        ticket_no
+
+        {
+          invoice_no,
+          ctrxn_pnr: ctrxn_pnr as string,
+          ctrxn_route: ctrxn_route as string,
+          ticket_no,
+          extra_particular: 'Air Ticket Non-Com',
+        }
       );
 
       const invoiceData: IInvoiceInfoDb = {

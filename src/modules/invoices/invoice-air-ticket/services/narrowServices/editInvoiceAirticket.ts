@@ -110,15 +110,15 @@ class EditInvoiceAirticket extends AbstractServices {
       }
 
       // CLIENT TRANSACTIONS
-      const clientTransId = await utils.updateClientTrans(
-        trxns,
-        prevCtrxnId,
-        prevClChargeTransId,
+      const clientTransId = await utils.updateClientTrans(trxns, {
+        ctrxn_pnr: ctrxn_pnr as string,
+        ctrxn_route: ctrxn_route as string,
+        extra_particular: 'Air Ticket',
         invoice_no,
-        ctrxn_pnr as string,
-        ctrxn_route as string,
-        ticket_no
-      );
+        prevClChargeTransId,
+        prevCtrxnId,
+        ticket_no,
+      });
 
       // AGENT TRANSACTION
       if (invoice_agent_id) {

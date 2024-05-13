@@ -41,6 +41,7 @@ const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/in
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const CommonAddMoneyReceipt_1 = __importDefault(require("../../../../../common/services/CommonAddMoneyReceipt"));
 const CommonSmsSend_services_1 = __importDefault(require("../../../../smsSystem/utils/CommonSmsSend.services"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 class AddInvoiceUmmrah extends abstract_services_1.default {
     constructor() {
         super();
@@ -72,29 +73,24 @@ class AddInvoiceUmmrah extends abstract_services_1.default {
                 if (flattenedRoutes.length > 0) {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
-                // CLIENT COMBINED TRANSACTIONS
-                const clTrxnBody = {
-                    ctrxn_type: 'DEBIT',
-                    ctrxn_amount: invoice_net_total,
-                    ctrxn_cl: invoice_combclient_id,
-                    ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 106,
-                    ctrxn_created_at: invoice_sales_date,
-                    ctrxn_note: invoice_note,
-                    ctrxn_particular_type: 'Invoice umrah create',
-                    ctrxn_pax,
+                const productsIds = billing_information.map((item) => item.billing_product_id);
+                let note = '';
+                if (productsIds.length) {
+                    note = yield common_conn.getProductsName(productsIds);
+                }
+                // CLIENT TRANSACTIONS
+                const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
+                const clientTransId = yield utils.clientTrans(trxns, {
+                    invoice_no,
                     ctrxn_pnr,
-                    ctrxn_airticket_no: tickets_no,
+                    ctrxn_pax,
                     ctrxn_route,
-                };
-                const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
-                const invoice_information = {
-                    invoice_client_id,
-                    invoice_combined_id,
-                    invoice_no: invoice_no,
-                    invoice_sub_total,
-                    invoice_category_id: 26,
-                    invoice_sales_man_id,
+                    extra_particular: 'Ummrah Package',
+                    note,
+                    ticket_no: tickets_no,
+                });
+                const invoice_information = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
+                    invoice_combined_id, invoice_no: invoice_no, invoice_sub_total, invoice_category_id: 26, invoice_sales_man_id,
                     invoice_net_total,
                     invoice_client_previous_due,
                     invoice_haji_group_id,
@@ -102,11 +98,9 @@ class AddInvoiceUmmrah extends abstract_services_1.default {
                     invoice_due_date,
                     invoice_created_by,
                     invoice_note,
-                    invoice_cltrxn_id,
                     invoice_total_profit,
                     invoice_total_vendor_price,
-                    invoice_reference,
-                };
+                    invoice_reference });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoice_information);
                 // AGENT TRANSACTION
                 yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 106, 'INVOICE UMMRAH');

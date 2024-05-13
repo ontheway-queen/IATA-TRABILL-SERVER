@@ -15,10 +15,8 @@ import { IOtherBillingInfoDb } from '../../../invoice_other/types/invoiceOther.i
 
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import Trxns from '../../../../../common/helpers/Trxns';
-import {
-  IClTrxnUpdate,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   IInvoiceUmmrahReq,
   IUmmrahPassenger,
@@ -60,7 +58,6 @@ class EditInvoiceUmmrah extends AbstractServices {
         invoice_combclient_id
       );
 
-
     // CLIENT AND COMBINED CLIENT
 
     const { invoice_client_id, invoice_combined_id } = await getClientOrCombId(
@@ -74,7 +71,7 @@ class EditInvoiceUmmrah extends AbstractServices {
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const { prevCtrxnId, comb_client } =
+      const { prevCtrxnId, prevClChargeTransId } =
         await common_conn.getPreviousInvoices(invoice_id);
 
       const ctrxn_pax = billing_information
@@ -99,25 +96,32 @@ class EditInvoiceUmmrah extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      const clTrxnBody: IClTrxnUpdate = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 107,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type: 'Invoice Umrah Update',
-        ctrxn_pax,
-        ctrxn_pnr,
-        ctrxn_route,
-        ctrxn_airticket_no: tickets_no,
-        ctrxn_trxn_id: prevCtrxnId,
-      };
+      let note = '';
 
-      await trxns.clTrxnUpdate(clTrxnBody);
+      const productsIds = billing_information.map(
+        (item) => item.billing_product_id
+      );
+
+      if (productsIds.length) {
+        note = await common_conn.getProductsName(productsIds);
+      }
+
+      // CLIENT TRANSACTIONS
+      const utils = new InvoiceUtils(req.body, common_conn);
+      const clientTransId = await utils.updateClientTrans(trxns, {
+        prevClChargeTransId,
+        prevCtrxnId,
+        invoice_no,
+        ctrxn_pnr,
+        ctrxn_pax,
+        ctrxn_route,
+        extra_particular: 'Ummrah Package',
+        note,
+        ticket_no: tickets_no,
+      });
 
       const invoice_information: IUpdateInvoiceInfoDb = {
+        ...clientTransId,
         invoice_client_id,
         invoice_combined_id,
         invoice_sub_total,
@@ -129,7 +133,9 @@ class EditInvoiceUmmrah extends AbstractServices {
         invoice_due_date,
         invoice_updated_by: invoice_created_by,
         invoice_note,
-        invoice_reference, invoice_total_profit, invoice_total_vendor_price
+        invoice_reference,
+        invoice_total_profit,
+        invoice_total_vendor_price,
       };
 
       await common_conn.updateInvoiceInformation(

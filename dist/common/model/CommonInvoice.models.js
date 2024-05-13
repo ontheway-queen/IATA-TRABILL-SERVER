@@ -43,6 +43,16 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .into('trabill_invoices')
                 .where('invoice_id', invoiceId);
         });
+        this.getProductsName = (productIds) => __awaiter(this, void 0, void 0, function* () {
+            if (productIds.length) {
+                const names = yield this.query()
+                    .select(this.db.raw(`REPLACE(group_concat(product_name, '\n'), ',', '') as productsName`))
+                    .from('trabill_products')
+                    .whereIn('product_id', productIds);
+                return names[0].productsName;
+            }
+            return '';
+        });
         this.getForEditInvoice = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()
                 .select('*')

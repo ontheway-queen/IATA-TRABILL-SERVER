@@ -6,12 +6,12 @@ import InvoiceHelpers, {
   InvoiceClientAndVendorValidate,
   getClientOrCombId,
 } from '../../../../../common/helpers/invoice.helpers';
-import { IClTrxnUpdate } from '../../../../../common/interfaces/Trxn.interfaces';
 import {
   IUpdateInvoiceInfoDb,
   InvoiceExtraAmount,
 } from '../../../../../common/types/Invoice.common.interface';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import { IInvoiceHajjReq } from '../../Type/InvoiceHajj.Interfaces';
 import CommonHajjDetailsInsert from '../commonServices/CommonHajjDetailsInsert';
 
@@ -45,7 +45,6 @@ class EditInvoiceHajj extends AbstractServices {
       invoice_reference,
     } = req.body as IInvoiceHajjReq;
 
-
     // VALIDATE CLIENT AND VENDOR
     const { invoice_total_profit, invoice_total_vendor_price } =
       await InvoiceClientAndVendorValidate(
@@ -64,7 +63,8 @@ class EditInvoiceHajj extends AbstractServices {
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const { prevCtrxnId } = await common_conn.getPreviousInvoices(invoice_id);
+      const { prevCtrxnId, prevClChargeTransId } =
+        await common_conn.getPreviousInvoices(invoice_id);
       const ctrxn_pax =
         billing_information[0] &&
         billing_information.map((item) => item.pax_name).join(' ,');
@@ -87,25 +87,32 @@ class EditInvoiceHajj extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      const clTrxnBody: IClTrxnUpdate = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 105,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type: 'Invoice Other Update',
+      const productsIds = billing_information.map(
+        (item) => item.billing_product_id
+      );
+
+      let note = '';
+
+      if (productsIds.length) {
+        note = await common_conn.getProductsName(productsIds);
+      }
+
+      // CLIENT TRANSACTIONS
+      const utils = new InvoiceUtils(req.body, common_conn);
+      const clientTransId = await utils.updateClientTrans(trxns, {
+        prevClChargeTransId,
+        prevCtrxnId,
+        extra_particular: 'Hajj',
+        invoice_no,
+        ticket_no: ctrnx_ticket_no,
         ctrxn_pax,
         ctrxn_pnr,
-        ctrxn_airticket_no: ctrnx_ticket_no,
         ctrxn_route,
-        ctrxn_trxn_id: prevCtrxnId,
-      };
-
-      await trxns.clTrxnUpdate(clTrxnBody);
+        note,
+      });
 
       const invoice_information: IUpdateInvoiceInfoDb = {
+        ...clientTransId,
         invoice_client_id,
         invoice_sub_total,
         invoice_sales_man_id,

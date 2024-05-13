@@ -60,17 +60,24 @@ class AddInvoiceOther extends abstract_services_1.default {
                 const combined_conn = this.models.combineClientModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const productsIds = billing_information.map((item) => item.billing_product_id);
-                let productName = '';
+                let note = '';
                 if (productsIds.length) {
-                    productName = yield conn.getProductsName(productsIds);
+                    note = yield common_conn.getProductsName(productsIds);
                 }
                 const invoice_no = yield this.generateVoucher(req, 'IO');
                 const ctrxn_ticket = ticketInfo.length > 0 &&
                     ticketInfo.map((item) => item.ticket_no).join(' ,');
                 const ctrxn_pnr = ticketInfo.map((item) => item.ticket_pnr).join(', ');
-                const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
                 // CLIENT TRANSACTIONS
-                const clientTransId = yield utils.clientTrans(trxns, invoice_no, ctrxn_pnr, ticketInfo && ((_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route), ctrxn_ticket, productName);
+                const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
+                const clientTransId = yield utils.clientTrans(trxns, {
+                    invoice_no,
+                    ctrxn_pnr: ctrxn_pnr,
+                    ctrxn_route: ticketInfo && ((_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route),
+                    extra_particular: 'Invoice Other',
+                    ticket_no: ctrxn_ticket,
+                    note,
+                });
                 const invoice_client_previous_due = yield combined_conn.getClientLastBalanceById(invoice_client_id, invoice_combined_id);
                 const invoieInfo = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_combined_id,

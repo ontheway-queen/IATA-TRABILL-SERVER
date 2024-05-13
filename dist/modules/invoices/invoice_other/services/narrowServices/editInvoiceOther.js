@@ -56,16 +56,25 @@ class EditInvoiceOther extends abstract_services_1.default {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const productsIds = billing_information.map((item) => item.billing_product_id);
-                let productName = '';
+                let note = '';
                 if (productsIds.length) {
-                    productName = yield conn.getProductsName(productsIds);
+                    note = yield common_conn.getProductsName(productsIds);
                 }
                 const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
                 const ctrxn_ticket = ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.map((item) => item.ticket_no).join(' ,');
                 const ctrxn_pnr = ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.map((item) => item.ticket_pnr).join(', ');
                 const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
                 // CLIENT TRANSACTIONS
-                const clientTransId = yield utils.updateClientTrans(trxns, prevCtrxnId, prevClChargeTransId, invoice_no, ctrxn_pnr, ticketInfo && ((_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route), ctrxn_ticket, productName);
+                const clientTransId = yield utils.updateClientTrans(trxns, {
+                    prevClChargeTransId,
+                    prevCtrxnId,
+                    ctrxn_pnr: ctrxn_pnr,
+                    extra_particular: 'Air Ticket',
+                    invoice_no,
+                    ticket_no: ctrxn_ticket,
+                    note,
+                    ctrxn_route: ticketInfo && ((_a = ticketInfo[0]) === null || _a === void 0 ? void 0 : _a.ticket_route),
+                });
                 // UPDATE INVOICE INFORMATION
                 const invoiceInfo = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_combined_id,

@@ -1,33 +1,30 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
+import Trxns from '../../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import InvoiceHelpers, {
-  getClientOrCombId,
   InvoiceClientAndVendorValidate,
   MoneyReceiptAmountIsValid,
 } from '../../../../../common/helpers/invoice.helpers';
+import { IVTrxn } from '../../../../../common/interfaces/Trxn.interfaces';
 import CommonAddMoneyReceipt from '../../../../../common/services/CommonAddMoneyReceipt';
-import {
-  ICommonMoneyReceiptInvoiceData,
-  InvoiceHistory,
-} from '../../../../../common/types/common.types';
 import {
   IInvoiceInfoDb,
   InvoiceExtraAmount,
 } from '../../../../../common/types/Invoice.common.interface';
-import { IOtherBillingInfoDb } from '../../../invoice_other/types/invoiceOther.interface';
+import {
+  ICommonMoneyReceiptInvoiceData,
+  InvoiceHistory,
+} from '../../../../../common/types/common.types';
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
+import { IOtherBillingInfoDb } from '../../../invoice_other/types/invoiceOther.interface';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   IHajiInformationDb,
   IInvoiceHajiPreReg,
   IInvoiceHajjPreReg,
 } from '../../Type/InvoiceHajjPreReg.Interfaces';
-import {
-  IClTrxnBody,
-  IVTrxn,
-} from '../../../../../common/interfaces/Trxn.interfaces';
-import Trxns from '../../../../../common/helpers/Trxns';
 
 class AddInvoiceHajjpre extends AbstractServices {
   constructor() {
@@ -81,23 +78,28 @@ class AddInvoiceHajjpre extends AbstractServices {
         .map((item) => item.pax_name)
         .join(' ,');
 
-      // CLIENT COMBINE TRANSACTION
-      const clTrxnBody: IClTrxnBody = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 102,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type: 'Invoice hajj pre reg create',
+      const productsIds = billing_information.map(
+        (item) => item.billing_product_id
+      );
+
+      let note = '';
+
+      if (productsIds.length) {
+        note = await common_conn.getProductsName(productsIds);
+      }
+
+      // CLIENT TRANSACTIONS
+      const utils = new InvoiceUtils(req.body, common_conn);
+      const clientTransId = await utils.clientTrans(trxns, {
+        invoice_no,
+        extra_particular: 'Hajj Pre Reg',
         ctrxn_pax,
-      };
+        note,
+      });
 
-      const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
-
-      // ============= invoice inforamtion
+      // ============= invoice information
       const invoice_information: IInvoiceInfoDb = {
+        ...clientTransId,
         invoice_client_id,
         invoice_no: invoice_no as string,
         invoice_sub_total,
@@ -110,7 +112,6 @@ class AddInvoiceHajjpre extends AbstractServices {
         invoice_created_by,
         invoice_note,
         invoice_haji_group_id,
-        invoice_cltrxn_id,
         invoice_total_profit,
         invoice_total_vendor_price,
         invoice_reference,

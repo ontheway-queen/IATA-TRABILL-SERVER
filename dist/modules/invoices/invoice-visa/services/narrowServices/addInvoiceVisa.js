@@ -40,6 +40,7 @@ const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/in
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const CommonAddMoneyReceipt_1 = __importDefault(require("../../../../../common/services/CommonAddMoneyReceipt"));
 const CommonSmsSend_services_1 = __importDefault(require("../../../../smsSystem/utils/CommonSmsSend.services"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 const InsertVisaBilling_1 = __importDefault(require("../commonServices/InsertVisaBilling"));
 class AddInvoiceVisa extends abstract_services_1.default {
     constructor() {
@@ -67,28 +68,34 @@ class AddInvoiceVisa extends abstract_services_1.default {
                     }
                 }
                 const invoice_no = yield this.generateVoucher(req, 'IV');
-                let invoice_cltrxn_id = null;
                 let approvedSum = 0;
                 billing_information.forEach((item) => {
                     if (item.billing_status === 'Approved') {
                         approvedSum += item.billing_subtotal;
                     }
                 });
+                let invoice_cltrxn_id = null;
+                let invoice_discount_cltrxn_id = null;
+                const productsIds = billing_information.map((item) => item.billing_product_id);
+                let note = '';
+                if (productsIds.length) {
+                    note = yield common_conn.getProductsName(productsIds);
+                }
                 if (approvedSum && approvedSum > 0) {
-                    const clTrxnBody = {
-                        ctrxn_type: 'DEBIT',
-                        ctrxn_amount: invoice_net_total,
-                        ctrxn_cl: invoice_combclient_id,
-                        ctrxn_voucher: invoice_no,
-                        ctrxn_particular_id: 96,
-                        ctrxn_created_at: invoice_sales_date,
-                        ctrxn_note: invoice_note,
-                        ctrxn_particular_type: 'Invoice visa create',
+                    // CLIENT TRANSACTIONS
+                    const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
+                    const clientTransId = yield utils.clientTrans(trxns, {
+                        extra_particular: 'Air Ticket',
+                        invoice_no,
                         ctrxn_pax: ctrxn_pax_name,
-                    };
-                    invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
+                        note,
+                    });
+                    invoice_cltrxn_id = clientTransId.invoice_cltrxn_id;
+                    invoice_discount_cltrxn_id = clientTransId.invoice_discount_cltrxn_id;
                 }
                 const invoice_information = {
+                    invoice_cltrxn_id,
+                    invoice_discount_cltrxn_id,
                     invoice_client_id,
                     invoice_no: invoice_no,
                     invoice_sub_total,
@@ -100,7 +107,6 @@ class AddInvoiceVisa extends abstract_services_1.default {
                     invoice_due_date,
                     invoice_created_by,
                     invoice_note,
-                    invoice_cltrxn_id,
                     invoice_reference,
                     invoice_total_profit,
                     invoice_total_vendor_price,

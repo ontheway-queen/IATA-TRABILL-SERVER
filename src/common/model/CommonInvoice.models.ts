@@ -304,6 +304,23 @@ class CommonInvoiceModel extends AbstractModels {
       .where('invoice_id', invoiceId);
   };
 
+  getProductsName = async (productIds: number[]) => {
+    if (productIds.length) {
+      const names = await this.query()
+        .select(
+          this.db.raw(
+            `REPLACE(group_concat(product_name, '\n'), ',', '') as productsName`
+          )
+        )
+        .from('trabill_products')
+        .whereIn('product_id', productIds);
+
+      return names[0].productsName;
+    }
+
+    return '';
+  };
+
   // INVOICES
   public async insertInvoicesInfo(invoice_information: IInvoiceInfoDb) {
     const invoice_id = await this.query()

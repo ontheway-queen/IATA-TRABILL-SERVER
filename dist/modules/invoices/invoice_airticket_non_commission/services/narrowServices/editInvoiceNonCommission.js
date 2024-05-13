@@ -85,7 +85,15 @@ class EditInvoiceNonCommission extends abstract_services_1.default {
                 if (flattenedRoutes.length > 0) {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
-                yield utils.updateClientTrans(trxns, prevCtrxnId, prevClChargeTransId, invoice_no, ctrxn_pnr, ctrxn_route, ticket_no);
+                yield utils.updateClientTrans(trxns, {
+                    prevCtrxnId,
+                    prevClChargeTransId,
+                    invoice_no,
+                    ctrxn_pnr: ctrxn_pnr,
+                    ctrxn_route: ctrxn_route,
+                    ticket_no,
+                    extra_particular: 'Air Ticket Non-Com',
+                });
                 const prevBillingInfo = yield conn.getPrevNonComVendor(invoice_id);
                 yield trxns.deleteInvVTrxn(prevBillingInfo);
                 // AGENT TRANSACTIONS

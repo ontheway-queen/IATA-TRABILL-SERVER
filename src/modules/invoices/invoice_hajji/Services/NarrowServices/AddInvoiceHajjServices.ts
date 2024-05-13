@@ -6,7 +6,6 @@ import InvoiceHelpers, {
   MoneyReceiptAmountIsValid,
   getClientOrCombId,
 } from '../../../../../common/helpers/invoice.helpers';
-import { IClTrxnBody } from '../../../../../common/interfaces/Trxn.interfaces';
 import CommonAddMoneyReceipt from '../../../../../common/services/CommonAddMoneyReceipt';
 import {
   IInvoiceInfoDb,
@@ -18,6 +17,7 @@ import {
 } from '../../../../../common/types/common.types';
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import { IInvoiceHajjReq } from '../../Type/InvoiceHajj.Interfaces';
 import CommonHajjDetailsInsert from '../commonServices/CommonHajjDetailsInsert';
 
@@ -96,24 +96,30 @@ class AddInvoiceHajjServices extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
       }
 
-      const clTrxnBody: IClTrxnBody = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 104,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type: 'Invoice hajj create',
+      const productsIds = billing_information.map(
+        (item) => item.billing_product_id
+      );
+
+      let note = '';
+
+      if (productsIds.length) {
+        note = await common_conn.getProductsName(productsIds);
+      }
+
+      // CLIENT TRANSACTIONS
+      const utils = new InvoiceUtils(req.body, common_conn);
+      const clientTransId = await utils.clientTrans(trxns, {
+        extra_particular: 'Hajj',
+        invoice_no,
+        ticket_no: ctrnx_ticket_no,
         ctrxn_pax,
         ctrxn_pnr,
-        ctrxn_airticket_no: ctrnx_ticket_no,
         ctrxn_route,
-      };
-
-      const invoice_cltrxn_id = await trxns.clTrxnInsert(clTrxnBody);
+        note,
+      });
 
       const invoice_information: IInvoiceInfoDb = {
+        ...clientTransId,
         invoice_client_id,
         invoice_no: invoice_no as string,
         invoice_sub_total,
@@ -128,7 +134,6 @@ class AddInvoiceHajjServices extends AbstractServices {
         invoice_hajj_session: new Date(invoice_hajj_session).getFullYear(),
         invoice_note,
         invoice_combined_id,
-        invoice_cltrxn_id,
         invoice_total_profit,
         invoice_total_vendor_price,
         invoice_reference,

@@ -14,8 +14,8 @@ import {
   IUpdateInvoiceInfoDb,
 } from '../../../../../common/types/Invoice.common.interface';
 import { InvoiceAirticketPreType } from '../../../invoice-air-ticket/types/invoiceAirticket.interface';
-import { InvoiceAirticketReissueReq } from '../../types/invoiceReissue.interface';
 import { InvoiceUtils } from '../../../utils/invoice.utils';
+import { InvoiceAirticketReissueReq } from '../../types/invoiceReissue.interface';
 
 class EditReissueAirticket extends AbstractServices {
   constructor() {
@@ -106,12 +106,16 @@ class EditReissueAirticket extends AbstractServices {
       // CLIENT TRANSACTIONS
       const clientTransId = await utils.updateClientTrans(
         trxns,
-        prevCtrxnId,
-        prevClChargeTransId,
-        invoice_no,
-        ctrxn_pnr as string,
-        ctrxn_route as string,
-        ticket_no
+
+        {
+          ctrxn_pnr: ctrxn_pnr as string,
+          extra_particular: 'Air Ticket Reissue',
+          invoice_no,
+          prevClChargeTransId,
+          prevCtrxnId,
+          ticket_no,
+          ctrxn_route: ctrxn_route,
+        }
       );
 
       // UPDATE INVOICE INFORMATION

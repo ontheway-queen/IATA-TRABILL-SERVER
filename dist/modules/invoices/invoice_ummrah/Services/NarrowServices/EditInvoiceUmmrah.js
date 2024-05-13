@@ -39,6 +39,7 @@ const abstract_services_1 = __importDefault(require("../../../../../abstracts/ab
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 class EditInvoiceUmmrah extends abstract_services_1.default {
     constructor() {
         super();
@@ -54,7 +55,7 @@ class EditInvoiceUmmrah extends abstract_services_1.default {
                 const conn = this.models.InvoiceUmmarhModels(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const { prevCtrxnId, comb_client } = yield common_conn.getPreviousInvoices(invoice_id);
+                const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
                 const ctrxn_pax = billing_information
                     .map((item) => item.pax_name)
                     .join(' ,');
@@ -70,24 +71,25 @@ class EditInvoiceUmmrah extends abstract_services_1.default {
                 if (flattenedRoutes.length > 0) {
                     ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
                 }
-                const clTrxnBody = {
-                    ctrxn_type: 'DEBIT',
-                    ctrxn_amount: invoice_net_total,
-                    ctrxn_cl: invoice_combclient_id,
-                    ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 107,
-                    ctrxn_created_at: invoice_sales_date,
-                    ctrxn_note: invoice_note,
-                    ctrxn_particular_type: 'Invoice Umrah Update',
-                    ctrxn_pax,
+                let note = '';
+                const productsIds = billing_information.map((item) => item.billing_product_id);
+                if (productsIds.length) {
+                    note = yield common_conn.getProductsName(productsIds);
+                }
+                // CLIENT TRANSACTIONS
+                const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
+                const clientTransId = yield utils.updateClientTrans(trxns, {
+                    prevClChargeTransId,
+                    prevCtrxnId,
+                    invoice_no,
                     ctrxn_pnr,
+                    ctrxn_pax,
                     ctrxn_route,
-                    ctrxn_airticket_no: tickets_no,
-                    ctrxn_trxn_id: prevCtrxnId,
-                };
-                yield trxns.clTrxnUpdate(clTrxnBody);
-                const invoice_information = {
-                    invoice_client_id,
+                    extra_particular: 'Ummrah Package',
+                    note,
+                    ticket_no: tickets_no,
+                });
+                const invoice_information = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_combined_id,
                     invoice_sub_total,
                     invoice_sales_man_id,
@@ -95,11 +97,10 @@ class EditInvoiceUmmrah extends abstract_services_1.default {
                     invoice_client_previous_due,
                     invoice_haji_group_id,
                     invoice_sales_date,
-                    invoice_due_date,
-                    invoice_updated_by: invoice_created_by,
-                    invoice_note,
-                    invoice_reference, invoice_total_profit, invoice_total_vendor_price
-                };
+                    invoice_due_date, invoice_updated_by: invoice_created_by, invoice_note,
+                    invoice_reference,
+                    invoice_total_profit,
+                    invoice_total_vendor_price });
                 yield common_conn.updateInvoiceInformation(invoice_id, invoice_information);
                 // AGENT TRANSACTION
                 if (invoice_agent_id) {

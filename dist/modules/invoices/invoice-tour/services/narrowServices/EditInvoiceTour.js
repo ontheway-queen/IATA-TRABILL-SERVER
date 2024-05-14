@@ -38,6 +38,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
+const invoice_utils_1 = require("../../../utils/invoice.utils");
 const invoicetour_helpers_1 = __importDefault(require("../../utils/invoicetour.helpers"));
 class EditInvoiceTour extends abstract_services_1.default {
     constructor() {
@@ -50,10 +51,8 @@ class EditInvoiceTour extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.invoiceTourModels(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
-                const combined_conn = this.models.combineClientModel(req, trx);
-                const vendor_conn = this.models.vendorModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const { prevCtrxnId } = yield common_conn.getPreviousInvoices(invoice_id);
+                const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
                 const ctrxn_pax = tourBilling
                     .map((item) => item.billing_pax_name)
                     .join(' ,');
@@ -61,21 +60,23 @@ class EditInvoiceTour extends abstract_services_1.default {
                 if (ticket_route) {
                     ctrxn_route = yield common_conn.getRoutesInfo(ticket_route);
                 }
-                const clTrxnBody = {
-                    ctrxn_type: 'DEBIT',
-                    ctrxn_amount: invoice_net_total,
-                    ctrxn_cl: invoice_combclient_id,
-                    ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 101,
-                    ctrxn_created_at: invoice_sales_date,
-                    ctrxn_note: invoice_note,
-                    ctrxn_particular_type: 'Invoice tour create',
-                    ctrxn_pax,
+                const productsIds = tourBilling.map((item) => item.billing_product_id);
+                let note = '';
+                if (productsIds.length) {
+                    note = yield common_conn.getProductsName(productsIds);
+                }
+                // CLIENT TRANSACTIONS
+                const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
+                const clientTransId = yield utils.updateClientTrans(trxns, {
+                    prevClChargeTransId,
+                    prevCtrxnId,
+                    invoice_no,
                     ctrxn_pnr: ticket_pnr,
-                    ctrxn_route: ctrxn_route,
-                    ctrxn_airticket_no: ticket_no,
-                };
-                yield trxns.clTrxnUpdate(Object.assign(Object.assign({}, clTrxnBody), { ctrxn_trxn_id: prevCtrxnId }));
+                    ctrxn_route,
+                    extra_particular: 'Tour Package',
+                    ticket_no,
+                    note,
+                });
                 if (invoice_agent_id) {
                     // AGENT TRANSACTION
                     yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'UPDATE', 101, 'TOUR PACKAGE');
@@ -95,21 +96,14 @@ class EditInvoiceTour extends abstract_services_1.default {
                     };
                 }, { totalCost: 0, totalSales: 0, totalProfit: 0 });
                 // UPDATE TOUR INVOICES
-                const invoiceData = {
-                    invoice_client_id,
+                const invoiceData = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_sales_man_id,
                     invoice_sales_date,
-                    invoice_due_date,
-                    invoice_updated_by: invoice_created_by,
-                    invoice_net_total,
+                    invoice_due_date, invoice_updated_by: invoice_created_by, invoice_net_total,
                     invoice_sub_total,
                     invoice_note,
-                    invoice_combined_id,
-                    invoice_total_profit: totalProfit,
-                    invoice_total_vendor_price: totalCost,
-                    invoice_client_previous_due,
-                    invoice_reference,
-                };
+                    invoice_combined_id, invoice_total_profit: totalProfit, invoice_total_vendor_price: totalCost, invoice_client_previous_due,
+                    invoice_reference });
                 yield common_conn.updateInvoiceInformation(invoice_id, invoiceData);
                 const invoiceExtraAmount = {
                     extra_amount_invoice_id: invoice_id,

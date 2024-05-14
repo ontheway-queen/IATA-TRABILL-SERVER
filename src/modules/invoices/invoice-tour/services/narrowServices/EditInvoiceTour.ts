@@ -4,12 +4,12 @@ import InvoiceHelpers, {
   getClientOrCombId,
 } from '../../../../../common/helpers/invoice.helpers';
 import Trxns from '../../../../../common/helpers/Trxns';
-import { IClTrxnBody } from '../../../../../common/interfaces/Trxn.interfaces';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
 import {
   InvoiceExtraAmount,
   IUpdateInvoiceInfoDb,
 } from '../../../../../common/types/Invoice.common.interface';
+import { InvoiceUtils } from '../../../utils/invoice.utils';
 import {
   IInvoiceTourItem,
   ITourRequest,
@@ -60,11 +60,10 @@ class EditInvoiceTour extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.invoiceTourModels(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
-      const combined_conn = this.models.combineClientModel(req, trx);
-      const vendor_conn = this.models.vendorModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const { prevCtrxnId } = await common_conn.getPreviousInvoices(invoice_id);
+      const { prevCtrxnId, prevClChargeTransId } =
+        await common_conn.getPreviousInvoices(invoice_id);
 
       const ctrxn_pax = tourBilling
         .map((item) => item.billing_pax_name)
@@ -76,22 +75,26 @@ class EditInvoiceTour extends AbstractServices {
         ctrxn_route = await common_conn.getRoutesInfo(ticket_route);
       }
 
-      const clTrxnBody: IClTrxnBody = {
-        ctrxn_type: 'DEBIT',
-        ctrxn_amount: invoice_net_total,
-        ctrxn_cl: invoice_combclient_id,
-        ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 101,
-        ctrxn_created_at: invoice_sales_date,
-        ctrxn_note: invoice_note,
-        ctrxn_particular_type: 'Invoice tour create',
-        ctrxn_pax,
-        ctrxn_pnr: ticket_pnr,
-        ctrxn_route: ctrxn_route,
-        ctrxn_airticket_no: ticket_no,
-      };
+      const productsIds = tourBilling.map((item) => item.billing_product_id);
 
-      await trxns.clTrxnUpdate({ ...clTrxnBody, ctrxn_trxn_id: prevCtrxnId });
+      let note = '';
+
+      if (productsIds.length) {
+        note = await common_conn.getProductsName(productsIds);
+      }
+
+      // CLIENT TRANSACTIONS
+      const utils = new InvoiceUtils(req.body, common_conn);
+      const clientTransId = await utils.updateClientTrans(trxns, {
+        prevClChargeTransId,
+        prevCtrxnId,
+        invoice_no,
+        ctrxn_pnr: ticket_pnr,
+        ctrxn_route,
+        extra_particular: 'Tour Package',
+        ticket_no,
+        note,
+      });
 
       if (invoice_agent_id) {
         // AGENT TRANSACTION
@@ -132,6 +135,7 @@ class EditInvoiceTour extends AbstractServices {
 
       // UPDATE TOUR INVOICES
       const invoiceData: IUpdateInvoiceInfoDb = {
+        ...clientTransId,
         invoice_client_id,
         invoice_sales_man_id,
         invoice_sales_date,

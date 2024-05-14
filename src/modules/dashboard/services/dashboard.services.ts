@@ -5,7 +5,10 @@ import {
   getDateRangeByWeek,
   getNext15Day,
 } from '../../../common/utils/libraries/lib';
-import { BspBillingSummaryQueryType } from '../types/dashboard.types';
+import {
+  BspBillingQueryType,
+  BspBillingSummaryQueryType,
+} from '../types/dashboard.types';
 
 class DashboardServices extends AbstractServices {
   constructor() {
@@ -165,10 +168,13 @@ class DashboardServices extends AbstractServices {
   // BSP BILLING
   public getBSPBilling = async (req: Request) => {
     const conn = this.models.dashboardModal(req);
+    let { billingType, from_date, to_date } = req.query as BspBillingQueryType;
 
-    const billingType = req.query?.billingType as 'previous' | 'upcoming';
-
-    let { from_date, to_date } = getBspBillingDate(billingType);
+    if (from_date === 'Invalid Date' && to_date === 'Invalid Date') {
+      let dateRange = getBspBillingDate(billingType);
+      from_date = dateRange.from_date;
+      to_date = dateRange.to_date;
+    }
 
     const ticket_issue = await conn.getBspTicketIssueInfo(from_date, to_date);
 
@@ -202,9 +208,14 @@ class DashboardServices extends AbstractServices {
   public getBspBillingSummary = async (req: Request) => {
     const conn = this.models.dashboardModal(req);
 
-    const { billingType, week } = req.query as BspBillingSummaryQueryType;
+    let { billingType, week, from_date, to_date } =
+      req.query as BspBillingSummaryQueryType;
 
-    let { from_date, to_date } = getBspBillingDate(billingType);
+    if (from_date === 'Invalid Date' && to_date === 'Invalid Date') {
+      let dateRange = getBspBillingDate(billingType);
+      from_date = dateRange.from_date;
+      to_date = dateRange.to_date;
+    }
 
     if (
       [

@@ -27,7 +27,7 @@ class VoidInvoice extends abstract_services_1.default {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { invoice_category_id } = yield common_conn.getPreviousInvoices(invoice_id);
-                const content = `BDT ${body.net_total}/- \nCHARGE BDT ${body.client_charge || 0}/-`;
+                const content = `FARE BDT ${body.net_total}/- \nCHARGE BDT ${body.client_charge || 0}/-`;
                 const ticket_nos = body.invoice_vendors
                     .map((item) => item.airticket_ticket_no)
                     .join(',');

@@ -8,10 +8,7 @@ class InvoiceAirticketValidators extends AbstractValidator {
   ];
   voidAirticket = [
     this.permissions.check(this.resources.invoice_airticket, 'delete'),
-    check('invoice_has_deleted_by')
-      .notEmpty()
-      .withMessage('User id is required'),
-    check('void_charge').notEmpty().withMessage('Void charge is required'),
+    check('invoice_void_date').notEmpty().toDate(),
   ];
 
   deleteInvoiceAirticket = [

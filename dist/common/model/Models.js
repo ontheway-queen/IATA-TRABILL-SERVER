@@ -43,6 +43,7 @@ const profitLossReport_1 = __importDefault(require("../../modules/report/models/
 const feedback_models_1 = __importDefault(require("../../modules/feedback/feedback.models"));
 const Trxn_models_1 = __importDefault(require("./Trxn.models"));
 const InvoiceHajj_models_1 = __importDefault(require("../../modules/invoices/invoice_hajji/Models/InvoiceHajj.models"));
+const pnr_details_models_1 = __importDefault(require("../../modules/invoices/invoice-air-ticket/models/pnr_details.models"));
 class Models {
     constructor() {
         this.db = database_1.db;
@@ -137,6 +138,9 @@ class Models {
     }
     CommonInvoiceModel(req, trx) {
         return new CommonInvoice_models_1.default(trx || this.db, req);
+    }
+    PnrDetailsModels(req, trx) {
+        return new pnr_details_models_1.default(trx || this.db, req);
     }
     DatabaseResetModels(req, trx) {
         return new databaseReset_models_1.default(trx || this.db, req);

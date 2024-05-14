@@ -104,9 +104,7 @@ class EditInvoiceVisa extends AbstractServices {
           ctrxn_particular_id: prevCtrxnId ? 96 : 97,
           ctrxn_created_at: invoice_sales_date,
           ctrxn_note: invoice_note || note,
-          ctrxn_particular_type: prevCtrxnId
-            ? 'Invoice visa update'
-            : 'Invoice visa create',
+          ctrxn_particular_type: 'Invoice Visa Fare',
           ctrxn_pax: ctrxn_pax_name,
         };
 

@@ -132,10 +132,13 @@ class DashboardServices extends abstract_services_1.default {
         });
         // BSP BILLING
         this.getBSPBilling = (req) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
             const conn = this.models.dashboardModal(req);
-            const billingType = (_a = req.query) === null || _a === void 0 ? void 0 : _a.billingType;
-            let { from_date, to_date } = (0, lib_1.getBspBillingDate)(billingType);
+            let { billingType, from_date, to_date } = req.query;
+            if (from_date === 'Invalid Date' && to_date === 'Invalid Date') {
+                let dateRange = (0, lib_1.getBspBillingDate)(billingType);
+                from_date = dateRange.from_date;
+                to_date = dateRange.to_date;
+            }
             const ticket_issue = yield conn.getBspTicketIssueInfo(from_date, to_date);
             const ticket_re_issue = yield conn.getBspTicketReissueInfo(from_date, to_date);
             const ticket_refund = yield conn.getBspTicketRefundInfo(from_date, to_date);
@@ -159,8 +162,12 @@ class DashboardServices extends abstract_services_1.default {
         // BSP BILLING SUMMARY
         this.getBspBillingSummary = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.dashboardModal(req);
-            const { billingType, week } = req.query;
-            let { from_date, to_date } = (0, lib_1.getBspBillingDate)(billingType);
+            let { billingType, week, from_date, to_date } = req.query;
+            if (from_date === 'Invalid Date' && to_date === 'Invalid Date') {
+                let dateRange = (0, lib_1.getBspBillingDate)(billingType);
+                from_date = dateRange.from_date;
+                to_date = dateRange.to_date;
+            }
             if ([
                 'previous',
                 'previous_next',

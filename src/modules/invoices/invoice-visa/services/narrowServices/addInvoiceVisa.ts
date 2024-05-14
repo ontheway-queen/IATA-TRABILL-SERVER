@@ -102,7 +102,7 @@ class AddInvoiceVisa extends AbstractServices {
         // CLIENT TRANSACTIONS
         const utils = new InvoiceUtils(req.body, common_conn);
         const clientTransId = await utils.clientTrans(trxns, {
-          extra_particular: 'Air Ticket',
+          extra_particular: 'Invoice Visa',
           invoice_no,
           note,
         });

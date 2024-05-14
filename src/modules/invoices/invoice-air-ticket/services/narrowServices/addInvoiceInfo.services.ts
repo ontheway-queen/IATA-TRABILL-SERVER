@@ -1,9 +1,6 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
-import {
-  IFakeInvoiceInfoItems,
-  IFakeInvoiceReqBody,
-} from '../../types/invoiceAirticket.interface';
+import { IFakeInvoiceReqBody } from '../../types/invoiceAirticket.interface';
 
 class AddInvoiceInfo extends AbstractServices {
   constructor() {

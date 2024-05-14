@@ -42,6 +42,7 @@ import FeedbackModel from '../../modules/feedback/feedback.models';
 
 import TrxnModels from './Trxn.models';
 import InvoiceHajjModels from '../../modules/invoices/invoice_hajji/Models/InvoiceHajj.models';
+import PnrDetailsModels from '../../modules/invoices/invoice-air-ticket/models/pnr_details.models';
 
 export interface IUserRequest {
   user: string;
@@ -166,6 +167,9 @@ class Models {
   }
   public CommonInvoiceModel(req: Request, trx?: Knex.Transaction) {
     return new CommonInvoiceModel(trx || this.db, req);
+  }
+  public PnrDetailsModels(req: Request, trx?: Knex.Transaction) {
+    return new PnrDetailsModels(trx || this.db, req);
   }
   public DatabaseResetModels(req: Request, trx?: Knex.Transaction) {
     return new DatabaseResetModels(trx || this.db, req);

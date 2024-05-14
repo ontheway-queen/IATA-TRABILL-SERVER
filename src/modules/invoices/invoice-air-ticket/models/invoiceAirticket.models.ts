@@ -709,7 +709,7 @@ class InvoiceAirticketModel extends AbstractModels {
 
   // INVOICE CLIENT PAYMENT
   getInvoiceClientPayment = async (invoice_id: idType) => {
-    return await this.query()
+    const data = await this.query()
       .select(
         'invclientpayment_moneyreceipt_id',
         'invclientpayment_amount as receipt_total_amount',
@@ -720,13 +720,13 @@ class InvoiceAirticketModel extends AbstractModels {
           'COALESCE(cl.client_name, ccl.combine_name) AS client_name'
         ),
         this.db.raw(
-          'COALESCE(mr.receipt_money_receipt_no, mr.receipt_vouchar_no) AS receipt_money_receipt_no'
+          'COALESCE(mr.receipt_money_receipt_no, mr.receipt_vouchar_no, invclientpayment_purpose) AS receipt_money_receipt_no'
         ),
         'mr.receipt_payment_to',
         this.db.raw("COALESCE(mr.receipt_note, 'N/A') AS receipt_note ")
       )
       .from('trabill_invoice_client_payments')
-      .join('trabill_users', { user_id: 'invclientpayment_collected_by' })
+      .leftJoin('trabill_users', { user_id: 'invclientpayment_collected_by' })
       .leftJoin('trabill_money_receipts as mr', {
         receipt_id: 'invclientpayment_moneyreceipt_id',
       })
@@ -742,8 +742,9 @@ class InvoiceAirticketModel extends AbstractModels {
         'invclientpayment_combined_id'
       )
       .where('invclientpayment_invoice_id', invoice_id)
-      .andWhereNot('invclientpayment_is_deleted', 1)
-      .andWhereNot('receipt_has_deleted', 1);
+      .andWhereNot('invclientpayment_is_deleted', 1);
+
+    return data;
   };
 
   public async insertInvoiceInfo(data: IFakeInvoiceInfo) {

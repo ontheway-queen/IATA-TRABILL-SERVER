@@ -178,6 +178,24 @@ class InvoiceAirticketController extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
         }));
+        this.getInvoiceInfo = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getInvoiceInfo(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+        }));
+        this.addInvoiceInfo = this.assyncWrapper.wrap(this.validator.createInvoiceInfo, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.addInvoiceInfo(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+        }));
+        this.deleteInvoiceInfo = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.deleteInvoiceInfo(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+        }));
     }
 }
 exports.default = InvoiceAirticketController;

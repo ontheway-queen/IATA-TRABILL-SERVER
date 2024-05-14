@@ -223,3 +223,49 @@ export interface IVoidReqBody {
     cost_price: number;
   }[];
 }
+
+export interface IFakeInvoiceReqBody
+  extends Omit<IFakeInvoiceInfo, 'ti_org_agency' | 'ti_created_by'> {
+  infos: Omit<
+    IFakeInvoiceInfoItems[],
+    'tii_org_agency' | 'tii_ti_id' | 'tii_created_by' | 'tii_invoice_id'
+  >;
+}
+
+export interface IFakeInvoiceInfo {
+  ti_org_agency: number;
+  ti_invoice_id: number;
+  ti_sub_total: number;
+  ti_total_discount: number;
+  ti_net_total: number;
+  ti_total_payment: number;
+  ti_invoice_total_due: number;
+  ti_created_by: number;
+}
+
+export interface IFakeInvoiceInfoItems {
+  tii_ti_id: number;
+  tii_org_agency: number;
+  tii_invoice_id: number;
+  tii_billing_id: number;
+  tii_airticket_id: number;
+  tii_airticket_no: string;
+  tii_airticket_discount: number;
+  tii_airticket_class: string;
+  tii_airticket_class_type: string;
+  tii_airticket_pnr: string;
+  tii_airticket_route: string;
+  tii_total_discount: number;
+  tii_product_name: string;
+  tii_pax_name: string;
+  tii_quantity: number;
+  tii_unit_price: number;
+  tii_sub_total: number;
+  tii_visiting_country: string;
+  tii_visa_type: string;
+  tii_token_no: string;
+  tii_status: string;
+  tii_journey_date: string;
+  tii_total_room: number;
+  tii_created_by: number;
+}

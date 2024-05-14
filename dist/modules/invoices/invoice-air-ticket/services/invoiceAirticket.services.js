@@ -20,6 +20,7 @@ const editInvoiceAirticket_1 = __importDefault(require("./narrowServices/editInv
 const pnr_details_service_1 = __importDefault(require("./narrowServices/pnr_details.service"));
 const sendMail_services_1 = __importDefault(require("./narrowServices/sendMail.services"));
 const void_invoice_1 = __importDefault(require("./narrowServices/void_invoice"));
+const addInvoiceInfo_services_1 = __importDefault(require("./narrowServices/addInvoiceInfo.services"));
 class InvoiceAirticketService extends abstract_services_1.default {
     constructor() {
         super();
@@ -151,6 +152,16 @@ class InvoiceAirticketService extends abstract_services_1.default {
                 data,
             };
         });
+        this.getInvoiceInfo = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { invoice_id } = req.params;
+            const data = yield this.models
+                .invoiceAirticketModel(req)
+                .getInvoiceInfo(invoice_id);
+            return {
+                success: true,
+                data,
+            };
+        });
         // ============= narrow services ==============
         this.pnrDetails = new pnr_details_service_1.default().pnrDetails;
         this.addInvoiceAirticket = new addInvoiceAirticket_1.default().addInvoiceAirTicket;
@@ -159,6 +170,8 @@ class InvoiceAirticketService extends abstract_services_1.default {
         this.voidInvoiceAirticket = new void_invoice_1.default().voidInvoice;
         this.addAirTicketTax = new air_ticket_tax_refund_1.default().addAirTicketTax;
         this.sendEmail = new sendMail_services_1.default().sendEmail;
+        this.addInvoiceInfo = new addInvoiceInfo_services_1.default().add;
+        this.deleteInvoiceInfo = new addInvoiceInfo_services_1.default().delete;
     }
 }
 exports.default = InvoiceAirticketService;

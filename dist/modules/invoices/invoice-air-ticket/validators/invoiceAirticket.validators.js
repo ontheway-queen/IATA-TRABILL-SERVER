@@ -76,6 +76,35 @@ class InvoiceAirticketValidators extends abstract_validators_1.default {
             (0, express_validator_1.check)('client_total_tax_refund').isNumeric(),
             (0, express_validator_1.check)('vendor_total_tax_refund').isNumeric(),
         ];
+        this.createInvoiceInfo = [
+            this.permissions.check(this.resources.invoice_airticket, 'create'),
+            (0, express_validator_1.check)('ti_invoice_id').isInt().notEmpty(),
+            (0, express_validator_1.check)('ti_invoice_total_due').isDecimal().optional(),
+            (0, express_validator_1.check)('ti_net_total').isDecimal().optional(),
+            (0, express_validator_1.check)('ti_sub_total').isDecimal().optional(),
+            (0, express_validator_1.check)('ti_total_discount').isDecimal().optional(),
+            (0, express_validator_1.check)('ti_total_payment').isDecimal().optional(),
+            (0, express_validator_1.check)('infos.*.tii_billing_id').isInt().optional(),
+            (0, express_validator_1.check)('infos.*.tii_airticket_id').isInt().optional(),
+            (0, express_validator_1.check)('infos.*.tii_airticket_no').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_airticket_discount').isDecimal().optional(),
+            (0, express_validator_1.check)('infos.*.tii_airticket_class').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_airticket_class_type').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_airticket_pnr').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_airticket_route').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_total_discount').isDecimal().optional(),
+            (0, express_validator_1.check)('infos.*.tii_product_name').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_pax_name').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_quantity').isInt().optional(),
+            (0, express_validator_1.check)('infos.*.tii_unit_price').isDecimal().optional(),
+            (0, express_validator_1.check)('infos.*.tii_sub_total').isDecimal().optional(),
+            (0, express_validator_1.check)('infos.*.tii_visiting_country').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_visa_type').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_token_no').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_status').isString().optional(),
+            (0, express_validator_1.check)('infos.*.tii_journey_date').toDate().optional(),
+            (0, express_validator_1.check)('infos.*.tii_total_room').isInt().optional(),
+        ];
     }
 }
 exports.default = InvoiceAirticketValidators;

@@ -78,6 +78,12 @@ class InvoiceAirTicketRouter extends AbstractRouter {
       '/discount/:invoice_id',
       this.controllers.getInvoiceDiscount
     );
+
+    this.routers
+      .route('/info/:invoice_id')
+      .get(this.controllers.getInvoiceInfo)
+      .delete(this.controllers.deleteInvoiceInfo);
+    this.routers.post('/info', this.controllers.addInvoiceInfo);
   }
 }
 

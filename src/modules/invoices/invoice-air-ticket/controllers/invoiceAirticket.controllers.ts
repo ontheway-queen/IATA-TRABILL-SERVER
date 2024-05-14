@@ -248,6 +248,39 @@ class InvoiceAirticketController extends AbstractController {
       }
     }
   );
+
+  public getInvoiceInfo = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response) => {
+      const data = await this.services.getInvoiceInfo(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
+
+  public addInvoiceInfo = this.assyncWrapper.wrap(
+    this.validator.createInvoiceInfo,
+    async (req: Request, res: Response) => {
+      const data = await this.services.addInvoiceInfo(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
+
+  public deleteInvoiceInfo = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response) => {
+      const data = await this.services.deleteInvoiceInfo(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
 }
 
 export default InvoiceAirticketController;

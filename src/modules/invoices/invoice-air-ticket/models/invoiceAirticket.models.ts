@@ -815,7 +815,8 @@ class InvoiceAirticketModel extends AbstractModels {
       )
       .from('trabill_invoice_info')
       .where('ti_invoice_id', invoice_id)
-      .andWhereNot('ti_is_deleted', 1);
+      .andWhereNot('ti_is_deleted', 1)
+      .orderBy('ti_created_at', 'desc');
 
     const infos = await this.query()
       .select(

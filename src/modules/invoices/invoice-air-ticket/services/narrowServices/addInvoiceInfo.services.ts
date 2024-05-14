@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import { IFakeInvoiceReqBody } from '../../types/invoiceAirticket.interface';
+import { InvoiceHistory } from '../../../../../common/types/common.types';
 
 class AddInvoiceInfo extends AbstractServices {
   constructor() {
@@ -21,6 +22,11 @@ class AddInvoiceInfo extends AbstractServices {
     const { user_id, agency_id } = req;
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.invoiceAirticketModel(req, trx);
+      const common_conn = this.models.CommonInvoiceModel(req, trx);
+
+      const { prev_inv_net_total } = await common_conn.getPreviousInvoices(
+        ti_invoice_id
+      );
 
       const ti_id = await conn.insertInvoiceInfo({
         ti_created_by: user_id,
@@ -44,6 +50,18 @@ class AddInvoiceInfo extends AbstractServices {
           });
         }
       }
+
+      // invoice history
+      const content = `EDITED INVOICE CREATED NET TOTAL CHANGE ${prev_inv_net_total}/- to ${ti_net_total}/-`;
+      const history_data: InvoiceHistory = {
+        history_activity_type: 'INVOICE_CREATED',
+        history_created_by: req.user_id,
+        history_invoice_id: ti_invoice_id,
+        history_invoice_payment_amount: ti_net_total,
+        invoicelog_content: content,
+      };
+
+      await common_conn.insertInvoiceHistory(history_data);
 
       await this.insertAudit(
         req,

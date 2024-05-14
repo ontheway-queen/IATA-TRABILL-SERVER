@@ -702,6 +702,7 @@ class invoiceTourModels extends AbstractModels {
 
     const billing_information = await this.query()
       .select(
+        'billing_id',
         'product_name',
         'billing_pax_name',
         'billing_total_pax',

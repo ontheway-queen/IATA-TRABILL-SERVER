@@ -2,7 +2,7 @@ CREATE TABLE
     trabill_invoice_info (
         ti_id INT PRIMARY KEY AUTO_INCREMENT,
         ti_org_agency INT NOT NULL,
-        ti_invoice_id INT NOT NULL,
+        ti_invoice_id INT NOT NULL UNIQUE,
         ti_sub_total DECIMAL(15, 2) DEFAULT NULL,
         ti_total_discount DECIMAL(15, 2) DEFAULT NULL,
         ti_net_total DECIMAL(15, 2) DEFAULT NULL,

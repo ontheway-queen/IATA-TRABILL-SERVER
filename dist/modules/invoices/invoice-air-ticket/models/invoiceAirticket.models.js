@@ -482,7 +482,8 @@ class InvoiceAirticketModel extends abstract_models_1.default {
                 .select('ti_invoice_id', 'ti_sub_total', 'ti_total_discount', 'ti_net_total', 'ti_total_payment', 'ti_invoice_total_due')
                 .from('trabill_invoice_info')
                 .where('ti_invoice_id', invoice_id)
-                .andWhereNot('ti_is_deleted', 1);
+                .andWhereNot('ti_is_deleted', 1)
+                .orderBy('ti_created_at', 'desc');
             const infos = yield this.query()
                 .select('tii_id', 'tii_ti_id', 'tii_org_agency', 'tii_invoice_id', 'tii_billing_id', 'tii_airticket_id', 'tii_airticket_no', 'tii_airticket_discount', 'tii_airticket_class', 'tii_airticket_class_type', 'tii_airticket_pnr', 'tii_airticket_route', 'tii_total_discount', 'tii_product_name', 'tii_pax_name', 'tii_quantity', 'tii_unit_price', 'tii_sub_total', 'tii_visiting_country', 'tii_visa_type', 'tii_token_no', 'tii_status', 'tii_journey_date', 'tii_total_room', 'tii_created_at')
                 .from('trabill_invoice_info_items')

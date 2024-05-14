@@ -133,7 +133,19 @@ export const commonTourPackValidator = [
     .isArray()
     .customSanitizer((value: []) => (value.length === 0 ? undefined : value)),
   check('tourAccms.*.accm_itinerary_id').optional().isInt(),
-  check('tourAccms.*.accm_description').isString().optional(),
+  check('tourAccms.*.accm_description')
+    .optional()
+    .custom((value) => {
+      if (value === null || value === '') {
+        return true;
+      }
+      if (typeof value === 'string') {
+        return true;
+      }
+      throw new Error(
+        'accm_description must be a string, null, or an empty string'
+      );
+    }),
   check('tourAccms.*.accm_cost_price').optional().isInt(),
   check('tourAccms.*.accm_checkin_date').optional().toDate(),
   check('tourAccms.*.accm_checkout_date').optional().toDate(),
@@ -161,8 +173,17 @@ export const commonTourPackValidator = [
     .withMessage('Guide itinerary ID is required'),
   check('guide_description')
     .optional()
-    .isString()
-    .withMessage('Guide description is required'),
+    .custom((value) => {
+      if (value === null || value === '') {
+        return true;
+      }
+      if (typeof value === 'string') {
+        return true;
+      }
+      throw new Error(
+        'accm_description must be a string, null, or an empty string'
+      );
+    }),
   // ... Add more validations for guide details
 
   // Validate tour billing data

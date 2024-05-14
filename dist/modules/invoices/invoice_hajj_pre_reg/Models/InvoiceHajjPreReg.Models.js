@@ -147,7 +147,7 @@ class InvoiceHajjPreModels extends abstract_models_1.default {
         this.getHajiBillingInfos = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
                 .into('trabill_invoice_hajj_pre_reg_billing_infos')
-                .select(this.db.raw('COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'), 'product_name', 'pax_name', 'billing_description', 'billing_quantity', 'billing_unit_price', 'billing_subtotal', 'billing_cost_price', 'billing_profit')
+                .select('billing_id', this.db.raw('COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'), 'product_name', 'pax_name', 'billing_description', 'billing_quantity', 'billing_unit_price', 'billing_subtotal', 'billing_cost_price', 'billing_profit')
                 .where('billing_invoice_id', invoice_id)
                 .andWhereNot('billing_is_deleted', 1)
                 .leftJoin('trabill_combined_clients as tcc', {

@@ -122,7 +122,17 @@ exports.commonTourPackValidator = [
         .isArray()
         .customSanitizer((value) => (value.length === 0 ? undefined : value)),
     (0, express_validator_1.check)('tourAccms.*.accm_itinerary_id').optional().isInt(),
-    (0, express_validator_1.check)('tourAccms.*.accm_description').isString().optional(),
+    (0, express_validator_1.check)('tourAccms.*.accm_description')
+        .optional()
+        .custom((value) => {
+        if (value === null || value === '') {
+            return true;
+        }
+        if (typeof value === 'string') {
+            return true;
+        }
+        throw new Error('accm_description must be a string, null, or an empty string');
+    }),
     (0, express_validator_1.check)('tourAccms.*.accm_cost_price').optional().isInt(),
     (0, express_validator_1.check)('tourAccms.*.accm_checkin_date').optional().toDate(),
     (0, express_validator_1.check)('tourAccms.*.accm_checkout_date').optional().toDate(),
@@ -148,8 +158,15 @@ exports.commonTourPackValidator = [
         .withMessage('Guide itinerary ID is required'),
     (0, express_validator_1.check)('guide_description')
         .optional()
-        .isString()
-        .withMessage('Guide description is required'),
+        .custom((value) => {
+        if (value === null || value === '') {
+            return true;
+        }
+        if (typeof value === 'string') {
+            return true;
+        }
+        throw new Error('accm_description must be a string, null, or an empty string');
+    }),
     // ... Add more validations for guide details
     // Validate tour billing data
     (0, express_validator_1.check)('tourBilling.*.billing_product_id')

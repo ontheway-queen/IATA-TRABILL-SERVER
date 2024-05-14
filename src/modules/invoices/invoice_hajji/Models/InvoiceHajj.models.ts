@@ -332,6 +332,7 @@ class InvoiceHajjModels extends AbstractModels {
   getInvoiceHajjBillingView = async (inovice_id: idType) => {
     const data = await this.query()
       .select(
+        'billing_id',
         this.db.raw(
           'COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'
         ),

@@ -21,6 +21,8 @@ class AddInvoiceInfo extends abstract_services_1.default {
             const { user_id, agency_id } = req;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.invoiceAirticketModel(req, trx);
+                const common_conn = this.models.CommonInvoiceModel(req, trx);
+                const { prev_inv_net_total } = yield common_conn.getPreviousInvoices(ti_invoice_id);
                 const ti_id = yield conn.insertInvoiceInfo({
                     ti_created_by: user_id,
                     ti_invoice_id,
@@ -36,6 +38,16 @@ class AddInvoiceInfo extends abstract_services_1.default {
                         yield conn.insertInvoiceInfoItems(Object.assign(Object.assign({}, info), { tii_created_by: user_id, tii_org_agency: agency_id, tii_ti_id: ti_id, tii_invoice_id: ti_invoice_id }));
                     }
                 }
+                // invoice history
+                const content = `EDITED INVOICE CREATED NET TOTAL CHANGE ${prev_inv_net_total}/- to ${ti_net_total}/-`;
+                const history_data = {
+                    history_activity_type: 'INVOICE_CREATED',
+                    history_created_by: req.user_id,
+                    history_invoice_id: ti_invoice_id,
+                    history_invoice_payment_amount: ti_net_total,
+                    invoicelog_content: content,
+                };
+                yield common_conn.insertInvoiceHistory(history_data);
                 yield this.insertAudit(req, 'create', 'Invoice duplicate info created', user_id, 'INVOICES');
                 return {
                     success: true,

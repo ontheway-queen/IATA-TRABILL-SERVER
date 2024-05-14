@@ -66,14 +66,14 @@ class AddInvoiceInfo extends AbstractServices {
       await this.insertAudit(
         req,
         'create',
-        'Invoice duplicate info created',
+        'Invoice edited info created',
         user_id,
         'INVOICES'
       );
 
       return {
         success: true,
-        message: 'Add Invoice info successfully',
+        message: 'Add Invoice fake info successfully',
         code: 201,
       };
     });

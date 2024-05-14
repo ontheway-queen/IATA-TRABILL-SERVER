@@ -48,10 +48,10 @@ class AddInvoiceInfo extends abstract_services_1.default {
                     invoicelog_content: content,
                 };
                 yield common_conn.insertInvoiceHistory(history_data);
-                yield this.insertAudit(req, 'create', 'Invoice duplicate info created', user_id, 'INVOICES');
+                yield this.insertAudit(req, 'create', 'Invoice edited info created', user_id, 'INVOICES');
                 return {
                     success: true,
-                    message: 'Add Invoice info successfully',
+                    message: 'Add Invoice fake info successfully',
                     code: 201,
                 };
             }));

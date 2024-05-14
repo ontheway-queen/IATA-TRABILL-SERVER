@@ -28,7 +28,7 @@ class VoidInvoice extends AbstractServices {
         invoice_id
       );
 
-      const content = `BDT ${body.net_total}/- \nCHARGE BDT ${
+      const content = `FARE BDT ${body.net_total}/- \nCHARGE BDT ${
         body.client_charge || 0
       }/-`;
 

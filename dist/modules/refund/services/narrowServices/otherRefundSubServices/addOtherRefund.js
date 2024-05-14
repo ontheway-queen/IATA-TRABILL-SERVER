@@ -59,6 +59,7 @@ class AddOtherRefund extends abstract_services_1.default {
                 let crefund_charge_ctrxnid = null;
                 let crefund_actransaction_id = null;
                 if (crefund_payment_type === 'ADJUST') {
+                    const ctrxn_note = `REFUND TOTAL ${total_refund_amount}/- \nREFUND CHARGE ${total_refund_charge}\nRETURN AMOUNT ${total_return_amount}/-`;
                     const clTrxnBody = {
                         ctrxn_type: 'CREDIT',
                         ctrxn_amount: total_refund_amount,
@@ -66,7 +67,7 @@ class AddOtherRefund extends abstract_services_1.default {
                         ctrxn_voucher: other_vouchar_number,
                         ctrxn_particular_id: 110,
                         ctrxn_created_at: date,
-                        ctrxn_note: '',
+                        ctrxn_note,
                         ctrxn_particular_type: 'OTHER REFUND(ADJUST)',
                         ctrxn_airticket_no: ticket_no,
                         ctrxn_pax: pax_name,
@@ -118,11 +119,9 @@ class AddOtherRefund extends abstract_services_1.default {
                             };
                             crefund_actransaction_id = yield trxns.AccTrxnInsert(ACTrxnBody);
                         }
-                        let clientRefundTrxnNote = `Net total : ${total_refund_amount}/- 
-          Money return : ${return_amount}/-
-          Refund charge : ${total_refund_charge}/-`;
+                        let ctrxn_note = `REFUND TOTAL ${total_refund_amount}/- \nREFUND CHARGE ${total_refund_charge}\nRETURN AMOUNT ${return_amount}/-`;
                         if (client_adjust_amount) {
-                            clientRefundTrxnNote += `\nAdjust amount : ${client_adjust_amount}/-`;
+                            ctrxn_note += `\nAdjust amount : ${client_adjust_amount}/-`;
                         }
                         const clTrxnBody = {
                             ctrxn_type: 'CREDIT',
@@ -131,7 +130,7 @@ class AddOtherRefund extends abstract_services_1.default {
                             ctrxn_voucher: other_vouchar_number,
                             ctrxn_particular_id: 110,
                             ctrxn_created_at: date,
-                            ctrxn_note: clientRefundTrxnNote,
+                            ctrxn_note,
                             ctrxn_particular_type: 'OTHER REFUND(MONEY RETURN)',
                             ctrxn_airticket_no: ticket_no,
                             ctrxn_pax: pax_name,
@@ -174,12 +173,11 @@ class AddOtherRefund extends abstract_services_1.default {
                     yield conn.updateAirticketItemIsRefund(vrefund_bill_id, 4, 1);
                     const { vendor_id, combined_id: combinedId } = (0, common_helper_1.separateCombClientToId)(comb_vendor_id);
                     let vrefund_vtrxn_id = null;
-                    let vrefund_charge_vtrxn_id = null;
                     let vrefund_acctrxn_id = null;
                     if (vrefund_payment_type === 'ADJUST') {
-                        let vendorRefundTrxnNote = `Net total : ${vrefund_amount}/- 
-          Adjust amount : ${vrefund_return_amount}/-
-          Refund charge : ${vrefund_charge}/-`;
+                        let vendorRefundTrxnNote = `TOTAL FARE ${vrefund_amount}/- 
+          REFUND CHARGE ${vrefund_charge}/-
+          ADJUST AMOUNT ${vrefund_return_amount}/-`;
                         const VTrxnBody = {
                             comb_vendor: comb_vendor_id,
                             vtrxn_amount: vrefund_return_amount,
@@ -199,8 +197,6 @@ class AddOtherRefund extends abstract_services_1.default {
                     }
                     else {
                         if (payment_method !== 4) {
-                            // account transaction from vendor
-                            const total_vendor_pay = yield conn.getInvoiceVendorPaymentByVendor(invoice_id, vendor_id, combinedId);
                             let accPayType = (0, lib_1.getPaymentType)(payment_method);
                             const ACTrxnBody = {
                                 acctrxn_ac_id: vrefund_account_id,

@@ -129,6 +129,8 @@ class AddAirTicketRefund extends AbstractServices {
       let crefund_actransaction_id = null;
 
       if (crefund_payment_type === 'ADJUST') {
+        const ctrxn_note = `REFUND TOTAL ${crefund_total_amount}/- \nREFUND CHARGE ${crefund_charge_amount}\nRETURN AMOUNT ${crefund_return_amount}/-`;
+
         const clTrxnBody: IClTrxnBody = {
           ctrxn_type: 'CREDIT',
           ctrxn_amount: crefund_total_amount,
@@ -136,8 +138,8 @@ class AddAirTicketRefund extends AbstractServices {
           ctrxn_voucher: voucher_number,
           ctrxn_particular_id: 108,
           ctrxn_created_at: date,
-          ctrxn_note: '',
-          ctrxn_particular_type: 'AIR TICKET REFUND(ADJUST)',
+          ctrxn_note,
+          ctrxn_particular_type: 'Air Ticket Refund',
           ctrxn_pnr: airtickerPnr.join(', '),
           ctrxn_airticket_no: airticketNo.join(', '),
           ctrxn_pax: passportName.join(', '),
@@ -153,7 +155,7 @@ class AddAirTicketRefund extends AbstractServices {
           ctrxn_particular_id: 108,
           ctrxn_created_at: date,
           ctrxn_note: '',
-          ctrxn_particular_type: 'AIR TICKET REFUND(CHARGE)',
+          ctrxn_particular_type: 'Refund Charge',
           ctrxn_pnr: airtickerPnr.join(', '),
           ctrxn_airticket_no: airticketNo.join(', '),
           ctrxn_pax: passportName.join(', '),
@@ -164,8 +166,7 @@ class AddAirTicketRefund extends AbstractServices {
         );
 
         // PAYMENT TO CLIENT INVOICE DUE
-        if(+crefund_return_amount>0){
-          
+        if (+crefund_return_amount > 0) {
         }
       }
 

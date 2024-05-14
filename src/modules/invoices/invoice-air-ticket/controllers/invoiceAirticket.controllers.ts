@@ -111,7 +111,7 @@ class InvoiceAirticketController extends AbstractController {
   );
 
   voidInvoiceAirticket = this.assyncWrapper.wrap(
-    this.validator.readInvoiceAirticket,
+    this.validator.voidAirticket,
     async (req: Request, res: Response) => {
       const data = await this.services.voidInvoiceAirticket(req);
 

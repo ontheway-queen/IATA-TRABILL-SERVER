@@ -617,6 +617,14 @@ class ReportServices extends abstract_services_1.default {
             const data = yield conn.invoiceAndMoneyReceiptDiscount(from_date, to_date);
             return { success: true, data };
         });
+        // SALES MAN WISE CLIENT TOTAL DUE
+        this.salesManWiseClientTotalDue = (req) => __awaiter(this, void 0, void 0, function* () {
+            const sales_man_id = req.params.salesman_id;
+            const { page, size } = req.query;
+            const conn = this.models.salesPurchasesReport(req);
+            const data = yield conn.salesManWiseClientTotalDue(sales_man_id, Number(page) || 1, Number(size) || 20);
+            return Object.assign({ success: true }, data);
+        });
     }
 }
 exports.default = ReportServices;

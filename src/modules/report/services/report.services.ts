@@ -1435,6 +1435,23 @@ class ReportServices extends AbstractServices {
 
     return { success: true, data };
   };
+
+  // SALES MAN WISE CLIENT TOTAL DUE
+  public salesManWiseClientTotalDue = async (req: Request) => {
+    const sales_man_id = req.params.salesman_id;
+
+    const { page, size } = req.query;
+
+    const conn = this.models.salesPurchasesReport(req);
+
+    const data = await conn.salesManWiseClientTotalDue(
+      sales_man_id,
+      Number(page) || 1,
+      Number(size) || 20
+    );
+
+    return { success: true, ...data };
+  };
 }
 
 export default ReportServices;

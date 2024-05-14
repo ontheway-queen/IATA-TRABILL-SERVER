@@ -132,7 +132,7 @@ class PnrDetailsService extends abstract_services_1.default {
                                     const airticket_net_commssion = baseFareCommission - airticket_ait;
                                     const airticket_purchase_price = Number(ticket.payment.total || 0) - airticket_net_commssion;
                                     ticket_details.push(Object.assign({ airticket_comvendor: iata_vendor, airticket_gds_id: 'Sabre', airticket_ticket_no: ticket.number, airticket_issue_date: ticket.date, airticket_base_fare: ticket.payment.subtotal, airticket_gross_fare: ticket.payment.total, airticket_classes,
-                                        cabin_type, airticket_tax: ticket.payment.taxes, currency: ticket.payment.currencyCode, airticket_segment: pnrData.allSegments.length, airticket_journey_date: pnrData.startDate, airticket_commission_percent_total: baseFareCommission, airticket_route_or_sector: route_or_sector, airticket_airline_id: owningAirline, airticket_ait, airticket_client_price: ticket.payment.total, airticket_purchase_price, airticket_profit: airticket_net_commssion }, taxesBreakdown[index]));
+                                        cabin_type, airticket_tax: ticket.payment.taxes, currency: ticket.payment.currencyCode, airticket_segment: pnrData.allSegments.length, airticket_journey_date: pnrData.startDate, airticket_commission_percent_total: Math.round(baseFareCommission), airticket_route_or_sector: route_or_sector, airticket_airline_id: owningAirline, airticket_ait, airticket_client_price: ticket.payment.total, airticket_purchase_price, airticket_profit: airticket_net_commssion }, taxesBreakdown[index]));
                                 }
                                 return ticket_details;
                             });

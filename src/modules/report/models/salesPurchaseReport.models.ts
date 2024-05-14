@@ -803,6 +803,50 @@ class SalesPurchasesReport extends AbstractModels {
 
     return { data, count };
   };
+
+  // SALES MAN WISE CLIENT TOTAL DUE
+  public async salesManWiseClientTotalDue(
+    employee_id: idType,
+    page: number,
+    size: number
+  ) {
+    const page_number = (page - 1) * size;
+
+    const data = await this.query()
+      .select(
+        this.db.raw('sum(view.sales_price) as total_sales'),
+        this.db.raw('sum(view.invoice_discount) as total_discount'),
+        this.db.raw('sum(view.invoice_total_pay) as total_client_payment'),
+        this.db.raw('sum(view.client_due) as total_client_due'),
+        'client_name',
+        'client_mobile',
+        'comb_client'
+      )
+      .from('view_invoice_total_billing as view')
+      .modify((event) => {
+        if (employee_id && employee_id !== 'all') {
+          event.where('view.invoice_sales_man_id', employee_id);
+        }
+      })
+      .andWhere('view.org_agency_id', this.org_agency)
+      .andWhere('client_due', '>', 0)
+
+      .limit(size)
+      .offset(page_number);
+
+    const [{ count }] = await this.query()
+      .select(this.db.raw(`count(*) as count`))
+      .from('view_invoice_total_billing as view')
+      .modify((event) => {
+        if (employee_id && employee_id !== 'all') {
+          event.where('view.invoice_sales_man_id', employee_id);
+        }
+      })
+      .andWhere('view.org_agency_id', this.org_agency)
+      .andWhere('client_due', '>', 0);
+
+    return { count, data };
+  }
 }
 
 export default SalesPurchasesReport;

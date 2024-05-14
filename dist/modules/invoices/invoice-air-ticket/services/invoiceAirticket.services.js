@@ -17,7 +17,7 @@ const addInvoiceAirticket_1 = __importDefault(require("./narrowServices/addInvoi
 const air_ticket_tax_refund_1 = __importDefault(require("./narrowServices/air_ticket_tax_refund"));
 const deleteAirTicket_1 = __importDefault(require("./narrowServices/deleteAirTicket"));
 const editInvoiceAirticket_1 = __importDefault(require("./narrowServices/editInvoiceAirticket"));
-const pnr_details_service_1 = __importDefault(require("./narrowServices/pnr_details.service"));
+const pnr_details_service_1 = __importDefault(require("./pnrServices/pnr_details.service"));
 const sendMail_services_1 = __importDefault(require("./narrowServices/sendMail.services"));
 const void_invoice_1 = __importDefault(require("./narrowServices/void_invoice"));
 class InvoiceAirticketService extends abstract_services_1.default {

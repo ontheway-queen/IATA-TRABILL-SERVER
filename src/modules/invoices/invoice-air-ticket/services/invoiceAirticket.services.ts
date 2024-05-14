@@ -5,7 +5,7 @@ import AddInvoiceAirticket from './narrowServices/addInvoiceAirticket';
 import AirTicketTaxRefund from './narrowServices/air_ticket_tax_refund';
 import DeleteAirTicket from './narrowServices/deleteAirTicket';
 import EditInvoiceAirticket from './narrowServices/editInvoiceAirticket';
-import PnrDetailsService from './narrowServices/pnr_details.service';
+import PnrDetailsService from './pnrServices/pnr_details.service';
 import SendMail from './narrowServices/sendMail.services';
 import VoidInvoice from './narrowServices/void_invoice';
 

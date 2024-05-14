@@ -768,6 +768,16 @@ class ReportController extends abstract_controllers_1.default {
         this.customAirTicketReportExcel = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
             yield this.excels.customAirTicketReportExcel(req, res);
         }));
+        // SALES MAN WISE CLIENT TOTAL DUE
+        this.salesManWiseClientTotalDue = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.salesManWiseClientTotalDue(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('Get Sales Report...');
+            }
+        }));
     }
 }
 exports.default = ReportController;

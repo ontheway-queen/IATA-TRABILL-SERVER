@@ -325,7 +325,7 @@ class invoiceTourModels extends abstract_models_1.default {
                 .where('transport_invoice_id', invoiceId)
                 .andWhereNot('transport_is_deleted', 1);
             const billing_information = yield this.query()
-                .select('product_name', 'billing_pax_name', 'billing_total_pax', 'billing_numof_room', 'billing_total_sales', 'billing_cost_price', 'billing_profit', 'billing_create_date', 'country_name', 'billing_country_id')
+                .select('billing_id', 'product_name', 'billing_pax_name', 'billing_total_pax', 'billing_numof_room', 'billing_total_sales', 'billing_cost_price', 'billing_profit', 'billing_create_date', 'country_name', 'billing_country_id')
                 .from('trabill_invoice_tour_billing')
                 .leftJoin('trabill_products', {
                 billing_product_id: 'product_id',

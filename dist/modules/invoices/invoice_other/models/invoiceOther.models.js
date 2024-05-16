@@ -87,7 +87,7 @@ class InvoiceOther extends abstract_models_1.default {
         this.getInvoiceBillingInfo = (id) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()
                 .from('trabill_other_invoices_billing')
-                .select('pax_name', 'billing_description', 'billing_quantity', 'billing_remaining_quantity', 'billing_unit_price', 'billing_subtotal', 'billing_cost_price', 'billing_profit', 'product_name', this.db.raw('COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'))
+                .select('billing_id', 'pax_name', 'billing_description', 'billing_quantity', 'billing_remaining_quantity', 'billing_unit_price', 'billing_subtotal', 'billing_cost_price', 'billing_profit', 'product_name', this.db.raw('COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'))
                 .where('billing_invoice_id', id)
                 .andWhereNot('billing_is_deleted', 1)
                 .leftJoin('trabill_products', { product_id: 'billing_product_id' })

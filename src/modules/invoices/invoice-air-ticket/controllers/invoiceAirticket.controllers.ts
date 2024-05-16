@@ -26,6 +26,20 @@ class InvoiceAirticketController extends AbstractController {
     }
   );
 
+  // CREATE INVOICE WITH PNR
+  public addInvoiceWithPnr = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response): Promise<void> => {
+      const data = await this.services.addInvoiceWithPnr(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error();
+      }
+    }
+  );
+
   /**
    * @API /api/v1/invoice-air-ticket
    * @Desc Invoice Airticket create
@@ -242,6 +256,39 @@ class InvoiceAirticketController extends AbstractController {
     this.validator.readInvoiceAirticket,
     async (req: Request, res: Response) => {
       const data = await this.services.getInvoiceClientPayment(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
+
+  public getInvoiceInfo = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response) => {
+      const data = await this.services.getInvoiceInfo(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
+
+  public addInvoiceInfo = this.assyncWrapper.wrap(
+    this.validator.createInvoiceInfo,
+    async (req: Request, res: Response) => {
+      const data = await this.services.addInvoiceInfo(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
+
+  public deleteInvoiceInfo = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response) => {
+      const data = await this.services.deleteInvoiceInfo(req);
 
       if (data.success) {
         res.status(200).json(data);

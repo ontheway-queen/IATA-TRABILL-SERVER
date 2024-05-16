@@ -183,7 +183,7 @@ class InvoiceHajjModels extends abstract_models_1.default {
         });
         this.getInvoiceHajjBillingView = (inovice_id) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()
-                .select(this.db.raw('COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'), 'billing_quantity', 'billing_unit_price', 'billing_subtotal', 'billing_cost_price', 'billing_profit', 'product_name', 'pax_name', 'billing_description')
+                .select('billing_id', this.db.raw('COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'), 'billing_quantity', 'billing_unit_price', 'billing_subtotal', 'billing_cost_price', 'billing_profit', 'product_name', 'pax_name', 'billing_description')
                 .from('trabill_invoice_hajj_billing_infos')
                 .leftJoin('trabill_combined_clients as tcc', {
                 combine_id: 'billing_combined_id',

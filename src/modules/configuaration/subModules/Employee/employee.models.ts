@@ -37,6 +37,7 @@ class EmployeeModel extends AbstractModels {
       .from('trabill_employees')
       .select(
         'employee_full_name',
+        'employee_creation_sign',
         'employee_email',
         'employee_mobile',
         'employee_commission',
@@ -75,6 +76,7 @@ class EmployeeModel extends AbstractModels {
       .from('trabill_employees')
       .select(
         'employee_id',
+        'employee_creation_sign',
         'employee_card_id',
         'employee_full_name',
         'trabill_departments.department_id',
@@ -130,6 +132,7 @@ class EmployeeModel extends AbstractModels {
       .from('trabill_employees')
       .select(
         'employee_id',
+        'employee_creation_sign',
         'employee_full_name',
         'employee_birth_date',
         'employee_card_id',

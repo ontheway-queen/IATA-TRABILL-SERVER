@@ -243,6 +243,7 @@ class InvoiceHajjPreModels extends AbstractModels {
     return await this.query()
       .into('trabill_invoice_hajj_pre_reg_billing_infos')
       .select(
+        'billing_id',
         this.db.raw(
           'COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'
         ),

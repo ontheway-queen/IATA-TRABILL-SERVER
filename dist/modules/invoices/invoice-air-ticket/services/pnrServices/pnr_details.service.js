@@ -15,140 +15,62 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const customError_1 = __importDefault(require("../../../../../common/utils/errors/customError"));
+const lib_1 = require("../../../../../common/utils/libraries/lib");
+const pnr_lib_1 = require("../../../../../common/utils/libraries/pnr_lib");
 class PnrDetailsService extends abstract_services_1.default {
     constructor() {
         super();
         // GET PNR DETAILS
-        this.pnrDetails = (req) => __awaiter(this, void 0, void 0, function* () {
+        this.pnrDetails = (req, pnrNo) => __awaiter(this, void 0, void 0, function* () {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
-                const pnr = req.params.pnr;
+                var _a;
+                const pnr = req.params.pnr || pnrNo;
                 if (pnr.trim().length !== 6) {
-                    throw new customError_1.default('No data found', 404, 'Bad request');
+                    throw new customError_1.default('RESOURCE_NOT_FOUND', 404, 'Invalid pnr no.');
                 }
-                // PND DETAILS FETCH
-                const apiUrl = `https://ota.m360ictapi.com/api/v1/public/get-booking/${pnr}`;
-                const TOKEN = 'dkUm2wwaeYNe0jiOn6olLZ96Tg+dyUPwxqFXEtO4O60lVyNgbSUmMaHQd3YRsQI5F6OVGcJmyqjcIg83BUA8jg==';
-                // Set headers
+                const conn = this.models.PnrDetailsModels(req, trx);
+                const ota_info = yield conn.getOtaInfo(req.agency_id);
+                const api_url = ota_info.ota_api_url + '/' + pnr;
                 const headers = {
                     'Content-Type': 'application/json',
-                    Authorization: `Bearer ${TOKEN}`,
+                    Authorization: `Bearer ${ota_info.ota_token}`,
                 };
                 try {
-                    const response = yield axios_1.default.get(apiUrl, { headers });
-                    if (response.data.success) {
-                        const pnrResponse = response.data.data;
-                        // =====================
-                        const common_conn = this.models.CommonInvoiceModel(req, trx);
-                        const conn = this.models.PnrDetailsModels(req, trx);
-                        const iata_vendor = yield common_conn.getIataVendorId();
-                        const pax_passports = pnrResponse.travelers.map((traveler) => {
+                    const response = yield axios_1.default.get(api_url, { headers });
+                    const pnrResponse = response.data.data;
+                    if (response.data.success &&
+                        (pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.flights) &&
+                        (pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.fares)) {
+                        const creationDetails = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.creationDetails;
+                        const invoice_sales_man_id = yield conn.getEmployeeByCreationSign(creationDetails === null || creationDetails === void 0 ? void 0 : creationDetails.creationUserSine);
+                        const pax_passports = (_a = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.travelers) === null || _a === void 0 ? void 0 : _a.map((traveler) => {
+                            var _a;
+                            const mobile_no = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.specialServices.find((item) => item.code === 'CTCM' &&
+                                item.travelerIndices.includes((0, lib_1.numRound)(traveler.nameAssociationId)));
+                            const email = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.specialServices.find((item) => item.code === 'CTCE' &&
+                                item.travelerIndices.includes((0, lib_1.numRound)(traveler.nameAssociationId)));
                             return {
+                                passport_no: (_a = traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments[0]) === null || _a === void 0 ? void 0 : _a.documentNumber,
                                 passport_name: traveler.givenName + ' ' + traveler.surname,
-                                passport_person_type: traveler.type,
+                                passport_person_type: (0, pnr_lib_1.capitalize)(traveler === null || traveler === void 0 ? void 0 : traveler.type),
                                 passport_mobile_no: (traveler === null || traveler === void 0 ? void 0 : traveler.phones)
                                     ? traveler === null || traveler === void 0 ? void 0 : traveler.phones[0].number
-                                    : null,
-                                passport_email: (traveler === null || traveler === void 0 ? void 0 : traveler.emails) ? traveler === null || traveler === void 0 ? void 0 : traveler.emails[0] : null,
+                                    : (0, pnr_lib_1.extractPaxStr)(mobile_no === null || mobile_no === void 0 ? void 0 : mobile_no.message),
+                                passport_email: (traveler === null || traveler === void 0 ? void 0 : traveler.emails)
+                                    ? traveler === null || traveler === void 0 ? void 0 : traveler.emails[0]
+                                    : (0, pnr_lib_1.extractPaxStr)(email === null || email === void 0 ? void 0 : email.message),
                             };
                         });
-                        function asyncMap(flights) {
-                            return __awaiter(this, void 0, void 0, function* () {
-                                const route_or_sector = [];
-                                const flight_details = [];
-                                for (const [index, flight] of flights.entries()) {
-                                    const fltdetails_from_airport_id = yield conn.airportIdByCode(flight.fromAirportCode);
-                                    const fltdetails_to_airport_id = yield conn.airportIdByCode(flight.toAirportCode);
-                                    if (index === 0) {
-                                        route_or_sector.push(fltdetails_from_airport_id);
-                                        route_or_sector.push(fltdetails_to_airport_id);
-                                    }
-                                    else {
-                                        route_or_sector.push(fltdetails_to_airport_id);
-                                    }
-                                    flight_details.push({
-                                        fltdetails_from_airport_id,
-                                        fltdetails_to_airport_id,
-                                        fltdetails_flight_no: flight.flightNumber,
-                                        fltdetails_fly_date: flight.departureDate,
-                                        fltdetails_departure_time: flight.departureTime,
-                                        fltdetails_arrival_time: flight.arrivalTime,
-                                        fltdetails_airline_id: yield conn.airlineIdByCode(flight.airlineCode),
-                                    });
-                                }
-                                return { route_or_sector, flight_details };
-                            });
-                        }
-                        // const flight_details = pnrResponse.flights.map(async (flight, index) => {
-                        //   const fltdetails_from_airport_id = await conn.airportIdByCode(
-                        //     flight.fromAirportCode
-                        //   );
-                        //   const fltdetails_to_airport_id = await conn.airportIdByCode(
-                        //     flight.toAirportCode
-                        //   );
-                        //   if (index === 0) {
-                        //     route_or_sector.push(fltdetails_from_airport_id);
-                        //   } else {
-                        //     route_or_sector.push(fltdetails_to_airport_id);
-                        //   }
-                        //   return {
-                        //     fltdetails_from_airport_id,
-                        //     fltdetails_to_airport_id,
-                        //     fltdetails_flight_no: flight.flightNumber,
-                        //     fltdetails_fly_date: flight.departureDate,
-                        //     fltdetails_departure_time: flight.departureTime,
-                        //     fltdetails_arrival_time: flight.arrivalDate,
-                        //     fltdetails_airline_id: await conn.airlineIdByCode(flight.airlineCode),
-                        //   };
-                        // });
-                        const airticket_route_or_sector = pnrResponse.journeys.map((journey) => journey.firstAirportCode);
-                        airticket_route_or_sector.push(pnrResponse.journeys[pnrResponse.journeys.length - 1]
-                            .lastAirportCode);
-                        // TAXES BREAKDOWN
-                        const taxesBreakdown = pnrResponse.fares.map((tax) => {
-                            const breakdown = tax.taxBreakdown.reduce((acc, current) => {
-                                acc[current.taxCode] = Number(current.taxAmount.amount);
-                                return acc;
-                            }, {});
-                            return breakdown;
-                        });
-                        let totalCountryTax = 0;
-                        for (const taxType in taxesBreakdown[0]) {
-                            if (['BD', 'UT', 'E5'].includes(taxType)) {
-                                totalCountryTax += taxesBreakdown[0][taxType];
-                            }
-                        }
-                        const { flight_details, route_or_sector } = yield asyncMap(pnrResponse.flights);
-                        function getPnrTicketDetails(pnrData) {
-                            return __awaiter(this, void 0, void 0, function* () {
-                                const airticket_classes = pnrData.flights[0].cabinTypeName;
-                                const cabin_type = pnrData.flights[0].cabinTypeCode;
-                                const owningAirline = yield conn.airlineIdByCode(pnrData.fareRules[0].owningAirlineCode);
-                                const ticket_details = [];
-                                for (const [index, ticket] of pnrData.flightTickets.entries()) {
-                                    const baseFareCommission = Number(ticket.payment.subtotal) * 0.07;
-                                    const countryTaxAit = Number(totalCountryTax || 0) * 0.003;
-                                    const grossAit = Number(ticket.payment.total || 0) * 0.003;
-                                    const airticket_ait = Math.round(grossAit - countryTaxAit);
-                                    const airticket_net_commssion = baseFareCommission - airticket_ait;
-                                    const airticket_purchase_price = Number(ticket.payment.total || 0) - airticket_net_commssion;
-                                    ticket_details.push(Object.assign({ airticket_comvendor: iata_vendor, airticket_gds_id: 'Sabre', airticket_ticket_no: ticket.number, airticket_issue_date: ticket.date, airticket_base_fare: ticket.payment.subtotal, airticket_gross_fare: ticket.payment.total, airticket_classes,
-                                        cabin_type, airticket_tax: ticket.payment.taxes, currency: ticket.payment.currencyCode, airticket_segment: pnrData.allSegments.length, airticket_journey_date: pnrData.startDate, airticket_commission_percent_total: Math.round(baseFareCommission), airticket_route_or_sector: route_or_sector, airticket_airline_id: owningAirline, airticket_ait, airticket_client_price: ticket.payment.total, airticket_purchase_price, airticket_profit: airticket_net_commssion }, taxesBreakdown[index]));
-                                }
-                                return ticket_details;
-                            });
-                        }
-                        const ticket_details = yield getPnrTicketDetails(pnrResponse);
-                        const data = {
-                            pax_passports,
-                            ticket_details,
-                            flight_details,
-                        };
+                        const flightRoute = yield (0, pnr_lib_1.formatFlightDetailsRoute)(pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.flights, conn);
+                        const ticket_details = yield (0, pnr_lib_1.formatTicketDetails)(conn, pnrResponse, flightRoute.route_or_sector);
+                        const data = Object.assign(Object.assign({}, flightRoute), { pax_passports,
+                            ticket_details, invoice_sales_date: creationDetails === null || creationDetails === void 0 ? void 0 : creationDetails.creationDate, invoice_sales_man_id, creation_sign: creationDetails === null || creationDetails === void 0 ? void 0 : creationDetails.creationUserSine });
                         return { success: true, data };
                     }
                     return { success: true, data: [] };
                 }
                 catch (error) {
-                    throw new customError_1.default('PNR details not found!', 404, error.message);
+                    throw new customError_1.default('BOOKING_NOT_FOUND', 404, 'Booking cannot be found');
                 }
             }));
         });

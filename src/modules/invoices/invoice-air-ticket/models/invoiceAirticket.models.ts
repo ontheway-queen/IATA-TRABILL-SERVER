@@ -5,6 +5,8 @@ import {
   IAirTicketDb,
   IAirTicketTaxRefund,
   IAirTicketTaxRefundItem,
+  IFakeInvoiceInfo,
+  IFakeInvoiceInfoItems,
   IFlightDetailsDb,
   ITaxesCommissionDB,
 } from '../types/invoiceAirticket.interface';
@@ -744,6 +746,112 @@ class InvoiceAirticketModel extends AbstractModels {
 
     return data;
   };
+
+  public async insertInvoiceInfo(data: IFakeInvoiceInfo) {
+    const [id] = await this.query()
+      .insert(data)
+      .into('trabill_invoice_info')
+      .onConflict('ti_invoice_id')
+      .merge();
+
+    return id;
+  }
+
+  public async deleteInvoiceInfo(invoice_id: idType) {
+    return await this.query()
+      .update({ ti_is_deleted: 1 })
+      .into('trabill_invoice_info')
+      .where('ti_invoice_id', invoice_id);
+  }
+
+  public async insertInvoiceInfoItems(data: IFakeInvoiceInfoItems) {
+    const isExit = await this.query()
+      .select('*')
+      .from('trabill_invoice_info_items')
+      .where('tii_invoice_id', data.tii_invoice_id)
+      .andWhere((event) => {
+        if (+data.tii_airticket_id) {
+          event.andWhere('tii_airticket_id', data.tii_airticket_id);
+        }
+        if (+data.tii_billing_id) {
+          event.andWhere('tii_billing_id', data.tii_billing_id);
+        }
+      });
+
+    if (isExit && isExit.length) {
+      return this.query()
+        .update(data)
+        .into('trabill_invoice_info_items')
+        .where('tii_invoice_id', data.tii_invoice_id)
+        .andWhere((event) => {
+          if (+data.tii_airticket_id) {
+            event.andWhere('tii_airticket_id', data.tii_airticket_id);
+          }
+          if (+data.tii_billing_id) {
+            event.andWhere('tii_billing_id', data.tii_billing_id);
+          }
+        });
+    } else {
+      return await this.query().insert(data).into('trabill_invoice_info_items');
+    }
+  }
+
+  public async deleteInvoiceInfoItems(invoice_id: idType) {
+    return await this.query()
+      .update({ tii_is_deleted: 1 })
+      .into('trabill_invoice_info_items')
+      .where('tii_invoice_id', invoice_id);
+  }
+
+  public async getInvoiceInfo(invoice_id: idType) {
+    const [data] = await this.query()
+      .select(
+        'ti_invoice_id',
+        'ti_sub_total',
+        'ti_total_discount',
+        'ti_net_total',
+        'ti_total_payment',
+        'ti_invoice_total_due'
+      )
+      .from('trabill_invoice_info')
+      .where('ti_invoice_id', invoice_id)
+      .andWhereNot('ti_is_deleted', 1)
+      .orderBy('ti_created_at', 'desc');
+
+    const infos = await this.query()
+      .select(
+        'tii_id',
+        'tii_ti_id',
+        'tii_org_agency',
+        'tii_invoice_id',
+        'tii_billing_id',
+        'tii_airticket_id',
+        'tii_airticket_no',
+        'tii_airticket_discount',
+        'tii_airticket_class',
+        'tii_airticket_class_type',
+        'tii_airticket_pnr',
+        'tii_airticket_route',
+        'tii_total_discount',
+        'tii_product_name',
+        'tii_pax_name',
+        'tii_quantity',
+        'tii_unit_price',
+        'tii_sub_total',
+        'tii_visiting_country',
+        'tii_visa_type',
+        'tii_token_no',
+        'tii_status',
+        'tii_journey_date',
+        'tii_total_room',
+        'tii_created_at'
+      )
+      .from('trabill_invoice_info_items')
+      .where('tii_invoice_id', invoice_id)
+      .andWhereNot('tii_is_deleted', 1);
+
+    return { ...data, infos };
+  }
 }
 
 export default InvoiceAirticketModel;

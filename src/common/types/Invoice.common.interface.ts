@@ -41,7 +41,7 @@ export interface IInvoiceInfoDb {
   invoice_note: string;
   invoice_no: string;
   invoice_sales_date: string;
-  invoice_due_date: string;
+  invoice_due_date?: string;
   invoice_client_id: number | null;
   invoice_combined_id: number | null;
   invoice_sales_man_id: number;

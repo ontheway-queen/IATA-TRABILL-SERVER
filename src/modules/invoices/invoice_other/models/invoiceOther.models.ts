@@ -319,6 +319,7 @@ class InvoiceOther extends AbstractModels {
     const data = await this.query()
       .from('trabill_other_invoices_billing')
       .select(
+        'billing_id',
         'pax_name',
         'billing_description',
         'billing_quantity',

@@ -64,18 +64,6 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 throw new customError_1.default('Please provide a valid invoice id', 400, 'Invalid invoice id');
             }
         });
-        this.getIataVendorId = () => __awaiter(this, void 0, void 0, function* () {
-            const [vendor_id] = yield this.query()
-                .select('vendor_id')
-                .from('trabill_vendors')
-                .where('vendor_type', 'IATA')
-                .andWhere('vendor_org_agency', this.org_agency)
-                .andWhereNot('vendor_is_deleted', 1);
-            if (vendor_id) {
-                return 'vendor-' + (vendor_id === null || vendor_id === void 0 ? void 0 : vendor_id.vendor_id);
-            }
-            return null;
-        });
         this.getProductById = (productId) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()
                 .select('product_name')

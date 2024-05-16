@@ -29,7 +29,7 @@ class InvoiceVisaModels extends abstract_models_1.default {
         });
         this.getViewBillingInfo = (inovice_id) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()
-                .select(this.db.raw('COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'), 'billing_quantity', 'billing_unit_price', 'billing_subtotal', 'billing_cost_price', 'billing_profit', 'product_name', 'country_name', 'billing_delivery_date', 'billing_mofa_no', 'billing_okala_no', 'billing_visa_no', 'billing_status', 'type_name', 'billing_token')
+                .select('billing_id', this.db.raw('COALESCE(tv.vendor_name, tcc.combine_name) AS vendor_name'), 'billing_quantity', 'billing_unit_price', 'billing_subtotal', 'billing_cost_price', 'billing_profit', 'product_name', 'country_name', 'billing_delivery_date', 'billing_mofa_no', 'billing_okala_no', 'billing_visa_no', 'billing_status', 'type_name', 'billing_token')
                 .from('trabill_invoice_visa_billing_infos')
                 .leftJoin('trabill_combined_clients as tcc', {
                 combine_id: 'billing_combined_id',

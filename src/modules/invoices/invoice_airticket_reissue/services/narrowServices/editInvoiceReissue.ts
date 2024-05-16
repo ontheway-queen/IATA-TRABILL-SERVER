@@ -303,7 +303,7 @@ class EditReissueAirticket extends AbstractServices {
             (airoute_route_sector_id) => {
               return {
                 airoute_invoice_id: invoice_id,
-                airoute_airticket_id: airticket_id,
+                airoute_airticket_id: airticketId,
                 airoute_route_sector_id,
               };
             }

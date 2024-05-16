@@ -127,6 +127,7 @@ class ReIssueAirticket extends AbstractModels {
   public async getReissueAirticketInfo(id: idType) {
     return await this.query()
       .select(
+        'airticket_id',
         'airticket_penalties',
         'airticket_classes',
         'airticket_commission_percent',

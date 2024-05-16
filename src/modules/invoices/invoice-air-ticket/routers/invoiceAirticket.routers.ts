@@ -11,6 +11,7 @@ class InvoiceAirTicketRouter extends AbstractRouter {
   }
   private callRouter() {
     this.routers.get('/pnr-details/:pnr', this.controllers.pnrDetails);
+    this.routers.post('/pnr', this.controllers.addInvoiceWithPnr);
 
     this.routers.get(
       '/all-invoiceno-and-id',
@@ -78,6 +79,12 @@ class InvoiceAirTicketRouter extends AbstractRouter {
       '/discount/:invoice_id',
       this.controllers.getInvoiceDiscount
     );
+
+    this.routers
+      .route('/info/:invoice_id')
+      .get(this.controllers.getInvoiceInfo)
+      .delete(this.controllers.deleteInvoiceInfo);
+    this.routers.post('/info', this.controllers.addInvoiceInfo);
   }
 }
 

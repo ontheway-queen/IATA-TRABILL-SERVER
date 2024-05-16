@@ -13,6 +13,7 @@ class InvoiceAirTicketRouter extends abstract_routers_1.default {
     }
     callRouter() {
         this.routers.get('/pnr-details/:pnr', this.controllers.pnrDetails);
+        this.routers.post('/pnr', this.controllers.addInvoiceWithPnr);
         this.routers.get('/all-invoiceno-and-id', this.controllers.getAllInvoicesNumAndId);
         this.routers.get('/client-due/:id', this.controllers.getClientDue);
         this.routers.get('/is-exist/:ticket', this.controllers.isTicketAlreadyExist);
@@ -38,6 +39,11 @@ class InvoiceAirTicketRouter extends abstract_routers_1.default {
         this.routers.get('/tax-refund/:invoice_id', this.controllers.selectAirTicketTax);
         this.routers.post('/tax-refund', this.controllers.addAirTicketTax);
         this.routers.get('/discount/:invoice_id', this.controllers.getInvoiceDiscount);
+        this.routers
+            .route('/info/:invoice_id')
+            .get(this.controllers.getInvoiceInfo)
+            .delete(this.controllers.deleteInvoiceInfo);
+        this.routers.post('/info', this.controllers.addInvoiceInfo);
     }
 }
 exports.default = InvoiceAirTicketRouter;

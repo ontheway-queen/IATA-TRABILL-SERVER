@@ -75,6 +75,36 @@ class InvoiceAirticketValidators extends AbstractValidator {
     check('client_total_tax_refund').isNumeric(),
     check('vendor_total_tax_refund').isNumeric(),
   ];
+
+  public createInvoiceInfo = [
+    this.permissions.check(this.resources.invoice_airticket, 'create'),
+    check('ti_invoice_id').isInt().notEmpty(),
+    check('ti_invoice_total_due').isDecimal().optional(),
+    check('ti_net_total').isDecimal().optional(),
+    check('ti_sub_total').isDecimal().optional(),
+    check('ti_total_discount').isDecimal().optional(),
+    check('ti_total_payment').isDecimal().optional(),
+    check('infos.*.tii_billing_id').isInt().optional(),
+    check('infos.*.tii_airticket_id').isInt().optional(),
+    check('infos.*.tii_airticket_no').isString().optional(),
+    check('infos.*.tii_airticket_discount').isDecimal().optional(),
+    check('infos.*.tii_airticket_class').isString().optional(),
+    check('infos.*.tii_airticket_class_type').isString().optional(),
+    check('infos.*.tii_airticket_pnr').isString().optional(),
+    check('infos.*.tii_airticket_route').isString().optional(),
+    check('infos.*.tii_total_discount').isDecimal().optional(),
+    check('infos.*.tii_product_name').isString().optional(),
+    check('infos.*.tii_pax_name').isString().optional(),
+    check('infos.*.tii_quantity').isInt().optional(),
+    check('infos.*.tii_unit_price').isDecimal().optional(),
+    check('infos.*.tii_sub_total').isDecimal().optional(),
+    check('infos.*.tii_visiting_country').isString().optional(),
+    check('infos.*.tii_visa_type').isString().optional(),
+    check('infos.*.tii_token_no').isString().optional(),
+    check('infos.*.tii_status').isString().optional(),
+    check('infos.*.tii_journey_date').toDate().optional(),
+    check('infos.*.tii_total_room').isInt().optional(),
+  ];
 }
 
 export default InvoiceAirticketValidators;

@@ -159,7 +159,10 @@ class ClientModel extends abstract_models_1.default {
                     if (search && search !== 'all') {
                         event
                             .andWhere('view_all_clients.client_name', 'LIKE', `%${search}%`)
-                            .orWhere('view_all_clients.mobile', 'LIKE', `%${search}%`);
+                            .orWhere('view_all_clients.mobile', 'LIKE', `%${search}%`)
+                            .andWhereRaw(`LOWER(view_all_clients.client_entry_id) LIKE ?`, [
+                            `%${search}%`,
+                        ]);
                     }
                 });
             })

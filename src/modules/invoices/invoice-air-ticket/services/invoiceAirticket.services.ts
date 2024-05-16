@@ -8,6 +8,8 @@ import EditInvoiceAirticket from './narrowServices/editInvoiceAirticket';
 import PnrDetailsService from './pnrServices/pnr_details.service';
 import SendMail from './narrowServices/sendMail.services';
 import VoidInvoice from './narrowServices/void_invoice';
+import AddInvoiceInfo from './narrowServices/addInvoiceInfo.services';
+import AddInvoiceWithPnr from './pnrServices/add_invoice_pnr.service';
 
 class InvoiceAirticketService extends AbstractServices {
   constructor() {
@@ -228,6 +230,19 @@ class InvoiceAirticketService extends AbstractServices {
     };
   };
 
+  public getInvoiceInfo = async (req: Request) => {
+    const { invoice_id } = req.params as { invoice_id: string };
+
+    const data = await this.models
+      .invoiceAirticketModel(req)
+      .getInvoiceInfo(invoice_id);
+
+    return {
+      success: true,
+      data,
+    };
+  };
+
   // ============= narrow services ==============
   pnrDetails = new PnrDetailsService().pnrDetails;
   public addInvoiceAirticket = new AddInvoiceAirticket().addInvoiceAirTicket;
@@ -235,8 +250,12 @@ class InvoiceAirticketService extends AbstractServices {
   public deleteInvoiceAirTicket = new DeleteAirTicket().deleteAirTicket;
   public voidInvoiceAirticket = new VoidInvoice().voidInvoice;
   public addAirTicketTax = new AirTicketTaxRefund().addAirTicketTax;
+  public addInvoiceWithPnr = new AddInvoiceWithPnr().addInvoiceWithPnr;
 
   public sendEmail = new SendMail().sendEmail;
+
+  public addInvoiceInfo = new AddInvoiceInfo().add;
+  public deleteInvoiceInfo = new AddInvoiceInfo().delete;
 }
 
 export default InvoiceAirticketService;

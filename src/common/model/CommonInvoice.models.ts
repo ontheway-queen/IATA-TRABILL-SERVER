@@ -173,7 +173,7 @@ class CommonInvoiceModel extends AbstractModels {
     p_invoice_id: number,
     p_airticket_id: number,
     p_passport_name: string,
-    p_passport_type: 'Adult' | 'Child' | 'Infant',
+    p_passport_type: 'Adult' | 'Child' | 'Infant' | string,
     p_mobile_no: string,
     p_email: string
   ) {
@@ -401,20 +401,6 @@ class CommonInvoiceModel extends AbstractModels {
         'Invalid invoice id'
       );
     }
-  };
-
-  getIataVendorId = async () => {
-    const [vendor_id] = await this.query()
-      .select('vendor_id')
-      .from('trabill_vendors')
-      .where('vendor_type', 'IATA')
-      .andWhere('vendor_org_agency', this.org_agency)
-      .andWhereNot('vendor_is_deleted', 1);
-
-    if (vendor_id) {
-      return 'vendor-' + vendor_id?.vendor_id;
-    }
-    return null;
   };
 
   getProductById = async (productId: idType) => {

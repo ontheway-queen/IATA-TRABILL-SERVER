@@ -47,7 +47,7 @@ class EmployeeModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
                 .from('trabill_employees')
-                .select('employee_full_name', 'employee_email', 'employee_mobile', 'employee_commission', this.db.raw('CAST(employee_salary AS DECIMAL(15,2))  AS employee_salary'), 'employee_joining_date', 'employee_address', 'employee_status', 'employee_status', 'trabill_designations.designation_name', 'trabill_blood_groups.group_name', 'employee_birth_date', 'employee_apppoint_date', 'employee_card_id')
+                .select('employee_full_name', 'employee_creation_sign', 'employee_email', 'employee_mobile', 'employee_commission', this.db.raw('CAST(employee_salary AS DECIMAL(15,2))  AS employee_salary'), 'employee_joining_date', 'employee_address', 'employee_status', 'employee_status', 'trabill_designations.designation_name', 'trabill_blood_groups.group_name', 'employee_birth_date', 'employee_apppoint_date', 'employee_card_id')
                 .leftJoin('trabill_blood_groups', 'trabill_blood_groups.group_id', 'trabill_employees.employee_bloodgroup_id')
                 .leftJoin('trabill_designations', 'trabill_designations.designation_id', 'trabill_employees.employee_designation_id')
                 .where('employee_id', employeeId);
@@ -59,7 +59,7 @@ class EmployeeModel extends abstract_models_1.default {
             const page_number = (page - 1) * size;
             const data = yield this.query()
                 .from('trabill_employees')
-                .select('employee_id', 'employee_card_id', 'employee_full_name', 'trabill_departments.department_id', 'trabill_departments.department_name', 'trabill_designations.designation_id', 'trabill_designations.designation_name', 'trabill_blood_groups.group_id', 'trabill_blood_groups.group_name', 'employee_email', 'employee_mobile', 'employee_salary', 'employee_commission', 'employee_birth_date', 'employee_apppoint_date', 'employee_joining_date', 'employee_address', 'employee_status', 'employee_org_agency as agency_id')
+                .select('employee_id', 'employee_creation_sign', 'employee_card_id', 'employee_full_name', 'trabill_departments.department_id', 'trabill_departments.department_name', 'trabill_designations.designation_id', 'trabill_designations.designation_name', 'trabill_blood_groups.group_id', 'trabill_blood_groups.group_name', 'employee_email', 'employee_mobile', 'employee_salary', 'employee_commission', 'employee_birth_date', 'employee_apppoint_date', 'employee_joining_date', 'employee_address', 'employee_status', 'employee_org_agency as agency_id')
                 .leftJoin('trabill_departments', 'trabill_departments.department_id', 'trabill_employees.employee_department_id')
                 .leftJoin('trabill_designations', 'trabill_designations.designation_id', 'trabill_employees.employee_designation_id')
                 .leftJoin('trabill_blood_groups', 'trabill_blood_groups.group_id', 'trabill_employees.employee_bloodgroup_id')
@@ -80,7 +80,7 @@ class EmployeeModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
                 .from('trabill_employees')
-                .select('employee_id', 'employee_full_name', 'employee_birth_date', 'employee_card_id', 'trabill_departments.department_id', 'trabill_departments.department_name', 'trabill_designations.designation_id', 'trabill_designations.designation_name', 'trabill_blood_groups.group_id', 'trabill_blood_groups.group_name', 'employee_email', 'employee_mobile', 'employee_salary', 'employee_commission', 'employee_apppoint_date', 'employee_joining_date', 'employee_address', 'employee_status', 'employee_org_agency as agency_id')
+                .select('employee_id', 'employee_creation_sign', 'employee_full_name', 'employee_birth_date', 'employee_card_id', 'trabill_departments.department_id', 'trabill_departments.department_name', 'trabill_designations.designation_id', 'trabill_designations.designation_name', 'trabill_blood_groups.group_id', 'trabill_blood_groups.group_name', 'employee_email', 'employee_mobile', 'employee_salary', 'employee_commission', 'employee_apppoint_date', 'employee_joining_date', 'employee_address', 'employee_status', 'employee_org_agency as agency_id')
                 .leftJoin('trabill_departments', 'trabill_departments.department_id', 'trabill_employees.employee_department_id')
                 .leftJoin('trabill_designations', 'trabill_designations.designation_id', 'trabill_employees.employee_designation_id')
                 .leftJoin('trabill_blood_groups', 'trabill_blood_groups.group_id', 'trabill_employees.employee_bloodgroup_id')

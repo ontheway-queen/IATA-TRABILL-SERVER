@@ -71,12 +71,12 @@ export interface InvoiceInfoType
   invoice_agent_com_amount: number;
   invoice_sub_total: number;
   invoice_net_total: number;
-  invoice_service_charge: number;
   invoice_total_profit: number;
   invoice_total_vendor_price: number;
   invoice_created_by: number;
   invoice_client_previous_due: number;
   invoice_vat: number;
+  invoice_service_charge: number;
   invoice_discount: number;
   invoice_agent_id: number;
   invoice_walking_customer_name: string;
@@ -127,7 +127,7 @@ export interface ITicketDetails {
   airticket_gds_id: string;
   airticket_issue_date: string;
   airticket_segment: number;
-  airticket_net_commssion: string;
+  airticket_net_commssion: number;
   airticket_route_or_sector: number[];
   airticket_pnr: string;
   airticket_bd_charge: number;

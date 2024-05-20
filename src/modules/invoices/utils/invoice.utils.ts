@@ -8,9 +8,24 @@ import { InvoiceInfoType } from '../invoice-air-ticket/types/invoiceAirticket.in
 
 export class InvoiceUtils {
   protected comm_conn: CommonInvoiceModel;
-  protected invoice: InvoiceInfoType;
+  protected invoice: {
+    invoice_net_total: number;
+    invoice_note: string;
+    invoice_sales_date: string;
+    invoice_combclient_id: string;
+    invoice_discount: number;
+  };
 
-  constructor(invoice: InvoiceInfoType, comm_conn: CommonInvoiceModel) {
+  constructor(
+    invoice: {
+      invoice_net_total: number;
+      invoice_note: string;
+      invoice_sales_date: string;
+      invoice_combclient_id: string;
+      invoice_discount: number;
+    },
+    comm_conn: CommonInvoiceModel
+  ) {
     this.comm_conn = comm_conn;
     this.invoice = invoice;
   }
@@ -31,6 +46,7 @@ export class InvoiceUtils {
         | 'Tour Package'
         | 'Hajj'
         | 'Ummrah Package'
+        | 'Add Invoice Air Ticket(PNR)'
         | 'Hajj Pre Reg';
       note?: string;
     }

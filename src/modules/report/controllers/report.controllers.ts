@@ -1206,6 +1206,20 @@ class ReportController extends AbstractController {
       await this.excels.customAirTicketReportExcel(req, res);
     }
   );
+
+  // SALES MAN WISE CLIENT TOTAL DUE
+  public salesManWiseClientTotalDue = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.salesManWiseClientTotalDue(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Get Sales Report...');
+      }
+    }
+  );
 }
 
 export default ReportController;

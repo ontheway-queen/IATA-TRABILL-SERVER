@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getDateRangeByWeek = exports.getNext15Day = exports.getIataDateRange = exports.getBspBillingDate = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
+exports.numRound = exports.getDateRangeByWeek = exports.getNext15Day = exports.getIataDateRange = exports.getBspBillingDate = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
 const axios_1 = __importDefault(require("axios"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const dayjs_1 = __importDefault(require("dayjs"));
@@ -223,4 +223,9 @@ const getDateRangeByWeek = (input) => {
     return { startDate, endDate };
 };
 exports.getDateRangeByWeek = getDateRangeByWeek;
+const numRound = (num) => {
+    const round = Math.round(Number(num || 0));
+    return Number(round || 0);
+};
+exports.numRound = numRound;
 //# sourceMappingURL=lib.js.map

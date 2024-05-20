@@ -5,10 +5,11 @@ import AddInvoiceAirticket from './narrowServices/addInvoiceAirticket';
 import AirTicketTaxRefund from './narrowServices/air_ticket_tax_refund';
 import DeleteAirTicket from './narrowServices/deleteAirTicket';
 import EditInvoiceAirticket from './narrowServices/editInvoiceAirticket';
-import PnrDetailsService from './narrowServices/pnr_details.service';
+import PnrDetailsService from './pnrServices/pnr_details.service';
 import SendMail from './narrowServices/sendMail.services';
 import VoidInvoice from './narrowServices/void_invoice';
 import AddInvoiceInfo from './narrowServices/addInvoiceInfo.services';
+import AddInvoiceWithPnr from './pnrServices/add_invoice_pnr.service';
 
 class InvoiceAirticketService extends AbstractServices {
   constructor() {
@@ -249,6 +250,7 @@ class InvoiceAirticketService extends AbstractServices {
   public deleteInvoiceAirTicket = new DeleteAirTicket().deleteAirTicket;
   public voidInvoiceAirticket = new VoidInvoice().voidInvoice;
   public addAirTicketTax = new AirTicketTaxRefund().addAirTicketTax;
+  public addInvoiceWithPnr = new AddInvoiceWithPnr().addInvoiceWithPnr;
 
   public sendEmail = new SendMail().sendEmail;
 

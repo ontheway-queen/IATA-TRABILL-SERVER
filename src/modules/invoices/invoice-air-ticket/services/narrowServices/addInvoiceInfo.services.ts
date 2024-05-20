@@ -1,7 +1,7 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
-import { IFakeInvoiceReqBody } from '../../types/invoiceAirticket.interface';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
+import { IFakeInvoiceReqBody } from '../../types/invoiceAirticket.interface';
 
 class AddInvoiceInfo extends AbstractServices {
   constructor() {
@@ -52,7 +52,7 @@ class AddInvoiceInfo extends AbstractServices {
       }
 
       // invoice history
-      const content = `EDITED INVOICE CREATED NET TOTAL CHANGE ${prev_inv_net_total}/- to ${ti_net_total}/-`;
+      const content = `INVOICE BILL UPDATED NET TOTAL ${prev_inv_net_total}/- to ${ti_net_total}/-`;
       const history_data: InvoiceHistory = {
         history_activity_type: 'INVOICE_CREATED',
         history_created_by: req.user_id,
@@ -63,13 +63,7 @@ class AddInvoiceInfo extends AbstractServices {
 
       await common_conn.insertInvoiceHistory(history_data);
 
-      await this.insertAudit(
-        req,
-        'create',
-        'Invoice edited info created',
-        user_id,
-        'INVOICES'
-      );
+      await this.insertAudit(req, 'create', content, user_id, 'INVOICES');
 
       return {
         success: true,

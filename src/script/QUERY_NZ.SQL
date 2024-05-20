@@ -9,11 +9,39 @@ CHANGE COLUMN `invclientpayment_purpose` `invclientpayment_purpose` VARCHAR(45) 
 
 
 
+ALTER TABLE `trabill`.`trabill_employees` 
+ADD COLUMN `employee_creation_sign` VARCHAR(5) NULL AFTER `employee_id`,
+ADD UNIQUE INDEX `employee_creation_sign_UNIQUE` (`employee_creation_sign` ASC) VISIBLE;
+;
 
 
 
+CREATE TABLE trabill_agency_ota_info (
+    ota_id INT AUTO_INCREMENT PRIMARY KEY,
+    ota_org_id INT,
+    ota_api_url VARCHAR(255) NOT NULL,
+    ota_token VARCHAR(555) NOT NULL,
+    ota_is_deleted TINYINT DEFAULT 0
+);
 
 
+ALTER TABLE `trabill`.`trabill_agency_ota_info` 
+CHANGE COLUMN `ota_org_id` `ota_org_id` INT NOT NULL ,
+DROP PRIMARY KEY,
+ADD PRIMARY KEY (`ota_id`, `ota_org_id`),
+ADD INDEX `trabill_agency_ota_info_ifk_1_idx` (`ota_org_id` ASC) VISIBLE;
+;
+ALTER TABLE `trabill`.`trabill_agency_ota_info` 
+ADD CONSTRAINT `trabill_agency_ota_info_ifk_1`
+  FOREIGN KEY (`ota_org_id`)
+  REFERENCES `trabill`.`trabill_agency_organization_information` (`org_id`)
+  ON DELETE NO ACTION
+  ON UPDATE NO ACTION;
+
+
+
+alter table trabill.trabill_invoice_airticket_pax
+add  column p_passport_no varchar(20) default null after p_passport_id;
 
 
 

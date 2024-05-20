@@ -39,7 +39,7 @@ class AddInvoiceInfo extends abstract_services_1.default {
                     }
                 }
                 // invoice history
-                const content = `EDITED INVOICE CREATED NET TOTAL CHANGE ${prev_inv_net_total}/- to ${ti_net_total}/-`;
+                const content = `INVOICE BILL UPDATED NET TOTAL ${prev_inv_net_total}/- to ${ti_net_total}/-`;
                 const history_data = {
                     history_activity_type: 'INVOICE_CREATED',
                     history_created_by: req.user_id,
@@ -48,7 +48,7 @@ class AddInvoiceInfo extends abstract_services_1.default {
                     invoicelog_content: content,
                 };
                 yield common_conn.insertInvoiceHistory(history_data);
-                yield this.insertAudit(req, 'create', 'Invoice edited info created', user_id, 'INVOICES');
+                yield this.insertAudit(req, 'create', content, user_id, 'INVOICES');
                 return {
                     success: true,
                     message: 'Add Invoice fake info successfully',

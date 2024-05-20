@@ -186,6 +186,11 @@ class ReportRouter extends AbstractRouter {
     this.routers.get('/daily-summary', this.controllers.dailySummary);
 
     this.routers.get(
+      '/salesman-wise-cl-due/:salesman_id',
+      this.controllers.salesManWiseClientTotalDue
+    );
+
+    this.routers.get(
       '/refund-report-client',
       this.controllers.refundReportClient
     );

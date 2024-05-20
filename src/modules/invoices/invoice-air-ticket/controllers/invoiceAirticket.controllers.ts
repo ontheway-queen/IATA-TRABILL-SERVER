@@ -26,6 +26,20 @@ class InvoiceAirticketController extends AbstractController {
     }
   );
 
+  // CREATE INVOICE WITH PNR
+  public addInvoiceWithPnr = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response): Promise<void> => {
+      const data = await this.services.addInvoiceWithPnr(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error();
+      }
+    }
+  );
+
   /**
    * @API /api/v1/invoice-air-ticket
    * @Desc Invoice Airticket create

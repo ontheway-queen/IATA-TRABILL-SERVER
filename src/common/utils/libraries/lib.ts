@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken';
 import { IUser } from '../../../auth/admin_auth.types';
 import config from '../../../config/config';
 import CustomError from '../errors/customError';
+import { idType } from '../../types/common.types';
 
 type TokenCreds = Omit<
   IUser,
@@ -277,4 +278,10 @@ export const getDateRangeByWeek = (
   }
 
   return { startDate, endDate };
+};
+
+export const numRound = (num: idType) => {
+  const round = Math.round(Number(num || 0));
+
+  return Number(round || 0);
 };

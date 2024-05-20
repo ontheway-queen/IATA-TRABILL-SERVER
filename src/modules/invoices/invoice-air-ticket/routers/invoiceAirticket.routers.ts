@@ -11,6 +11,7 @@ class InvoiceAirTicketRouter extends AbstractRouter {
   }
   private callRouter() {
     this.routers.get('/pnr-details/:pnr', this.controllers.pnrDetails);
+    this.routers.post('/pnr', this.controllers.addInvoiceWithPnr);
 
     this.routers.get(
       '/all-invoiceno-and-id',

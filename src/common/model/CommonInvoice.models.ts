@@ -491,7 +491,8 @@ class CommonInvoiceModel extends AbstractModels {
         ),
 
         'invoice_note',
-        'user_first_name'
+        'user_first_name',
+        this.db.raw(`CASE WHEN COUNT(ti_id) > 0 THEN 1 ELSE 0 END AS is_edited`)
       )
       .where('invoice_id', invoiceId)
       .leftJoin('trabill_invoices_extra_amounts', {
@@ -508,7 +509,10 @@ class CommonInvoiceModel extends AbstractModels {
         'trabill_combined_clients as ccl',
         'ccl.combine_id',
         'invoice_combined_id'
-      );
+      )
+      .leftJoin(`trabill_invoice_info`, {
+        ti_invoice_id: 'invoice_id',
+      });
 
     if (isEmpty(data)) {
       throw new CustomError(

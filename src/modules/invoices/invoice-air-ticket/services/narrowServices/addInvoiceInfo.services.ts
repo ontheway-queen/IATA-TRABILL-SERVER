@@ -72,6 +72,7 @@ class AddInvoiceInfo extends AbstractServices {
       };
     });
   };
+
   public delete = async (req: Request) => {
     const { invoice_id } = req.params as { invoice_id: string };
 

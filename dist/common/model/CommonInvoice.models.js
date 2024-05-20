@@ -505,7 +505,7 @@ class CommonInvoiceModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()
                 .from('trabill_invoices')
-                .select('invoice_no', 'invoice_reference', 'invoice_client_previous_due', 'invoice_total_profit', 'invoice_show_discount', 'invoice_show_prev_due', 'employee_full_name', 'invoice_net_total', 'invoice_sub_total', 'invoice_total_vendor_price', 'invoice_category_id', 'invoice_create_date as invoice_date', 'invoice_sales_date', 'invoice_due_date', 'invoice_vat', 'invoice_service_charge', 'invoice_discount', 'agent_name', 'invoice_agent_com_amount', 'invoice_walking_customer_name', 'invoice_reissue_client_type', 'invoice_is_refund', this.db.raw("CASE WHEN invoice_client_id IS NOT NULL THEN CONCAT('client-',invoice_client_id) ELSE CONCAT('combined-',invoice_combined_id) END AS invoice_combclient_id"), this.db.raw('COALESCE(cl.client_name, ccl.combine_name) AS client_name'), this.db.raw(`COALESCE(cl.client_mobile, ccl.combine_mobile) AS client_mobile`), this.db.raw('COALESCE(cl.client_email, ccl.combine_email) AS client_email'), this.db.raw('COALESCE(cl.client_address, ccl.combine_address) AS client_address'), 'invoice_note', 'user_first_name')
+                .select('invoice_no', 'invoice_reference', 'invoice_client_previous_due', 'invoice_total_profit', 'invoice_show_discount', 'invoice_show_prev_due', 'employee_full_name', 'invoice_net_total', 'invoice_sub_total', 'invoice_total_vendor_price', 'invoice_category_id', 'invoice_create_date as invoice_date', 'invoice_sales_date', 'invoice_due_date', 'invoice_vat', 'invoice_service_charge', 'invoice_discount', 'agent_name', 'invoice_agent_com_amount', 'invoice_walking_customer_name', 'invoice_reissue_client_type', 'invoice_is_refund', this.db.raw("CASE WHEN invoice_client_id IS NOT NULL THEN CONCAT('client-',invoice_client_id) ELSE CONCAT('combined-',invoice_combined_id) END AS invoice_combclient_id"), this.db.raw('COALESCE(cl.client_name, ccl.combine_name) AS client_name'), this.db.raw(`COALESCE(cl.client_mobile, ccl.combine_mobile) AS client_mobile`), this.db.raw('COALESCE(cl.client_email, ccl.combine_email) AS client_email'), this.db.raw('COALESCE(cl.client_address, ccl.combine_address) AS client_address'), 'invoice_note', 'user_first_name', this.db.raw(`CASE WHEN COUNT(ti_id) > 0 THEN 1 ELSE 0 END AS is_edited`))
                 .where('invoice_id', invoiceId)
                 .leftJoin('trabill_invoices_extra_amounts', {
                 extra_amount_invoice_id: 'invoice_id',
@@ -517,7 +517,10 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .leftJoin('trabill_employees', { employee_id: 'invoice_sales_man_id' })
                 .leftJoin('trabill_users', { user_id: 'invoice_created_by' })
                 .leftJoin('trabill_clients as cl', { invoice_client_id: 'cl.client_id' })
-                .leftJoin('trabill_combined_clients as ccl', 'ccl.combine_id', 'invoice_combined_id');
+                .leftJoin('trabill_combined_clients as ccl', 'ccl.combine_id', 'invoice_combined_id')
+                .leftJoin(`trabill_invoice_info`, {
+                ti_invoice_id: 'invoice_id',
+            });
             if ((0, invoice_helpers_1.isEmpty)(data)) {
                 throw new customError_1.default('Please provide a valid invoice id', 400, 'Invalid Invoice Id');
             }

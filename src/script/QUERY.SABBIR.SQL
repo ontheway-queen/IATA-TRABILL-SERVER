@@ -52,4 +52,8 @@ CREATE TABLE
         FOREIGN KEY (tii_created_by) REFERENCES trabill_users (user_id),
         FOREIGN KEY (tii_deleted_by) REFERENCES trabill_users (user_id),
         FOREIGN KEY (tii_ti_id) REFERENCES trabill_invoice_info (ti_id)
-    )
+    );
+
+v_all_inv -- update this view from local;
+view_invoice_other_list -- update this view from local;
+view_invoice_visalist -- update this view from local;

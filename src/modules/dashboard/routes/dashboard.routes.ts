@@ -1,5 +1,8 @@
+import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
 import DashboardControllers from '../controllers/dashboard.controllers';
+
+const upload = multer({ dest: 'uploads/' });
 
 class DashboardRoutes extends AbstractRouter {
   private controllers = new DashboardControllers();
@@ -40,6 +43,11 @@ class DashboardRoutes extends AbstractRouter {
     this.routers.get('/best-clients', this.controllers.getBestClients);
     this.routers.get('/best-employee', this.controllers.getBestEmployee);
     this.routers.get('/iata-limit', this.controllers.iataBankGuaranteeLimit);
+    this.routers.post(
+      '/bsp-bill-check',
+      upload.single('file'),
+      this.controllers.bspBillingCrossCheck
+    );
   }
 }
 export default DashboardRoutes;

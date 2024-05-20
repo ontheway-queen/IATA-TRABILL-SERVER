@@ -165,6 +165,7 @@ class InvoiceAirticketService extends abstract_services_1.default {
         });
         // ============= narrow services ==============
         this.pnrDetails = new pnr_details_service_1.default().pnrDetails;
+        this.testPnrDetails = new pnr_details_service_1.default().testPnrDetails;
         this.addInvoiceAirticket = new addInvoiceAirticket_1.default().addInvoiceAirTicket;
         this.editInvoiceAirticket = new editInvoiceAirticket_1.default().editInvoiceAirTicket;
         this.deleteInvoiceAirTicket = new deleteAirTicket_1.default().deleteAirTicket;

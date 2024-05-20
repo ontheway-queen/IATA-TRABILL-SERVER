@@ -25,26 +25,26 @@ class DeleteAirTicketRefund extends abstract_services_1.default {
             const { deleted_by } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
+                const common_conn = this.models.CommonInvoiceModel(req, trx);
+                const mr_conn = this.models.MoneyReceiptModels(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { atrefund_invoice_id, atrefund_trxn_charge_id } = yield conn.getAirticketRefund(refund_id);
-                // client trxn delete
+                // client trans delete
                 const airticketRefundClient = yield conn.getAirticketClientRefund(refund_id);
                 if (atrefund_trxn_charge_id) {
                     yield this.models
                         .vendorModel(req, trx)
                         .deleteOnlineTrxnCharge(atrefund_trxn_charge_id);
                 }
-                for (const item of airticketRefundClient) {
-                    const { crefund_ctrxnid, crefund_charge_ctrxnid, crefund_actransaction_id, } = item;
-                    if (crefund_ctrxnid) {
-                        yield trxns.deleteClTrxn(crefund_ctrxnid, item.comb_client);
-                    }
-                    if (crefund_charge_ctrxnid) {
-                        yield trxns.deleteClTrxn(crefund_charge_ctrxnid, item.comb_client);
-                    }
-                    if (crefund_actransaction_id) {
-                        yield trxns.deleteAccTrxn(crefund_actransaction_id);
-                    }
+                const { crefund_ctrxnid, crefund_charge_ctrxnid, crefund_actransaction_id, } = airticketRefundClient;
+                if (crefund_ctrxnid) {
+                    yield trxns.deleteClTrxn(crefund_ctrxnid, airticketRefundClient.comb_client);
+                }
+                if (crefund_charge_ctrxnid) {
+                    yield trxns.deleteClTrxn(crefund_charge_ctrxnid, airticketRefundClient.comb_client);
+                }
+                if (crefund_actransaction_id) {
+                    yield trxns.deleteAccTrxn(crefund_actransaction_id);
                 }
                 // vendor trans delete
                 const previousVendorRefundInfo = yield conn.getPreviousVendorRefundInfo(refund_id);
@@ -61,6 +61,15 @@ class DeleteAirTicketRefund extends abstract_services_1.default {
                     }
                     yield conn.updateAirticketItemIsRefund(vrefund_airticket_id, vrefund_category_id, 0);
                 }
+                // delete inv cl pay
+                yield mr_conn.deleteInvClPayByRfId('OTHER', +refund_id, airticketRefundClient.crefund_client_id, airticketRefundClient.crefund_combined_id);
+                const history_data = {
+                    history_activity_type: 'INVOICE_REFUNDED',
+                    history_invoice_id: atrefund_invoice_id,
+                    history_created_by: req.user_id,
+                    invoicelog_content: `DELETE INVOICE REFUND`,
+                };
+                yield common_conn.insertInvoiceHistory(history_data);
                 yield conn.updateInvoiceAirticketIsRefund(atrefund_invoice_id, 0);
                 yield conn.deleteAirTicketRefund(refund_id, deleted_by);
                 yield this.insertAudit(req, 'delete', `DELETED  INVOICE AIR TICKET REFUND/:${refund_id}`, deleted_by, 'REFUND');

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.numRound = exports.getDateRangeByWeek = exports.getNext15Day = exports.getIataDateRange = exports.getBspBillingDate = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
+exports.dateStrConverter = exports.numRound = exports.getDateRangeByWeek = exports.getNext15Day = exports.getIataDateRange = exports.getBspPdfDate = exports.getBspBillingDate = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
 const axios_1 = __importDefault(require("axios"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const dayjs_1 = __importDefault(require("dayjs"));
@@ -148,6 +148,20 @@ const getBspBillingDate = (dateType) => {
     return { from_date, to_date };
 };
 exports.getBspBillingDate = getBspBillingDate;
+const getBspPdfDate = (currentDate) => {
+    const currentMonth = currentDate.getMonth();
+    let from_date, to_date;
+    if (currentDate.getDate() <= 15) {
+        from_date = new Date(currentDate.getFullYear(), currentMonth, 1);
+        to_date = new Date(currentDate.getFullYear(), currentMonth, 15);
+    }
+    else {
+        from_date = new Date(currentDate.getFullYear(), currentMonth, 16);
+        to_date = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    }
+    return { from_date, to_date };
+};
+exports.getBspPdfDate = getBspPdfDate;
 const getIataDateRange = () => {
     const new_date = new Date();
     const today = (0, dayjs_1.default)().format('YYYY-MM-DD');
@@ -228,4 +242,24 @@ const numRound = (num) => {
     return Number(round || 0);
 };
 exports.numRound = numRound;
+const dateStrConverter = (dateString) => {
+    const [day, month, year] = dateString.split('-');
+    const monthAbbreviations = {
+        JAN: 0,
+        FEB: 1,
+        MAR: 2,
+        APR: 3,
+        MAY: 4,
+        JUN: 5,
+        JUL: 6,
+        AUG: 7,
+        SEP: 8,
+        OCT: 9,
+        NOV: 10,
+        DEC: 11,
+    };
+    const monthNumber = monthAbbreviations[month];
+    return new Date(+year, monthNumber, +day);
+};
+exports.dateStrConverter = dateStrConverter;
 //# sourceMappingURL=lib.js.map

@@ -45,4 +45,6 @@ export interface IAdvanceMrInsert {
   invclientpayment_client_id: number | null;
   invclientpayment_combined_id: number | null;
   invclientpayment_purpose?: string;
+  invclientpayment_rf_type?: 'OTHER' | 'AIT' | 'PARTIAL' | 'TOUR' | 'TAX';
+  invclientpayment_rf_id?: number;
 }

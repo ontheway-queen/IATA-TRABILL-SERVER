@@ -1,6 +1,7 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
+import { InvoiceHistory } from '../../../../../common/types/common.types';
 
 class DeleteAirTicketRefund extends AbstractServices {
   constructor() {
@@ -16,12 +17,14 @@ class DeleteAirTicketRefund extends AbstractServices {
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);
+      const common_conn = this.models.CommonInvoiceModel(req, trx);
+      const mr_conn = this.models.MoneyReceiptModels(req, trx);
       const trxns = new Trxns(req, trx);
 
       const { atrefund_invoice_id, atrefund_trxn_charge_id } =
         await conn.getAirticketRefund(refund_id);
 
-      // client trxn delete
+      // client trans delete
       const airticketRefundClient = await conn.getAirticketClientRefund(
         refund_id
       );
@@ -32,23 +35,27 @@ class DeleteAirTicketRefund extends AbstractServices {
           .deleteOnlineTrxnCharge(atrefund_trxn_charge_id);
       }
 
-      for (const item of airticketRefundClient) {
-        const {
+      const {
+        crefund_ctrxnid,
+        crefund_charge_ctrxnid,
+        crefund_actransaction_id,
+      } = airticketRefundClient;
+
+      if (crefund_ctrxnid) {
+        await trxns.deleteClTrxn(
           crefund_ctrxnid,
+          airticketRefundClient.comb_client
+        );
+      }
+      if (crefund_charge_ctrxnid) {
+        await trxns.deleteClTrxn(
           crefund_charge_ctrxnid,
-          crefund_actransaction_id,
-        } = item;
+          airticketRefundClient.comb_client
+        );
+      }
 
-        if (crefund_ctrxnid) {
-          await trxns.deleteClTrxn(crefund_ctrxnid, item.comb_client);
-        }
-        if (crefund_charge_ctrxnid) {
-          await trxns.deleteClTrxn(crefund_charge_ctrxnid, item.comb_client);
-        }
-
-        if (crefund_actransaction_id) {
-          await trxns.deleteAccTrxn(crefund_actransaction_id);
-        }
+      if (crefund_actransaction_id) {
+        await trxns.deleteAccTrxn(crefund_actransaction_id);
       }
 
       // vendor trans delete
@@ -83,6 +90,23 @@ class DeleteAirTicketRefund extends AbstractServices {
           0
         );
       }
+
+      // delete inv cl pay
+      await mr_conn.deleteInvClPayByRfId(
+        'OTHER',
+        +refund_id,
+        airticketRefundClient.crefund_client_id,
+        airticketRefundClient.crefund_combined_id
+      );
+
+      const history_data: InvoiceHistory = {
+        history_activity_type: 'INVOICE_REFUNDED',
+        history_invoice_id: atrefund_invoice_id,
+        history_created_by: req.user_id,
+        invoicelog_content: `DELETE INVOICE REFUND`,
+      };
+
+      await common_conn.insertInvoiceHistory(history_data);
 
       await conn.updateInvoiceAirticketIsRefund(atrefund_invoice_id, 0);
 

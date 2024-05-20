@@ -144,6 +144,7 @@ exports.ValidateCreditLimit = ValidateCreditLimit;
 const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total, advance_amount) => __awaiter(void 0, void 0, void 0, function* () {
     const data = yield common_conn.getAdvanceMrById(cl_id, com_id);
     let need_to_payment = Number(net_total);
+    let able_to_payment = Number(advance_amount);
     if (data === null || data === void 0 ? void 0 : data.length) {
         for (const item of data) {
             if (need_to_payment === 0) {
@@ -161,9 +162,11 @@ const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total, advance_amo
             };
             yield common_conn.insertAdvanceMr(invClPay);
             need_to_payment -= Number(payment_amount);
+            able_to_payment -= Number(payment_amount);
         }
     }
-    const clHaveAdvance = advance_amount > need_to_payment ? need_to_payment : advance_amount;
+    const clHaveAdvance = able_to_payment > need_to_payment ? need_to_payment : able_to_payment;
+    console.log({ need_to_payment, advance_amount, clHaveAdvance });
     if (clHaveAdvance > 0) {
         const invClPay = {
             invclientpayment_moneyreceipt_id: null,
@@ -173,6 +176,7 @@ const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total, advance_amo
             invclientpayment_combined_id: com_id,
             invclientpayment_purpose: 'ADVANCE PAY',
         };
+        console.log({ invClPay });
         yield common_conn.insertAdvanceMr(invClPay);
     }
 });

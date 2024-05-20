@@ -418,10 +418,11 @@ class ReportServices extends abstract_services_1.default {
         });
         this.GDSReport = (req) => __awaiter(this, void 0, void 0, function* () {
             const { gds_id } = req.params;
-            const { from_date, to_date } = req.query;
+            const { from_date, to_date, page, size } = req.query;
             const conn = this.models.reportModel(req);
-            const data = yield conn.GDSReport(gds_id, from_date, to_date);
-            return Object.assign({ success: true }, data);
+            const { data, count } = yield conn.GDSReport(gds_id, from_date, to_date, page, size);
+            const sum = yield conn.GDSReportGrossSum(gds_id, from_date, to_date);
+            return { success: true, count, data: Object.assign({ list: data }, sum) };
         });
         this.AITReport = (req) => __awaiter(this, void 0, void 0, function* () {
             const id = req.params.vendor_id;
@@ -568,8 +569,9 @@ class ReportServices extends abstract_services_1.default {
         this.getOtherTaxReport = (req) => __awaiter(this, void 0, void 0, function* () {
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.salesPurchasesReport(req);
-            const data = yield conn.getOtherTaxReport(from_date, to_date, Number(page) || 1, Number(size) || 20);
-            return Object.assign({ success: true }, data);
+            const { count, data } = yield conn.getOtherTaxReport(from_date, to_date, Number(page) || 1, Number(size) || 20);
+            const sum = yield conn.getSumTaxAmount(from_date, to_date);
+            return { success: true, count, data: Object.assign({ list: data }, sum) };
         });
         this.getDailySalesReport = (req) => __awaiter(this, void 0, void 0, function* () {
             const { comb_client, employee_id, product_id } = req.body;
@@ -601,8 +603,9 @@ class ReportServices extends abstract_services_1.default {
             const { from_date, to_date, page, size, client } = req.query;
             const conn = this.models.reportModel(req);
             const data = yield conn.airTicketDetailsReport(from_date, to_date, Number(page), Number(size), client);
+            const sum = yield conn.airTicketDetailsSumCostPurchase(from_date, to_date, client);
             const count = yield conn.airTicketDetailsCount(from_date, to_date, client);
-            return { success: true, data, count };
+            return { success: true, data: Object.assign({ list: data }, sum), count };
         });
         this.invoiceAndMoneyReceiptDiscount = (req) => __awaiter(this, void 0, void 0, function* () {
             const { from_date, to_date } = req.query;

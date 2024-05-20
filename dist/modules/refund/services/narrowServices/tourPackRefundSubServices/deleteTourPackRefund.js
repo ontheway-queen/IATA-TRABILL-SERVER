@@ -21,6 +21,8 @@ class DeleteTourPackRefund extends abstract_services_1.default {
             const { refund_id } = req.params;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, voidTrx || trx);
+                const common_conn = this.models.CommonInvoiceModel(req, trx);
+                const mr_conn = this.models.MoneyReceiptModels(req, trx);
                 const vendor_conn = this.models.vendorModel(req, voidTrx || trx);
                 const trxns = new Trxns_1.default(req, voidTrx || trx);
                 const { refund_invoice_id, refund_charge_id } = yield conn.getTourRefund(refund_id);
@@ -31,17 +33,15 @@ class DeleteTourPackRefund extends abstract_services_1.default {
                     yield vendor_conn.deleteOnlineTrxnCharge(refund_charge_id);
                 }
                 yield conn.deleteRefundTour(refund_id, req.user_id);
-                for (const item of tourRefundClient) {
-                    const { crefund_ctrxnid, crefund_charge_ctrxnid, crefund_actransaction_id, } = item;
-                    if (crefund_ctrxnid) {
-                        yield trxns.deleteClTrxn(crefund_ctrxnid, item.comb_client);
-                    }
-                    if (crefund_charge_ctrxnid) {
-                        yield trxns.deleteClTrxn(crefund_charge_ctrxnid, item.comb_client);
-                    }
-                    if (crefund_actransaction_id) {
-                        yield trxns.deleteAccTrxn(crefund_actransaction_id);
-                    }
+                const { crefund_ctrxnid, crefund_charge_ctrxnid, crefund_actransaction_id, } = tourRefundClient;
+                if (crefund_ctrxnid) {
+                    yield trxns.deleteClTrxn(crefund_ctrxnid, tourRefundClient.comb_client);
+                }
+                if (crefund_charge_ctrxnid) {
+                    yield trxns.deleteClTrxn(crefund_charge_ctrxnid, tourRefundClient.comb_client);
+                }
+                if (crefund_actransaction_id) {
+                    yield trxns.deleteAccTrxn(crefund_actransaction_id);
                 }
                 for (const item of vendorRefundInfo) {
                     const { vrefund_vtrxn_id, vrefund_charge_vtrxn_id, vrefund_acctrxn_id, } = item;
@@ -57,6 +57,15 @@ class DeleteTourPackRefund extends abstract_services_1.default {
                     }
                 }
                 const message = `DELETED REFUND TOUR PACKAGE/:${refund_id}`;
+                // delete inv cl pay
+                yield mr_conn.deleteInvClPayByRfId('TOUR', +refund_id, tourRefundClient.crefund_client_id, tourRefundClient.crefund_combined_id);
+                const history_data = {
+                    history_activity_type: 'INVOICE_REFUNDED',
+                    history_invoice_id: refund_invoice_id,
+                    history_created_by: req.user_id,
+                    invoicelog_content: `DELETE INVOICE REFUND`,
+                };
+                yield common_conn.insertInvoiceHistory(history_data);
                 yield this.insertAudit(req, 'update', message, req.user_id, 'INVOICES');
                 return {
                     success: true,

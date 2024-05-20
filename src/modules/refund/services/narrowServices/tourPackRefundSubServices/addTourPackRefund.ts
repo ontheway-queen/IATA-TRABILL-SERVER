@@ -8,6 +8,9 @@ import {
   IClTrxnBody,
   IVTrxn,
 } from '../../../../../common/interfaces/Trxn.interfaces';
+import { IAdvanceMrInsert } from '../../../../../common/model/interfaces';
+import { InvoiceHistory } from '../../../../../common/types/common.types';
+import { numRound } from '../../../../../common/utils/libraries/lib';
 import { IOnlineTrxnCharge } from '../../../../accounts/types/account.interfaces';
 import {
   IRefundTourClient,
@@ -37,6 +40,8 @@ class AddTourPackRefund extends AbstractServices {
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);
+      const mr_conn = this.models.MoneyReceiptModels(req, trx);
+      const common_conn = this.models.CommonInvoiceModel(req, trx);
       const vendor_conn = this.models.vendorModel(req, trx);
       const trxns = new Trxns(req, trx);
 
@@ -55,10 +60,9 @@ class AddTourPackRefund extends AbstractServices {
         crefund_charge_amount,
       } = client_refund_info;
 
+      const { client_id, combined_id } = separateCombClientToId(comb_client);
       let refund_charge_id: number | null = null;
       if (payment_method === 3 && trxn_charge_amount) {
-        const { client_id, combined_id } = separateCombClientToId(comb_client);
-
         const online_charge_trxn: IOnlineTrxnCharge = {
           charge_from_acc_id: crefund_account_id,
           charge_to_client_id: client_id as number,
@@ -124,6 +128,43 @@ class AddTourPackRefund extends AbstractServices {
 
         if (crefund_charge_amount) {
           crefund_charge_ctrxnid = await trxns.clTrxnInsert(clTrxnChargeBody);
+        }
+
+        // INVOICE CLIENT PAYMENT
+        const cl_due = await mr_conn.getInvoicesIdAndAmount(
+          client_id,
+          combined_id
+        );
+
+        let paidAmountNow: number = 0;
+        for (const item of cl_due) {
+          const { invoice_id, total_due } = item;
+
+          const availableAmount =
+            numRound(crefund_return_amount) - paidAmountNow;
+
+          const payment_amount =
+            availableAmount >= total_due ? total_due : availableAmount;
+
+          const invClPay: IAdvanceMrInsert = {
+            invclientpayment_moneyreceipt_id: null,
+            invclientpayment_amount: payment_amount,
+            invclientpayment_invoice_id: invoice_id,
+            invclientpayment_client_id: client_id,
+            invclientpayment_combined_id: combined_id,
+            invclientpayment_purpose: tour_vouchar_number,
+            invclientpayment_rf_type: 'TOUR',
+            invclientpayment_rf_id: refund_id,
+          };
+
+          await common_conn.insertAdvanceMr(invClPay);
+
+          paidAmountNow += payment_amount;
+          if (total_due >= availableAmount) {
+            break;
+          } else {
+            continue;
+          }
         }
       } else {
         if (payment_method !== 4) {
@@ -203,8 +244,6 @@ class AddTourPackRefund extends AbstractServices {
           // for cheque here...
         }
       }
-
-      const { client_id, combined_id } = separateCombClientToId(comb_client);
 
       const tourClientRefund: IRefundTourClient = {
         crefund_refund_id: refund_id,
@@ -405,7 +444,15 @@ class AddTourPackRefund extends AbstractServices {
         await conn.addTourVendor(tourRefundVendorInfos);
       }
 
-      // END HERE
+      // invoice history
+      const history_data: InvoiceHistory = {
+        history_activity_type: 'INVOICE_REFUNDED',
+        history_invoice_id: invoice_id,
+        history_created_by: req.user_id,
+        invoicelog_content: `REFUND INVOICE VOUCHER ${tour_vouchar_number} RETURN BDT ${crefund_return_amount}/-`,
+      };
+
+      await common_conn.insertInvoiceHistory(history_data);
 
       // add tour itineraries
       await conn.updateInvoiceIsRefund(invoice_id, 1);

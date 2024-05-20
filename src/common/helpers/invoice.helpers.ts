@@ -211,6 +211,7 @@ export const addAdvanceMr = async (
   const data = await common_conn.getAdvanceMrById(cl_id, com_id);
 
   let need_to_payment = Number(net_total);
+  let able_to_payment = Number(advance_amount);
 
   if (data?.length) {
     for (const item of data) {
@@ -234,21 +235,26 @@ export const addAdvanceMr = async (
       await common_conn.insertAdvanceMr(invClPay);
 
       need_to_payment -= Number(payment_amount);
+      able_to_payment -= Number(payment_amount);
     }
   }
 
   const clHaveAdvance =
-    advance_amount > need_to_payment ? need_to_payment : advance_amount;
+    able_to_payment > need_to_payment ? need_to_payment : able_to_payment;
 
-  if (clHaveAdvance  > 0) {
+  console.log({ need_to_payment, advance_amount, clHaveAdvance });
+
+  if (clHaveAdvance > 0) {
     const invClPay = {
       invclientpayment_moneyreceipt_id: null,
-      invclientpayment_amount: clHaveAdvance ,
+      invclientpayment_amount: clHaveAdvance,
       invclientpayment_invoice_id: inv_id,
       invclientpayment_client_id: cl_id,
       invclientpayment_combined_id: com_id,
       invclientpayment_purpose: 'ADVANCE PAY',
     };
+
+    console.log({ invClPay });
 
     await common_conn.insertAdvanceMr(invClPay);
   }

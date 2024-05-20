@@ -371,12 +371,15 @@ class DashboardModels extends abstract_models_1.default {
             return { ticket_re_issue };
         });
         this.getBspTicketRefundInfo = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
-            const [data] = yield this.query()
+            const [data] = (yield this.query()
                 .sum('vrefund_return_amount as refund_amount')
                 .from('v_bsp_ticket_refund')
                 .where('vendor_org_agency', this.org_agency)
                 .andWhere('vendor_type', 'IATA')
-                .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
+                .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [
+                from_date,
+                to_date,
+            ]));
             return data;
         });
         this.getBspTicketRefundSummary = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {

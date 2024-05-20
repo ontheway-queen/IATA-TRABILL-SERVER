@@ -188,5 +188,16 @@ class DashboardControllers extends AbstractController {
       }
     }
   );
+
+  bspBillingCrossCheck = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response) => {
+      const data = await this.services.bspBillingCrossCheck(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
 }
 export default DashboardControllers;

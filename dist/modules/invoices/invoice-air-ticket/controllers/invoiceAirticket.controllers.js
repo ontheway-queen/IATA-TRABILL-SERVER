@@ -30,6 +30,16 @@ class InvoiceAirticketController extends abstract_controllers_1.default {
                 this.error();
             }
         }));
+        // PNR DETAILS
+        this.testPnrDetails = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.testPnrDetails(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error();
+            }
+        }));
         // CREATE INVOICE WITH PNR
         this.addInvoiceWithPnr = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.services.addInvoiceWithPnr(req);

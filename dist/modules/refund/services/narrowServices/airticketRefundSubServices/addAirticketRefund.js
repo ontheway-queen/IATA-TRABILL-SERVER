@@ -29,6 +29,8 @@ class AddAirTicketRefund extends abstract_services_1.default {
             const voucher_number = (0, invoice_helpers_1.generateVoucherNumber)(7, 'AR-REF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
+                const mr_conn = this.models.MoneyReceiptModels(req, trx);
+                const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { invoice_payment } = yield conn.getInvoiceDuePayment(invoice_id);
@@ -75,8 +77,9 @@ class AddAirTicketRefund extends abstract_services_1.default {
                 let crefund_ctrxnid = null;
                 let crefund_charge_ctrxnid = null;
                 let crefund_actransaction_id = null;
+                const cl_return_amount = (0, lib_1.numRound)(crefund_total_amount) - (0, lib_1.numRound)(crefund_charge_amount);
                 if (crefund_payment_type === 'ADJUST') {
-                    const ctrxn_note = `REFUND TOTAL ${crefund_total_amount}/- \nREFUND CHARGE ${crefund_charge_amount}\nRETURN AMOUNT ${crefund_return_amount}/-`;
+                    const ctrxn_note = `REFUND TOTAL ${crefund_total_amount}/- \nREFUND CHARGE ${crefund_charge_amount}\nRETURN AMOUNT ${cl_return_amount}/-`;
                     const clTrxnBody = {
                         ctrxn_type: 'CREDIT',
                         ctrxn_amount: crefund_total_amount,
@@ -107,8 +110,31 @@ class AddAirTicketRefund extends abstract_services_1.default {
                         ctrxn_route: airticketRoute.join(', '),
                     };
                     crefund_charge_ctrxnid = yield trxns.clTrxnInsert(clRefundChargeTrxnBody);
-                    // PAYMENT TO CLIENT INVOICE DUE
-                    if (+crefund_return_amount > 0) {
+                    // INVOICE CLIENT PAYMENT
+                    const cl_due = yield mr_conn.getInvoicesIdAndAmount(client_id, combined_id);
+                    let paidAmountNow = 0;
+                    for (const item of cl_due) {
+                        const { invoice_id, total_due } = item;
+                        const availableAmount = cl_return_amount - paidAmountNow;
+                        const payment_amount = availableAmount >= total_due ? total_due : availableAmount;
+                        const invClPay = {
+                            invclientpayment_moneyreceipt_id: null,
+                            invclientpayment_amount: payment_amount,
+                            invclientpayment_invoice_id: invoice_id,
+                            invclientpayment_client_id: client_id,
+                            invclientpayment_combined_id: combined_id,
+                            invclientpayment_purpose: voucher_number,
+                            invclientpayment_rf_type: 'AIT',
+                            invclientpayment_rf_id: refund_id,
+                        };
+                        yield common_conn.insertAdvanceMr(invClPay);
+                        paidAmountNow += payment_amount;
+                        if (total_due >= availableAmount) {
+                            break;
+                        }
+                        else {
+                            continue;
+                        }
                     }
                 }
                 // MONEY RETURN
@@ -313,6 +339,14 @@ class AddAirTicketRefund extends abstract_services_1.default {
                 if (airticketClientRefund) {
                     yield conn.insertVendorRefundInfo(airticketVendorRefunds);
                 }
+                // invoice history
+                const history_data = {
+                    history_activity_type: 'INVOICE_REFUNDED',
+                    history_invoice_id: invoice_id,
+                    history_created_by: req.user_id,
+                    invoicelog_content: `REFUND INVOICE VOUCHER ${voucher_number} RETURN BDT ${cl_return_amount}/-`,
+                };
+                yield common_conn.insertInvoiceHistory(history_data);
                 // insert audit
                 const audit_content = `REFUNDED AIR TICKET, VOUCHER ${voucher_number}, BDT ${crefund_total_amount}/-, RETURN BDT ${crefund_return_amount}/-`;
                 yield this.insertAudit(req, 'create', audit_content, created_by, 'REFUND');

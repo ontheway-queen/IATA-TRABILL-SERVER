@@ -20,6 +20,7 @@ const abstract_services_1 = __importDefault(require("../../../../../abstracts/ab
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const invoice_helpers_1 = require("../../../../../common/helpers/invoice.helpers");
+const lib_1 = require("../../../../../common/utils/libraries/lib");
 class AddPartialRefundServices extends abstract_services_1.default {
     constructor() {
         super();
@@ -29,6 +30,8 @@ class AddPartialRefundServices extends abstract_services_1.default {
             const voucher_no = (0, invoice_helpers_1.generateVoucherNumber)(7, 'PRF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
+                const mr_conn = this.models.MoneyReceiptModels(req, trx);
+                const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 let client_trxn_id = null;
                 let charge_trxn_id = null;
@@ -165,6 +168,35 @@ class AddPartialRefundServices extends abstract_services_1.default {
                     prfnd_note: note,
                 };
                 const refund_id = yield conn.addPartialRefund(persialRefundInfo);
+                if (prfnd_payment_type === 'ADJUST') {
+                    const cl_return_amount = (0, lib_1.numRound)(prfnd_total_amount) - (0, lib_1.numRound)(prfnd_charge_amount);
+                    // INVOICE CLIENT PAYMENT
+                    const cl_due = yield mr_conn.getInvoicesIdAndAmount(client_id, combined_id);
+                    let paidAmountNow = 0;
+                    for (const item of cl_due) {
+                        const { invoice_id, total_due } = item;
+                        const availableAmount = cl_return_amount - paidAmountNow;
+                        const payment_amount = availableAmount >= total_due ? total_due : availableAmount;
+                        const invClPay = {
+                            invclientpayment_moneyreceipt_id: null,
+                            invclientpayment_amount: payment_amount,
+                            invclientpayment_invoice_id: invoice_id,
+                            invclientpayment_client_id: client_id,
+                            invclientpayment_combined_id: combined_id,
+                            invclientpayment_purpose: voucher_no,
+                            invclientpayment_rf_type: 'PARTIAL',
+                            invclientpayment_rf_id: refund_id,
+                        };
+                        yield common_conn.insertAdvanceMr(invClPay);
+                        paidAmountNow += payment_amount;
+                        if (total_due >= availableAmount) {
+                            break;
+                        }
+                        else {
+                            continue;
+                        }
+                    }
+                }
                 // VENDOR REFUND INFO
                 let persialVendorInfos = [];
                 let vprfnd_trxn_id;
@@ -274,6 +306,14 @@ class AddPartialRefundServices extends abstract_services_1.default {
                     };
                     persialVendorInfos.push(persialVendorInfo);
                 }
+                // invoice history
+                const history_data = {
+                    history_activity_type: 'INVOICE_REFUNDED',
+                    history_invoice_id: invoice_id,
+                    history_created_by: req.user_id,
+                    invoicelog_content: `PARTIAL REFUND VOUCHER ${voucher_no} RETURN BDT ${prfnd_return_amount}/-`,
+                };
+                yield common_conn.insertInvoiceHistory(history_data);
                 yield conn.addPartialRefundVendorInfo(persialVendorInfos);
                 yield conn.updateInvoiceAirticketIsRefund(invoice_id, 1);
                 const audit_content = `ADDED AIR TICKET PARTIAL REFUND, VOUCHER ${voucher_no}, BDT ${prfnd_total_amount}/-, RETURN BDT ${prfnd_return_amount}/-`;

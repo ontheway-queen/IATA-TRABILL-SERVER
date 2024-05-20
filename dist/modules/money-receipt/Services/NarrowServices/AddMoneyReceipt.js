@@ -189,7 +189,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                             history_invoice_id: invoice_id,
                             history_created_by: receipt_created_by,
                             history_invoice_payment_amount: payment_amount,
-                            invoicelog_content: 'Money receipt has been deleted',
+                            invoicelog_content: `CLIENT PAYMENT FOR OVERALL BDT ${payment_amount}/-`,
                         };
                         yield common_conn.insertInvoiceHistory(history_data);
                         paidAmountNow += payment_amount;

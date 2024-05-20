@@ -6,6 +6,7 @@ Partial Refund update service
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
+import { InvoiceHistory } from '../../../../../common/types/common.types';
 
 class DeletePartialRefund extends AbstractServices {
   constructor() {
@@ -18,10 +19,16 @@ class DeletePartialRefund extends AbstractServices {
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);
+      const mr_conn = this.models.MoneyReceiptModels(req, trx);
+      const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const { prfnd_invoice_id, prfnd_vouchar_number } =
-        await conn.getPersialRfndInvoiceId(refund_id);
+      const {
+        prfnd_invoice_id,
+        prfnd_vouchar_number,
+        prfnd_client_id,
+        prfnd_combine_id,
+      } = await conn.getPersialRfndInvoiceId(refund_id);
 
       const { invoice_category_id } = await conn.getInvoiceInfo(
         prfnd_invoice_id
@@ -80,6 +87,24 @@ class DeletePartialRefund extends AbstractServices {
       await conn.updateInvoiceAirticketIsRefund(prfnd_invoice_id, 0);
 
       const audit_content = `DELETED PARTIAL REFUND, VOUCHER ${prfnd_vouchar_number}`;
+
+      // delete inv cl pay
+      await mr_conn.deleteInvClPayByRfId(
+        'PARTIAL',
+        +refund_id,
+        prfnd_client_id,
+        prfnd_combine_id
+      );
+
+      const history_data: InvoiceHistory = {
+        history_activity_type: 'INVOICE_REFUNDED',
+        history_invoice_id: prfnd_invoice_id,
+        history_created_by: req.user_id,
+        invoicelog_content: audit_content,
+      };
+
+      await common_conn.insertInvoiceHistory(history_data);
+
       await this.insertAudit(
         req,
         'delete',

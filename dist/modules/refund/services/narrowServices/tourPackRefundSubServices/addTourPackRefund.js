@@ -16,6 +16,7 @@ const abstract_services_1 = __importDefault(require("../../../../../abstracts/ab
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const invoice_helpers_1 = require("../../../../../common/helpers/invoice.helpers");
+const lib_1 = require("../../../../../common/utils/libraries/lib");
 class AddTourPackRefund extends abstract_services_1.default {
     constructor() {
         super();
@@ -24,14 +25,16 @@ class AddTourPackRefund extends abstract_services_1.default {
             const tour_vouchar_number = (0, invoice_helpers_1.generateVoucherNumber)(7, 'TOUR-REF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
+                const mr_conn = this.models.MoneyReceiptModels(req, trx);
+                const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { invoice_payment } = yield conn.getInvoiceDuePayment(invoice_id);
                 const { ticket_no, ticket_pnr, airticket_route, pax_name } = yield conn.view_tour_info_for_refund(invoice_id);
                 const { payment_method, trxn_charge_amount, crefund_payment_type, crefund_account_id, crefund_return_amount, crefund_total_amount, crefund_charge_amount, } = client_refund_info;
+                const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
                 let refund_charge_id = null;
                 if (payment_method === 3 && trxn_charge_amount) {
-                    const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
                     const online_charge_trxn = {
                         charge_from_acc_id: crefund_account_id,
                         charge_to_client_id: client_id,
@@ -89,6 +92,32 @@ class AddTourPackRefund extends abstract_services_1.default {
                     };
                     if (crefund_charge_amount) {
                         crefund_charge_ctrxnid = yield trxns.clTrxnInsert(clTrxnChargeBody);
+                    }
+                    // INVOICE CLIENT PAYMENT
+                    const cl_due = yield mr_conn.getInvoicesIdAndAmount(client_id, combined_id);
+                    let paidAmountNow = 0;
+                    for (const item of cl_due) {
+                        const { invoice_id, total_due } = item;
+                        const availableAmount = (0, lib_1.numRound)(crefund_return_amount) - paidAmountNow;
+                        const payment_amount = availableAmount >= total_due ? total_due : availableAmount;
+                        const invClPay = {
+                            invclientpayment_moneyreceipt_id: null,
+                            invclientpayment_amount: payment_amount,
+                            invclientpayment_invoice_id: invoice_id,
+                            invclientpayment_client_id: client_id,
+                            invclientpayment_combined_id: combined_id,
+                            invclientpayment_purpose: tour_vouchar_number,
+                            invclientpayment_rf_type: 'TOUR',
+                            invclientpayment_rf_id: refund_id,
+                        };
+                        yield common_conn.insertAdvanceMr(invClPay);
+                        paidAmountNow += payment_amount;
+                        if (total_due >= availableAmount) {
+                            break;
+                        }
+                        else {
+                            continue;
+                        }
                     }
                 }
                 else {
@@ -167,7 +196,6 @@ class AddTourPackRefund extends abstract_services_1.default {
                         // for cheque here...
                     }
                 }
-                const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
                 const tourClientRefund = {
                     crefund_refund_id: refund_id,
                     crefund_invoice_id: invoice_id,
@@ -329,7 +357,14 @@ class AddTourPackRefund extends abstract_services_1.default {
                 if (tourRefundVendorInfos.length) {
                     yield conn.addTourVendor(tourRefundVendorInfos);
                 }
-                // END HERE
+                // invoice history
+                const history_data = {
+                    history_activity_type: 'INVOICE_REFUNDED',
+                    history_invoice_id: invoice_id,
+                    history_created_by: req.user_id,
+                    invoicelog_content: `REFUND INVOICE VOUCHER ${tour_vouchar_number} RETURN BDT ${crefund_return_amount}/-`,
+                };
+                yield common_conn.insertInvoiceHistory(history_data);
                 // add tour itineraries
                 yield conn.updateInvoiceIsRefund(invoice_id, 1);
                 // update vendor product is refund

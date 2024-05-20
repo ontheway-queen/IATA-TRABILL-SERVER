@@ -79,23 +79,29 @@ class AddInvoiceOther extends AbstractServices {
 
       const trxns = new Trxns(req, trx);
 
-      const productsIds = billing_information.map(
+      const productsIds = billing_information?.map(
         (item) => item.billing_product_id
       );
 
       let note = '';
 
-      if (productsIds.length) {
+      if (productsIds?.length) {
         note = await common_conn.getProductsName(productsIds);
       }
 
       const invoice_no = await this.generateVoucher(req, 'IO');
 
-      const ctrxn_ticket =
-        ticketInfo.length > 0 &&
-        ticketInfo.map((item) => item.ticket_no).join(' ,');
+      const invoice_client_previous_due =
+        await combined_conn.getClientLastBalanceById(
+          invoice_client_id as number,
+          invoice_combined_id as number
+        );
 
-      const ctrxn_pnr = ticketInfo.map((item) => item.ticket_pnr).join(', ');
+      const ctrxn_ticket =
+        ticketInfo?.length &&
+        ticketInfo?.map((item) => item.ticket_no).join(' ,');
+
+      const ctrxn_pnr = ticketInfo?.map((item) => item.ticket_pnr).join(', ');
 
       // CLIENT TRANSACTIONS
       const utils = new InvoiceUtils(req.body, common_conn);
@@ -107,12 +113,6 @@ class AddInvoiceOther extends AbstractServices {
         ticket_no: ctrxn_ticket as string,
         note,
       });
-
-      const invoice_client_previous_due =
-        await combined_conn.getClientLastBalanceById(
-          invoice_client_id as number,
-          invoice_combined_id as number
-        );
 
       const invoieInfo: IInvoiceInfoDb = {
         ...clientTransId,
@@ -199,7 +199,7 @@ class AddInvoiceOther extends AbstractServices {
       }
 
       // HOTEL INFORMATION
-      if (isNotEmpty(hotel_information) && hotel_information.length) {
+      if (isNotEmpty(hotel_information) && hotel_information?.length) {
         const hotelInfo = hotel_information?.map((item) => {
           return {
             ...item,
@@ -215,7 +215,7 @@ class AddInvoiceOther extends AbstractServices {
       }
 
       // TRANSPORT INFORMATION
-      if (isNotEmpty(transport_information) && transport_information.length) {
+      if (isNotEmpty(transport_information) && transport_information?.length) {
         const transportsData = transport_information?.map((item) => {
           return { ...item, transport_other_invoice_id: invoice_id };
         });

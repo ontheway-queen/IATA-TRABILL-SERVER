@@ -254,11 +254,13 @@ class RefundModel extends AbstractModels {
   }
 
   public async getAirticketClientRefund(refundId: idType) {
-    const clientRefund = (await this.query()
+    const [clientRefund] = await this.query()
       .select(
         this.db.raw(
           "CASE WHEN crefund_client_id IS NOT NULL THEN CONCAT('client-',crefund_client_id) ELSE CONCAT('combined-',crefund_combined_id) END AS comb_client"
         ),
+        'crefund_client_id',
+        'crefund_combined_id',
         'crefund_total_amount',
         'crefund_charge_amount',
         'crefund_return_amount',
@@ -272,9 +274,9 @@ class RefundModel extends AbstractModels {
       )
       .from('trabill_airticket_client_refunds')
       .where('crefund_refund_id', refundId)
-      .andWhereNot('crefund_is_deleted', 1)) as IGetCleintRefund[];
+      .andWhereNot('crefund_is_deleted', 1);
 
-    return clientRefund;
+    return clientRefund as IGetCleintRefund;
   }
 
   public async deleteAirTicketRefund(
@@ -630,11 +632,13 @@ class RefundModel extends AbstractModels {
   }
 
   public async getTourClientRefund(refund_id: idType) {
-    const clientRefund = (await this.query()
+    const [clientRefund] = (await this.query()
       .select(
         this.db.raw(
           "CASE WHEN crefund_client_id IS NOT NULL THEN CONCAT('client-',crefund_client_id) ELSE CONCAT('combined-',crefund_combined_id) END AS comb_client"
         ),
+        'crefund_client_id',
+        'crefund_combined_id',
         'crefund_charge_amount',
         'crefund_total_amount',
         'crefund_return_amount',
@@ -869,11 +873,13 @@ class RefundModel extends AbstractModels {
   }
 
   public async getOtherClientRefundInfo(refund_id: idType) {
-    const refund = (await this.query()
+    const [refund] = await this.query()
       .select(
         this.db.raw(
           `CASE WHEN crefund_client_id IS NOT NULL THEN CONCAT('client-',crefund_client_id) ELSE CONCAT('combined-',crefund_combined_id) END AS comb_client`
         ),
+        'crefund_client_id',
+        'crefund_combined_id',
         'crefund_charge_amount',
         'crefund_total_amount',
         'crefund_return_amount',
@@ -886,9 +892,9 @@ class RefundModel extends AbstractModels {
         'crefund_charge_ctrxnid'
       )
       .from('trabill_other_refunds_to_clients')
-      .where('crefund_refund_id', refund_id)) as IGetCleintRefund[];
+      .where('crefund_refund_id', refund_id);
 
-    return refund;
+    return refund as IGetCleintRefund;
   }
 
   public async getOtherVendorRefundInfo(refund_id: idType) {
@@ -1060,7 +1066,8 @@ class RefundModel extends AbstractModels {
       .andWhere('refund_is_deleted', 0)
       .andWhere('refund_org_agency', this.org_agency)
       .limit(size)
-      .offset(page_number);
+      .offset(page_number)
+      .orderBy('refund_id', 'desc');
 
     return refunds;
   }
@@ -1599,11 +1606,18 @@ class RefundModel extends AbstractModels {
 
   getPersialRfndInvoiceId = async (refund_id: idType) => {
     const [data] = (await this.query()
-      .select('prfnd_invoice_id', 'prfnd_vouchar_number')
+      .select(
+        'prfnd_invoice_id',
+        'prfnd_vouchar_number',
+        'prfnd_client_id',
+        'prfnd_combine_id'
+      )
       .from('trabill_pershial_refund')
       .where('prfnd_id', refund_id)) as {
       prfnd_invoice_id: number;
       prfnd_vouchar_number: string;
+      prfnd_client_id: null | number;
+      prfnd_combine_id: null | number;
     }[];
 
     return data;

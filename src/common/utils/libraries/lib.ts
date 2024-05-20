@@ -4,8 +4,8 @@ import dayjs from 'dayjs';
 import jwt from 'jsonwebtoken';
 import { IUser } from '../../../auth/admin_auth.types';
 import config from '../../../config/config';
-import CustomError from '../errors/customError';
 import { idType } from '../../types/common.types';
+import CustomError from '../errors/customError';
 
 type TokenCreds = Omit<
   IUser,
@@ -175,6 +175,25 @@ export const getBspBillingDate = (dateType?: 'previous' | 'upcoming') => {
   return { from_date, to_date };
 };
 
+export const getBspPdfDate = (currentDate: Date) => {
+  const currentMonth = currentDate.getMonth();
+  let from_date, to_date;
+
+  if (currentDate.getDate() <= 15) {
+    from_date = new Date(currentDate.getFullYear(), currentMonth, 1);
+    to_date = new Date(currentDate.getFullYear(), currentMonth, 15);
+  } else {
+    from_date = new Date(currentDate.getFullYear(), currentMonth, 16);
+    to_date = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0
+    );
+  }
+
+  return { from_date, to_date };
+};
+
 export const getIataDateRange = () => {
   const new_date = new Date();
   const today = dayjs().format('YYYY-MM-DD');
@@ -284,4 +303,27 @@ export const numRound = (num: idType) => {
   const round = Math.round(Number(num || 0));
 
   return Number(round || 0);
+};
+
+export const dateStrConverter = (dateString: string) => {
+  const [day, month, year] = dateString.split('-');
+
+  const monthAbbreviations: any = {
+    JAN: 0,
+    FEB: 1,
+    MAR: 2,
+    APR: 3,
+    MAY: 4,
+    JUN: 5,
+    JUL: 6,
+    AUG: 7,
+    SEP: 8,
+    OCT: 9,
+    NOV: 10,
+    DEC: 11,
+  };
+
+  const monthNumber = monthAbbreviations[month];
+
+  return new Date(+year, monthNumber, +day);
 };

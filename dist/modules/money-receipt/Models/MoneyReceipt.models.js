@@ -226,6 +226,43 @@ class MoneyReceiptModels extends abstract_models_1.default {
                 .andWhere('receipt_org_agency', this.org_agency);
             return { count: row_count, data };
         });
+        this.sumMoneyReceiptAmount = (search, from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            search && search.toLowerCase();
+            from_date
+                ? (from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD'))
+                : null;
+            to_date ? (to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD')) : null;
+            const [data] = yield this.query()
+                .sum('receipt_total_amount as total_received')
+                .from('v_mr')
+                .andWhere((builder) => {
+                builder
+                    .andWhere('receipt_org_agency', this.org_agency)
+                    .modify((event) => {
+                    if (search) {
+                        event
+                            .andWhereRaw(`LOWER(receipt_vouchar_no) LIKE ?`, [
+                            `%${search}%`,
+                        ])
+                            .orWhereRaw(`LOWER(account_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(mobile) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(receipt_money_receipt_no) LIKE ?`, [
+                            `%${search}%`,
+                        ])
+                            .orWhereRaw(`LOWER(cheque_or_bank_name) LIKE ?`, [
+                            `%${search}%`,
+                        ]);
+                    }
+                    if (from_date && to_date) {
+                        event.andWhereRaw(`DATE_FORMAT(receipt_payment_date,'%Y-%m-%d') BETWEEN ? AND ?`, [from_date, to_date]);
+                    }
+                });
+            })
+                .andWhere('receipt_org_agency', this.org_agency)
+                .andWhereNot('receipt_payment_to', 'AGENT_COMMISSION');
+            return data;
+        });
         this.getAllAgentMoneyReceipt = (page, size, search, from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
             search && search.toLowerCase();
             const page_number = (page - 1) * size;
@@ -742,6 +779,15 @@ class MoneyReceiptModels extends abstract_models_1.default {
                 .update({ advr_is_deleted, advr_deleted_by })
                 .into('trabill_advance_return')
                 .where('advr_id', advrId);
+        });
+        this.deleteInvClPayByRfId = (rf_type, rf_id, cl_id, com_id) => __awaiter(this, void 0, void 0, function* () {
+            yield this.query()
+                .update('invclientpayment_is_deleted', 1)
+                .from('trabill_invoice_client_payments')
+                .where('invclientpayment_client_id', cl_id)
+                .andWhere('invclientpayment_combined_id', com_id)
+                .andWhere('invclientpayment_rf_type', rf_type)
+                .andWhere('invclientpayment_rf_id', rf_id);
         });
         this.insertAdvrCheque = (data) => __awaiter(this, void 0, void 0, function* () {
             yield this.query()

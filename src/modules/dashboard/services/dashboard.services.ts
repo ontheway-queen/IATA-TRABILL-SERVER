@@ -1,14 +1,18 @@
 import { Request } from 'express';
+import PDFParser from 'pdf-parse';
 import AbstractServices from '../../../abstracts/abstract.services';
+import CustomError from '../../../common/utils/errors/customError';
 import {
   getBspBillingDate,
   getDateRangeByWeek,
   getNext15Day,
+  numRound,
 } from '../../../common/utils/libraries/lib';
 import {
   BspBillingQueryType,
   BspBillingSummaryQueryType,
 } from '../types/dashboard.types';
+import { bspBillingFormatter, withinRange } from '../utils/dashbaor.utils';
 
 class DashboardServices extends AbstractServices {
   constructor() {
@@ -318,6 +322,64 @@ class DashboardServices extends AbstractServices {
       message: 'request is OK',
       data,
     };
+  };
+
+  // BSP BILLING CROSS CHECK
+  bspBillingCrossCheck = async (req: Request) => {
+    try {
+      if (!req.file) {
+        throw new CustomError('No file uploaded', 400, 'File not found');
+      }
+
+      const conn = this.models.dashboardModal(req);
+
+      // Use pdf-parse to parse the uploaded PDF file
+      const pdfData = await PDFParser(req.file.path as any);
+
+      const data = bspBillingFormatter(pdfData.text);
+
+      // from database
+      const ticket_issue = await conn.getBspTicketIssueInfo(
+        data?.salesDateRange.from_date,
+        data?.salesDateRange.to_date
+      );
+
+      const ticket_re_issue = await conn.getBspTicketReissueInfo(
+        data?.salesDateRange.from_date,
+        data?.salesDateRange.to_date
+      );
+
+      const ticket_refund = await conn.getBspTicketRefundInfo(
+        data?.salesDateRange.from_date,
+        data?.salesDateRange.to_date
+      );
+
+      const AMOUNT =
+        numRound(ticket_issue.purchase_amount) +
+        numRound(ticket_re_issue.purchase_amount) -
+        numRound(ticket_refund.refund_amount);
+
+      if (withinRange(data.SUMMARY.AMOUNT, AMOUNT, 10)) {
+        const diffAmount = numRound(data.SUMMARY.AMOUNT) - numRound(AMOUNT);
+
+        return {
+          success: true,
+          data,
+          message:
+            'DATA DIFFERENCE BETWEEN BSP BILL AND TRABILL-DB IS ' +
+            Math.abs(diffAmount),
+        };
+      }
+
+      return {
+        success: true,
+        data,
+        message: 'BSP BILLING CROSS CHECK NOT MATCHED...',
+      };
+    } catch (error) {
+      console.error('Error parsing PDF:', error);
+      throw new CustomError('Error parsing PDF', 500, 'Something went wrong!');
+    }
   };
 }
 export default DashboardServices;

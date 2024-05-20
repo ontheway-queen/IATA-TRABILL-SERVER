@@ -2,6 +2,7 @@ import { Request } from 'express';
 import { Knex } from 'knex';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
+import { InvoiceHistory } from '../../../../../common/types/common.types';
 class DeleteTourPackRefund extends AbstractServices {
   constructor() {
     super();
@@ -15,6 +16,8 @@ class DeleteTourPackRefund extends AbstractServices {
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, voidTrx || trx);
+      const common_conn = this.models.CommonInvoiceModel(req, trx);
+      const mr_conn = this.models.MoneyReceiptModels(req, trx);
       const vendor_conn = this.models.vendorModel(req, voidTrx || trx);
       const trxns = new Trxns(req, voidTrx || trx);
 
@@ -34,22 +37,23 @@ class DeleteTourPackRefund extends AbstractServices {
 
       await conn.deleteRefundTour(refund_id, req.user_id);
 
-      for (const item of tourRefundClient) {
-        const {
-          crefund_ctrxnid,
-          crefund_charge_ctrxnid,
-          crefund_actransaction_id,
-        } = item;
+      const {
+        crefund_ctrxnid,
+        crefund_charge_ctrxnid,
+        crefund_actransaction_id,
+      } = tourRefundClient;
 
-        if (crefund_ctrxnid) {
-          await trxns.deleteClTrxn(crefund_ctrxnid, item.comb_client);
-        }
-        if (crefund_charge_ctrxnid) {
-          await trxns.deleteClTrxn(crefund_charge_ctrxnid, item.comb_client);
-        }
-        if (crefund_actransaction_id) {
-          await trxns.deleteAccTrxn(crefund_actransaction_id);
-        }
+      if (crefund_ctrxnid) {
+        await trxns.deleteClTrxn(crefund_ctrxnid, tourRefundClient.comb_client);
+      }
+      if (crefund_charge_ctrxnid) {
+        await trxns.deleteClTrxn(
+          crefund_charge_ctrxnid,
+          tourRefundClient.comb_client
+        );
+      }
+      if (crefund_actransaction_id) {
+        await trxns.deleteAccTrxn(crefund_actransaction_id);
       }
 
       for (const item of vendorRefundInfo) {
@@ -73,6 +77,23 @@ class DeleteTourPackRefund extends AbstractServices {
       }
 
       const message = `DELETED REFUND TOUR PACKAGE/:${refund_id}`;
+
+      // delete inv cl pay
+      await mr_conn.deleteInvClPayByRfId(
+        'TOUR',
+        +refund_id,
+        tourRefundClient.crefund_client_id,
+        tourRefundClient.crefund_combined_id
+      );
+
+      const history_data: InvoiceHistory = {
+        history_activity_type: 'INVOICE_REFUNDED',
+        history_invoice_id: refund_invoice_id,
+        history_created_by: req.user_id,
+        invoicelog_content: `DELETE INVOICE REFUND`,
+      };
+
+      await common_conn.insertInvoiceHistory(history_data);
 
       await this.insertAudit(req, 'update', message, req.user_id, 'INVOICES');
       return {

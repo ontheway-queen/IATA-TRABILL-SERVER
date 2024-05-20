@@ -524,12 +524,15 @@ class DashboardModels extends AbstractModels {
     from_date: string | Date,
     to_date: string | Date
   ) => {
-    const [data] = await this.query()
+    const [data] = (await this.query()
       .sum('vrefund_return_amount as refund_amount')
       .from('v_bsp_ticket_refund')
       .where('vendor_org_agency', this.org_agency)
       .andWhere('vendor_type', 'IATA')
-      .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
+      .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ])) as { refund_amount: number }[];
 
     return data;
   };

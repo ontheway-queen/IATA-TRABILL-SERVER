@@ -99,6 +99,8 @@ export interface IGetCleintRefund {
   crefund_actransaction_id: number | null;
   crefund_charge_ctrxnid: number | null;
   crefund_ctrxnid: number | null;
+  crefund_client_id: null | number;
+  crefund_combined_id: null | number;
 }
 
 export interface IGetVendorRefund {
@@ -119,14 +121,13 @@ export interface IClientRefundReqBody {
   client_id: string;
   total_refund_amount: number;
   total_refund_charge: number;
-  total_return_amount: number;
+  // total_return_amount: number;
   return_amount?: number;
   crefund_payment_type: 'MONEY_RETURN' | 'ADJUST';
   account_id?: number;
   cheque_no?: string;
   payment_type_id: number;
   trxn_charge_amount: number;
-  crefund_date: string;
   bank_name?: string;
   withdraw_date?: string;
 }

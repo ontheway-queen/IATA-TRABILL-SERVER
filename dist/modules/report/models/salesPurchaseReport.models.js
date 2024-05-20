@@ -144,6 +144,33 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 .andWhere('airticket_is_deleted', 0);
             return { count: row_count, data };
         });
+        this.getSumTaxAmount = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
+            to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
+            const [data] = yield this.query()
+                .select(this.db.raw(`sum(
+          COALESCE(airticket_tax,0) +
+          COALESCE(airticket_tax1,0) +
+          airticket_bd_charge +
+          airticket_xt_charge +
+          airticket_ut_charge +
+          airticket_es_charge +
+          airticket_ow_charge +
+          airticket_pz_charge +
+          airticket_qa_charge +
+          airticket_g4_charge +
+          airticket_e5_charge +
+          airticket_p7_charge +
+          airticket_p8_charge +
+          airticket_r9_charge
+      ) AS total`))
+                .from('trabill_invoice_airticket_items')
+                .leftJoin('trabill_invoices', { invoice_id: 'airticket_invoice_id' })
+                .where('airticket_org_agency', this.org_agency)
+                .andWhereRaw(`DATE_FORMAT(invoice_sales_date, '%Y-%m-%d') BETWEEN ? AND ?`, [from_date, to_date])
+                .andWhere('airticket_is_deleted', 0);
+            return data;
+        });
         // OVERALL PROFIT LOSS
         // sales report summary
         this.getSalesReportSummary = (from_date, to_date, page, size) => __awaiter(this, void 0, void 0, function* () {

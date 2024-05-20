@@ -22,11 +22,13 @@ class AddOtherRefund extends abstract_services_1.default {
         super();
         this.add = (req) => __awaiter(this, void 0, void 0, function* () {
             const { comb_client, vendor_refund_info, client_refund_info, date, note, created_by, invoice_id, } = req.body;
-            const { crefund_payment_type, payment_type_id, trxn_charge_amount, account_id, crefund_date, total_refund_amount, total_refund_charge, total_return_amount, } = client_refund_info;
+            const { crefund_payment_type, payment_type_id, trxn_charge_amount, account_id, total_refund_amount, total_refund_charge, } = client_refund_info;
             const other_vouchar_number = (0, invoice_helpers_1.generateVoucherNumber)(7, 'OTHER-REF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);
+                const mr_conn = this.models.MoneyReceiptModels(req, trx);
+                const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { invoice_payment } = yield conn.getInvoiceDuePayment(invoice_id);
                 const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
@@ -58,8 +60,9 @@ class AddOtherRefund extends abstract_services_1.default {
                 let crefund_ctrxnid = null;
                 let crefund_charge_ctrxnid = null;
                 let crefund_actransaction_id = null;
+                const cl_return_amount = (0, lib_1.numRound)(total_refund_amount) - (0, lib_1.numRound)(total_refund_charge);
                 if (crefund_payment_type === 'ADJUST') {
-                    const ctrxn_note = `REFUND TOTAL ${total_refund_amount}/- \nREFUND CHARGE ${total_refund_charge}\nRETURN AMOUNT ${total_return_amount}/-`;
+                    const ctrxn_note = `REFUND TOTAL ${total_refund_amount}/- \nREFUND CHARGE ${total_refund_charge}\nRETURN AMOUNT ${cl_return_amount}/-`;
                     const clTrxnBody = {
                         ctrxn_type: 'CREDIT',
                         ctrxn_amount: total_refund_amount,
@@ -90,6 +93,32 @@ class AddOtherRefund extends abstract_services_1.default {
                     };
                     crefund_ctrxnid = yield trxns.clTrxnInsert(clTrxnBody);
                     crefund_charge_ctrxnid = yield trxns.clTrxnInsert(clChargeTrxnBody);
+                    // INVOICE PAYMENT
+                    const cl_due = yield mr_conn.getInvoicesIdAndAmount(client_id, combined_id);
+                    let paidAmountNow = 0;
+                    for (const item of cl_due) {
+                        const { invoice_id, total_due } = item;
+                        const availableAmount = cl_return_amount - paidAmountNow;
+                        const payment_amount = availableAmount >= total_due ? total_due : availableAmount;
+                        const invClPay = {
+                            invclientpayment_moneyreceipt_id: null,
+                            invclientpayment_amount: payment_amount,
+                            invclientpayment_invoice_id: invoice_id,
+                            invclientpayment_client_id: client_id,
+                            invclientpayment_combined_id: combined_id,
+                            invclientpayment_purpose: other_vouchar_number,
+                            invclientpayment_rf_type: 'OTHER',
+                            invclientpayment_rf_id: refund_id,
+                        };
+                        yield common_conn.insertAdvanceMr(invClPay);
+                        paidAmountNow += payment_amount;
+                        if (total_due >= availableAmount) {
+                            break;
+                        }
+                        else {
+                            continue;
+                        }
+                    }
                 }
                 // MONEY RETURN
                 else {
@@ -97,7 +126,7 @@ class AddOtherRefund extends abstract_services_1.default {
                         let return_amount = 0;
                         let client_adjust_amount = 0;
                         if (invoice_payment >= total_refund_amount) {
-                            return_amount = total_return_amount;
+                            return_amount = cl_return_amount;
                         }
                         else if (invoice_payment < total_refund_amount) {
                             return_amount = invoice_payment - total_refund_charge;
@@ -156,7 +185,7 @@ class AddOtherRefund extends abstract_services_1.default {
                     crefund_charge_ctrxnid: crefund_charge_ctrxnid,
                     crefund_charge_amount: total_refund_charge,
                     crefund_total_amount: total_refund_amount,
-                    crefund_return_amount: total_return_amount,
+                    crefund_return_amount: cl_return_amount,
                     crefund_vouchar_number: other_vouchar_number,
                     crefund_payment_type,
                     crefund_moneyreturn_type: payment_type_id,
@@ -166,7 +195,7 @@ class AddOtherRefund extends abstract_services_1.default {
                 yield conn.refundOtherClient(refundOtherClient);
                 const otherClientRefund = [];
                 for (const item of vendor_refund_info) {
-                    const { vrefund_bill_id, comb_vendor_id, vrefund_product_id, vrefund_quantity, billing_remaining_quantity, vrefund_charge, payment_method, trxn_charge_amount, vrefund_account_id, vrefund_amount, vrefund_return_amount, vrefund_payment_type, vrefund_invoice_category_id, vrefund_date, } = item;
+                    const { vrefund_bill_id, comb_vendor_id, vrefund_product_id, vrefund_quantity, billing_remaining_quantity, vrefund_charge, payment_method, vrefund_account_id, vrefund_amount, vrefund_return_amount, vrefund_payment_type, vrefund_invoice_category_id, vrefund_date, } = item;
                     if (!vrefund_quantity) {
                         continue;
                     }
@@ -249,8 +278,15 @@ class AddOtherRefund extends abstract_services_1.default {
                 if (otherClientRefund.length) {
                     yield conn.refundOtherVendor(otherClientRefund);
                 }
+                const history_data = {
+                    history_activity_type: 'INVOICE_REFUNDED',
+                    history_invoice_id: invoice_id,
+                    history_created_by: req.user_id,
+                    invoicelog_content: `REFUND INVOICE VOUCHER ${other_vouchar_number} RETURN BDT ${cl_return_amount}/-`,
+                };
+                yield common_conn.insertInvoiceHistory(history_data);
                 yield conn.updateInvoiceIsRefund(invoice_id, 1);
-                yield this.insertAudit(req, 'delete', `REFUNDED INVOICE OTHER, VOUCHER ${other_vouchar_number}, BDT ${total_refund_amount}/-, RETURN BDT ${total_return_amount}/-`, created_by, 'REFUND');
+                yield this.insertAudit(req, 'delete', `REFUNDED INVOICE OTHER, VOUCHER ${other_vouchar_number}, BDT ${total_refund_amount}/-, RETURN BDT ${cl_return_amount}/-`, created_by, 'REFUND');
                 return {
                     success: true,
                     message: 'Other refund has been created successfully',

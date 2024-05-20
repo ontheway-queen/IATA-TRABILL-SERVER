@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const moment_1 = __importDefault(require("moment"));
 const abstract_models_1 = __importDefault(require("../../../abstracts/abstract.models"));
 const common_helper_1 = require("../../../common/helpers/common.helper");
+const lib_1 = require("../../../common/utils/libraries/lib");
 class ReportModel extends abstract_models_1.default {
     constructor() {
         super(...arguments);
@@ -70,8 +71,33 @@ class ReportModel extends abstract_models_1.default {
                     builder.where('airticket_vendor_combine_id', combined_id);
                 }
             })
+                .orderBy('sales_date', 'desc')
                 .limit(size)
                 .offset(page_number);
+        });
+        this.airTicketDetailsSumCostPurchase = (from_date, to_date, client) => __awaiter(this, void 0, void 0, function* () {
+            const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(client);
+            const [data] = yield this.query()
+                .sum('airticket_client_price as total_sales_price')
+                .sum('airticket_purchase_price as total_purchase_price')
+                .from('view_all_airticket_details')
+                .where('airticket_org_agency', this.org_agency)
+                .modify((builder) => {
+                builder.where('airticket_org_agency', this.org_agency);
+                if (from_date && to_date) {
+                    builder.whereRaw('Date(sales_date) BETWEEN ? AND ?', [
+                        from_date,
+                        to_date,
+                    ]);
+                }
+                if (client_id) {
+                    builder.where('airticket_client_id', client_id);
+                }
+                if (combined_id) {
+                    builder.where('airticket_vendor_combine_id', combined_id);
+                }
+            });
+            return data;
         });
         this.airTicketDetailsCount = (from_date, to_date, client) => __awaiter(this, void 0, void 0, function* () {
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(client);
@@ -1194,17 +1220,23 @@ class ReportModel extends abstract_models_1.default {
             return { employee, report };
         });
     }
-    GDSReport(gds_name, from_date, to_date) {
+    GDSReport(gds_name, from_date, to_date, page = 1, size = 20) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date
                 ? (from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD'))
                 : null;
             to_date ? (to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD')) : null;
+            const offset = ((0, lib_1.numRound)(page) - 1) * (0, lib_1.numRound)(size || 20);
             const data = yield this.query()
-                .select('airticket_id', 'airticket_gds_id as gds_name', this.db.raw('airticket_segment as airticket_segment'), 'airticket_journey_date', 'airticket_ticket_no', this.db.raw(`GROUP_CONCAT(airline_iata_code SEPARATOR ' - ') AS airline_iata_code`), 'airticket_pnr')
+                .select('airticket_id', 'airline.airline_name', 'airticket_gross_fare', 'airticket_commission_percent_total', 'airticket_gds_id as gds_name', this.db.raw('airticket_segment as airticket_segment'), 'airticket_journey_date', 'airticket_ticket_no', this.db.raw(`GROUP_CONCAT(airline_iata_code SEPARATOR ' - ') AS airline_iata_code`), 'airticket_pnr')
                 .from('trabill_invoice_airticket_items')
                 .leftJoin(this.db.raw(`trabill_invoice_airticket_routes AS route ON route.airoute_airticket_id = airticket_id AND route.airoute_invoice_id = airticket_invoice_id AND airoute_is_deleted = 0`))
-                .leftJoin('trabill_airports', { airline_id: 'airoute_route_sector_id' })
+                .leftJoin('trabill_airports', {
+                'trabill_airports.airline_id': 'airoute_route_sector_id',
+            })
+                .leftJoin('trabill_airlines as airline', {
+                'airline.airline_id': 'airticket_airline_id',
+            })
                 .where('airticket_org_agency', this.org_agency)
                 .whereNotNull('airticket_gds_id')
                 .andWhereNot('airticket_is_deleted', 1)
@@ -1219,7 +1251,9 @@ class ReportModel extends abstract_models_1.default {
                     ]);
                 }
             })
-                .groupBy('airticket_id', 'gds_name');
+                .groupBy('airticket_id', 'gds_name')
+                .limit((0, lib_1.numRound)(size))
+                .offset(offset);
             const [{ row_count }] = yield this.db('trabill_invoice_airticket_items')
                 .select(this.db.raw('count(*) as row_count'))
                 .where('airticket_org_agency', this.org_agency)
@@ -1237,6 +1271,33 @@ class ReportModel extends abstract_models_1.default {
                 }
             });
             return { count: row_count, data };
+        });
+    }
+    GDSReportGrossSum(gds_name, from_date, to_date) {
+        return __awaiter(this, void 0, void 0, function* () {
+            from_date
+                ? (from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD'))
+                : null;
+            to_date ? (to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD')) : null;
+            const [data] = yield this.query()
+                .sum('airticket_gross_fare as total_gross_fare')
+                .sum('airticket_commission_percent_total as total_commission')
+                .from('trabill_invoice_airticket_items')
+                .where('airticket_org_agency', this.org_agency)
+                .whereNotNull('airticket_gds_id')
+                .andWhereNot('airticket_is_deleted', 1)
+                .modify((event) => {
+                if (gds_name && gds_name !== 'all') {
+                    event.andWhere('airticket_gds_id', gds_name);
+                }
+                if (from_date && to_date) {
+                    event.andWhereRaw('Date(airticket_sales_date) BETWEEN ? AND ?', [
+                        from_date,
+                        to_date,
+                    ]);
+                }
+            });
+            return data;
         });
     }
     AITReportClient(vendor_id, combined_id, from_date, to_date, page, size) {

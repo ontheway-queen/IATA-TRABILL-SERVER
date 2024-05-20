@@ -8,7 +8,12 @@ import {
   IClTrxnBody,
   IVTrxn,
 } from '../../../../../common/interfaces/Trxn.interfaces';
-import { getPaymentType } from '../../../../../common/utils/libraries/lib';
+import { IAdvanceMrInsert } from '../../../../../common/model/interfaces';
+import { InvoiceHistory } from '../../../../../common/types/common.types';
+import {
+  getPaymentType,
+  numRound,
+} from '../../../../../common/utils/libraries/lib';
 import { IOnlineTrxnCharge } from '../../../../accounts/types/account.interfaces';
 import {
   IAirTicketRefund,
@@ -48,6 +53,8 @@ class AddAirTicketRefund extends AbstractServices {
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);
+      const mr_conn = this.models.MoneyReceiptModels(req, trx);
+      const common_conn = this.models.CommonInvoiceModel(req, trx);
       const vendor_conn = this.models.vendorModel(req, trx);
       const trxns = new Trxns(req, trx);
 
@@ -127,9 +134,11 @@ class AddAirTicketRefund extends AbstractServices {
       let crefund_ctrxnid = null;
       let crefund_charge_ctrxnid = null;
       let crefund_actransaction_id = null;
+      const cl_return_amount =
+        numRound(crefund_total_amount) - numRound(crefund_charge_amount);
 
       if (crefund_payment_type === 'ADJUST') {
-        const ctrxn_note = `REFUND TOTAL ${crefund_total_amount}/- \nREFUND CHARGE ${crefund_charge_amount}\nRETURN AMOUNT ${crefund_return_amount}/-`;
+        const ctrxn_note = `REFUND TOTAL ${crefund_total_amount}/- \nREFUND CHARGE ${crefund_charge_amount}\nRETURN AMOUNT ${cl_return_amount}/-`;
 
         const clTrxnBody: IClTrxnBody = {
           ctrxn_type: 'CREDIT',
@@ -165,8 +174,40 @@ class AddAirTicketRefund extends AbstractServices {
           clRefundChargeTrxnBody
         );
 
-        // PAYMENT TO CLIENT INVOICE DUE
-        if (+crefund_return_amount > 0) {
+        // INVOICE CLIENT PAYMENT
+        const cl_due = await mr_conn.getInvoicesIdAndAmount(
+          client_id,
+          combined_id
+        );
+
+        let paidAmountNow: number = 0;
+        for (const item of cl_due) {
+          const { invoice_id, total_due } = item;
+
+          const availableAmount = cl_return_amount - paidAmountNow;
+
+          const payment_amount =
+            availableAmount >= total_due ? total_due : availableAmount;
+
+          const invClPay: IAdvanceMrInsert = {
+            invclientpayment_moneyreceipt_id: null,
+            invclientpayment_amount: payment_amount,
+            invclientpayment_invoice_id: invoice_id,
+            invclientpayment_client_id: client_id,
+            invclientpayment_combined_id: combined_id,
+            invclientpayment_purpose: voucher_number,
+            invclientpayment_rf_type: 'AIT',
+            invclientpayment_rf_id: refund_id,
+          };
+
+          await common_conn.insertAdvanceMr(invClPay);
+
+          paidAmountNow += payment_amount;
+          if (total_due >= availableAmount) {
+            break;
+          } else {
+            continue;
+          }
         }
       }
 
@@ -441,6 +482,16 @@ class AddAirTicketRefund extends AbstractServices {
       if (airticketClientRefund) {
         await conn.insertVendorRefundInfo(airticketVendorRefunds);
       }
+
+      // invoice history
+      const history_data: InvoiceHistory = {
+        history_activity_type: 'INVOICE_REFUNDED',
+        history_invoice_id: invoice_id,
+        history_created_by: req.user_id,
+        invoicelog_content: `REFUND INVOICE VOUCHER ${voucher_number} RETURN BDT ${cl_return_amount}/-`,
+      };
+
+      await common_conn.insertInvoiceHistory(history_data);
 
       // insert audit
       const audit_content = `REFUNDED AIR TICKET, VOUCHER ${voucher_number}, BDT ${crefund_total_amount}/-, RETURN BDT ${crefund_return_amount}/-`;

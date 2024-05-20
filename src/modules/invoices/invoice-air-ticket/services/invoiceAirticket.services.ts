@@ -245,6 +245,7 @@ class InvoiceAirticketService extends AbstractServices {
 
   // ============= narrow services ==============
   pnrDetails = new PnrDetailsService().pnrDetails;
+  testPnrDetails = new PnrDetailsService().testPnrDetails;
   public addInvoiceAirticket = new AddInvoiceAirticket().addInvoiceAirTicket;
   public editInvoiceAirticket = new EditInvoiceAirticket().editInvoiceAirTicket;
   public deleteInvoiceAirTicket = new DeleteAirTicket().deleteAirTicket;

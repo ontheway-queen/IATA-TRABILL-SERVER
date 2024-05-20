@@ -59,15 +59,16 @@ class AddInvoiceOther extends abstract_services_1.default {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const combined_conn = this.models.combineClientModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const productsIds = billing_information.map((item) => item.billing_product_id);
+                const productsIds = billing_information === null || billing_information === void 0 ? void 0 : billing_information.map((item) => item.billing_product_id);
                 let note = '';
-                if (productsIds.length) {
+                if (productsIds === null || productsIds === void 0 ? void 0 : productsIds.length) {
                     note = yield common_conn.getProductsName(productsIds);
                 }
                 const invoice_no = yield this.generateVoucher(req, 'IO');
-                const ctrxn_ticket = ticketInfo.length > 0 &&
-                    ticketInfo.map((item) => item.ticket_no).join(' ,');
-                const ctrxn_pnr = ticketInfo.map((item) => item.ticket_pnr).join(', ');
+                const invoice_client_previous_due = yield combined_conn.getClientLastBalanceById(invoice_client_id, invoice_combined_id);
+                const ctrxn_ticket = (ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.length) &&
+                    (ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.map((item) => item.ticket_no).join(' ,'));
+                const ctrxn_pnr = ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.map((item) => item.ticket_pnr).join(', ');
                 // CLIENT TRANSACTIONS
                 const utils = new invoice_utils_1.InvoiceUtils(req.body, common_conn);
                 const clientTransId = yield utils.clientTrans(trxns, {
@@ -78,7 +79,6 @@ class AddInvoiceOther extends abstract_services_1.default {
                     ticket_no: ctrxn_ticket,
                     note,
                 });
-                const invoice_client_previous_due = yield combined_conn.getClientLastBalanceById(invoice_client_id, invoice_combined_id);
                 const invoieInfo = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_combined_id,
                     invoice_created_by,
@@ -124,14 +124,14 @@ class AddInvoiceOther extends abstract_services_1.default {
                     yield conn.insertTicketInfo(ticketsInfo);
                 }
                 // HOTEL INFORMATION
-                if ((0, invoice_helpers_1.isNotEmpty)(hotel_information) && hotel_information.length) {
+                if ((0, invoice_helpers_1.isNotEmpty)(hotel_information) && (hotel_information === null || hotel_information === void 0 ? void 0 : hotel_information.length)) {
                     const hotelInfo = hotel_information === null || hotel_information === void 0 ? void 0 : hotel_information.map((item) => {
                         return Object.assign(Object.assign({}, item), { hotel_check_in_date: item.hotel_check_in_date && (item === null || item === void 0 ? void 0 : item.hotel_check_in_date), hotel_check_out_date: item.hotel_check_in_date && (item === null || item === void 0 ? void 0 : item.hotel_check_out_date), hotel_invoice_id: invoice_id });
                     });
                     yield conn.insertHotelInfo(hotelInfo);
                 }
                 // TRANSPORT INFORMATION
-                if ((0, invoice_helpers_1.isNotEmpty)(transport_information) && transport_information.length) {
+                if ((0, invoice_helpers_1.isNotEmpty)(transport_information) && (transport_information === null || transport_information === void 0 ? void 0 : transport_information.length)) {
                     const transportsData = transport_information === null || transport_information === void 0 ? void 0 : transport_information.map((item) => {
                         return Object.assign(Object.assign({}, item), { transport_other_invoice_id: invoice_id });
                     });

@@ -367,10 +367,15 @@ class MoneyReceiptServices extends AbstractServices {
         to_date
       );
 
+    const total = await this.models
+      .MoneyReceiptModels(req)
+      .sumMoneyReceiptAmount(search, from_date, to_date);
+
     return {
       success: true,
       message: 'All Money Receipt',
-      ...data,
+      count: data.count,
+      data: { data: data.data, ...total },
     };
   };
 

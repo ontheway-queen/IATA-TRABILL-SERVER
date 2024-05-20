@@ -45,6 +45,17 @@ add  column p_passport_no varchar(20) default null after p_passport_id;
 
 
 
+ALTER TABLE `trabill`.`trabill_invoice_client_payments` 
+ADD COLUMN `invclientpayment_rf_type` ENUM('OTHER' ,'AIT' ,'PARTIAL' ,'TOUR' ,'TAX') NULL AFTER `invclientpayment_deleted_by`,
+ADD COLUMN `invclientpayment_rf_id` INT NULL AFTER `invclientpayment_rf_type`;
+
+
+ALTER TABLE `trabill`.`trabill_invoice_client_payments` 
+CHANGE COLUMN `invclientpayment_date` `invclientpayment_date` TIMESTAMP NULL DEFAULT NULL ;
+
+
+
+
 
 -- INCOMPLETE QUERY
 SELECT 

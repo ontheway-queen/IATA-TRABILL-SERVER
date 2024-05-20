@@ -255,7 +255,15 @@ class MoneyReceiptServices extends abstract_services_1.default {
             const data = yield this.models
                 .MoneyReceiptModels(req)
                 .getAllMoneyReceipt(Number(page) || 1, Number(size) || 20, search, from_date, to_date);
-            return Object.assign({ success: true, message: 'All Money Receipt' }, data);
+            const total = yield this.models
+                .MoneyReceiptModels(req)
+                .sumMoneyReceiptAmount(search, from_date, to_date);
+            return {
+                success: true,
+                message: 'All Money Receipt',
+                count: data.count,
+                data: Object.assign({ data: data.data }, total),
+            };
         });
         this.getAllAgentMoneyReceipt = (req) => __awaiter(this, void 0, void 0, function* () {
             const { page, size, search, from_date, to_date } = req.query;

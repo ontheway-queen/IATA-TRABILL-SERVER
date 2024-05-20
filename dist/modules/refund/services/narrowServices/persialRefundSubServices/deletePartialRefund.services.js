@@ -26,8 +26,10 @@ class DeletePartialRefund extends abstract_services_1.default {
             const { deleted_by } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
+                const mr_conn = this.models.MoneyReceiptModels(req, trx);
+                const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const { prfnd_invoice_id, prfnd_vouchar_number } = yield conn.getPersialRfndInvoiceId(refund_id);
+                const { prfnd_invoice_id, prfnd_vouchar_number, prfnd_client_id, prfnd_combine_id, } = yield conn.getPersialRfndInvoiceId(refund_id);
                 const { invoice_category_id } = yield conn.getInvoiceInfo(prfnd_invoice_id);
                 const { prfnd_actrxn_id, prfnd_charge_trxn_id, prfnd_trxn_id, comb_client, } = yield conn.getPersialRfndInfo(refund_id);
                 if (prfnd_actrxn_id) {
@@ -57,6 +59,15 @@ class DeletePartialRefund extends abstract_services_1.default {
                 yield conn.deletePartialVendorRefund(refund_id, deleted_by);
                 yield conn.updateInvoiceAirticketIsRefund(prfnd_invoice_id, 0);
                 const audit_content = `DELETED PARTIAL REFUND, VOUCHER ${prfnd_vouchar_number}`;
+                // delete inv cl pay
+                yield mr_conn.deleteInvClPayByRfId('PARTIAL', +refund_id, prfnd_client_id, prfnd_combine_id);
+                const history_data = {
+                    history_activity_type: 'INVOICE_REFUNDED',
+                    history_invoice_id: prfnd_invoice_id,
+                    history_created_by: req.user_id,
+                    invoicelog_content: audit_content,
+                };
+                yield common_conn.insertInvoiceHistory(history_data);
                 yield this.insertAudit(req, 'delete', audit_content, deleted_by, 'REFUND');
                 return { success: true, message: 'Partial refund deleted successfully' };
             }));

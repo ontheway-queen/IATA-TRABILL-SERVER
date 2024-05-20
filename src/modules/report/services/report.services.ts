@@ -960,16 +960,25 @@ class ReportServices extends AbstractServices {
   public GDSReport = async (req: Request) => {
     const { gds_id } = req.params;
 
-    const { from_date, to_date } = req.query as {
+    const { from_date, to_date, page, size } = req.query as {
       from_date: string;
       to_date: string;
+      page: idType;
+      size: idType;
     };
 
     const conn = this.models.reportModel(req);
 
-    const data = await conn.GDSReport(gds_id, from_date, to_date);
+    const { data, count } = await conn.GDSReport(
+      gds_id,
+      from_date,
+      to_date,
+      page,
+      size
+    );
+    const sum = await conn.GDSReportGrossSum(gds_id, from_date, to_date);
 
-    return { success: true, ...data };
+    return { success: true, count, data: { list: data, ...sum } };
   };
 
   public AITReport = async (req: Request) => {
@@ -1316,14 +1325,16 @@ class ReportServices extends AbstractServices {
     };
     const conn = this.models.salesPurchasesReport(req);
 
-    const data = await conn.getOtherTaxReport(
+    const { count, data } = await conn.getOtherTaxReport(
       from_date,
       to_date,
       Number(page) || 1,
       Number(size) || 20
     );
 
-    return { success: true, ...data };
+    const sum = await conn.getSumTaxAmount(from_date, to_date);
+
+    return { success: true, count, data: { list: data, ...sum } };
   };
 
   public getDailySalesReport = async (req: Request) => {
@@ -1411,9 +1422,15 @@ class ReportServices extends AbstractServices {
       client
     );
 
+    const sum = await conn.airTicketDetailsSumCostPurchase(
+      from_date,
+      to_date,
+      client
+    );
+
     const count = await conn.airTicketDetailsCount(from_date, to_date, client);
 
-    return { success: true, data, count };
+    return { success: true, data: { list: data, ...sum }, count };
   };
   invoiceAndMoneyReceiptDiscount = async (req: Request) => {
     const { from_date, to_date } = req.query as {

@@ -13,6 +13,9 @@ import {
   IClTrxnBody,
   IVTrxn,
 } from '../../../../../common/interfaces/Trxn.interfaces';
+import { IAdvanceMrInsert } from '../../../../../common/model/interfaces';
+import { InvoiceHistory } from '../../../../../common/types/common.types';
+import { numRound } from '../../../../../common/utils/libraries/lib';
 import {
   IPartialRefund,
   IPartialRefundReqBody,
@@ -47,6 +50,8 @@ class AddPartialRefundServices extends AbstractServices {
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);
+      const mr_conn = this.models.MoneyReceiptModels(req, trx);
+      const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
 
       let client_trxn_id = null;
@@ -205,6 +210,47 @@ class AddPartialRefundServices extends AbstractServices {
 
       const refund_id = await conn.addPartialRefund(persialRefundInfo);
 
+      if (prfnd_payment_type === 'ADJUST') {
+        const cl_return_amount =
+          numRound(prfnd_total_amount) - numRound(prfnd_charge_amount);
+
+        // INVOICE CLIENT PAYMENT
+        const cl_due = await mr_conn.getInvoicesIdAndAmount(
+          client_id,
+          combined_id
+        );
+
+        let paidAmountNow: number = 0;
+        for (const item of cl_due) {
+          const { invoice_id, total_due } = item;
+
+          const availableAmount = cl_return_amount - paidAmountNow;
+
+          const payment_amount =
+            availableAmount >= total_due ? total_due : availableAmount;
+
+          const invClPay: IAdvanceMrInsert = {
+            invclientpayment_moneyreceipt_id: null,
+            invclientpayment_amount: payment_amount,
+            invclientpayment_invoice_id: invoice_id,
+            invclientpayment_client_id: client_id,
+            invclientpayment_combined_id: combined_id,
+            invclientpayment_purpose: voucher_no,
+            invclientpayment_rf_type: 'PARTIAL',
+            invclientpayment_rf_id: refund_id,
+          };
+
+          await common_conn.insertAdvanceMr(invClPay);
+
+          paidAmountNow += payment_amount;
+          if (total_due >= availableAmount) {
+            break;
+          } else {
+            continue;
+          }
+        }
+      }
+
       // VENDOR REFUND INFO
       let persialVendorInfos: IPartialRefundVendorInfo[] = [];
       let vprfnd_trxn_id;
@@ -356,6 +402,16 @@ class AddPartialRefundServices extends AbstractServices {
 
         persialVendorInfos.push(persialVendorInfo);
       }
+
+      // invoice history
+      const history_data: InvoiceHistory = {
+        history_activity_type: 'INVOICE_REFUNDED',
+        history_invoice_id: invoice_id,
+        history_created_by: req.user_id,
+        invoicelog_content: `PARTIAL REFUND VOUCHER ${voucher_no} RETURN BDT ${prfnd_return_amount}/-`,
+      };
+
+      await common_conn.insertInvoiceHistory(history_data);
 
       await conn.addPartialRefundVendorInfo(persialVendorInfos);
 

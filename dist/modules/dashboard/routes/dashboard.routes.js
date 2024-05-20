@@ -3,8 +3,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const multer_1 = __importDefault(require("multer"));
 const abstract_routers_1 = __importDefault(require("../../../abstracts/abstract.routers"));
 const dashboard_controllers_1 = __importDefault(require("../controllers/dashboard.controllers"));
+const upload = (0, multer_1.default)({ dest: 'uploads/' });
 class DashboardRoutes extends abstract_routers_1.default {
     constructor() {
         super();
@@ -29,6 +31,7 @@ class DashboardRoutes extends abstract_routers_1.default {
         this.routers.get('/best-clients', this.controllers.getBestClients);
         this.routers.get('/best-employee', this.controllers.getBestEmployee);
         this.routers.get('/iata-limit', this.controllers.iataBankGuaranteeLimit);
+        this.routers.post('/bsp-bill-check', upload.single('file'), this.controllers.bspBillingCrossCheck);
     }
 }
 exports.default = DashboardRoutes;

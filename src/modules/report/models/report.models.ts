@@ -2,6 +2,7 @@ import moment from 'moment';
 import AbstractModels from '../../../abstracts/abstract.models';
 import { separateCombClientToId } from '../../../common/helpers/common.helper';
 import { idType } from '../../../common/types/common.types';
+import { numRound } from '../../../common/utils/libraries/lib';
 import { ITransaction } from '../types/report.interfaces';
 
 class ReportModel extends AbstractModels {
@@ -93,8 +94,41 @@ class ReportModel extends AbstractModels {
           builder.where('airticket_vendor_combine_id', combined_id);
         }
       })
+      .orderBy('sales_date', 'desc')
       .limit(size)
       .offset(page_number);
+  };
+
+  airTicketDetailsSumCostPurchase = async (
+    from_date: string,
+    to_date: string,
+    client: string
+  ) => {
+    const { client_id, combined_id } = separateCombClientToId(client);
+
+    const [data] = await this.query()
+      .sum('airticket_client_price as total_sales_price')
+      .sum('airticket_purchase_price as total_purchase_price')
+      .from('view_all_airticket_details')
+      .where('airticket_org_agency', this.org_agency)
+      .modify((builder) => {
+        builder.where('airticket_org_agency', this.org_agency);
+        if (from_date && to_date) {
+          builder.whereRaw('Date(sales_date) BETWEEN ? AND ?', [
+            from_date,
+            to_date,
+          ]);
+        }
+
+        if (client_id) {
+          builder.where('airticket_client_id', client_id);
+        }
+        if (combined_id) {
+          builder.where('airticket_vendor_combine_id', combined_id);
+        }
+      });
+
+    return data;
   };
 
   airTicketDetailsCount = async (
@@ -1677,15 +1711,26 @@ class ReportModel extends AbstractModels {
     return { employee, report };
   }
 
-  public async GDSReport(gds_name: idType, from_date: string, to_date: string) {
+  public async GDSReport(
+    gds_name: idType,
+    from_date: string,
+    to_date: string,
+    page: idType = 1,
+    size: idType = 20
+  ) {
     from_date
       ? (from_date = moment(new Date(from_date)).format('YYYY-MM-DD'))
       : null;
     to_date ? (to_date = moment(new Date(to_date)).format('YYYY-MM-DD')) : null;
 
+    const offset = (numRound(page) - 1) * numRound(size || 20);
+
     const data = await this.query()
       .select(
         'airticket_id',
+        'airline.airline_name',
+        'airticket_gross_fare',
+        'airticket_commission_percent_total',
         'airticket_gds_id as gds_name',
         this.db.raw('airticket_segment as airticket_segment'),
         'airticket_journey_date',
@@ -1693,6 +1738,7 @@ class ReportModel extends AbstractModels {
         this.db.raw(
           `GROUP_CONCAT(airline_iata_code SEPARATOR ' - ') AS airline_iata_code`
         ),
+
         'airticket_pnr'
       )
       .from('trabill_invoice_airticket_items')
@@ -1701,7 +1747,12 @@ class ReportModel extends AbstractModels {
           `trabill_invoice_airticket_routes AS route ON route.airoute_airticket_id = airticket_id AND route.airoute_invoice_id = airticket_invoice_id AND airoute_is_deleted = 0`
         )
       )
-      .leftJoin('trabill_airports', { airline_id: 'airoute_route_sector_id' })
+      .leftJoin('trabill_airports', {
+        'trabill_airports.airline_id': 'airoute_route_sector_id',
+      })
+      .leftJoin('trabill_airlines as airline', {
+        'airline.airline_id': 'airticket_airline_id',
+      })
       .where('airticket_org_agency', this.org_agency)
       .whereNotNull('airticket_gds_id')
       .andWhereNot('airticket_is_deleted', 1)
@@ -1716,7 +1767,9 @@ class ReportModel extends AbstractModels {
           ]);
         }
       })
-      .groupBy('airticket_id', 'gds_name');
+      .groupBy('airticket_id', 'gds_name')
+      .limit(numRound(size))
+      .offset(offset);
 
     const [{ row_count }] = await this.db('trabill_invoice_airticket_items')
       .select(this.db.raw('count(*) as row_count'))
@@ -1737,6 +1790,38 @@ class ReportModel extends AbstractModels {
       });
 
     return { count: row_count, data };
+  }
+
+  public async GDSReportGrossSum(
+    gds_name: idType,
+    from_date: string,
+    to_date: string
+  ) {
+    from_date
+      ? (from_date = moment(new Date(from_date)).format('YYYY-MM-DD'))
+      : null;
+    to_date ? (to_date = moment(new Date(to_date)).format('YYYY-MM-DD')) : null;
+
+    const [data] = await this.query()
+      .sum('airticket_gross_fare as total_gross_fare')
+      .sum('airticket_commission_percent_total as total_commission')
+      .from('trabill_invoice_airticket_items')
+      .where('airticket_org_agency', this.org_agency)
+      .whereNotNull('airticket_gds_id')
+      .andWhereNot('airticket_is_deleted', 1)
+      .modify((event) => {
+        if (gds_name && gds_name !== 'all') {
+          event.andWhere('airticket_gds_id', gds_name);
+        }
+        if (from_date && to_date) {
+          event.andWhereRaw('Date(airticket_sales_date) BETWEEN ? AND ?', [
+            from_date,
+            to_date,
+          ]);
+        }
+      });
+
+    return data;
   }
 
   public async AITReportClient(

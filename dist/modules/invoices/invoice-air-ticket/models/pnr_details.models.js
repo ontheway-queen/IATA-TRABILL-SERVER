@@ -68,7 +68,8 @@ class PnrDetailsModels extends abstract_models_1.default {
             const [data] = yield this.query()
                 .select('employee_id')
                 .from('trabill_employees')
-                .where('employee_creation_sign', sign);
+                .where('employee_creation_sign', sign)
+                .andWhere('employee_org_agency', this.org_agency);
             return data === null || data === void 0 ? void 0 : data.employee_id;
         });
     }

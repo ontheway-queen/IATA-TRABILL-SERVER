@@ -6,7 +6,7 @@ export const formatFlightDetailsRoute = async (
   flights: any,
   conn: PnrDetailsModels
 ) => {
-  const route_or_sector: number[] = [];
+  const airticket_route_or_sector: number[] = [];
   const route_sectors: string[] = [];
 
   const flight_details: any[] = [];
@@ -20,13 +20,13 @@ export const formatFlightDetailsRoute = async (
     );
 
     if (index === 0) {
-      route_or_sector.push(fltdetails_from_airport_id);
-      route_or_sector.push(fltdetails_to_airport_id);
+      airticket_route_or_sector.push(fltdetails_from_airport_id);
+      airticket_route_or_sector.push(fltdetails_to_airport_id);
 
       route_sectors.push(flight.fromAirportCode);
       route_sectors.push(flight.toAirportCode);
     } else {
-      route_or_sector.push(fltdetails_to_airport_id);
+      airticket_route_or_sector.push(fltdetails_to_airport_id);
       route_sectors.push(flight.toAirportCode);
     }
 
@@ -41,13 +41,13 @@ export const formatFlightDetailsRoute = async (
     });
   }
 
-  return { route_or_sector, flight_details, route_sectors };
+  return { airticket_route_or_sector, flight_details, route_sectors };
 };
 
 export const formatTicketDetails = async (
   conn: PnrDetailsModels,
   pnrData: any,
-  route_or_sector: number[]
+  airticket_route_or_sector: number[]
 ) => {
   const iata_vendor = await conn.getIataVendorId();
   const airticket_classes = pnrData.flights[0].cabinTypeName;
@@ -103,7 +103,7 @@ export const formatTicketDetails = async (
       airticket_segment: pnrData.allSegments.length,
       airticket_journey_date: pnrData.startDate,
       airticket_commission_percent_total: numRound(baseFareCommission),
-      airticket_route_or_sector: route_or_sector,
+      airticket_route_or_sector: airticket_route_or_sector,
       airticket_airline_id: owningAirline,
       airticket_ait,
       airticket_client_price: ticket.payment.total,
@@ -126,7 +126,11 @@ export const capitalize = (str: string) => {
   });
 };
 
-export const extractPaxStr = (input: string) => {
+export const extractPaxStr = (input: string | undefined) => {
+  if (!input) {
+    return undefined;
+  }
+
   const regex1 = /\/([A-Z0-9.]+)\/\/([A-Z0-9.]+)$/i;
   const regex2 = /\/(\d+)$/;
 

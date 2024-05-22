@@ -65,7 +65,7 @@ class InvoiceAirticketModel extends abstract_models_1.default {
         this.getAirTicketFlights = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
                 .from('trabill_invoice_airticket_items_flight_details')
-                .select('fltdetails_fly_date', 'fltdetails_arrival_time', 'fltdetails_departure_time', 'airline_name', this.db.raw("concat(airport_from.airline_iata_code, ' ',airport_from.airline_airport) as flight_from"), this.db.raw("concat(airport_to.airline_iata_code, ' ',airport_to.airline_airport) as flight_to"))
+                .select('fltdetails_fly_date', 'fltdetails_arrival_time', 'fltdetails_departure_time', 'airline_name', this.db.raw('airport_from.airline_airport as flight_from'), this.db.raw('airport_to.airline_airport as flight_to'))
                 .where('fltdetails_invoice_id', invoiceId)
                 .andWhereNot('fltdetails_is_deleted', 1)
                 .leftJoin('trabill_airlines', {

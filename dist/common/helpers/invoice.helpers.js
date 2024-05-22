@@ -166,7 +166,6 @@ const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total, advance_amo
         }
     }
     const clHaveAdvance = able_to_payment > need_to_payment ? need_to_payment : able_to_payment;
-    console.log({ need_to_payment, advance_amount, clHaveAdvance });
     if (clHaveAdvance > 0) {
         const invClPay = {
             invclientpayment_moneyreceipt_id: null,
@@ -176,7 +175,6 @@ const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total, advance_amo
             invclientpayment_combined_id: com_id,
             invclientpayment_purpose: 'ADVANCE PAY',
         };
-        console.log({ invClPay });
         yield common_conn.insertAdvanceMr(invClPay);
     }
 });

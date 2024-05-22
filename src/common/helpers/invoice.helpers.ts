@@ -242,8 +242,6 @@ export const addAdvanceMr = async (
   const clHaveAdvance =
     able_to_payment > need_to_payment ? need_to_payment : able_to_payment;
 
-  console.log({ need_to_payment, advance_amount, clHaveAdvance });
-
   if (clHaveAdvance > 0) {
     const invClPay = {
       invclientpayment_moneyreceipt_id: null,
@@ -253,8 +251,6 @@ export const addAdvanceMr = async (
       invclientpayment_combined_id: com_id,
       invclientpayment_purpose: 'ADVANCE PAY',
     };
-
-    console.log({ invClPay });
 
     await common_conn.insertAdvanceMr(invClPay);
   }

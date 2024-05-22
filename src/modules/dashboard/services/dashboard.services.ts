@@ -336,7 +336,9 @@ class DashboardServices extends AbstractServices {
       // Use pdf-parse to parse the uploaded PDF file
       const pdfData = await PDFParser(req.file.path as any);
 
-      const data = bspBillingFormatter(pdfData.text);
+      return { success: true, text: pdfData.text };
+
+      const data = bspBillingFormatter(pdfData.text) as any;
 
       // from database
       const ticket_issue = await conn.getBspTicketIssueInfo(
@@ -358,6 +360,15 @@ class DashboardServices extends AbstractServices {
         numRound(ticket_issue.purchase_amount) +
         numRound(ticket_re_issue.purchase_amount) -
         numRound(ticket_refund.refund_amount);
+
+      const db_summary = {
+        issue: numRound(ticket_issue.purchase_amount),
+        reissue: numRound(ticket_re_issue.purchase_amount),
+        refund: numRound(ticket_refund.refund_amount),
+        combined: AMOUNT,
+      };
+
+      data.db_summary = db_summary;
 
       if (withinRange(data.SUMMARY.AMOUNT, AMOUNT, 10)) {
         const diffAmount = numRound(data.SUMMARY.AMOUNT) - numRound(AMOUNT);

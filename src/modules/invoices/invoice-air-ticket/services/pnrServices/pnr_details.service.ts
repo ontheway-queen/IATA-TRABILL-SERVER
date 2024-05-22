@@ -7,21 +7,18 @@ import {
   capitalize,
   extractPaxStr,
   formatFlightDetailsRoute,
-  formatTicketDetails,
 } from '../../../../../common/utils/libraries/pnr_lib';
-import { staticPnrData } from '../../demo/data';
 
 class PnrDetailsService extends AbstractServices {
   constructor() {
     super();
   }
 
-  // GET PNR DETAILS
   pnrDetails = async (req: Request, pnrNo?: string) => {
     return await this.models.db.transaction(async (trx) => {
       const pnr = req.params.pnr || (pnrNo as string);
 
-      if (pnr.trim().length !== 6) {
+      if (pnr && pnr.trim().length !== 6) {
         throw new CustomError('Invalid pnr no.', 404, 'RESOURCE_NOT_FOUND');
       }
 
@@ -29,9 +26,14 @@ class PnrDetailsService extends AbstractServices {
 
       const ota_info = await conn.getOtaInfo(req.agency_id);
 
-      // const api_url = ota_info.ota_api_url + '/' + pnr;
-      const api_url =
-        'http://192.168.0.158:9008/api/v1/public/get-booking' + '/' + pnr;
+      if (!ota_info.ota_api_url && !ota_info.ota_token) {
+        return { success: true, message: 'Empty token and base url' };
+      }
+
+      const api_url = ota_info.ota_api_url + '/' + pnr;
+
+      // const api_url =
+      // 'http://192.168.0.158:9008/api/v1/public/get-booking' + '/' + pnr;
 
       const headers = {
         'Content-Type': 'application/json',
@@ -40,7 +42,6 @@ class PnrDetailsService extends AbstractServices {
 
       try {
         const response = await axios.get(api_url, { headers });
-
         const pnrResponse = response.data.data;
 
         if (
@@ -50,102 +51,99 @@ class PnrDetailsService extends AbstractServices {
         ) {
           const creationDetails = pnrResponse?.creationDetails;
 
-          const invoice_sales_man_id = await conn.getEmployeeByCreationSign(
-            creationDetails?.creationUserSine
-          );
-
-          const pax_passports = pnrResponse?.travelers?.map((traveler: any) => {
-            const mobile_no = pnrResponse?.specialServices.find(
-              (item: any) =>
-                item.code === 'CTCM' &&
-                item.travelerIndices.includes(
-                  numRound(traveler.nameAssociationId)
-                )
-            );
-
-            const email = pnrResponse?.specialServices.find(
-              (item: any) =>
-                item.code === 'CTCE' &&
-                item.travelerIndices.includes(
-                  numRound(traveler.nameAssociationId)
-                )
-            );
-
-            return {
-              passport_no: traveler?.identityDocuments[0]?.documentNumber,
-              passport_name: traveler.givenName + ' ' + traveler.surname,
-              passport_person_type: capitalize(traveler?.type),
-              passport_mobile_no: traveler?.phones
-                ? traveler?.phones[0].number
-                : extractPaxStr(mobile_no?.message),
-
-              passport_email: traveler?.emails
-                ? traveler?.emails[0]
-                : extractPaxStr(email?.message),
-            };
-          });
-
-          const flightRoute = await formatFlightDetailsRoute(
-            pnrResponse?.flights,
-            conn
-          );
-
-          const ticket_details = await formatTicketDetails(
-            conn,
-            pnrResponse,
-            flightRoute.route_or_sector
-          );
-
-          const data = {
-            ...flightRoute,
-            pax_passports,
-            ticket_details,
-            invoice_sales_date: creationDetails?.creationDate,
-            invoice_sales_man_id,
-            creation_sign: creationDetails?.creationUserSine,
-          };
-          return { success: true, data };
-        }
-        return { success: true, data: [] };
-      } catch (error: any) {
-        throw new CustomError(
-          'Booking cannot be found',
-          404,
-          'BOOKING_NOT_FOUND'
-        );
-      }
-    });
-  };
-
-  // TEST ========================
-  testPnrDetails = async (req: Request, pnrNo?: string) => {
-    return await this.models.db.transaction(async (trx) => {
-      const conn = this.models.PnrDetailsModels(req, trx);
-
-      try {
-        const pnrResponse = staticPnrData;
-
-        if (pnrResponse?.flights && pnrResponse?.fares) {
-          const creationDetails = pnrResponse?.creationDetails;
+          const iata_vendor = await conn.getIataVendorId();
 
           const invoice_sales_man_id = await conn.getEmployeeByCreationSign(
             creationDetails?.creationUserSine
           );
 
-          const airticket_classes = pnrResponse.flights[0].cabinTypeName;
-          const cabin_type = pnrResponse.flights[0].cabinTypeCode;
-          const owningAirline = await conn.airlineIdByCode(
-            pnrResponse.fareRules[0].owningAirlineCode
-          );
+          const ticket_details: any[] = [];
 
-          const ticket_details = pnrResponse.flightTickets.map((ticket) => {
-            const taxBreakdown = pnrResponse.fares.find((item) =>
-              item.travelerIndices.includes(ticket.travelerIndex)
+          for (const ticket of pnrResponse.flightTickets) {
+            const flightsId = ticket.flightCoupons?.map(
+              (item: any) => item.itemId
             );
 
-            console.log(taxBreakdown);
+            if (!flightsId) {
+              throw new CustomError(
+                'The ticket has already been refunded or reissued.',
+                400,
+                'Invalid PNR'
+              );
+            }
 
-            const baseFareCommission = Number(
+            // TRAVELERS
+            const travelers = pnrResponse.travelers.filter(
+              (item: any) =>
+                Number(item.nameAssociationId) === Number(ticket.travelerIndex)
+            );
+
+            const pax_passports = travelers?.map((traveler: any) => {
+              const mobile_no = pnrResponse?.specialServices.find(
+                (item: any) =>
+                  item.code === 'CTCM' &&
+                  item.travelerIndices?.includes(
+                    numRound(traveler.nameAssociationId)
+                  )
+              );
+
+              const email = pnrResponse?.specialServices.find(
+                (item: any) =>
+                  item.code === 'CTCE' &&
+                  item.travelerIndices?.includes(
+                    numRound(traveler.nameAssociationId)
+                  )
+              );
+
+              return {
+                passport_no: traveler?.identityDocuments
+                  ? traveler?.identityDocuments[0]?.documentNumber
+                  : undefined,
+                passport_name: traveler.givenName + ' ' + traveler.surname,
+                passport_person_type: capitalize(traveler?.type),
+                passport_mobile_no: traveler?.phones
+                  ? traveler?.phones[0].number
+                  : extractPaxStr(mobile_no?.message),
+
+                passport_email: traveler?.emails
+                  ? traveler?.emails[0]
+                  : extractPaxStr(email?.message),
+                identityDocuments: traveler?.identityDocuments
+                  ? traveler?.identityDocuments[0]
+                  : undefined,
+              };
+            });
+
+            // FLIGHT DETAILS
+            const flights = pnrResponse.flights.filter((item: any) =>
+              flightsId?.includes(item.itemId)
+            );
+
+            const { flight_details, airticket_route_or_sector, route_sectors } =
+              await formatFlightDetailsRoute(flights, conn);
+
+            // TAX BREAKDOWN
+            const taxBreakdown = pnrResponse.fares.find((item: any) =>
+              item.travelerIndices?.includes(ticket.travelerIndex)
+            );
+
+            const breakdown = taxBreakdown?.taxBreakdown.reduce(
+              (acc: any, current: any) => {
+                acc[current.taxCode] = Number(current.taxAmount.amount);
+                return acc;
+              },
+              {}
+            );
+
+            let totalCountryTax = 0;
+
+            for (const taxType in breakdown) {
+              if (['BD', 'UT', 'E5']?.includes(taxType)) {
+                totalCountryTax += breakdown[taxType];
+              }
+            }
+
+            const baseFareCommission = numRound(
               ticket.commission.commissionAmount
             );
             const countryTaxAit = Number(1 || 0) * 0.003;
@@ -156,91 +154,74 @@ class PnrDetailsService extends AbstractServices {
             const airticket_purchase_price =
               Number(ticket.payment.total || 0) - airticket_net_commssion;
 
+            const airticket_segment = pnrResponse.allSegments.length;
+
+            const airticket_commission_percent = numRound(
+              (numRound(baseFareCommission) /
+                numRound(ticket.payment.subtotal)) *
+                100
+            );
+
+            const owningAirline = await conn.airlineIdByCode(
+              flights[0].airlineCode
+            );
+
+            const airticket_return_date =
+              airticket_segment > 1
+                ? pnrResponse.allSegments[airticket_segment - 1].endDate
+                : undefined;
+
             const ticketData = {
-              airticket_comvendor: 'iata_vendor', // -----------
-              airticket_gds_id: 'Sabre',
+              ...breakdown,
               airticket_ticket_no: ticket.number,
-              airticket_issue_date: ticket.date,
-              airticket_base_fare: ticket.payment.subtotal,
               airticket_gross_fare: ticket.payment.total,
-              airticket_classes,
-              cabin_type,
-              airticket_tax: ticket.payment.taxes,
-              currency: ticket.payment.currencyCode,
-              airticket_segment: pnrResponse.allSegments.length,
-              airticket_journey_date: pnrResponse.startDate,
-              airticket_commission_percent_total: numRound(baseFareCommission),
-              // airticket_route_or_sector: route_or_sector,
-              airticket_airline_id: owningAirline,
+              airticket_base_fare: ticket.payment.subtotal,
+              airticket_comvendor: iata_vendor,
+              airticket_commission_percent,
+              airticket_commission_percent_total: baseFareCommission,
               airticket_ait,
+              airticket_net_commssion,
+              airticket_airline_id: owningAirline,
+              airticket_route_or_sector,
+              airticket_pnr: pnrResponse.bookingId,
+              airticket_gds_id: 'Sabre',
+              airticket_tax: ticket.payment.taxes,
+              airticket_segment,
+              airticket_issue_date: ticket.date,
+              airticket_journey_date: pnrResponse.startDate,
+              airticket_return_date,
+              airticket_classes: flights[0].cabinTypeName,
+
               airticket_client_price: ticket.payment.total,
               airticket_purchase_price,
-              airticket_net_commssion,
               airticket_profit: airticket_net_commssion,
-              airticket_commission_percent: numRound(
-                (numRound(baseFareCommission) /
-                  numRound(ticket.payment.subtotal)) *
-                  100
-              ),
-              // ...taxesBreakdown[index],
+
+              flight_details,
+              pax_passports,
+
+              route_sectors,
             };
-          });
 
-          const pax_passports = pnrResponse?.travelers?.map((traveler: any) => {
-            const mobile_no = pnrResponse?.specialServices.find(
-              (item: any) =>
-                item.code === 'CTCM' &&
-                item.travelerIndices.includes(
-                  numRound(traveler.nameAssociationId)
-                )
-            );
+            ticket_details.push(ticketData);
+          }
 
-            const email = pnrResponse?.specialServices.find(
-              (item: any) =>
-                item.code === 'CTCE' &&
-                item.travelerIndices.includes(
-                  numRound(traveler.nameAssociationId)
-                )
-            );
-
-            return {
-              passport_no: traveler?.identityDocuments[0]?.documentNumber,
-              passport_name: traveler.givenName + ' ' + traveler.surname,
-              passport_person_type: capitalize(traveler?.type),
-              passport_mobile_no: traveler?.phones
-                ? traveler?.phones[0].number
-                : extractPaxStr(mobile_no?.message as string),
-
-              passport_email: traveler?.emails
-                ? traveler?.emails[0]
-                : extractPaxStr(email?.message as string),
-            };
-          });
-
-          const flightRoute = await formatFlightDetailsRoute(
-            pnrResponse?.flights,
-            conn
-          );
-
-          const ticket_details12 = await formatTicketDetails(
-            conn,
-            pnrResponse,
-            flightRoute.route_or_sector
-          );
-
-          const data = {
-            ...flightRoute,
-            pax_passports,
-            ticket_details,
-            invoice_sales_date: creationDetails?.creationDate,
-            invoice_sales_man_id,
-            creation_sign: creationDetails?.creationUserSine,
+          return {
+            success: true,
+            data: {
+              ticket_details,
+              invoice_sales_date: creationDetails?.creationDate,
+              invoice_sales_man_id,
+              creation_sign: creationDetails?.creationUserSine,
+            },
           };
-          return { success: true, data };
         }
         return { success: true, data: [] };
       } catch (error: any) {
-        throw new CustomError('Booking cannot be found', 404, error.message);
+        throw new CustomError(
+          error.message || 'Booking cannot be found',
+          404,
+          error.type + '. pnr_details.service'
+        );
       }
     });
   };

@@ -71,7 +71,7 @@ class EditInvoiceAirticket extends AbstractServices {
 
     // CLIENT AND COMBINED CLIENT
 
-    const { invoice_client_id, invoice_combined_id } = await getClientOrCombId(
+    const { invoice_client_id, invoice_combined_id } = getClientOrCombId(
       invoice_combclient_id
     );
     const invoice_id = Number(req.params.invoice_id);

@@ -2,6 +2,7 @@ export const origin = [
   'http://localhost:3000',
   'http://localhost:3001',
   'http://localhost:3002',
+  'http://localhost:3003',
   'http://localhost:3004',
   'http://localhost:7789',
   'http://localhost:5000',
@@ -36,6 +37,7 @@ export const origin = [
   'http://192.168.0.215:5173',
   'https://192.168.0.215:5173',
   'http://192.168.0.215:3002',
+  'http://192.168.0.215:3003',
   'https://iata.trabill.biz',
   'https://www.iata.trabill.biz',
 ];

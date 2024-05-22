@@ -245,6 +245,7 @@ class DashboardServices extends abstract_services_1.default {
                 const conn = this.models.dashboardModal(req);
                 // Use pdf-parse to parse the uploaded PDF file
                 const pdfData = yield (0, pdf_parse_1.default)(req.file.path);
+                return { success: true, text: pdfData.text };
                 const data = (0, dashbaor_utils_1.bspBillingFormatter)(pdfData.text);
                 // from database
                 const ticket_issue = yield conn.getBspTicketIssueInfo(data === null || data === void 0 ? void 0 : data.salesDateRange.from_date, data === null || data === void 0 ? void 0 : data.salesDateRange.to_date);
@@ -253,6 +254,13 @@ class DashboardServices extends abstract_services_1.default {
                 const AMOUNT = (0, lib_1.numRound)(ticket_issue.purchase_amount) +
                     (0, lib_1.numRound)(ticket_re_issue.purchase_amount) -
                     (0, lib_1.numRound)(ticket_refund.refund_amount);
+                const db_summary = {
+                    issue: (0, lib_1.numRound)(ticket_issue.purchase_amount),
+                    reissue: (0, lib_1.numRound)(ticket_re_issue.purchase_amount),
+                    refund: (0, lib_1.numRound)(ticket_refund.refund_amount),
+                    combined: AMOUNT,
+                };
+                data.db_summary = db_summary;
                 if ((0, dashbaor_utils_1.withinRange)(data.SUMMARY.AMOUNT, AMOUNT, 10)) {
                     const diffAmount = (0, lib_1.numRound)(data.SUMMARY.AMOUNT) - (0, lib_1.numRound)(AMOUNT);
                     return {

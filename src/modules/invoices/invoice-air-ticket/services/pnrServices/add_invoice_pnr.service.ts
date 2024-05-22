@@ -1,6 +1,7 @@
 // KBWTST
 // AGVKZZ - VOID
 
+import dayjs from 'dayjs';
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
@@ -11,7 +12,10 @@ import {
   IInvoiceInfoDb,
   InvoiceExtraAmount,
 } from '../../../../../common/types/Invoice.common.interface';
-import { InvoiceHistory } from '../../../../../common/types/common.types';
+import {
+  IPassportDb,
+  InvoiceHistory,
+} from '../../../../../common/types/common.types';
 import CustomError from '../../../../../common/utils/errors/customError';
 import { numRound } from '../../../../../common/utils/libraries/lib';
 import { capitalize } from '../../../../../common/utils/libraries/pnr_lib';
@@ -37,9 +41,9 @@ class AddInvoiceWithPnr extends AbstractServices {
       invoice_walking_customer_name,
       invoice_discount,
       invoice_service_charge,
-      invoice_vat,
       invoice_pnr,
     } = req.body as IPnrInvoiceBody;
+
     const getPnrDetails = new PnrDetailsService();
 
     const pnrData = await getPnrDetails.pnrDetails(req, invoice_pnr);
@@ -61,16 +65,16 @@ class AddInvoiceWithPnr extends AbstractServices {
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.invoiceAirticketModel(req, trx);
+      const pass_conn = this.models.passportModel(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const combined_conn = this.models.combineClientModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const invoice_note =
-        'THE INVOICE IS GENERATED AUTOMATICALLY, ENRICHED WITH SABRE PNR DATA.';
+      const invoice_note = 'THE INVOICE IS GENERATED AUTOMATICALLY.';
 
       // common invoice assets
       const invoice_no = await this.generateVoucher(req, 'AIT');
-      const route_name = pnrResponse?.route_sectors?.join(',');
+      const route_name = pnrResponse?.ticket_details[0].route_sectors.join(',');
       const { client_id, combined_id } = separateCombClientToId(
         invoice_combclient_id
       );
@@ -97,8 +101,7 @@ class AddInvoiceWithPnr extends AbstractServices {
       const invoice_net_total =
         invoice_sub_total -
         numRound(invoice_discount) +
-        numRound(invoice_service_charge) +
-        numRound(invoice_vat);
+        numRound(invoice_service_charge);
 
       // client transaction
       const invoice_info = {
@@ -153,7 +156,6 @@ class AddInvoiceWithPnr extends AbstractServices {
 
       const invoiceExtraAmount: InvoiceExtraAmount = {
         extra_amount_invoice_id: invoice_id,
-        invoice_vat,
         invoice_service_charge,
         invoice_discount,
       };
@@ -162,8 +164,12 @@ class AddInvoiceWithPnr extends AbstractServices {
       // await common_conn.insertInvoicePreData(invoicePreData);
 
       // ticket information
-      for (const ticket of pnrResponse.ticket_details) {
+      for (const [index, ticket] of pnrResponse.ticket_details.entries()) {
         // vendor transaction
+        const vtrxn_pax = ticket?.pax_passports
+          .map((item) => item.passport_name)
+          .join(',');
+
         const VTrxnBody: IVTrxn = {
           comb_vendor: ticket.airticket_comvendor,
           vtrxn_amount: ticket.airticket_purchase_price,
@@ -176,7 +182,7 @@ class AddInvoiceWithPnr extends AbstractServices {
           vtrxn_voucher: invoice_no,
           vtrxn_pnr: invoice_pnr,
           vtrxn_route: route_name,
-          vtrxn_pax: pnrResponse.pax_passports[0].passport_name, // PASS NAME
+          vtrxn_pax,
           vtrxn_airticket_no: ticket.airticket_ticket_no,
         };
 
@@ -226,21 +232,62 @@ class AddInvoiceWithPnr extends AbstractServices {
         );
 
         // INSERT PAX PASSPORT INFO
-        if (pnrResponse?.pax_passports?.length) {
-          for (const passport of pnrResponse?.pax_passports) {
-            await common_conn.insertInvoiceAirticketPaxName(
-              invoice_id,
-              airticket_id,
-              passport?.passport_name,
-              capitalize(passport.passport_person_type),
-              passport.passport_mobile_no,
-              passport.passport_email
-            );
+        if (ticket?.pax_passports) {
+          for (const passport of ticket?.pax_passports) {
+            const identityDocuments = passport?.identityDocuments;
+
+            if (
+              identityDocuments &&
+              identityDocuments.documentType === 'PASSPORT'
+            ) {
+              let passport_id = await pass_conn.getPassIdByPassNo(
+                identityDocuments.documentNumber
+              );
+
+              if (!passport_id) {
+                const PassportData: IPassportDb = {
+                  passport_person_type: capitalize(
+                    passport.passport_person_type
+                  ) as 'Infant' | 'Child' | 'Adult',
+                  passport_passport_no: identityDocuments.documentNumber,
+                  passport_name: passport?.passport_name,
+                  passport_mobile_no: passport.passport_mobile_no,
+                  passport_date_of_birth:
+                    identityDocuments.birthDate &&
+                    dayjs(identityDocuments.birthDate).format(
+                      'YYYY-MM-DD HH:mm:ss.SSS'
+                    ),
+                  passport_date_of_expire:
+                    identityDocuments.expiryDate &&
+                    dayjs(identityDocuments.expiryDate).format(
+                      'YYYY-MM-DD HH:mm:ss.SSS'
+                    ),
+                  passport_email: passport.passport_email,
+                  passport_created_by: req.user_id,
+                };
+
+                passport_id = await pass_conn.addPassport(PassportData);
+              }
+              await common_conn.insertInvoiceAirticketPax(
+                invoice_id,
+                airticket_id,
+                passport_id
+              );
+            } else {
+              await common_conn.insertInvoiceAirticketPaxName(
+                invoice_id,
+                airticket_id,
+                passport?.passport_name,
+                capitalize(passport.passport_person_type),
+                passport.passport_mobile_no,
+                passport.passport_email
+              );
+            }
           }
         }
 
         // airticket routes insert
-        const airticketRoutes = pnrResponse?.route_or_sector.map(
+        const airticketRoutes = ticket.airticket_route_or_sector.map(
           (airoute_route_sector_id) => {
             return {
               airoute_invoice_id: invoice_id,
@@ -253,16 +300,18 @@ class AddInvoiceWithPnr extends AbstractServices {
         await common_conn.insertAirticketRoute(airticketRoutes);
 
         // flight details
-        const flightsDetails: IFlightDetailsDb[] =
-          pnrResponse?.flight_details?.map((item) => {
-            return {
-              ...item,
-              fltdetails_airticket_id: airticket_id,
-              fltdetails_invoice_id: invoice_id,
-            };
-          });
+        if (index === 0) {
+          const flightsDetails: IFlightDetailsDb[] =
+            ticket?.flight_details?.map((item) => {
+              return {
+                ...item,
+                fltdetails_airticket_id: airticket_id,
+                fltdetails_invoice_id: invoice_id,
+              };
+            });
 
-        await conn.insertAirTicketFlightDetails(flightsDetails);
+          await conn.insertAirTicketFlightDetails(flightsDetails);
+        }
       }
 
       // invoice history

@@ -17,6 +17,17 @@ class PassportModel extends AbstractModels {
     return passport[0];
   }
 
+  getPassIdByPassNo = async (pass_no: string) => {
+    const [passport] = await this.query()
+      .select('passport_id')
+      .from('trabill_passport_details')
+      .where('passport_org_agency', this.org_agency)
+      .andWhere('passport_passport_no', pass_no)
+      .andWhereNot('passport_is_deleted', 1);
+
+    return passport?.passport_id;
+  };
+
   updatePassport = async (data: IEditPassport) => {
     const [passport_id] = await this.query()
       .insert({ ...data, passport_org_agency: this.org_agency })

@@ -2,14 +2,14 @@ import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
 import { idType } from '../../../../common/types/common.types';
 import AddInvoiceAirticket from './narrowServices/addInvoiceAirticket';
+import AddInvoiceInfo from './narrowServices/addInvoiceInfo.services';
 import AirTicketTaxRefund from './narrowServices/air_ticket_tax_refund';
 import DeleteAirTicket from './narrowServices/deleteAirTicket';
 import EditInvoiceAirticket from './narrowServices/editInvoiceAirticket';
-import PnrDetailsService from './pnrServices/pnr_details.service';
 import SendMail from './narrowServices/sendMail.services';
 import VoidInvoice from './narrowServices/void_invoice';
-import AddInvoiceInfo from './narrowServices/addInvoiceInfo.services';
 import AddInvoiceWithPnr from './pnrServices/add_invoice_pnr.service';
+import PnrDetailsService from './pnrServices/pnr_details.service';
 
 class InvoiceAirticketService extends AbstractServices {
   constructor() {
@@ -245,7 +245,6 @@ class InvoiceAirticketService extends AbstractServices {
 
   // ============= narrow services ==============
   pnrDetails = new PnrDetailsService().pnrDetails;
-  testPnrDetails = new PnrDetailsService().testPnrDetails;
   public addInvoiceAirticket = new AddInvoiceAirticket().addInvoiceAirTicket;
   public editInvoiceAirticket = new EditInvoiceAirticket().editInvoiceAirTicket;
   public deleteInvoiceAirTicket = new DeleteAirTicket().deleteAirTicket;

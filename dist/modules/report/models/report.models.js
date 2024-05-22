@@ -1450,7 +1450,14 @@ class ReportModel extends abstract_models_1.default {
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             const page_number = (page - 1) * size;
             const result = yield this.query()
-                .select('view_all_airticket_details.airticket_invoice_id as invoice_id', 'view_all_airticket_details.invoice_category_id', 'view_all_airticket_details.invoice_no', 'airticket_airline_id', 'view_all_airticket_details.airticket_ticket_no', 'view_all_airticket_details.airticket_id', 'view_all_airticket_details.airticket_pnr', 'view_all_airticket_details.passport_name', 'view_all_airticket_details.airticket_routes', this.db.raw(`view_all_airticket_details.airticket_client_price - COALESCE(trabill_invoices_extra_amounts.invoice_discount, 0) AS airticket_client_price`), 'view_all_airticket_details.airticket_purchase_price', this.db.raw('((view_all_airticket_details.airticket_client_price - COALESCE(trabill_invoices_extra_amounts.invoice_discount, 0)) - view_all_airticket_details.airticket_purchase_price) as total_profit'), 'trabill_airlines.airline_name', 'create_date AS invoice_create_date')
+                .select('view_all_airticket_details.airticket_invoice_id as invoice_id', 
+            // 'airticket_is_refund',
+            // 'airticket_is_reissued',
+            'view_all_airticket_details.invoice_category_id', 'view_all_airticket_details.invoice_no', 'airticket_airline_id', 'view_all_airticket_details.airticket_ticket_no', 'view_all_airticket_details.airticket_id', 'view_all_airticket_details.airticket_pnr', 'view_all_airticket_details.passport_name', 'view_all_airticket_details.airticket_routes', this.db.raw(`CASE 
+        WHEN airticket_is_refund THEN 'REFUNDED'
+        WHEN airticket_is_reissued THEN 'REISSUED'
+        ELSE 'ISSUED'
+    END AS TKT_TYPE`), this.db.raw(`view_all_airticket_details.airticket_client_price - COALESCE(trabill_invoices_extra_amounts.invoice_discount, 0) AS airticket_client_price`), 'view_all_airticket_details.airticket_purchase_price', this.db.raw('((view_all_airticket_details.airticket_client_price - COALESCE(trabill_invoices_extra_amounts.invoice_discount, 0)) - view_all_airticket_details.airticket_purchase_price) as total_profit'), 'trabill_airlines.airline_name', 'create_date AS invoice_create_date')
                 .from('view_all_airticket_details')
                 .leftJoin('trabill_airlines', { airline_id: 'airticket_airline_id' })
                 .leftJoin('trabill_invoices_extra_amounts', {
@@ -1472,6 +1479,13 @@ class ReportModel extends abstract_models_1.default {
                 .limit(size)
                 .offset(page_number);
             const total = yield this.query()
+                .select(this.db.raw(`sum(CASE 
+        WHEN airticket_is_refund THEN 0
+        ELSE airticket_client_price
+    END) as airticket_client_price`), this.db.raw(`sum(CASE 
+        WHEN airticket_is_refund THEN 0
+        ELSE airticket_purchase_price
+    END) as airticket_purchase_price`))
                 .from('view_all_airticket_details')
                 .where('trabill_invoices.invoice_org_agency', this.org_agency)
                 .join('trabill_invoices', {
@@ -1483,9 +1497,7 @@ class ReportModel extends abstract_models_1.default {
                     builder.andWhere('airticket_airline_id', airline_id);
                 }
             })
-                .andWhereRaw('Date(trabill_invoices.invoice_sales_date) BETWEEN ? AND ?', [from_date, to_date])
-                .sum(`airticket_client_price as airticket_client_price`)
-                .sum(`airticket_purchase_price as airticket_purchase_price`);
+                .andWhereRaw('Date(trabill_invoices.invoice_sales_date) BETWEEN ? AND ?', [from_date, to_date]);
             return { data: Object.assign({ result }, total[0]) };
         });
     }

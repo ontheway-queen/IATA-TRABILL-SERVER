@@ -1,21 +1,18 @@
 export interface IPnrInvoiceBody {
   invoice_combclient_id: string;
   invoice_walking_customer_name: string;
-  invoice_vat: number;
+  // invoice_vat: number;
   invoice_service_charge: number;
   invoice_discount: number;
   invoice_pnr: string;
 }
 
 export interface IPnrDetails {
-  pax_passports: PaxPassport[];
   ticket_details: TicketDetail[];
-  flight_details: FlightDetail[];
+
   invoice_sales_date: string;
-  creation_sign: string;
   invoice_sales_man_id: number;
-  route_sectors: string[];
-  route_or_sector: number[];
+  creation_sign: string;
 }
 
 export interface PaxPassport {
@@ -23,6 +20,21 @@ export interface PaxPassport {
   passport_person_type: string;
   passport_mobile_no: any;
   passport_email: any;
+  identityDocuments: IidentityDocuments;
+}
+
+export interface IidentityDocuments {
+  documentNumber: string;
+  documentType: string;
+  expiryDate: string;
+  issuingCountryCode: string;
+  residenceCountryCode: string;
+  givenName: string;
+  surname: string;
+  birthDate: string;
+  gender: string;
+  isPrimaryDocumentHolder: boolean;
+  itemId: string;
 }
 
 export interface TicketDetail {
@@ -41,6 +53,7 @@ export interface TicketDetail {
   airticket_commission_percent_total: number;
   airticket_commission_percent: number;
   airticket_route_or_sector: number[];
+  route_sectors: string[];
   airticket_airline_id: number;
   airticket_ait: number;
   airticket_client_price: number;
@@ -57,6 +70,9 @@ export interface TicketDetail {
   YQ: number;
   P8: number;
   P7: number;
+
+  pax_passports: PaxPassport[];
+  flight_details: FlightDetail[];
 }
 
 export interface FlightDetail {

@@ -2049,6 +2049,8 @@ class ReportModel extends AbstractModels {
     const result = await this.query()
       .select(
         'view_all_airticket_details.airticket_invoice_id as invoice_id',
+        // 'airticket_is_refund',
+        // 'airticket_is_reissued',
         'view_all_airticket_details.invoice_category_id',
         'view_all_airticket_details.invoice_no',
         'airticket_airline_id',
@@ -2057,6 +2059,11 @@ class ReportModel extends AbstractModels {
         'view_all_airticket_details.airticket_pnr',
         'view_all_airticket_details.passport_name',
         'view_all_airticket_details.airticket_routes',
+        this.db.raw(`CASE 
+        WHEN airticket_is_refund THEN 'REFUNDED'
+        WHEN airticket_is_reissued THEN 'REISSUED'
+        ELSE 'ISSUED'
+    END AS TKT_TYPE`),
         this.db.raw(
           `view_all_airticket_details.airticket_client_price - COALESCE(trabill_invoices_extra_amounts.invoice_discount, 0) AS airticket_client_price`
         ),
@@ -2089,6 +2096,16 @@ class ReportModel extends AbstractModels {
       .offset(page_number);
 
     const total = await this.query()
+      .select(
+        this.db.raw(`sum(CASE 
+        WHEN airticket_is_refund THEN 0
+        ELSE airticket_client_price
+    END) as airticket_client_price`),
+        this.db.raw(`sum(CASE 
+        WHEN airticket_is_refund THEN 0
+        ELSE airticket_purchase_price
+    END) as airticket_purchase_price`)
+      )
       .from('view_all_airticket_details')
       .where('trabill_invoices.invoice_org_agency', this.org_agency)
       .join('trabill_invoices', {
@@ -2103,9 +2120,7 @@ class ReportModel extends AbstractModels {
       .andWhereRaw(
         'Date(trabill_invoices.invoice_sales_date) BETWEEN ? AND ?',
         [from_date, to_date]
-      )
-      .sum(`airticket_client_price as airticket_client_price`)
-      .sum(`airticket_purchase_price as airticket_purchase_price`);
+      );
 
     return { data: { result, ...total[0] } };
   }

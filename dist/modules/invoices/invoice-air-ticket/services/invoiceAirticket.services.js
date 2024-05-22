@@ -14,14 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
 const addInvoiceAirticket_1 = __importDefault(require("./narrowServices/addInvoiceAirticket"));
+const addInvoiceInfo_services_1 = __importDefault(require("./narrowServices/addInvoiceInfo.services"));
 const air_ticket_tax_refund_1 = __importDefault(require("./narrowServices/air_ticket_tax_refund"));
 const deleteAirTicket_1 = __importDefault(require("./narrowServices/deleteAirTicket"));
 const editInvoiceAirticket_1 = __importDefault(require("./narrowServices/editInvoiceAirticket"));
-const pnr_details_service_1 = __importDefault(require("./pnrServices/pnr_details.service"));
 const sendMail_services_1 = __importDefault(require("./narrowServices/sendMail.services"));
 const void_invoice_1 = __importDefault(require("./narrowServices/void_invoice"));
-const addInvoiceInfo_services_1 = __importDefault(require("./narrowServices/addInvoiceInfo.services"));
 const add_invoice_pnr_service_1 = __importDefault(require("./pnrServices/add_invoice_pnr.service"));
+const pnr_details_service_1 = __importDefault(require("./pnrServices/pnr_details.service"));
 class InvoiceAirticketService extends abstract_services_1.default {
     constructor() {
         super();
@@ -165,7 +165,6 @@ class InvoiceAirticketService extends abstract_services_1.default {
         });
         // ============= narrow services ==============
         this.pnrDetails = new pnr_details_service_1.default().pnrDetails;
-        this.testPnrDetails = new pnr_details_service_1.default().testPnrDetails;
         this.addInvoiceAirticket = new addInvoiceAirticket_1.default().addInvoiceAirTicket;
         this.editInvoiceAirticket = new editInvoiceAirticket_1.default().editInvoiceAirTicket;
         this.deleteInvoiceAirTicket = new deleteAirTicket_1.default().deleteAirTicket;

@@ -187,12 +187,8 @@ class InvoiceAirticketModel extends AbstractModels {
         'fltdetails_arrival_time',
         'fltdetails_departure_time',
         'airline_name',
-        this.db.raw(
-          "concat(airport_from.airline_iata_code, ' ',airport_from.airline_airport) as flight_from"
-        ),
-        this.db.raw(
-          "concat(airport_to.airline_iata_code, ' ',airport_to.airline_airport) as flight_to"
-        )
+        this.db.raw('airport_from.airline_airport as flight_from'),
+        this.db.raw('airport_to.airline_airport as flight_to')
       )
       .where('fltdetails_invoice_id', invoiceId)
       .andWhereNot('fltdetails_is_deleted', 1)

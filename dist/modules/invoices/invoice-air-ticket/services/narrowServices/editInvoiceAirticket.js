@@ -71,7 +71,7 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                 yield (0, invoice_helpers_1.ValidateClientAndVendor)(invoice_combclient_id, vendor);
             }
             // CLIENT AND COMBINED CLIENT
-            const { invoice_client_id, invoice_combined_id } = yield (0, invoice_helpers_1.getClientOrCombId)(invoice_combclient_id);
+            const { invoice_client_id, invoice_combined_id } = (0, invoice_helpers_1.getClientOrCombId)(invoice_combclient_id);
             const invoice_id = Number(req.params.invoice_id);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b, _c, _d, _e;

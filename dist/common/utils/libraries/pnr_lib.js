@@ -12,20 +12,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractPaxStr = exports.capitalize = exports.formatTicketDetails = exports.formatFlightDetailsRoute = void 0;
 const lib_1 = require("./lib");
 const formatFlightDetailsRoute = (flights, conn) => __awaiter(void 0, void 0, void 0, function* () {
-    const route_or_sector = [];
+    const airticket_route_or_sector = [];
     const route_sectors = [];
     const flight_details = [];
     for (const [index, flight] of flights === null || flights === void 0 ? void 0 : flights.entries()) {
         const fltdetails_from_airport_id = yield conn.airportIdByCode(flight.fromAirportCode);
         const fltdetails_to_airport_id = yield conn.airportIdByCode(flight.toAirportCode);
         if (index === 0) {
-            route_or_sector.push(fltdetails_from_airport_id);
-            route_or_sector.push(fltdetails_to_airport_id);
+            airticket_route_or_sector.push(fltdetails_from_airport_id);
+            airticket_route_or_sector.push(fltdetails_to_airport_id);
             route_sectors.push(flight.fromAirportCode);
             route_sectors.push(flight.toAirportCode);
         }
         else {
-            route_or_sector.push(fltdetails_to_airport_id);
+            airticket_route_or_sector.push(fltdetails_to_airport_id);
             route_sectors.push(flight.toAirportCode);
         }
         flight_details.push({
@@ -38,10 +38,10 @@ const formatFlightDetailsRoute = (flights, conn) => __awaiter(void 0, void 0, vo
             fltdetails_airline_id: yield conn.airlineIdByCode(flight.airlineCode),
         });
     }
-    return { route_or_sector, flight_details, route_sectors };
+    return { airticket_route_or_sector, flight_details, route_sectors };
 });
 exports.formatFlightDetailsRoute = formatFlightDetailsRoute;
-const formatTicketDetails = (conn, pnrData, route_or_sector) => __awaiter(void 0, void 0, void 0, function* () {
+const formatTicketDetails = (conn, pnrData, airticket_route_or_sector) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const iata_vendor = yield conn.getIataVendorId();
     const airticket_classes = pnrData.flights[0].cabinTypeName;
@@ -70,7 +70,7 @@ const formatTicketDetails = (conn, pnrData, route_or_sector) => __awaiter(void 0
         const airticket_net_commssion = baseFareCommission - airticket_ait;
         const airticket_purchase_price = Number(ticket.payment.total || 0) - airticket_net_commssion;
         ticket_details.push(Object.assign({ airticket_comvendor: iata_vendor, airticket_gds_id: 'Sabre', airticket_ticket_no: ticket.number, airticket_issue_date: ticket.date, airticket_base_fare: ticket.payment.subtotal, airticket_gross_fare: ticket.payment.total, airticket_classes,
-            cabin_type, airticket_tax: ticket.payment.taxes, currency: ticket.payment.currencyCode, airticket_segment: pnrData.allSegments.length, airticket_journey_date: pnrData.startDate, airticket_commission_percent_total: (0, lib_1.numRound)(baseFareCommission), airticket_route_or_sector: route_or_sector, airticket_airline_id: owningAirline, airticket_ait, airticket_client_price: ticket.payment.total, airticket_purchase_price,
+            cabin_type, airticket_tax: ticket.payment.taxes, currency: ticket.payment.currencyCode, airticket_segment: pnrData.allSegments.length, airticket_journey_date: pnrData.startDate, airticket_commission_percent_total: (0, lib_1.numRound)(baseFareCommission), airticket_route_or_sector: airticket_route_or_sector, airticket_airline_id: owningAirline, airticket_ait, airticket_client_price: ticket.payment.total, airticket_purchase_price,
             airticket_net_commssion, airticket_profit: airticket_net_commssion, airticket_commission_percent: (0, lib_1.numRound)(((0, lib_1.numRound)(baseFareCommission) / (0, lib_1.numRound)(ticket.payment.subtotal)) * 100) }, taxesBreakdown[index]));
     }
     return ticket_details;
@@ -83,6 +83,9 @@ const capitalize = (str) => {
 };
 exports.capitalize = capitalize;
 const extractPaxStr = (input) => {
+    if (!input) {
+        return undefined;
+    }
     const regex1 = /\/([A-Z0-9.]+)\/\/([A-Z0-9.]+)$/i;
     const regex2 = /\/(\d+)$/;
     const match1 = input.match(regex1);

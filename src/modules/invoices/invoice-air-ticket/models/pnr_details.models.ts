@@ -54,7 +54,8 @@ class PnrDetailsModels extends AbstractModels {
     const [data] = await this.query()
       .select('employee_id')
       .from('trabill_employees')
-      .where('employee_creation_sign', sign);
+      .where('employee_creation_sign', sign)
+      .andWhere('employee_org_agency', this.org_agency);
 
     return data?.employee_id;
   }

@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const dayjs_1 = __importDefault(require("dayjs"));
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
@@ -27,7 +28,7 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
     constructor() {
         super();
         this.addInvoiceWithPnr = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { invoice_combclient_id, invoice_walking_customer_name, invoice_discount, invoice_service_charge, invoice_vat, invoice_pnr, } = req.body;
+            const { invoice_combclient_id, invoice_walking_customer_name, invoice_discount, invoice_service_charge, invoice_pnr, } = req.body;
             const getPnrDetails = new pnr_details_service_1.default();
             const pnrData = yield getPnrDetails.pnrDetails(req, invoice_pnr);
             if (!pnrData.success) {
@@ -39,15 +40,16 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                     pnrResponse.creation_sign);
             }
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c;
+                var _a;
                 const conn = this.models.invoiceAirticketModel(req, trx);
+                const pass_conn = this.models.passportModel(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const combined_conn = this.models.combineClientModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const invoice_note = 'THE INVOICE IS GENERATED AUTOMATICALLY, ENRICHED WITH SABRE PNR DATA.';
+                const invoice_note = 'THE INVOICE IS GENERATED AUTOMATICALLY.';
                 // common invoice assets
                 const invoice_no = yield this.generateVoucher(req, 'AIT');
-                const route_name = (_a = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.route_sectors) === null || _a === void 0 ? void 0 : _a.join(',');
+                const route_name = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.ticket_details[0].route_sectors.join(',');
                 const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(invoice_combclient_id);
                 const ticket_no = pnrResponse.ticket_details
                     .map((item) => item.airticket_ticket_no)
@@ -63,8 +65,7 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                 });
                 const invoice_net_total = invoice_sub_total -
                     (0, lib_1.numRound)(invoice_discount) +
-                    (0, lib_1.numRound)(invoice_service_charge) +
-                    (0, lib_1.numRound)(invoice_vat);
+                    (0, lib_1.numRound)(invoice_service_charge);
                 // client transaction
                 const invoice_info = {
                     invoice_net_total,
@@ -93,15 +94,15 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                 }
                 const invoiceExtraAmount = {
                     extra_amount_invoice_id: invoice_id,
-                    invoice_vat,
                     invoice_service_charge,
                     invoice_discount,
                 };
                 yield common_conn.insertInvoiceExtraAmount(invoiceExtraAmount);
                 // await common_conn.insertInvoicePreData(invoicePreData);
                 // ticket information
-                for (const ticket of pnrResponse.ticket_details) {
+                for (const [index, ticket] of pnrResponse.ticket_details.entries()) {
                     // vendor transaction
+                    const vtrxn_pax = ticket === null || ticket === void 0 ? void 0 : ticket.pax_passports.map((item) => item.passport_name).join(',');
                     const VTrxnBody = {
                         comb_vendor: ticket.airticket_comvendor,
                         vtrxn_amount: ticket.airticket_purchase_price,
@@ -114,7 +115,7 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                         vtrxn_voucher: invoice_no,
                         vtrxn_pnr: invoice_pnr,
                         vtrxn_route: route_name,
-                        vtrxn_pax: pnrResponse.pax_passports[0].passport_name,
+                        vtrxn_pax,
                         vtrxn_airticket_no: ticket.airticket_ticket_no,
                     };
                     const airticket_vtrxn_id = yield trxns.VTrxnInsert(VTrxnBody);
@@ -155,13 +156,36 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                     };
                     const airticket_id = yield conn.insertInvoiceAirticketItem(invoiceAirticketItems);
                     // INSERT PAX PASSPORT INFO
-                    if ((_b = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.pax_passports) === null || _b === void 0 ? void 0 : _b.length) {
-                        for (const passport of pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.pax_passports) {
-                            yield common_conn.insertInvoiceAirticketPaxName(invoice_id, airticket_id, passport === null || passport === void 0 ? void 0 : passport.passport_name, (0, pnr_lib_1.capitalize)(passport.passport_person_type), passport.passport_mobile_no, passport.passport_email);
+                    if (ticket === null || ticket === void 0 ? void 0 : ticket.pax_passports) {
+                        for (const passport of ticket === null || ticket === void 0 ? void 0 : ticket.pax_passports) {
+                            const identityDocuments = passport === null || passport === void 0 ? void 0 : passport.identityDocuments;
+                            if (identityDocuments &&
+                                identityDocuments.documentType === 'PASSPORT') {
+                                let passport_id = yield pass_conn.getPassIdByPassNo(identityDocuments.documentNumber);
+                                if (!passport_id) {
+                                    const PassportData = {
+                                        passport_person_type: (0, pnr_lib_1.capitalize)(passport.passport_person_type),
+                                        passport_passport_no: identityDocuments.documentNumber,
+                                        passport_name: passport === null || passport === void 0 ? void 0 : passport.passport_name,
+                                        passport_mobile_no: passport.passport_mobile_no,
+                                        passport_date_of_birth: identityDocuments.birthDate &&
+                                            (0, dayjs_1.default)(identityDocuments.birthDate).format('YYYY-MM-DD HH:mm:ss.SSS'),
+                                        passport_date_of_expire: identityDocuments.expiryDate &&
+                                            (0, dayjs_1.default)(identityDocuments.expiryDate).format('YYYY-MM-DD HH:mm:ss.SSS'),
+                                        passport_email: passport.passport_email,
+                                        passport_created_by: req.user_id,
+                                    };
+                                    passport_id = yield pass_conn.addPassport(PassportData);
+                                }
+                                yield common_conn.insertInvoiceAirticketPax(invoice_id, airticket_id, passport_id);
+                            }
+                            else {
+                                yield common_conn.insertInvoiceAirticketPaxName(invoice_id, airticket_id, passport === null || passport === void 0 ? void 0 : passport.passport_name, (0, pnr_lib_1.capitalize)(passport.passport_person_type), passport.passport_mobile_no, passport.passport_email);
+                            }
                         }
                     }
                     // airticket routes insert
-                    const airticketRoutes = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.route_or_sector.map((airoute_route_sector_id) => {
+                    const airticketRoutes = ticket.airticket_route_or_sector.map((airoute_route_sector_id) => {
                         return {
                             airoute_invoice_id: invoice_id,
                             airoute_airticket_id: airticket_id,
@@ -170,10 +194,12 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                     });
                     yield common_conn.insertAirticketRoute(airticketRoutes);
                     // flight details
-                    const flightsDetails = (_c = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.flight_details) === null || _c === void 0 ? void 0 : _c.map((item) => {
-                        return Object.assign(Object.assign({}, item), { fltdetails_airticket_id: airticket_id, fltdetails_invoice_id: invoice_id });
-                    });
-                    yield conn.insertAirTicketFlightDetails(flightsDetails);
+                    if (index === 0) {
+                        const flightsDetails = (_a = ticket === null || ticket === void 0 ? void 0 : ticket.flight_details) === null || _a === void 0 ? void 0 : _a.map((item) => {
+                            return Object.assign(Object.assign({}, item), { fltdetails_airticket_id: airticket_id, fltdetails_invoice_id: invoice_id });
+                        });
+                        yield conn.insertAirTicketFlightDetails(flightsDetails);
+                    }
                 }
                 // invoice history
                 const content = `INV AIR TICKET ADDED, VOUCHER ${invoice_no}, PNR ${invoice_pnr}, BDT ${invoice_net_total}/-`;

@@ -252,7 +252,7 @@ class VendorModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
                 .from('trabill_vendors')
-                .select('vendor_name', 'vendor_email', 'vendor_mobile', 'vendor_address', 'vendor_fixed_advance', 'trabill_vendors.vendor_credit_limit', 'vendor_registration_date', 'vendor_opening_trxn.vtrxn_amount AS vendor_opening_balance', this.db.raw(`CASE WHEN vendor_opening_trxn.vtrxn_type = 'DEBIT' THEN 'due' ELSE 'advance' END AS vendor_opening_balance_pay_type`), 'vendor_bank_guarantee', 'vendor_start_date', 'vendor_end_date')
+                .select('vendor_name', 'vendor_type', 'vendor_email', 'vendor_mobile', 'vendor_address', 'vendor_fixed_advance', 'trabill_vendors.vendor_credit_limit', 'vendor_registration_date', 'vendor_opening_trxn.vtrxn_amount AS vendor_opening_balance', this.db.raw(`CASE WHEN vendor_opening_trxn.vtrxn_type = 'DEBIT' THEN 'due' ELSE 'advance' END AS vendor_opening_balance_pay_type`), 'vendor_bank_guarantee', 'vendor_start_date', 'vendor_end_date')
                 .leftJoin(`${this.trxn}.vendor_trxn as vendor_opening_trxn`, {
                 'vendor_opening_trxn.vtrxn_id': 'trabill_vendors.vendor_opening_trxn_id',
             })

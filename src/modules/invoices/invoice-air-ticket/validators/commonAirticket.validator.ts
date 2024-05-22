@@ -210,6 +210,9 @@ export const commonAirticketValidator = [
     .withMessage('Airline other bonus total must be an integer'),
   check('ticketInfo.*.ticket_details.airticket_other_bonus_type')
     .optional()
+    .customSanitizer((value: null | string) => {
+      return value === null ? undefined : value;
+    })
     .isString()
     .withMessage('Airline other bonus type must be a string'),
   check('ticketInfo.*.ticket_details.airticket_pnr').optional().isString(),

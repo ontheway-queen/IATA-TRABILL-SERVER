@@ -217,6 +217,7 @@ class VendorModel extends AbstractModels {
       .from('trabill_vendors')
       .select(
         'vendor_name',
+        'vendor_type',
         'vendor_email',
         'vendor_mobile',
         'vendor_address',

@@ -8,6 +8,9 @@ export const bspBillingFormatter = (text: string) => {
   const summaryStartIndex = text.indexOf('REMITTANCE TOTAL');
   const summaryEndIndex = text.indexOf('BANK:');
   const summaryText = text.slice(summaryStartIndex, summaryEndIndex);
+
+  console.log({ summaryText });
+
   const salesPeriodRegex = /Billing Period:\s*(\d+)\s*\((.*?)\s*to\s*(.*?)\)/;
   const salesPeriodMatch = text.match(salesPeriodRegex);
   const salesPeriod = salesPeriodMatch
@@ -26,6 +29,8 @@ export const bspBillingFormatter = (text: string) => {
 
   const summaryMatch = summaryText.match(summaryRegex);
 
+  console.log({ summaryMatch });
+
   const salesDateRange = getBspPdfDate(salesPeriod as Date);
   const billingDateRange = getBspPdfDate(billingPeriod as Date);
 
@@ -39,6 +44,8 @@ export const bspBillingFormatter = (text: string) => {
     SUMMARY.SALES = salesPeriod;
     SUMMARY.BILLING = billingPeriod;
   }
+
+  console.log({ SUMMARY });
 
   return { SUMMARY, salesDateRange, billingDateRange };
 };

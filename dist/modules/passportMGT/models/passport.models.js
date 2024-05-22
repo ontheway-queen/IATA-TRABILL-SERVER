@@ -17,6 +17,15 @@ const customError_1 = __importDefault(require("../../../common/utils/errors/cust
 class PassportModel extends abstract_models_1.default {
     constructor() {
         super(...arguments);
+        this.getPassIdByPassNo = (pass_no) => __awaiter(this, void 0, void 0, function* () {
+            const [passport] = yield this.query()
+                .select('passport_id')
+                .from('trabill_passport_details')
+                .where('passport_org_agency', this.org_agency)
+                .andWhere('passport_passport_no', pass_no)
+                .andWhereNot('passport_is_deleted', 1);
+            return passport === null || passport === void 0 ? void 0 : passport.passport_id;
+        });
         this.updatePassport = (data) => __awaiter(this, void 0, void 0, function* () {
             const [passport_id] = yield this.query()
                 .insert(Object.assign(Object.assign({}, data), { passport_org_agency: this.org_agency }))

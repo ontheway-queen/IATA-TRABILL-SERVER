@@ -57,3 +57,6 @@ CREATE TABLE
 v_all_inv -- update this view from local;
 view_invoice_other_list -- update this view from local;
 view_invoice_visalist -- update this view from local;
+all_users -- update this view from local;
+alter table trabill_users
+add column user_data_percent decimal(10, 2) DEFAULT NULL after user_email;

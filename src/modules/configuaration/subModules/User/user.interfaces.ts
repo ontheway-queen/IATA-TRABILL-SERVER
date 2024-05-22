@@ -9,6 +9,7 @@ export interface IUser {
   current_password?: string;
   password: string;
   user_agency_id: number;
+  user_data_percent: number | null;
   user_role: userRoleType;
 }
 export interface ICreateUser

@@ -87,7 +87,7 @@ class UserServices extends abstract_services_1.default {
     // CREATE USER
     createUser(req) {
         return __awaiter(this, void 0, void 0, function* () {
-            const { password, user_dial_code, user_email, user_first_name, user_last_name, user_role_id, user_username, user_mobile, user_agency_id, } = req.body;
+            const { password, user_dial_code, user_email, user_first_name, user_last_name, user_role_id, user_username, user_mobile, user_agency_id, user_data_percent, } = req.body;
             const user_password = yield lib_1.default.hashPass(password);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.configModel.userModel(req, trx);
@@ -109,6 +109,7 @@ class UserServices extends abstract_services_1.default {
                     user_role_id,
                     user_username,
                     user_mobile,
+                    user_data_percent,
                     user_role: roleName.role_user_type,
                 };
                 const user_id = yield conn.createUser(userInfo);
@@ -127,7 +128,7 @@ class UserServices extends abstract_services_1.default {
             if (!userId) {
                 throw new customError_1.default('Please provide user id', 400, 'Empty user id');
             }
-            const { password, user_dial_code, user_email, user_first_name, user_last_name, user_role_id, user_username, user_mobile, current_password, } = req.body;
+            const { password, user_dial_code, user_email, user_first_name, user_last_name, user_role_id, user_username, user_data_percent, user_mobile, current_password, } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.configModel.userModel(req, trx);
                 const roleName = yield conn.getUserRoleName(user_role_id);
@@ -153,6 +154,7 @@ class UserServices extends abstract_services_1.default {
                     user_role_id,
                     user_username,
                     user_mobile,
+                    user_data_percent,
                     user_role: roleName.role_user_type,
                 };
                 yield conn.updateUser(userInfo, userId);

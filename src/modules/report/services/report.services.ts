@@ -248,36 +248,20 @@ class ReportServices extends AbstractServices {
 
     const { from_date, to_date, page, size } = req.query;
 
-    let separateVendor;
-
-    if (comb_vendor && comb_vendor !== 'all') {
-      separateVendor = separateCombClientToId(comb_vendor);
-    }
-    const vendor_id = separateVendor?.vendor_id || 'all';
-    const combined_id = separateVendor?.combined_id || 'all';
-
     const conn = this.models.reportModel(req);
 
     const data = await conn.getVendorWiseReport(
-      vendor_id,
-      combined_id,
+      comb_vendor,
       String(from_date),
       String(to_date),
       Number(page) || 1,
-      Number(size) || 20
-    );
-
-    const count = await conn.countVendorPaymentDataRow(
-      vendor_id,
-      combined_id,
-      String(from_date),
-      String(to_date)
+      Number(size) || 20,
+      req.user_id
     );
 
     return {
       success: true,
-      data,
-      count,
+      ...data,
     };
   };
 
@@ -300,14 +284,8 @@ class ReportServices extends AbstractServices {
       String(from_date),
       String(to_date),
       Number(page) || 1,
-      Number(size) || 20
-    );
-
-    const sales_count = await conn.countClientSalesDataRow(
-      clientId,
-      combine_id,
-      String(from_date),
-      String(to_date)
+      Number(size) || 20,
+      req.user_id
     );
 
     const collection = await conn.getClientCollectionClient(
@@ -316,17 +294,14 @@ class ReportServices extends AbstractServices {
       String(from_date),
       String(to_date),
       Number(page) || 1,
-      Number(size) || 20
+      Number(size) || 20,
+      req.user_id
     );
 
-    const collection_count = await conn.countClientCollectionDataRow(
-      clientId,
-      combine_id,
-      String(from_date),
-      String(to_date)
-    );
-
-    const count = { collection_count, sales_count };
+    const count = {
+      collection_count: collection.count,
+      sales_count: sales.count,
+    };
 
     const data = { ...count, collection, sales };
 
@@ -350,30 +325,23 @@ class ReportServices extends AbstractServices {
   };
 
   public getSalesReport = async (req: Request) => {
-    const { client_id: invoice_combclient_id, employee_id } = req.body as {
+    const { client_id, employee_id } = req.body as {
       employee_id: idType;
       client_id: string;
     };
 
     const { from_date, to_date, page, size } = req.query;
 
-    let clientCombine;
-    if (invoice_combclient_id && invoice_combclient_id !== 'all') {
-      clientCombine = separateCombClientToId(invoice_combclient_id);
-    }
-    let client_id: idType = clientCombine?.client_id || 'all';
-    let combined_id: idType = clientCombine?.combined_id || 'all';
-
     const conn = this.models.salesPurchasesReport(req);
 
     const data = await conn.getSalesReport(
-      client_id as string,
-      combined_id as string,
+      client_id,
       employee_id,
       String(from_date),
       String(to_date),
       Number(page) || 1,
-      Number(size) || 20
+      Number(size) || 20,
+      req.user_id
     );
 
     return { success: true, ...data };
@@ -389,44 +357,79 @@ class ReportServices extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.profitLossReport(req, trx);
 
-      // sales and purchase
-      const sales_info = await conn.totalSales(from_date, to_date);
+      const user_percentage = await conn.getUserPercentage(req.user_id);
 
-      const refund_info = await conn.getClientRefundTotal(from_date, to_date);
+      // sales and purchase
+      const sales_info = await conn.totalSales(
+        from_date,
+        to_date,
+        user_percentage
+      );
+
+      const refund_info = await conn.getClientRefundTotal(
+        from_date,
+        to_date,
+        user_percentage
+      );
 
       const service_charge = await conn.getInvoicesServiceCharge(
         from_date,
-        to_date
+        to_date,
+        user_percentage
       );
 
       const void_profit_loss = await conn.getInvoiceVoidProfit(
         from_date,
-        to_date
+        to_date,
+        user_percentage
       );
 
       const total_employee_salary = await conn.getEmployeeExpense(
         from_date,
-        to_date
+        to_date,
+        user_percentage
       );
 
-      const expense_total = await conn.allExpenses(from_date, to_date);
+      const expense_total = await conn.allExpenses(
+        from_date,
+        to_date,
+        user_percentage
+      );
 
-      const incentive = await conn.allIncentive(from_date, to_date);
+      const incentive = await conn.allIncentive(
+        from_date,
+        to_date,
+        user_percentage
+      );
 
       const total_discount = await conn.getAllClientDiscount(
         from_date,
-        to_date
+        to_date,
+        user_percentage
       );
 
-      const online_charge = await conn.getBankCharge(from_date, to_date);
+      const online_charge = await conn.getBankCharge(
+        from_date,
+        to_date,
+        user_percentage
+      );
 
-      const vendor_ait = await conn.getVendorAit(from_date, to_date);
+      const vendor_ait = await conn.getVendorAit(
+        from_date,
+        to_date,
+        user_percentage
+      );
 
       const non_invoice = await conn.getNonInvoiceIncomeProfit(
         from_date,
-        to_date
+        to_date,
+        user_percentage
       );
-      const agent_payment = await conn.getAgentPayment(from_date, to_date);
+      const agent_payment = await conn.getAgentPayment(
+        from_date,
+        to_date,
+        user_percentage
+      );
 
       return {
         success: true,
@@ -530,7 +533,8 @@ class ReportServices extends AbstractServices {
       String(from_date),
       String(to_date),
       Number(page) || 1,
-      Number(size) || 20
+      Number(size) || 20,
+      req.user_id
     );
 
     return { success: true, ...data };
@@ -849,7 +853,8 @@ class ReportServices extends AbstractServices {
       String(from_date),
       String(to_date),
       Number(page) || 1,
-      Number(size) || 20
+      Number(size) || 20,
+      req.user_id
     );
 
     return { success: true, ...data };
@@ -948,7 +953,8 @@ class ReportServices extends AbstractServices {
       String(from_date),
       String(to_date),
       Number(page) || 1,
-      Number(size) || 20
+      Number(size) || 20,
+      req.user_id
     );
 
     return {
@@ -1042,22 +1048,17 @@ class ReportServices extends AbstractServices {
 
     const conn = this.models.reportModel(req);
 
-    const { data } = await conn.airlineWiseSalesReport(
+    const data = await conn.airlineWiseSalesReport(
       airline_id,
       String(from_date),
       String(to_date),
       Number(page) || 1,
       Number(size) || 20,
-      search as string
+      search as string,
+      req.user_id
     );
 
-    const count = await conn.countAirlinesWiseReportDataRow(
-      airline_id,
-      String(from_date),
-      String(to_date)
-    );
-
-    return { success: true, count, data };
+    return { success: true, ...data };
   };
 
   public getClientDiscount = async (req: Request) => {
@@ -1129,12 +1130,13 @@ class ReportServices extends AbstractServices {
       from_date,
       to_date,
       Number(page || 1),
-      Number(size || 20)
+      Number(size || 20),
+      req.user_id
     );
 
     let data: any[] = [];
 
-    for (const ticket of tickets) {
+    for (const ticket of tickets.data) {
       const invoiceId = ticket?.invoice_id;
       if (invoiceId) {
         const invoiceDue = await this.models
@@ -1147,15 +1149,9 @@ class ReportServices extends AbstractServices {
       }
     }
 
-    const count = await conn.countTicketWiseProfitLossReportDataRow(
-      ticket_id,
-      from_date,
-      to_date
-    );
-
     return {
       success: true,
-      count,
+      count: tickets.count,
       data,
     };
   };
@@ -1200,13 +1196,7 @@ class ReportServices extends AbstractServices {
       Number(size) || 20
     );
 
-    const count = await conn.countEmployeeExpenseDataRow(
-      employee_id,
-      String(from_date),
-      String(to_date)
-    );
-
-    return { success: true, count, data };
+    return { success: true, ...data };
   };
 
   public getAllInvoiceCategory = async (req: Request) => {
@@ -1241,7 +1231,7 @@ class ReportServices extends AbstractServices {
   public todaySales = async (req: Request) => {
     const conn = this.models.salesPurchasesReport(req);
 
-    const data = await conn.salesPurchaseReport();
+    const data = await conn.salesPurchaseReport(req.user_id);
 
     return { success: true, data };
   };
@@ -1249,7 +1239,7 @@ class ReportServices extends AbstractServices {
   public paymentAndPurchase = async (req: Request) => {
     const conn = this.models.salesPurchasesReport(req);
 
-    const data = await conn.paymentAndPurchase();
+    const data = await conn.paymentAndPurchase(req.user_id);
 
     return { success: true, data };
   };
@@ -1351,30 +1341,16 @@ class ReportServices extends AbstractServices {
     };
 
     const conn = this.models.salesPurchasesReport(req);
-    let combClients;
-    let clientId;
-    let combineId;
-    if (comb_client !== 'all') {
-      combClients = separateCombClientToId(comb_client);
-    }
-
-    if (combClients?.client_id) {
-      clientId = combClients.client_id;
-    }
-
-    if (combClients?.combined_id) {
-      combineId = combClients.combined_id;
-    }
 
     const data = await conn.getDailySalesReport(
-      clientId as number,
-      combineId as number,
+      comb_client,
       employee_id,
       product_id,
       from_date,
       to_date,
       Number(page || 1),
-      Number(size || 20)
+      Number(size || 20),
+      req.user_id
     );
 
     return { success: true, ...data };

@@ -511,16 +511,10 @@ class ReportExcelServices extends abstract_services_1.default {
          */
         this.getMonthlySalesEarninghExcel = (req, res) => __awaiter(this, void 0, void 0, function* () {
             var _c, _d;
-            const { client_id: invoice_combclient_id, employee_id } = req.body;
+            const { client_id, employee_id } = req.body;
             const { from_date, to_date, page, size } = req.query;
-            let clientCombine;
-            if (invoice_combclient_id && invoice_combclient_id !== 'all') {
-                clientCombine = (0, common_helper_1.separateCombClientToId)(invoice_combclient_id);
-            }
-            let client_id = (clientCombine === null || clientCombine === void 0 ? void 0 : clientCombine.client_id) || 'all';
-            let combined_id = (clientCombine === null || clientCombine === void 0 ? void 0 : clientCombine.combined_id) || 'all';
             const conn = this.models.salesPurchasesReport(req);
-            const data = yield conn.getSalesReport(client_id, combined_id, employee_id, String(from_date), String(to_date), 1, this.rowSize);
+            const data = yield conn.getSalesReport(client_id, employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const worksheet = workbook.addWorksheet('Monthly Sales and earning');
             const dirPath = path_1.default.join(__dirname, '../files');
@@ -590,7 +584,7 @@ class ReportExcelServices extends abstract_services_1.default {
             const airline_id = req.params.airline;
             const { from_date, to_date, page, size, search } = req.query;
             const conn = this.models.reportModel(req);
-            const { data } = yield conn.airlineWiseSalesReport(airline_id, String(from_date), String(to_date), 1, this.rowSize, search);
+            const { data } = yield conn.airlineWiseSalesReport(airline_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, search, req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const worksheet = workbook.addWorksheet('Airline Wise Sales');
             const dirPath = path_1.default.join(__dirname, '../files');
@@ -656,7 +650,7 @@ class ReportExcelServices extends abstract_services_1.default {
             const { item_id, sales_man_id } = req.body;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.reportModel(req);
-            const items = yield conn.salesReportItemSalesman(item_id, sales_man_id, String(from_date), String(to_date), 1, this.rowSize);
+            const items = yield conn.salesReportItemSalesman(item_id, sales_man_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const worksheet = workbook.addWorksheet('Sales Man & Item');
             const dirPath = path_1.default.join(__dirname, '../files');
@@ -725,8 +719,8 @@ class ReportExcelServices extends abstract_services_1.default {
             }
             const clientId = (separateComb === null || separateComb === void 0 ? void 0 : separateComb.client_id) || 'all';
             const combine_id = (separateComb === null || separateComb === void 0 ? void 0 : separateComb.combined_id) || 'all';
-            const sales = yield conn.getClientSales(clientId, combine_id, String(from_date), String(to_date), 1, this.rowSize);
-            const collection = yield conn.getClientCollectionClient(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
+            const sales = yield conn.getClientSales(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
+            const collection = yield conn.getClientCollectionClient(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const dirPath = path_1.default.join(__dirname, '../files');
             const filePath = `${dirPath}/clientWiseCollectionSalesReport.xlsx`;
@@ -820,15 +814,9 @@ class ReportExcelServices extends abstract_services_1.default {
         });
         this.getVendorWisePurchasePaymentReportExcel = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const { comb_vendor } = req.params;
-            const { from_date, to_date } = req.query;
-            let separateVendor;
-            if (comb_vendor && comb_vendor !== 'all') {
-                separateVendor = (0, common_helper_1.separateCombClientToId)(comb_vendor);
-            }
-            const vendor_id = (separateVendor === null || separateVendor === void 0 ? void 0 : separateVendor.vendor_id) || 'all';
-            const combined_id = (separateVendor === null || separateVendor === void 0 ? void 0 : separateVendor.combined_id) || 'all';
+            const { from_date, to_date, page, size } = req.query;
             const conn = this.models.reportModel(req);
-            const data = yield conn.getVendorWiseReport(vendor_id, combined_id, String(from_date), String(to_date), 1, this.rowSize);
+            const data = yield conn.getVendorWiseReport(comb_vendor, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const dirPath = path_1.default.join(__dirname, '../files');
             const filePath = `${dirPath}/vendorWisePurchasePaymentReport.xlsx`;
@@ -845,7 +833,7 @@ class ReportExcelServices extends abstract_services_1.default {
                 { header: 'Due Amount', key: 'due_amount', width: 20 },
             ];
             // Loop through data and populate rows
-            data.forEach((report, index) => {
+            data.data.forEach((report, index) => {
                 report.serial = index + 1;
                 ticketFromVendorWorksheet.addRow(report);
             });
@@ -876,7 +864,7 @@ class ReportExcelServices extends abstract_services_1.default {
             const sales_man_id = req.params.salesman_id;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.salesPurchasesReport(req);
-            const data = yield conn.salesManWiseCollectionDue(sales_man_id, String(from_date), String(to_date), 1, this.rowSize);
+            const data = yield conn.salesManWiseCollectionDue(sales_man_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const worksheet = workbook.addWorksheet('SalesMan Collection & Due');
             const dirPath = path_1.default.join(__dirname, '../files');
@@ -941,19 +929,7 @@ class ReportExcelServices extends abstract_services_1.default {
             const { comb_client, employee_id, product_id } = req.body;
             const { from_date, to_date } = req.query;
             const conn = this.models.salesPurchasesReport(req);
-            let combClients;
-            let clientId;
-            let combineId;
-            if (comb_client !== 'all') {
-                combClients = (0, common_helper_1.separateCombClientToId)(comb_client);
-            }
-            if (combClients === null || combClients === void 0 ? void 0 : combClients.client_id) {
-                clientId = combClients.client_id;
-            }
-            if (combClients === null || combClients === void 0 ? void 0 : combClients.combined_id) {
-                combineId = combClients.combined_id;
-            }
-            const { data } = yield conn.getDailySalesReport(clientId, combineId, employee_id, product_id, from_date, to_date, 1, this.rowSize);
+            const { data } = yield conn.getDailySalesReport(comb_client, employee_id, product_id, from_date, to_date, 1, this.rowSize, req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const dirPath = path_1.default.join(__dirname, '../files');
             const filePath = `${dirPath}/dailySalesReport.xlsx`;
@@ -1009,7 +985,7 @@ class ReportExcelServices extends abstract_services_1.default {
         });
         this.getDailySalesCollectionReportExcel = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.salesPurchasesReport(req);
-            const data = yield conn.salesPurchaseReport();
+            const data = yield conn.salesPurchaseReport(req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const dirPath = path_1.default.join(__dirname, '../files');
             const filePath = `${dirPath}/dailyCollectionSalesReport.xlsx`;
@@ -1156,7 +1132,7 @@ class ReportExcelServices extends abstract_services_1.default {
         });
         this.getDailyPurchasePaymentExcel = (req, res) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.salesPurchasesReport(req);
-            const data = yield conn.paymentAndPurchase();
+            const data = yield conn.paymentAndPurchase(req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const dirPath = path_1.default.join(__dirname, '../files');
             const filePath = `${dirPath}/dailyCollectionPurcheasePaymentReport.xlsx`;
@@ -1309,7 +1285,7 @@ class ReportExcelServices extends abstract_services_1.default {
             const { visa_id } = req.params;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.profitLossReport(req);
-            const data = yield conn.visaWiseProfitLoss(visa_id, String(from_date), String(to_date), 1, this.rowSize);
+            const data = yield conn.visaWiseProfitLoss(visa_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const worksheet = workbook.addWorksheet('Visa Wise Profit Loss');
             const dirPath = path_1.default.join(__dirname, '../files');
@@ -1373,13 +1349,14 @@ class ReportExcelServices extends abstract_services_1.default {
             const { from_date, to_date } = req.query;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.profitLossReport(req, trx);
-                const { total_sales_price, total_cost_price } = yield conn.totalSales(String(from_date), String(to_date));
+                const user_percentage = yield conn.getUserPercentage(req.user_id);
+                const { total_sales_price, total_cost_price } = yield conn.totalSales(String(from_date), String(to_date), user_percentage);
                 const total_refun_profit = yield conn.refundProfitAir(String(from_date), String(to_date));
-                const total_employee_salary = yield conn.getEmployeeExpense(String(from_date), String(to_date));
-                const incentive = yield conn.allIncentive(String(from_date), String(to_date));
-                const expense_total = yield conn.allExpenses(String(from_date), String(to_date));
-                const client_discount = yield conn.getAllClientDiscount(String(from_date), String(to_date));
-                const service_charge = yield conn.getInvoicesServiceCharge(from_date, to_date);
+                const total_employee_salary = yield conn.getEmployeeExpense(String(from_date), String(to_date), user_percentage);
+                const incentive = yield conn.allIncentive(String(from_date), String(to_date), user_percentage);
+                const expense_total = yield conn.allExpenses(String(from_date), String(to_date), user_percentage);
+                const client_discount = yield conn.getAllClientDiscount(String(from_date), String(to_date), user_percentage);
+                const service_charge = yield conn.getInvoicesServiceCharge(from_date, to_date, user_percentage);
                 // const tour_profit = await conn.getTourProfitLoss(from_date, to_date);
                 const total_sales_profit = (total_sales_price - (total_cost_price | 0)) | 0;
                 const gross_profit_loss = total_sales_profit + (total_refun_profit | 0);
@@ -1626,9 +1603,9 @@ class ReportExcelServices extends abstract_services_1.default {
             const { ticket_id } = req.params;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.profitLossReport(req);
-            const tickets = yield conn.ticketWiseProfitLossReport(ticket_id, from_date, to_date, 1, this.rowSize);
+            const tickets = yield conn.ticketWiseProfitLossReport(ticket_id, from_date, to_date, Number(page) || 1, Number(size) || 20, req.user_id);
             let data = [];
-            for (const ticket of tickets) {
+            for (const ticket of tickets.data) {
                 const invoiceId = ticket === null || ticket === void 0 ? void 0 : ticket.invoice_id;
                 if (invoiceId) {
                     const invoiceDue = yield this.models
@@ -1715,7 +1692,7 @@ class ReportExcelServices extends abstract_services_1.default {
                 { header: 'Note', key: 'note', width: 20 },
             ];
             // Loop through data and populate rows
-            data.forEach((report, index) => {
+            data.data.forEach((report, index) => {
                 report.serial = index + 1;
                 const date = new Date(report.created_date);
                 const monthNames = [

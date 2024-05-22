@@ -22,7 +22,7 @@ class ReportModel extends abstract_models_1.default {
         this.loanReport = (from_date, to_date, authority, loan_type, page, size) => __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const loan_reports = yield this.query()
                 .select('loan_name', 'authority_name', 'loan_installment', 'loan_installment_type', 'loan_installment_per_day', 'loan_installment_per_month', 'loan_installment_duration', 'loan_interest_percent', 'loan_cheque_no', 'loan_bank_name', 'loan_payment_type', 'loan_amount', 'loan_payable_amount', 'loan_receivable_amount', 'loan_due_amount', 'loan_note', 'loan_create_date')
                 .from('trabill_loans')
@@ -46,11 +46,11 @@ class ReportModel extends abstract_models_1.default {
             })
                 .andWhere('loan_org_agency', this.org_agency)
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             return loan_reports;
         });
         this.airTicketDetailsReport = (from_date, to_date, page, size, client) => __awaiter(this, void 0, void 0, function* () {
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(client);
             return yield this.query()
                 .select('*')
@@ -73,7 +73,7 @@ class ReportModel extends abstract_models_1.default {
             })
                 .orderBy('sales_date', 'desc')
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
         });
         this.airTicketDetailsSumCostPurchase = (from_date, to_date, client) => __awaiter(this, void 0, void 0, function* () {
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(client);
@@ -247,46 +247,58 @@ class ReportModel extends abstract_models_1.default {
             return result;
         });
     }
-    getVendorWiseReport(vendor_id, combine_id, from_date, to_date, page, size) {
+    getVendorWiseReport(comb_vendor, from_date, to_date, page, size, user_id) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
-            return yield this.query()
+            const offset = (page - 1) * size;
+            const { vendor_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_vendor);
+            const [{ count }] = (yield this.query()
+                .select(this.db.raw(`count(*) as count`))
+                .from('view_invoices_cost')
+                .modify((event) => {
+                if (vendor_id && vendor_id) {
+                    event.andWhere('vendor_id', vendor_id);
+                }
+                if (combined_id) {
+                    event.andWhere('combine_id', combined_id);
+                }
+            })
+                .andWhere('org_agency', this.org_agency)
+                .andWhereRaw('Date(sales_date) BETWEEN ? AND ?', [
+                from_date,
+                to_date,
+            ]));
+            const [user] = (yield this.query()
+                .select('user_data_percent')
+                .from('trabill_users')
+                .where({ user_id }));
+            let total_count = count;
+            if (user && user.user_data_percent) {
+                total_count = Math.round((count * +user.user_data_percent) / 100);
+                if (size > total_count) {
+                    size = total_count;
+                }
+                if (page - 1 > 0) {
+                    size = total_count - offset;
+                }
+            }
+            const data = yield this.query()
                 .select('*')
                 .from('view_invoices_cost')
                 .modify((event) => {
-                if (vendor_id && vendor_id !== 'all') {
+                if (vendor_id) {
                     event.andWhere('vendor_id', vendor_id);
                 }
-                if (combine_id && combine_id !== 'all') {
-                    event.andWhere('combine_id', combine_id);
+                if (combined_id) {
+                    event.andWhere('combine_id', combined_id);
                 }
             })
                 .andWhere('org_agency', this.org_agency)
                 .andWhereRaw('Date(sales_date) BETWEEN ? AND ?', [from_date, to_date])
                 .limit(size)
-                .offset(page_number);
-        });
-    }
-    countVendorPaymentDataRow(vendor_id, combine_id, from_date, to_date) {
-        return __awaiter(this, void 0, void 0, function* () {
-            from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
-            to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const [count] = yield this.query()
-                .select(this.db.raw(`count(*) as row_count`))
-                .from('view_invoices_cost')
-                .modify((event) => {
-                if (vendor_id && vendor_id !== 'all') {
-                    event.andWhere('vendor_id', vendor_id);
-                }
-                if (combine_id && combine_id !== 'all') {
-                    event.andWhere('combine_id', combine_id);
-                }
-            })
-                .andWhere('org_agency', this.org_agency)
-                .andWhereRaw('Date(sales_date) BETWEEN ? AND ?', [from_date, to_date]);
-            return count.row_count;
+                .offset(offset);
+            return { count: total_count, data };
         });
     }
     getVisaList() {
@@ -303,7 +315,7 @@ class ReportModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('*')
                 .from('v_login_history')
@@ -312,7 +324,7 @@ class ReportModel extends abstract_models_1.default {
                 .andWhereRaw('DATE_FORMAT(login_date_and_time, "%Y-%m-%d") BETWEEN ? AND ?', [from_date, to_date])
                 .orderBy('login_id', 'desc')
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             const [count] = yield this.query()
                 .select(this.db.raw(`count(*) as row_count`))
                 .from('v_login_history')
@@ -395,7 +407,7 @@ class ReportModel extends abstract_models_1.default {
     }
     clientWisePassengerList(client_id, combined_id, page, size) {
         return __awaiter(this, void 0, void 0, function* () {
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('passport_id', 'passport_client_id', 'passport_name as client_name', 'passport_mobile_no', 'passport_passport_no', 'passport_email', 'passport_date_of_birth', 'passport_date_of_expire', 'passport_date_of_issue')
                 .from('trabill_passport_details')
@@ -411,7 +423,7 @@ class ReportModel extends abstract_models_1.default {
             })
                 .orderBy('passport_id', 'desc')
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             return data;
         });
     }
@@ -437,7 +449,7 @@ class ReportModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('*')
                 .from('view_country_wise_report')
@@ -452,7 +464,7 @@ class ReportModel extends abstract_models_1.default {
                 to_date,
             ])
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             const [{ total }] = yield this.query()
                 .count('* as total')
                 .from('view_country_wise_report')
@@ -532,7 +544,7 @@ class ReportModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('invoice_id', 'invoice_category_id', 'passport_client_id', 'passport_combined_id', 'passport_name', 'trabill_passport_details.passport_passport_no', this.db.raw('COALESCE(combine_name, client_name) AS client_name'), 'invoice_no', 'country_name', this.db.raw(`COALESCE(pstatus_name,'Unknown') AS pstatus_name`), 'passport_create_date', 'trabill_passport_details.passport_id')
                 .from('trabill_passport_details')
@@ -569,7 +581,7 @@ class ReportModel extends abstract_models_1.default {
             ])
                 .orderBy('passport_id', 'desc')
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             return data;
         });
     }
@@ -955,7 +967,7 @@ class ReportModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('expense_total_amount', 'expdetails_head_id', 'head_name as head_expense', 'expense_vouchar_no', 'expense_note', 'expcheque_status', 'expense_date', 'expense_payment_type', 'account_name', 'expdetails_amount')
                 .from('trabill_expense_details')
@@ -981,7 +993,7 @@ class ReportModel extends abstract_models_1.default {
                 .orderBy('expense_id', 'desc')
                 .groupBy('expense_id')
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             return data;
         });
     }
@@ -1018,7 +1030,7 @@ class ReportModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const getAllReport = yield this.query()
                 .select('account_id', 'account_name', this.db.raw("concat(user_first_name, ' ', user_last_name) as created_by"), 'acctrxn_type AS actransaction_type', 'acctrxn_amount AS actransaction_amount', 'trxntype_name as transection_type', 'acctrxn_particular_id AS actransaction_transaction_type_id', 'acctrxn_created_at AS actransaction_date')
                 .from(`${this.trxn}.acc_trxn`)
@@ -1061,7 +1073,7 @@ class ReportModel extends abstract_models_1.default {
             ])
                 .orderBy('acctrxn_particular_id', 'desc')
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             return getAllReport;
         });
     }
@@ -1103,11 +1115,41 @@ class ReportModel extends abstract_models_1.default {
             return count.row_count;
         });
     }
-    salesReportItemSalesman(item_id, sales_man_id, from_date, to_date, page, size) {
+    salesReportItemSalesman(item_id, sales_man_id, from_date, to_date, page, size, user_id) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
+            const [{ count }] = (yield this.query()
+                .select(this.db.raw(`count(*) as count`))
+                .from(`view_sales_report_item_salesman`)
+                .andWhereRaw('DATE_FORMAT(sales_date, "%Y-%m-%d") BETWEEN ? AND ?', [
+                from_date,
+                to_date,
+            ])
+                .modify(function (builder) {
+                if (sales_man_id && sales_man_id !== 'all') {
+                    builder.andWhere('invoice_sales_man_id', sales_man_id);
+                }
+                if (item_id && item_id !== 'all') {
+                    builder.andWhere('product_id', item_id);
+                }
+            })
+                .andWhere('org_agency_id', this.org_agency));
+            const [user] = (yield this.query()
+                .select('user_data_percent')
+                .from('trabill_users')
+                .where({ user_id }));
+            let total_count = count;
+            if (user && user.user_data_percent) {
+                total_count = Math.round((count * +user.user_data_percent) / 100);
+                if (size > total_count) {
+                    size = total_count;
+                }
+                if (page - 1 > 0) {
+                    size = total_count - offset;
+                }
+            }
             const report = yield this.query()
                 .select('invoice_id', 'invoice_category_id', 'invoice_no', 'sales_price', 'cost_price', 'create_date', 'sales_date', 'invoice_name', 'product_name', 'sales_by', 'invoice_sales_man_id', 'invoice_client_id', 'invoice_combined_id', 'client_name')
                 .from(`view_sales_report_item_salesman`)
@@ -1125,7 +1167,7 @@ class ReportModel extends abstract_models_1.default {
             })
                 .andWhere('org_agency_id', this.org_agency)
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             let employee;
             if (sales_man_id)
                 [employee] = yield this.query()
@@ -1138,39 +1180,13 @@ class ReportModel extends abstract_models_1.default {
                     designation_id: 'employee_designation_id',
                 })
                     .where('employee_id', sales_man_id);
-            const [{ row_count }] = yield this.query()
-                .select(this.db.raw(`count(*) as row_count`))
-                .from(`view_sales_report_item_salesman`)
-                .andWhereRaw('DATE_FORMAT(sales_date, "%Y-%m-%d") BETWEEN ? AND ?', [
-                from_date,
-                to_date,
-            ])
-                .modify(function (builder) {
-                if (sales_man_id && sales_man_id !== 'all') {
-                    builder.andWhere('invoice_sales_man_id', sales_man_id);
-                }
-                if (item_id && item_id !== 'all') {
-                    builder.andWhere('product_id', item_id);
-                }
-            })
-                .andWhere('org_agency_id', this.org_agency);
-            const [total] = yield this.query()
-                .from(`view_sales_report_item_salesman`)
-                .andWhereRaw('DATE_FORMAT(sales_date, "%Y-%m-%d") BETWEEN ? AND ?', [
-                from_date,
-                to_date,
-            ])
-                .modify(function (builder) {
-                if (sales_man_id && sales_man_id !== 'all') {
-                    builder.andWhere('invoice_sales_man_id', sales_man_id);
-                }
-                if (item_id && item_id !== 'all') {
-                    builder.andWhere('product_id', item_id);
-                }
-            })
-                .andWhere('org_agency_id', this.org_agency)
-                .sum('sales_price as total_sales');
-            return { count: row_count, data: { employee, report, total } };
+            const total = report.reduce((acc, item) => {
+                acc.total_sales += parseFloat(item.sales_price) || 0;
+                return acc;
+            }, {
+                total_sales: 0,
+            });
+            return { count: total_count, data: { employee, report, total } };
         });
     }
     salesManReportCollectionDue(sales_man_id, from_date, to_date) {
@@ -1304,7 +1320,7 @@ class ReportModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('vendor_name', 'airticket_net_commssion', 'airticket_ait', 'airticket_sales_date', 'airticket_pnr', 'airticket_ticket_no')
                 .from('trabill_invoice_airticket_items')
@@ -1324,14 +1340,14 @@ class ReportModel extends abstract_models_1.default {
                 to_date,
             ])
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             return data;
         });
     }
     voidInvoices(from_date, to_date, page = 1, size = 20) {
         return __awaiter(this, void 0, void 0, function* () {
             size = Number(size);
-            const page_number = (Number(page) - 1) * size;
+            const offset = (Number(page) - 1) * size;
             const data = yield this.query()
                 .select('invoice_id', 'invoice_category_id', 'invoice_client_id', 'invoice_combined_id', this.db.raw('coalesce(cl.client_name,comb.combine_name , company_name) as client_name'), 'invoice_reissue_client_type', 'invoice_no', 'invoice_hajj_session', 'invcat_title', 'invoice_sub_total', 'invoice_net_total', 'invoice_void_charge', 'invoice_sales_date', 'invoice_note', 'user_full_name AS user_name', this.db.raw("CASE WHEN invoice_is_void = 1 THEN 'VOID' ELSE 'DELETE' END AS invoices_trash_type"), 'invoice_create_date')
                 .from('trabill_invoices')
@@ -1359,7 +1375,7 @@ class ReportModel extends abstract_models_1.default {
                 }
             })
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             const [{ count }] = (yield this.query()
                 .count('* as count')
                 .from('trabill_invoices')
@@ -1380,7 +1396,7 @@ class ReportModel extends abstract_models_1.default {
     getAirTicketTotalReport(from_date, to_date, page = 1, size = 20, client) {
         return __awaiter(this, void 0, void 0, function* () {
             size = Number(size);
-            const page_number = (Number(page) - 1) * size;
+            const offset = (Number(page) - 1) * size;
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(client);
             const data = yield this.query()
                 .select('*')
@@ -1401,7 +1417,7 @@ class ReportModel extends abstract_models_1.default {
                 }
             })
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             const [{ count }] = (yield this.query()
                 .count('* as count')
                 .from('v_air_ticket_total_summary')
@@ -1444,11 +1460,38 @@ class ReportModel extends abstract_models_1.default {
             return count.row_count;
         });
     }
-    airlineWiseSalesReport(airline_id, from_date, to_date, page, size, search_query) {
+    airlineWiseSalesReport(airline_id, from_date, to_date, page, size, search_query, user_id) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
+            const [{ count }] = (yield this.query()
+                .select(this.db.raw(`count(*) as count`))
+                .from('view_all_airticket_details')
+                .where('airticket_org_agency', this.org_agency)
+                .modify((builder) => {
+                if (airline_id !== 'all') {
+                    builder.andWhere('airticket_airline_id', airline_id);
+                }
+            })
+                .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
+                from_date,
+                to_date,
+            ]));
+            const [user] = (yield this.query()
+                .select('user_data_percent')
+                .from('trabill_users')
+                .where({ user_id }));
+            let total_count = count;
+            if (user && user.user_data_percent) {
+                total_count = Math.round((count * +user.user_data_percent) / 100);
+                if (size > total_count) {
+                    size = total_count;
+                }
+                if (page - 1 > 0) {
+                    size = total_count - offset;
+                }
+            }
             const result = yield this.query()
                 .select('view_all_airticket_details.airticket_invoice_id as invoice_id', 'view_all_airticket_details.invoice_category_id', 'view_all_airticket_details.invoice_no', 'airticket_airline_id', 'view_all_airticket_details.airticket_ticket_no', 'view_all_airticket_details.airticket_id', 'view_all_airticket_details.airticket_pnr', 'view_all_airticket_details.passport_name', 'view_all_airticket_details.airticket_routes', this.db.raw(`view_all_airticket_details.airticket_client_price - COALESCE(trabill_invoices_extra_amounts.invoice_discount, 0) AS airticket_client_price`), 'view_all_airticket_details.airticket_purchase_price', this.db.raw('((view_all_airticket_details.airticket_client_price - COALESCE(trabill_invoices_extra_amounts.invoice_discount, 0)) - view_all_airticket_details.airticket_purchase_price) as total_profit'), 'trabill_airlines.airline_name', 'create_date AS invoice_create_date')
                 .from('view_all_airticket_details')
@@ -1470,50 +1513,25 @@ class ReportModel extends abstract_models_1.default {
                 to_date,
             ])
                 .limit(size)
-                .offset(page_number);
-            const total = yield this.query()
-                .from('view_all_airticket_details')
-                .where('trabill_invoices.invoice_org_agency', this.org_agency)
-                .join('trabill_invoices', {
-                'trabill_invoices.invoice_id': 'airticket_invoice_id',
-            })
-                .andWhereNot('trabill_invoices.invoice_is_deleted', 1)
-                .modify((builder) => {
-                if (airline_id !== 'all') {
-                    builder.andWhere('airticket_airline_id', airline_id);
-                }
-            })
-                .andWhereRaw('Date(trabill_invoices.invoice_sales_date) BETWEEN ? AND ?', [from_date, to_date])
-                .sum(`airticket_client_price as airticket_client_price`)
-                .sum(`airticket_purchase_price as airticket_purchase_price`);
-            return { data: Object.assign({ result }, total[0]) };
-        });
-    }
-    countAirlinesWiseReportDataRow(airline_id, from_date, to_date) {
-        return __awaiter(this, void 0, void 0, function* () {
-            from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
-            to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const [count] = yield this.query()
-                .select(this.db.raw(`count(*) as row_count`))
-                .from('view_all_airticket_details')
-                .where('airticket_org_agency', this.org_agency)
-                .modify((builder) => {
-                if (airline_id !== 'all') {
-                    builder.andWhere('airticket_airline_id', airline_id);
-                }
-            })
-                .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
-                from_date,
-                to_date,
-            ]);
-            return count.row_count;
+                .offset(offset);
+            const infos = result.reduce((acc, item) => {
+                acc.airticket_client_price +=
+                    parseFloat(item.airticket_client_price) || 0;
+                acc.airticket_purchase_price +=
+                    parseFloat(item.airticket_purchase_price) || 0;
+                return acc;
+            }, {
+                airticket_client_price: 0,
+                airticket_purchase_price: 0,
+            });
+            return { count: total_count, data: Object.assign({ result }, infos) };
         });
     }
     getClientDiscount(client_id, combine_id, from_date, to_date, page, size) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('invoice_id', 'invoice_category_id', 'invoice_client_id', 'invoice_combined_id', 'invoice_no', this.db.raw(`COALESCE(client_name, combine_name) as client_name`), 'invoice_sales_date as payment_date', 'invoice_discount as discount_total')
                 .from('trabill_invoices')
@@ -1541,7 +1559,7 @@ class ReportModel extends abstract_models_1.default {
             })
                 .orderBy('invoice_id')
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             const [{ row_count }] = yield this.query()
                 .select(this.db.raw(`count(*) as row_count`))
                 .from('trabill_invoices')
@@ -1570,7 +1588,7 @@ class ReportModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('*')
                 .from('view_journey_date_wise_report')
@@ -1587,7 +1605,7 @@ class ReportModel extends abstract_models_1.default {
                     event.andWhere('airticket_combined_id', combined_id);
             })
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             const [{ count }] = (yield this.query()
                 .count('*')
                 .from('view_journey_date_wise_report')
@@ -1614,7 +1632,7 @@ class ReportModel extends abstract_models_1.default {
     }
     hajGroupPassengerList(group_id, page, size) {
         return __awaiter(this, void 0, void 0, function* () {
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('passport_passport_no', 'passport_name', 'hajiinfo_tracking_number', 'hajiinfo_tracking_number', 'passport_date_of_birth', 'passport_date_of_issue', 'passport_date_of_expire', 'passport_email', 'passport_mobile_no')
                 .from('view_group_wise_passenger_list')
@@ -1626,7 +1644,7 @@ class ReportModel extends abstract_models_1.default {
             })
                 .orderBy('invoice_id', 'desc')
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             const [{ row_count }] = yield this.query()
                 .select(this.db.raw(`count(*) as row_count`))
                 .from('view_group_wise_passenger_list')
@@ -1675,7 +1693,7 @@ class ReportModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
-            const page_number = (page - 1) * size;
+            const offset = (page - 1) * size;
             const data = yield this.query()
                 .select('audit_id', 'audit_user_id', 'audit_action', 'audit_content', 'audit_module_type', 'audit_action_date_time', this.db.raw("CONCAT(user_first_name, ' ', user_last_name) AS user_name"))
                 .from('trabill_audit_history')
@@ -1692,7 +1710,7 @@ class ReportModel extends abstract_models_1.default {
             ])
                 .orderBy('audit_id', 'desc')
                 .limit(size)
-                .offset(page_number);
+                .offset(offset);
             const [{ row_count }] = yield this.query()
                 .select(this.db.raw(`count(*) as row_count`))
                 .from('trabill_audit_history')

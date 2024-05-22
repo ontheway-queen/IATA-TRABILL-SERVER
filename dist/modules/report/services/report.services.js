@@ -108,20 +108,9 @@ class ReportServices extends abstract_services_1.default {
         this.getVendorPurchaseAndPayment = (req) => __awaiter(this, void 0, void 0, function* () {
             const { comb_vendor } = req.params;
             const { from_date, to_date, page, size } = req.query;
-            let separateVendor;
-            if (comb_vendor && comb_vendor !== 'all') {
-                separateVendor = (0, common_helper_1.separateCombClientToId)(comb_vendor);
-            }
-            const vendor_id = (separateVendor === null || separateVendor === void 0 ? void 0 : separateVendor.vendor_id) || 'all';
-            const combined_id = (separateVendor === null || separateVendor === void 0 ? void 0 : separateVendor.combined_id) || 'all';
             const conn = this.models.reportModel(req);
-            const data = yield conn.getVendorWiseReport(vendor_id, combined_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
-            const count = yield conn.countVendorPaymentDataRow(vendor_id, combined_id, String(from_date), String(to_date));
-            return {
-                success: true,
-                data,
-                count,
-            };
+            const data = yield conn.getVendorWiseReport(comb_vendor, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
+            return Object.assign({ success: true }, data);
         });
         this.getClientSales = (req) => __awaiter(this, void 0, void 0, function* () {
             const { client_id } = req.body;
@@ -133,11 +122,12 @@ class ReportServices extends abstract_services_1.default {
             }
             const clientId = (separateComb === null || separateComb === void 0 ? void 0 : separateComb.client_id) || 'all';
             const combine_id = (separateComb === null || separateComb === void 0 ? void 0 : separateComb.combined_id) || 'all';
-            const sales = yield conn.getClientSales(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
-            const sales_count = yield conn.countClientSalesDataRow(clientId, combine_id, String(from_date), String(to_date));
-            const collection = yield conn.getClientCollectionClient(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
-            const collection_count = yield conn.countClientCollectionDataRow(clientId, combine_id, String(from_date), String(to_date));
-            const count = { collection_count, sales_count };
+            const sales = yield conn.getClientSales(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
+            const collection = yield conn.getClientCollectionClient(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
+            const count = {
+                collection_count: collection.count,
+                sales_count: sales.count,
+            };
             const data = Object.assign(Object.assign({}, count), { collection, sales });
             return { success: true, count, data };
         });
@@ -149,16 +139,10 @@ class ReportServices extends abstract_services_1.default {
             return Object.assign({ success: true, message: 'Vendor advance due' }, data);
         });
         this.getSalesReport = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { client_id: invoice_combclient_id, employee_id } = req.body;
+            const { client_id, employee_id } = req.body;
             const { from_date, to_date, page, size } = req.query;
-            let clientCombine;
-            if (invoice_combclient_id && invoice_combclient_id !== 'all') {
-                clientCombine = (0, common_helper_1.separateCombClientToId)(invoice_combclient_id);
-            }
-            let client_id = (clientCombine === null || clientCombine === void 0 ? void 0 : clientCombine.client_id) || 'all';
-            let combined_id = (clientCombine === null || clientCombine === void 0 ? void 0 : clientCombine.combined_id) || 'all';
             const conn = this.models.salesPurchasesReport(req);
-            const data = yield conn.getSalesReport(client_id, combined_id, employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
+            const data = yield conn.getSalesReport(client_id, employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             return Object.assign({ success: true }, data);
         });
         // OVERALL PROFIT LOSS
@@ -166,19 +150,20 @@ class ReportServices extends abstract_services_1.default {
             const { from_date, to_date } = req.query;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.profitLossReport(req, trx);
+                const user_percentage = yield conn.getUserPercentage(req.user_id);
                 // sales and purchase
-                const sales_info = yield conn.totalSales(from_date, to_date);
-                const refund_info = yield conn.getClientRefundTotal(from_date, to_date);
-                const service_charge = yield conn.getInvoicesServiceCharge(from_date, to_date);
-                const void_profit_loss = yield conn.getInvoiceVoidProfit(from_date, to_date);
-                const total_employee_salary = yield conn.getEmployeeExpense(from_date, to_date);
-                const expense_total = yield conn.allExpenses(from_date, to_date);
-                const incentive = yield conn.allIncentive(from_date, to_date);
-                const total_discount = yield conn.getAllClientDiscount(from_date, to_date);
-                const online_charge = yield conn.getBankCharge(from_date, to_date);
-                const vendor_ait = yield conn.getVendorAit(from_date, to_date);
-                const non_invoice = yield conn.getNonInvoiceIncomeProfit(from_date, to_date);
-                const agent_payment = yield conn.getAgentPayment(from_date, to_date);
+                const sales_info = yield conn.totalSales(from_date, to_date, user_percentage);
+                const refund_info = yield conn.getClientRefundTotal(from_date, to_date, user_percentage);
+                const service_charge = yield conn.getInvoicesServiceCharge(from_date, to_date, user_percentage);
+                const void_profit_loss = yield conn.getInvoiceVoidProfit(from_date, to_date, user_percentage);
+                const total_employee_salary = yield conn.getEmployeeExpense(from_date, to_date, user_percentage);
+                const expense_total = yield conn.allExpenses(from_date, to_date, user_percentage);
+                const incentive = yield conn.allIncentive(from_date, to_date, user_percentage);
+                const total_discount = yield conn.getAllClientDiscount(from_date, to_date, user_percentage);
+                const online_charge = yield conn.getBankCharge(from_date, to_date, user_percentage);
+                const vendor_ait = yield conn.getVendorAit(from_date, to_date, user_percentage);
+                const non_invoice = yield conn.getNonInvoiceIncomeProfit(from_date, to_date, user_percentage);
+                const agent_payment = yield conn.getAgentPayment(from_date, to_date, user_percentage);
                 return {
                     success: true,
                     data: Object.assign(Object.assign(Object.assign({}, sales_info), refund_info), { service_charge,
@@ -227,7 +212,7 @@ class ReportServices extends abstract_services_1.default {
             const { visa_id } = req.params;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.profitLossReport(req);
-            const data = yield conn.visaWiseProfitLoss(visa_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
+            const data = yield conn.visaWiseProfitLoss(visa_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             return Object.assign({ success: true }, data);
         });
         this.userLoginHistory = (req) => __awaiter(this, void 0, void 0, function* () {
@@ -377,7 +362,7 @@ class ReportServices extends abstract_services_1.default {
             const sales_man_id = req.params.salesman_id;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.salesPurchasesReport(req);
-            const data = yield conn.salesManWiseCollectionDue(sales_man_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
+            const data = yield conn.salesManWiseCollectionDue(sales_man_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             return Object.assign({ success: true }, data);
         });
         this.salesReportCollectionDue = (req) => __awaiter(this, void 0, void 0, function* () {
@@ -413,7 +398,7 @@ class ReportServices extends abstract_services_1.default {
             const { item_id, sales_man_id } = req.body;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.reportModel(req);
-            const data = yield conn.salesReportItemSalesman(item_id, sales_man_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
+            const data = yield conn.salesReportItemSalesman(item_id, sales_man_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             return Object.assign({ success: true }, data);
         });
         this.GDSReport = (req) => __awaiter(this, void 0, void 0, function* () {
@@ -448,9 +433,8 @@ class ReportServices extends abstract_services_1.default {
             const airline_id = req.params.airline;
             const { from_date, to_date, page, size, search } = req.query;
             const conn = this.models.reportModel(req);
-            const { data } = yield conn.airlineWiseSalesReport(airline_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, search);
-            const count = yield conn.countAirlinesWiseReportDataRow(airline_id, String(from_date), String(to_date));
-            return { success: true, count, data };
+            const data = yield conn.airlineWiseSalesReport(airline_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, search, req.user_id);
+            return Object.assign({ success: true }, data);
         });
         this.getClientDiscount = (req) => __awaiter(this, void 0, void 0, function* () {
             const { client_id } = req.params;
@@ -482,9 +466,9 @@ class ReportServices extends abstract_services_1.default {
             const { ticket_id } = req.params;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.profitLossReport(req);
-            const tickets = yield conn.ticketWiseProfitLossReport(ticket_id, from_date, to_date, Number(page || 1), Number(size || 20));
+            const tickets = yield conn.ticketWiseProfitLossReport(ticket_id, from_date, to_date, Number(page || 1), Number(size || 20), req.user_id);
             let data = [];
-            for (const ticket of tickets) {
+            for (const ticket of tickets.data) {
                 const invoiceId = ticket === null || ticket === void 0 ? void 0 : ticket.invoice_id;
                 if (invoiceId) {
                     const invoiceDue = yield this.models
@@ -494,10 +478,9 @@ class ReportServices extends abstract_services_1.default {
                     data.push(ticket_info);
                 }
             }
-            const count = yield conn.countTicketWiseProfitLossReportDataRow(ticket_id, from_date, to_date);
             return {
                 success: true,
-                count,
+                count: tickets.count,
                 data,
             };
         });
@@ -518,8 +501,7 @@ class ReportServices extends abstract_services_1.default {
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.profitLossReport(req);
             const data = yield conn.getEmployeeExpenses(employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20);
-            const count = yield conn.countEmployeeExpenseDataRow(employee_id, String(from_date), String(to_date));
-            return { success: true, count, data };
+            return Object.assign({ success: true }, data);
         });
         this.getAllInvoiceCategory = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.reportModel(req);
@@ -538,12 +520,12 @@ class ReportServices extends abstract_services_1.default {
         });
         this.todaySales = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.salesPurchasesReport(req);
-            const data = yield conn.salesPurchaseReport();
+            const data = yield conn.salesPurchaseReport(req.user_id);
             return { success: true, data };
         });
         this.paymentAndPurchase = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.salesPurchasesReport(req);
-            const data = yield conn.paymentAndPurchase();
+            const data = yield conn.paymentAndPurchase(req.user_id);
             return { success: true, data };
         });
         this.getOnlineTrxnCharge = (req) => __awaiter(this, void 0, void 0, function* () {
@@ -577,19 +559,7 @@ class ReportServices extends abstract_services_1.default {
             const { comb_client, employee_id, product_id } = req.body;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.salesPurchasesReport(req);
-            let combClients;
-            let clientId;
-            let combineId;
-            if (comb_client !== 'all') {
-                combClients = (0, common_helper_1.separateCombClientToId)(comb_client);
-            }
-            if (combClients === null || combClients === void 0 ? void 0 : combClients.client_id) {
-                clientId = combClients.client_id;
-            }
-            if (combClients === null || combClients === void 0 ? void 0 : combClients.combined_id) {
-                combineId = combClients.combined_id;
-            }
-            const data = yield conn.getDailySalesReport(clientId, combineId, employee_id, product_id, from_date, to_date, Number(page || 1), Number(size || 20));
+            const data = yield conn.getDailySalesReport(comb_client, employee_id, product_id, from_date, to_date, Number(page || 1), Number(size || 20), req.user_id);
             return Object.assign({ success: true }, data);
         });
         // AIR TICKET TOTAL REPORT

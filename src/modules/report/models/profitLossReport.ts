@@ -12,7 +12,7 @@ class ProfitLossReport extends AbstractModels {
   ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
 
     const data = await this.query()
       .select(
@@ -43,21 +43,10 @@ class ProfitLossReport extends AbstractModels {
       .andWhere('payroll_org_agency', this.org_agency)
       .orderBy('payroll_id', 'desc')
       .limit(size)
-      .offset(page_number);
+      .offset(offset);
 
-    return data;
-  }
-
-  public async countEmployeeExpenseDataRow(
-    employee_id: idType,
-    from_date: string,
-    to_date: string
-  ) {
-    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
-    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-
-    const [count] = await this.query()
-      .select(this.db.raw(`count(*) as row_count`))
+    const [{ count }] = (await this.query()
+      .select(this.db.raw(`count(*) as count`))
       .from('trabill_payroll')
       .where('payroll_id_deleted', 0)
       .andWhereRaw('Date(payroll_date) BETWEEN ? AND ?', [from_date, to_date])
@@ -66,32 +55,74 @@ class ProfitLossReport extends AbstractModels {
           builder.where('payroll_employee_id', employee_id);
         }
       })
-      .andWhere('payroll_org_agency', this.org_agency);
+      .andWhere('payroll_org_agency', this.org_agency)) as { count: number }[];
 
-    return count.row_count;
+    return { count, data };
   }
 
-  public async totalSales(from_date: string, to_date: string) {
+  public async getUserPercentage(user_id: number) {
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
+
+    return user.user_data_percent;
+  }
+
+  public async totalSales(
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const [data] = await this.query()
-      .select(
-        this.db.raw(
-          'CAST(SUM(view_invoice_total_billing.sales_price) AS DECIMAL(15,2)) AS total_sales_price'
-        ),
-        this.db.raw(
-          'CAST(SUM(cost_price) AS DECIMAL(15,2)) AS total_cost_price'
-        )
-      )
+    const [{ count }] = (await this.query()
+      .count('* as count')
       .from('view_invoice_total_billing')
       .andWhere('view_invoice_total_billing.org_agency_id', this.org_agency)
       .andWhereRaw(
         'Date(view_invoice_total_billing.sales_date) BETWEEN ? AND ?',
         [from_date, to_date]
-      );
+      )) as { count: number }[];
 
-    return data;
+    const limit = Math.round((count * percentage) / 100);
+
+    const data = (await this.query()
+      .select('sales_price', 'cost_price')
+      .from('view_invoice_total_billing')
+      .andWhere('view_invoice_total_billing.org_agency_id', this.org_agency)
+      .andWhereRaw(
+        'Date(view_invoice_total_billing.sales_date) BETWEEN ? AND ?',
+        [from_date, to_date]
+      )
+      .orderBy('invoice_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      })) as {
+      sales_price: number;
+      cost_price: number;
+    }[];
+
+    const total = data.reduce(
+      (
+        acc: {
+          total_sales_price: number;
+          total_cost_price: number;
+        },
+        item: any
+      ) => {
+        acc.total_sales_price += parseFloat(item.sales_price) || 0;
+        acc.total_cost_price += parseFloat(item.cost_price) || 0;
+        return acc;
+      },
+      {
+        total_sales_price: 0,
+        total_cost_price: 0,
+      }
+    );
+
+    return total;
   }
 
   public async getOverallSalesSummery(
@@ -252,11 +283,27 @@ class ProfitLossReport extends AbstractModels {
       .andWhere('atrefund_org_agency', this.org_agency);
   }
 
-  public allIncentive = async (from_date: string, to_date: string) => {
+  public allIncentive = async (
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) => {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const [incentive] = (await this.query()
+    const [{ count }] = (await this.query()
+      .count('* as count')
+      .from('trabill_incentive_income_details')
+      .where('incentive_is_deleted', 0)
+      .andWhere('incentive_org_agency', this.org_agency)
+      .andWhereRaw('Date(incentive_date) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])) as { count: number }[];
+
+    const limit = Math.round((count || 0 * percentage) / 100);
+
+    const data = (await this.query()
       .select(
         this.db.raw(
           'CAST(sum(COALESCE(incentive_amount, 0)) AS DECIMAL(15, 2)) as incentive_total'
@@ -265,29 +312,77 @@ class ProfitLossReport extends AbstractModels {
       .from('trabill_incentive_income_details')
       .where('incentive_is_deleted', 0)
       .andWhere('incentive_org_agency', this.org_agency)
-      .andWhereRaw('Date(incentive_date) BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ])) as { incentive_total: number }[];
+      .andWhereRaw('Date(incentive_date) BETWEEN ? AND ?', [from_date, to_date])
+      .orderBy('incentive_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      })) as { incentive_amount: number }[];
 
-    return Number(incentive.incentive_total);
+    const total = data.reduce(
+      (
+        acc: {
+          incentive_amount: number;
+        },
+        item: any
+      ) => {
+        acc.incentive_amount += parseFloat(item.incentive_amount) || 0;
+        return acc;
+      },
+      {
+        incentive_amount: 0,
+      }
+    );
+
+    return Number(total.incentive_amount);
   };
 
-  public async getEmployeeExpense(from_date: string, to_date: string) {
+  public async getEmployeeExpense(
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const [data] = (await this.query()
-      .select(this.db.raw('sum(payroll_net_amount) as employee_salary'))
+    const [{ count }] = (await this.query()
+      .count('* as count')
       .from('trabill_payroll')
       .where('payroll_org_agency', this.org_agency)
       .andWhereNot('payroll_id_deleted', 1)
       .andWhereRaw('Date(payroll_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
-      ])) as { employee_salary: number }[];
+      ])) as { count: number }[];
 
-    return Number(data.employee_salary);
+    const limit = Math.round((count || 0 * percentage) / 100);
+
+    const data = (await this.query()
+      .select('payroll_net_amount')
+      .from('trabill_payroll')
+      .where('payroll_org_agency', this.org_agency)
+      .andWhereNot('payroll_id_deleted', 1)
+      .andWhereRaw('Date(payroll_date) BETWEEN ? AND ?', [from_date, to_date])
+      .orderBy('payroll_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      })) as { payroll_net_amount: number }[];
+
+    const total = data.reduce(
+      (
+        acc: {
+          payroll_net_amount: number;
+        },
+        item: any
+      ) => {
+        acc.payroll_net_amount += parseFloat(item.payroll_net_amount) || 0;
+        return acc;
+      },
+      {
+        payroll_net_amount: 0,
+      }
+    );
+
+    return Number(total.payroll_net_amount);
   }
 
   agentLedgers = async (
@@ -322,32 +417,76 @@ class ProfitLossReport extends AbstractModels {
     return { data, count };
   };
 
-  public async allExpenses(from_date: string, to_date: string) {
+  public async allExpenses(
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const [expenses] = (await this.query()
-      .select(
-        this.db.raw(
-          'CAST(SUM(COALESCE(expense_total_amount, 0)) AS DECIMAL(15, 2)) as expense_total'
-        )
-      )
+    const [{ count }] = (await this.query()
+      .count('* AS count')
       .from('trabill_expenses')
       .where('expense_is_deleted', 0)
       .andWhere('expense_org_agency', this.org_agency)
       .andWhereRaw('Date(expense_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
-      ])) as { expense_total: number }[];
+      ])) as { count: number }[];
 
-    return Number(expenses.expense_total);
+    const limit = Math.round((count || 0 * percentage) / 100);
+
+    const data = (await this.query()
+      .select('expense_total_amount')
+      .from('trabill_expenses')
+      .where('expense_is_deleted', 0)
+      .andWhere('expense_org_agency', this.org_agency)
+      .andWhereRaw('Date(expense_date) BETWEEN ? AND ?', [from_date, to_date])
+      .orderBy('expense_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      })) as { expense_total: number }[];
+
+    const total = data.reduce(
+      (
+        acc: {
+          expense_total: number;
+        },
+        item: any
+      ) => {
+        acc.expense_total += parseFloat(item.expense_total_amount) || 0;
+        return acc;
+      },
+      {
+        expense_total: 0,
+      }
+    );
+
+    return Number(total.expense_total);
   }
 
-  public async getAllClientDiscount(from_date: string, to_date: string) {
+  public async getAllClientDiscount(
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const [data] = await this.query()
+    const [{ invoice_count }] = (await this.query()
+      .count('* as invoice_count')
+      .from('trabill_invoices')
+      .where('invoice_is_deleted', 0)
+      .andWhere('invoice_org_agency', this.org_agency)
+      .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])) as { invoice_count: number }[];
+
+    const invoice_limit = Math.round((invoice_count * percentage) / 100);
+
+    const data = await this.query()
       .select(
         this.db.raw(`SUM(COALESCE(invoice_discount, 0)) AS total_discount`)
       )
@@ -360,35 +499,96 @@ class ProfitLossReport extends AbstractModels {
       .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
         from_date,
         to_date,
-      ]);
+      ])
+      .orderBy('invoice_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(invoice_limit);
+      });
 
-    const [receipt] = await this.query()
-      .select(
-        this.db.raw(`SUM(COALESCE(receipt_total_discount,0)) AS total_discount`)
-      )
+    const invoice_total = data.reduce(
+      (
+        acc: {
+          total_discount: number;
+        },
+        item: any
+      ) => {
+        acc.total_discount += parseFloat(item.invoice_discount) || 0;
+        return acc;
+      },
+      {
+        total_discount: 0,
+      }
+    );
+
+    const [{ receipt_count }] = (await this.query()
+      .count('* as receipt_count')
       .from('trabill_money_receipts')
       .where('receipt_has_deleted', 0)
       .andWhere('receipt_org_agency', this.org_agency)
       .andWhereRaw(`Date(receipt_payment_date)  BETWEEN ? AND ?`, [
         from_date,
         to_date,
-      ]);
+      ])) as { receipt_count: number }[];
+
+    const receipt_limit = Math.round((receipt_count * percentage) / 100);
+
+    const receipt = await this.query()
+      .select('receipt_total_discount')
+      .from('trabill_money_receipts')
+      .where('receipt_has_deleted', 0)
+      .andWhere('receipt_org_agency', this.org_agency)
+      .andWhereRaw(`Date(receipt_payment_date)  BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ])
+      .orderBy('receipt_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(receipt_limit);
+      });
+
+    const receipt_total = receipt.reduce(
+      (
+        acc: {
+          total_discount: number;
+        },
+        item: any
+      ) => {
+        acc.total_discount += parseFloat(item.receipt_total_discount) || 0;
+        return acc;
+      },
+      {
+        total_discount: 0,
+      }
+    );
 
     const total_discount =
-      Number(data.total_discount) + Number(receipt.total_discount);
+      Number(invoice_total.total_discount) +
+      Number(receipt_total.total_discount);
 
     return total_discount;
   }
 
-  public async getInvoicesServiceCharge(from_date: string, to_date: string) {
+  public async getInvoicesServiceCharge(
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const [data] = await this.db('trabill_invoices')
-      .select(
-        this.db.raw(
-          `CAST(sum(COALESCE(invoice_service_charge,0)) AS DECIMAL(15,2)) as total_service_charge`
-        )
+
+    const [{ count }] = (await this.db('trabill_invoices')
+      .count('* as count')
+      .where('invoice_is_deleted', 0)
+      .andWhereRaw(
+        `DATE_FORMAT(invoice_sales_date,'%Y-%m-%d') BETWEEN ? AND ?`,
+        [from_date, to_date]
       )
+      .andWhere('invoice_org_agency', this.org_agency)) as { count: number }[];
+
+    const limit = Math.round((count * percentage) / 100);
+
+    const data = await this.db('trabill_invoices')
+      .select(this.db.raw(`invoice_service_charge`))
       .leftJoin('trabill_invoices_extra_amounts', {
         extra_amount_invoice_id: 'invoice_id',
       })
@@ -397,102 +597,192 @@ class ProfitLossReport extends AbstractModels {
         `DATE_FORMAT(invoice_sales_date,'%Y-%m-%d') BETWEEN ? AND ?`,
         [from_date, to_date]
       )
-      .andWhere('invoice_org_agency', this.org_agency);
+      .andWhere('invoice_org_agency', this.org_agency)
+      .orderBy('invoice_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      });
 
-    return Number(data.total_service_charge);
+    const total = data.reduce(
+      (
+        acc: {
+          total_service_charge: number;
+        },
+        item: any
+      ) => {
+        acc.total_service_charge +=
+          parseFloat(item.invoice_service_charge) || 0;
+        return acc;
+      },
+      {
+        total_service_charge: 0,
+      }
+    );
+
+    return Number(total.total_service_charge);
   }
 
-  /*  public async getTourProfitLoss(from_date: string, to_date: string) {
-    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
-    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const [{ tour_profit }] = await this.query()
-      .select(
-        this.db.raw(
-          `SUM(COALESCE(billing_total_sales,0) - COALESCE(billing_cost_price, 0)) as tour_profit`
-        )
-      )
-      .from('trabill_invoice_tour_billing')
-
-      .where('billing_is_deleted', 0)
-      .leftJoin('trabill_invoices', { invoice_id: 'billing_invoice_id' })
-      .andWhere('invoice_org_agency', this.org_agency)
-      .andWhereRaw(
-        `DATE_FORMAT(invoice_sales_date,'%Y-%m-%d') BETWEEN ? AND ?`,
-        [from_date, to_date]
-      );
-
-    return Number(tour_profit);
-  } */
-
-  public async getBankCharge(from_date: string, to_date: string) {
+  public async getBankCharge(
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const [data] = (await this.query()
-      .sum('charge_amount AS loss')
+    const [{ count }] = (await this.query()
+      .count('* as count')
       .from('trabill_online_trxn_charge')
       .where('charge_is_deleted', 0)
       .andWhere('charge_org_agency', this.org_agency)
       .andWhereRaw(
         `DATE_FORMAT(charge_created_date, '%Y-%m-%d') BETWEEN ? AND ?`,
         [from_date, to_date]
-      )) as { loss: number }[];
+      )) as { count: number }[];
 
-    return Number(data.loss);
+    const limit = Math.round((count * percentage) / 100);
+
+    const data = (await this.query()
+      .select('charge_amount')
+      .from('trabill_online_trxn_charge')
+      .where('charge_is_deleted', 0)
+      .andWhere('charge_org_agency', this.org_agency)
+      .andWhereRaw(
+        `DATE_FORMAT(charge_created_date, '%Y-%m-%d') BETWEEN ? AND ?`,
+        [from_date, to_date]
+      )
+      .orderBy('charge_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      })) as { charge_amount: number }[];
+
+    const total = data.reduce(
+      (
+        acc: {
+          charge_amount: number;
+        },
+        item: any
+      ) => {
+        acc.charge_amount += parseFloat(item.charge_amount) || 0;
+        return acc;
+      },
+      {
+        charge_amount: 0,
+      }
+    );
+
+    return Number(total.charge_amount);
   }
 
-  public async getVendorAit(from_date: string, to_date: string) {
+  public async getVendorAit(
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const [data] = (await this.query()
-      .select(
-        this.db.raw(
-          `CAST(SUM(COALESCE(vendor_ait, 0)) AS DECIMAL(15,2)) AS total_ait`
-        )
-      )
+    const [{ count }] = (await this.query()
+      .count('* as count')
       .from('trabill_vendor_payments')
       .where('vpay_is_deleted', 0)
       .andWhere('vpay_org_agency', this.org_agency)
       .andWhereRaw('DATE_FORMAT(payment_date, "%Y-%m-%d") BETWEEN ? AND ?', [
         from_date,
         to_date,
-      ])) as { total_ait: number }[];
+      ])) as { count: number }[];
 
-    return Number(data.total_ait);
+    const data = (await this.query()
+      .select(`vendor_ait`)
+      .from('trabill_vendor_payments')
+      .where('vpay_is_deleted', 0)
+      .andWhere('vpay_org_agency', this.org_agency)
+      .andWhereRaw('DATE_FORMAT(payment_date, "%Y-%m-%d") BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])
+      .orderBy('vpay_id', 'desc')) as { vendor_ait: number }[];
+
+    const total = data.reduce(
+      (
+        acc: {
+          vendor_ait: number;
+        },
+        item: any
+      ) => {
+        acc.vendor_ait += parseFloat(item.vendor_ait) || 0;
+        return acc;
+      },
+      {
+        vendor_ait: 0,
+      }
+    );
+
+    return Number(total.vendor_ait);
   }
 
-  public async getNonInvoiceIncomeProfit(from_date: string, to_date: string) {
+  public async getNonInvoiceIncomeProfit(
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const [data] = (await this.query()
-      .select(
-        this.db.raw(
-          `CAST(SUM(COALESCE(nonincome_amount, 0)) AS DECIMAL(15, 2)) AS total_amount`
-        )
-      )
+    const [{ count }] = (await this.query()
+      .count('* as count')
       .from('trabill_noninvoice_income_details')
       .where('nonincome_is_deleted', 0)
       .andWhere('nonincome_org_agency', this.org_agency)
       .andWhereRaw(
         `DATE_FORMAT(nonincome_created_date, '%Y-%m-%d') BETWEEN ? AND ?`,
         [from_date, to_date]
-      )) as { total_amount: number }[];
+      )) as { count: number }[];
 
-    return Number(data.total_amount);
+    const limit = Math.round((count * percentage) / 100);
+
+    const data = (await this.query()
+      .select(`nonincome_amount`)
+      .from('trabill_noninvoice_income_details')
+      .where('nonincome_is_deleted', 0)
+      .andWhere('nonincome_org_agency', this.org_agency)
+      .andWhereRaw(
+        `DATE_FORMAT(nonincome_created_date, '%Y-%m-%d') BETWEEN ? AND ?`,
+        [from_date, to_date]
+      )
+      .orderBy('nonincome_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      })) as { total_amount: number }[];
+
+    const total = data.reduce(
+      (
+        acc: {
+          nonincome_amount: number;
+        },
+        item: any
+      ) => {
+        acc.nonincome_amount += parseFloat(item.nonincome_amount) || 0;
+        return acc;
+      },
+      {
+        nonincome_amount: 0,
+      }
+    );
+
+    return Number(total.nonincome_amount);
   }
 
-  public async getAgentPayment(from_date: string, to_date: string) {
+  public async getAgentPayment(
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const [data] = (await this.query()
-      .select(
-        this.db.raw(
-          `CAST(SUM(COALESCE(receipt_total_amount,0)) AS DECIMAL(15,2)) AS agent_payment`
-        )
-      )
+    const [{ count }] = (await this.query()
+      .count('* as count')
       .from('trabill_money_receipts')
       .where('receipt_payment_to', 'AGENT_COMMISSION')
       .andWhere('receipt_has_deleted', 0)
@@ -501,16 +791,55 @@ class ProfitLossReport extends AbstractModels {
         `DATE_FORMAT(receipt_payment_date, '%Y-%m-%d') BETWEEN ? AND ?`,
         [from_date, to_date]
       )) as {
-      agent_payment: number;
+      count: number;
     }[];
 
-    return Number(data.agent_payment);
+    const limit = Math.round((count * percentage) / 100);
+
+    const data = (await this.query()
+      .select('receipt_total_amount')
+      .from('trabill_money_receipts')
+      .where('receipt_payment_to', 'AGENT_COMMISSION')
+      .andWhere('receipt_has_deleted', 0)
+      .andWhere('receipt_org_agency', this.org_agency)
+      .andWhereRaw(
+        `DATE_FORMAT(receipt_payment_date, '%Y-%m-%d') BETWEEN ? AND ?`,
+        [from_date, to_date]
+      )
+      .orderBy('receipt_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      })) as {
+      receipt_total_amount: number;
+    }[];
+
+    const total = data.reduce(
+      (
+        acc: {
+          receipt_total_amount: number;
+        },
+        item: any
+      ) => {
+        acc.receipt_total_amount += parseFloat(item.receipt_total_amount) || 0;
+        return acc;
+      },
+      {
+        receipt_total_amount: 0,
+      }
+    );
+
+    return Number(total.receipt_total_amount);
   }
 
-  getInvoiceVoidProfit = async (from_date: string, to_date: string) => {
+  getInvoiceVoidProfit = async (
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) => {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const [data] = (await this.query()
+
+    const [{ count }] = (await this.query()
       .sum('invoice_void_charge as total_charge')
       .from('trabill_invoices')
       .andWhere('invoice_is_void', 1)
@@ -519,28 +848,100 @@ class ProfitLossReport extends AbstractModels {
         [from_date, to_date]
       )
       .andWhere('invoice_org_agency', this.org_agency)) as {
+      count: number;
+    }[];
+
+    const limit = Math.round((count || 0 * percentage) / 100);
+
+    const data = (await this.query()
+      .select('invoice_void_charge')
+      .from('trabill_invoices')
+      .andWhere('invoice_is_void', 1)
+      .andWhereRaw(
+        `DATE_FORMAT(invoice_sales_date,'%Y-%m-%d') BETWEEN ? AND ?`,
+        [from_date, to_date]
+      )
+      .andWhere('invoice_org_agency', this.org_agency)
+      .orderBy('invoice_id', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      })) as {
       total_charge: number;
     }[];
 
-    return Number(data.total_charge) || 0;
+    const total = data.reduce(
+      (
+        acc: {
+          total_charge: number;
+        },
+        item: any
+      ) => {
+        acc.total_charge += parseFloat(item.invoice_void_charge) || 0;
+        return acc;
+      },
+      {
+        total_charge: 0,
+      }
+    );
+
+    return Number(total.total_charge) || 0;
   };
-  getClientRefundTotal = async (from_date: string, to_date: string) => {
+  getClientRefundTotal = async (
+    from_date: string,
+    to_date: string,
+    percentage: number
+  ) => {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const [data] = (await this.query()
-      .sum('crefund_return_amount as client_refund_return')
-      .sum('vrefund_return_amount as vendor_refund_return')
+
+    const [{ count }] = (await this.query()
+      .count('* as count')
       .from('v_all_refunds')
       .andWhereRaw(`DATE_FORMAT(atrefund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
         from_date,
         to_date,
       ])
       .andWhere('atrefund_org_agency', this.org_agency)) as {
-      client_refund_return: string;
-      vendor_refund_return: string;
+      count: number;
     }[];
 
-    return data;
+    const limit = Math.round((count * percentage) / 100);
+
+    const data = (await this.query()
+      .select('crefund_return_amount', 'vrefund_return_amount')
+      .from('v_all_refunds')
+      .andWhereRaw(`DATE_FORMAT(atrefund_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ])
+      .andWhere('atrefund_org_agency', this.org_agency)
+      .orderBy('atrefund_date', 'desc')
+      .modify((event) => {
+        if (percentage) event.limit(limit);
+      })) as {
+      crefund_return_amount: string;
+      vrefund_return_amount: string;
+    }[];
+
+    const total = data.reduce(
+      (
+        acc: {
+          client_refund_return: number;
+          vendor_refund_return: number;
+        },
+        item: any
+      ) => {
+        acc.client_refund_return += parseFloat(item.crefund_return_amount) || 0;
+        acc.vendor_refund_return += parseFloat(item.vrefund_return_amount) || 0;
+        return acc;
+      },
+      {
+        client_refund_return: 0,
+        vendor_refund_return: 0,
+      }
+    );
+
+    return total;
   };
 
   public async visaWiseProfitLoss(
@@ -548,11 +949,51 @@ class ProfitLossReport extends AbstractModels {
     from_date: string,
     to_date: string,
     page: number,
-    size: number
+    size: number,
+    user_id: number
   ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
+
+    const [{ count }] = (await this.query()
+      .select(this.db.raw(`count(*) as count`))
+      .from('trabill_invoices')
+      .leftJoin('trabill_invoice_categories', {
+        invcat_id: 'invoice_category_id',
+      })
+      .where('invoice_is_deleted', 0)
+      .andWhere('invcat_parentcat', 'VISA')
+      .modify((event) => {
+        if (visa_id !== 'all') {
+          event.where('invoice_category_id', visa_id);
+        }
+      })
+      .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])
+      .andWhere('trabill_invoices.invoice_org_agency', this.org_agency)) as {
+      count: number;
+    }[];
+
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
+
+    let total_count: number = count;
+
+    if (user && user.user_data_percent) {
+      total_count = Math.round((count * +user.user_data_percent) / 100);
+
+      if (size > total_count) {
+        size = total_count;
+      }
+      if (page - 1 > 0) {
+        size = total_count - offset;
+      }
+    }
 
     const data = await this.query()
       .select(
@@ -588,31 +1029,9 @@ class ProfitLossReport extends AbstractModels {
       ])
       .andWhere('trabill_invoices.invoice_org_agency', this.org_agency)
       .limit(size)
-      .offset(page_number);
+      .offset(offset);
 
-    const [{ row_count }] = await this.query()
-      .select(this.db.raw(`count(*) as row_count`))
-      .from('trabill_invoices')
-      .leftJoin('trabill_invoice_visa_billing_infos', {
-        billing_invoice_id: 'invoice_id',
-      })
-      .leftJoin('trabill_invoice_categories', {
-        invcat_id: 'invoice_category_id',
-      })
-      .where('invoice_is_deleted', 0)
-      .andWhere('invcat_parentcat', 'VISA')
-      .modify((event) => {
-        if (visa_id !== 'all') {
-          event.where('invoice_category_id', visa_id);
-        }
-      })
-      .andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ])
-      .andWhere('trabill_invoices.invoice_org_agency', this.org_agency);
-
-    return { count: row_count, data };
+    return { count: total_count, data };
   }
 
   public async ticketWiseProfitLossReport(
@@ -620,13 +1039,46 @@ class ProfitLossReport extends AbstractModels {
     from_date: string,
     to_date: string,
     page: number,
-    size: number
+    size: number,
+    user_id: number
   ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
 
-    const airticket = await this.query()
+    const [{ count }] = (await this.query()
+      .count('* as count')
+      .from('view_all_airticket_details')
+      .modify((event) => {
+        if (ticket_no && ticket_no !== 'all') {
+          event.where('airticket_id', ticket_no);
+        }
+      })
+      .where('airticket_org_agency', this.org_agency)
+      .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])) as { count: number }[];
+
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
+
+    let total_count: number = count;
+
+    if (user && user.user_data_percent) {
+      total_count = Math.round((count * +user.user_data_percent) / 100);
+
+      if (size > total_count) {
+        size = total_count;
+      }
+      if (page - 1 > 0) {
+        size = total_count - offset;
+      }
+    }
+
+    const data = await this.query()
       .select(
         'airticket_id',
         'airticket_airline_id',
@@ -662,32 +1114,9 @@ class ProfitLossReport extends AbstractModels {
         to_date,
       ])
       .limit(size)
-      .offset(page_number);
-    return airticket;
-  }
-  public async countTicketWiseProfitLossReportDataRow(
-    ticket_no: idType,
-    from_date: string,
-    to_date: string
-  ) {
-    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
-    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
+      .offset(offset);
 
-    const [{ row_count }] = await this.query()
-      .select(this.db.raw(`COUNT(*) AS row_count`))
-      .from('view_all_airticket_details')
-      .modify((event) => {
-        if (ticket_no && ticket_no !== 'all') {
-          event.where('airticket_id', ticket_no);
-        }
-      })
-      .where('airticket_org_agency', this.org_agency)
-      .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ]);
-
-    return row_count;
+    return { count: total_count, data };
   }
 
   public async getOnlineTrxnCharge(
@@ -698,7 +1127,7 @@ class ProfitLossReport extends AbstractModels {
   ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
 
     const data = await this.query()
       .select(
@@ -749,7 +1178,7 @@ class ProfitLossReport extends AbstractModels {
         to_date,
       ])
       .limit(size)
-      .offset(page_number);
+      .offset(offset);
 
     return data;
   }

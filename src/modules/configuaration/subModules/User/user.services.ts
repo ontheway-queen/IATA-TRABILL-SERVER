@@ -32,6 +32,7 @@ class UserServices extends AbstractServices {
       user_username,
       user_mobile,
       user_agency_id,
+      user_data_percent,
     } = req.body as IUser;
 
     const user_password = await Lib.hashPass(password);
@@ -64,6 +65,7 @@ class UserServices extends AbstractServices {
         user_role_id,
         user_username,
         user_mobile,
+        user_data_percent,
         user_role: roleName.role_user_type,
       };
 
@@ -93,6 +95,7 @@ class UserServices extends AbstractServices {
       user_last_name,
       user_role_id,
       user_username,
+      user_data_percent,
       user_mobile,
       current_password,
     } = req.body as IUser;
@@ -132,6 +135,7 @@ class UserServices extends AbstractServices {
         user_role_id,
         user_username,
         user_mobile,
+        user_data_percent,
         user_role: roleName.role_user_type,
       };
 

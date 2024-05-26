@@ -32,7 +32,7 @@ export interface IComTrxn {
   comtrxn_note: string;
   comtrxn_create_at: string;
   comtrxn_user_id: idType;
-  comtrxn_pay_type?: string;
+  // comtrxn_pay_type?: string;
 }
 
 export interface IClTrxn extends Omit<IClTrxnBody, 'ctrxn_cl'> {
@@ -56,7 +56,7 @@ export interface IUpdateCTrxn {
   p_particular_id: number;
   p_particular_type: string;
   p_note: string;
-  p_pay_type: string;
+  p_pay_type?: string;
   p_created_at: string;
 }
 
@@ -103,7 +103,7 @@ export interface IUpdateCombTrxn {
   p_note: string;
   p_create_at: string;
   p_pax: string;
-  p_pay_type: string;
+  p_pay_type?: string;
 }
 
 export interface IAccTrxn {

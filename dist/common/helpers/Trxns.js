@@ -29,14 +29,15 @@ class Trxns extends abstract_services_1.default {
                     ctrxn_created_at,
                     ctrxn_note,
                     ctrxn_particular_id,
-                    ctrxn_particular_type,
+                    ctrxn_particular_type: ctrxn_particular_type +
+                        (ctrxn_pay_type ? ` (${ctrxn_pay_type})` : ''),
                     ctrxn_pax,
                     ctrxn_pnr,
                     ctrxn_route,
                     ctrxn_type,
                     ctrxn_voucher,
                     ctrxn_airticket_no,
-                    ctrxn_pay_type,
+                    // ctrxn_pay_type,
                     ctrxn_user_id: this.req.user_id,
                 };
                 trxnId = yield this.conn.insertClTrxn(clTrxnBody);
@@ -51,12 +52,13 @@ class Trxns extends abstract_services_1.default {
                     comtrxn_type: ctrxn_type,
                     comtrxn_comb_id: combined_id,
                     comtrxn_particular_id: ctrxn_particular_id,
-                    comtrxn_particular_type: ctrxn_particular_type,
+                    comtrxn_particular_type: ctrxn_particular_type +
+                        (ctrxn_pay_type ? ` (${ctrxn_pay_type})` : ''),
                     comtrxn_amount: ctrxn_amount,
                     comtrxn_note: ctrxn_note,
                     comtrxn_create_at: ctrxn_created_at,
                     comtrxn_user_id: this.req.user_id,
-                    comtrxn_pay_type: ctrxn_pay_type,
+                    // comtrxn_pay_type: ctrxn_pay_type,
                 };
                 trxnId = yield this.conn.insertComTrxn(comTrxnBody);
             }
@@ -118,7 +120,8 @@ class Trxns extends abstract_services_1.default {
                     p_note: ctrxn_note,
                     p_amount: ctrxn_amount,
                     p_particular_id: ctrxn_particular_id,
-                    p_particular_type: ctrxn_particular_type,
+                    p_particular_type: ctrxn_particular_type +
+                        (ctrxn_pay_type ? ` (${ctrxn_pay_type})` : ''),
                     p_pax: ctrxn_pax,
                     p_pnr: ctrxn_pnr,
                     p_created_at: ctrxn_created_at,
@@ -126,7 +129,7 @@ class Trxns extends abstract_services_1.default {
                     p_type: ctrxn_type,
                     p_voucher: ctrxn_voucher,
                     p_airticket_no: ctrxn_airticket_no,
-                    p_pay_type: ctrxn_pay_type,
+                    // p_pay_type: ctrxn_pay_type as string,
                 };
                 yield this.conn.updateClTrxn(clTrxnBody);
             }
@@ -137,7 +140,8 @@ class Trxns extends abstract_services_1.default {
                     p_type: ctrxn_type,
                     p_comb_id: combined_id,
                     p_particular_id: ctrxn_particular_id,
-                    p_particular_type: ctrxn_particular_type,
+                    p_particular_type: ctrxn_particular_type +
+                        (ctrxn_pay_type ? ` (${ctrxn_pay_type})` : ''),
                     p_amount: ctrxn_amount,
                     p_note: ctrxn_note,
                     p_create_at: ctrxn_created_at,
@@ -145,7 +149,7 @@ class Trxns extends abstract_services_1.default {
                     p_airticket_no: ctrxn_airticket_no,
                     p_pnr: ctrxn_pnr,
                     p_route: ctrxn_route,
-                    p_pay_type: ctrxn_pay_type,
+                    // p_pay_type: ctrxn_pay_type as string,
                 };
                 yield this.conn.updateComTrxn(comTrxnBody);
             }
@@ -181,7 +185,8 @@ class Trxns extends abstract_services_1.default {
                     comtrxn_type: vtrxn_type,
                     comtrxn_comb_id: combined_id,
                     comtrxn_particular_id: vtrxn_particular_id,
-                    comtrxn_particular_type: vtrxn_particular_type,
+                    comtrxn_particular_type: vtrxn_particular_type +
+                        (vtrxn_pay_type ? ` (${vtrxn_pay_type})` : ''),
                     comtrxn_amount: vtrxn_amount,
                     comtrxn_note: vtrxn_note,
                     comtrxn_create_at: vtrxn_created_at,
@@ -190,7 +195,7 @@ class Trxns extends abstract_services_1.default {
                     comtrxn_pnr: vtrxn_pnr,
                     comtrxn_route: vtrxn_route,
                     comtrxn_airticket_no: vtrxn_airticket_no,
-                    comtrxn_pay_type: vtrxn_pay_type,
+                    // comtrxn_pay_type: vtrxn_pay_type,
                 };
                 trxnId = yield this.conn.insertComTrxn(comTrxnBody);
             }
@@ -230,11 +235,12 @@ class Trxns extends abstract_services_1.default {
                     p_type: vtrxn_type,
                     p_comb_id: combined_id,
                     p_particular_id: vtrxn_particular_id,
-                    p_particular_type: vtrxn_particular_type,
+                    p_particular_type: vtrxn_particular_type +
+                        (vtrxn_pay_type ? ` (${vtrxn_pay_type})` : ''),
                     p_amount: vtrxn_amount,
                     p_note: vtrxn_note,
                     p_create_at: vtrxn_created_at,
-                    p_pay_type: vtrxn_pay_type,
+                    // p_pay_type: vtrxn_pay_type as string,
                 };
                 yield this.conn.updateComTrxn(ComTrxnBody);
             }

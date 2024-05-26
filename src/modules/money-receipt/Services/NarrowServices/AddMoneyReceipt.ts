@@ -18,6 +18,7 @@ import {
 import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 import { smsInvoiceData } from '../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../smsSystem/utils/CommonSmsSend.services';
+import { getPaymentType } from '../../../../common/utils/libraries/lib';
 class AddMoneyReceipt extends AbstractServices {
   constructor() {
     super();
@@ -72,16 +73,7 @@ class AddMoneyReceipt extends AbstractServices {
           }`
         : receipt_note || '';
 
-      let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-      if (receipt_payment_type === 1) {
-        accPayType = 'CASH';
-      } else if (receipt_payment_type === 2) {
-        accPayType = 'BANK';
-      } else if (receipt_payment_type === 3) {
-        accPayType = 'MOBILE BANKING';
-      } else {
-        accPayType = 'CASH';
-      }
+      const accPayType = getPaymentType(+receipt_payment_type);
 
       if (receipt_payment_type !== 4) {
         const AccTrxnBody: IAcTrxn = {

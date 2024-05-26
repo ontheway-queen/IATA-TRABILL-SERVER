@@ -142,6 +142,60 @@ class ReportModel extends abstract_models_1.default {
                 .andWhere('client_org_agency', this.org_agency);
             return clients;
         });
+        // CLIENT DUE ADVANCE
+        this.getClientWiseDueSummary = (client_id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.query()
+                .select('invoice_org_agency', 'invoice_client_id', 'invoice_combined_id', 'client_name', this.db.raw('SUM(purchase) as purchase'), this.db.raw('SUM(sales) as sales'), this.db.raw('SUM(pay) as pay'), this.db.raw('SUM(due) as due'), this.db.raw('SUM(profit) as profit'), this.db.raw('GROUP_CONCAT(airlines) AS airlines_code'))
+                .from(this.db
+                .select('invoice_org_agency', 'invoice_client_id', 'invoice_combined_id', 'client_name', this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'), this.db.raw("CONCAT(airline_code, '(', COUNT(*), ')') AS airlines"))
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency)
+                .groupBy('invoice_client_id', 'invoice_combined_id', 'airline_id')
+                .as('inv_due'))
+                .groupBy('inv_due.invoice_client_id', 'inv_due.invoice_combined_id');
+            return data;
+        });
+        this.DueDetails = (client_id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.query()
+                .select([
+                'invoice_id',
+                'invoice_org_agency',
+                'invoice_client_id',
+                'invoice_combined_id',
+                'client_name',
+                'invoice_no',
+                'invoice_category_id',
+                'invoice_sales_date',
+                'airline_id',
+                'airline_name',
+                'invoice_total_vendor_price as purchase',
+                'invoice_net_total as sales',
+                'cl_pay as pay',
+                'due_amount as due',
+                'invoice_total_profit as profit',
+                'airline_code as airlines_code',
+            ])
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency);
+            return data;
+        });
+        this.getAirlineWiseClientDueSummary = (client_id) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.query()
+                .select([
+                'invoice_org_agency',
+                'airline_id',
+                this.db.raw('SUM(invoice_total_vendor_price) as purchase'),
+                this.db.raw('SUM(invoice_net_total) as sales'),
+                this.db.raw('SUM(cl_pay) as pay'),
+                this.db.raw('SUM(due_amount) as due'),
+                this.db.raw('SUM(invoice_total_profit) as profit'),
+                'airline_code as airlines_code',
+                'airline_name',
+            ])
+                .groupBy('airline_id')
+                .where('invoice_org_agency', this.org_agency);
+            return data;
+        });
         // INVOICE AND MONEY RECEIPT DISCOUNT
         this.invoiceAndMoneyReceiptDiscount = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()

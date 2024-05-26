@@ -574,8 +574,9 @@ class SalesPurchasesReport extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const page_number = (page - 1) * size;
             const data = yield this.query()
-                .select(this.db.raw('sum(view.sales_price) as total_sales'), this.db.raw('sum(view.invoice_discount) as total_discount'), this.db.raw('sum(view.invoice_total_pay) as total_client_payment'), this.db.raw('sum(view.client_due) as total_client_due'), 'client_name', 'client_mobile', 'comb_client')
+                .select(this.db.raw('sum(view.sales_price) as total_sales'), this.db.raw('sum(view.invoice_discount) as total_discount'), this.db.raw('sum(view.invoice_total_pay) as total_client_payment'), this.db.raw('sum(view.client_due) as total_client_due'), this.db.raw('count(*) as total'), 'employee_full_name')
                 .from('view_invoice_total_billing as view')
+                .leftJoin('trabill_employees', { employee_id: 'invoice_sales_man_id' })
                 .modify((event) => {
                 if (employee_id && employee_id !== 'all') {
                     event.where('view.invoice_sales_man_id', employee_id);
@@ -583,19 +584,13 @@ class SalesPurchasesReport extends abstract_models_1.default {
             })
                 .andWhere('view.org_agency_id', this.org_agency)
                 .andWhere('client_due', '>', 0)
+                .groupBy('invoice_sales_man_id'
+            // 'invoice_client_id',
+            // 'invoice_combined_id'
+            )
                 .limit(size)
                 .offset(page_number);
-            const [{ count }] = yield this.query()
-                .select(this.db.raw(`count(*) as count`))
-                .from('view_invoice_total_billing as view')
-                .modify((event) => {
-                if (employee_id && employee_id !== 'all') {
-                    event.where('view.invoice_sales_man_id', employee_id);
-                }
-            })
-                .andWhere('view.org_agency_id', this.org_agency)
-                .andWhere('client_due', '>', 0);
-            return { count, data };
+            return { count: 0, data };
         });
     }
 }

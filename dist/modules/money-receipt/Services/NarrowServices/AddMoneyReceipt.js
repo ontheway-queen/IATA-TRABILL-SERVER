@@ -16,6 +16,7 @@ const abstract_services_1 = __importDefault(require("../../../../abstracts/abstr
 const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../common/helpers/common.helper");
 const CommonSmsSend_services_1 = __importDefault(require("../../../smsSystem/utils/CommonSmsSend.services"));
+const lib_1 = require("../../../../common/utils/libraries/lib");
 class AddMoneyReceipt extends abstract_services_1.default {
     constructor() {
         super();
@@ -36,19 +37,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                 const note = receipt_total_discount
                     ? `Paid ${receipt_total_amount} discount ${receipt_total_discount}, ${receipt_note || ''}`
                     : receipt_note || '';
-                let accPayType;
-                if (receipt_payment_type === 1) {
-                    accPayType = 'CASH';
-                }
-                else if (receipt_payment_type === 2) {
-                    accPayType = 'BANK';
-                }
-                else if (receipt_payment_type === 3) {
-                    accPayType = 'MOBILE BANKING';
-                }
-                else {
-                    accPayType = 'CASH';
-                }
+                const accPayType = (0, lib_1.getPaymentType)(+receipt_payment_type);
                 if (receipt_payment_type !== 4) {
                     const AccTrxnBody = {
                         acctrxn_ac_id: account_id,

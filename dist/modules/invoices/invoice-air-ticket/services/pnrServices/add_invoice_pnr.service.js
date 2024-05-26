@@ -194,13 +194,13 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                     });
                     yield common_conn.insertAirticketRoute(airticketRoutes);
                     // flight details
-                    if (index === 0) {
-                        const flightsDetails = (_a = ticket === null || ticket === void 0 ? void 0 : ticket.flight_details) === null || _a === void 0 ? void 0 : _a.map((item) => {
-                            return Object.assign(Object.assign({}, item), { fltdetails_airticket_id: airticket_id, fltdetails_invoice_id: invoice_id });
-                        });
-                        yield conn.insertAirTicketFlightDetails(flightsDetails);
-                    }
+                    // if (index === 0) {
+                    const flightsDetails = (_a = ticket === null || ticket === void 0 ? void 0 : ticket.flight_details) === null || _a === void 0 ? void 0 : _a.map((item) => {
+                        return Object.assign(Object.assign({}, item), { fltdetails_airticket_id: airticket_id, fltdetails_invoice_id: invoice_id });
+                    });
+                    yield conn.insertAirTicketFlightDetails(flightsDetails);
                 }
+                // }
                 // invoice history
                 const content = `INV AIR TICKET ADDED, VOUCHER ${invoice_no}, PNR ${invoice_pnr}, BDT ${invoice_net_total}/-`;
                 // invoice history

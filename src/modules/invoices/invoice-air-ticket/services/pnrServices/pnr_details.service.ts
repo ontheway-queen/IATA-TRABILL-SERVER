@@ -8,6 +8,7 @@ import {
   extractPaxStr,
   formatFlightDetailsRoute,
 } from '../../../../../common/utils/libraries/pnr_lib';
+import { IPnrResponse } from '../../types/pnr_invoice.interfaces';
 
 class PnrDetailsService extends AbstractServices {
   constructor() {
@@ -42,7 +43,7 @@ class PnrDetailsService extends AbstractServices {
 
       try {
         const response = await axios.get(api_url, { headers });
-        const pnrResponse = response.data.data;
+        const pnrResponse = response.data.data as IPnrResponse;
 
         if (
           response.data.success &&
@@ -58,11 +59,9 @@ class PnrDetailsService extends AbstractServices {
           );
 
           const ticket_details: any[] = [];
-
+          // TICKET DETAILS
           for (const ticket of pnrResponse.flightTickets) {
-            const flightsId = ticket.flightCoupons?.map(
-              (item: any) => item.itemId
-            );
+            const flightsId = ticket.flightCoupons?.map((item) => item.itemId);
 
             if (!flightsId) {
               throw new CustomError(
@@ -74,13 +73,13 @@ class PnrDetailsService extends AbstractServices {
 
             // TRAVELERS
             const travelers = pnrResponse.travelers.filter(
-              (item: any) =>
+              (item) =>
                 Number(item.nameAssociationId) === Number(ticket.travelerIndex)
             );
 
-            const pax_passports = travelers?.map((traveler: any) => {
+            const pax_passports = travelers?.map((traveler) => {
               const mobile_no = pnrResponse?.specialServices.find(
-                (item: any) =>
+                (item) =>
                   item.code === 'CTCM' &&
                   item.travelerIndices?.includes(
                     numRound(traveler.nameAssociationId)
@@ -88,7 +87,7 @@ class PnrDetailsService extends AbstractServices {
               );
 
               const email = pnrResponse?.specialServices.find(
-                (item: any) =>
+                (item) =>
                   item.code === 'CTCE' &&
                   item.travelerIndices?.includes(
                     numRound(traveler.nameAssociationId)
@@ -115,7 +114,7 @@ class PnrDetailsService extends AbstractServices {
             });
 
             // FLIGHT DETAILS
-            const flights = pnrResponse.flights.filter((item: any) =>
+            const flights = pnrResponse.flights.filter((item) =>
               flightsId?.includes(item.itemId)
             );
 
@@ -123,12 +122,12 @@ class PnrDetailsService extends AbstractServices {
               await formatFlightDetailsRoute(flights, conn);
 
             // TAX BREAKDOWN
-            const taxBreakdown = pnrResponse.fares.find((item: any) =>
+            const taxBreakdown = pnrResponse.fares.find((item) =>
               item.travelerIndices?.includes(ticket.travelerIndex)
             );
 
             const breakdown = taxBreakdown?.taxBreakdown.reduce(
-              (acc: any, current: any) => {
+              (acc: any, current) => {
                 acc[current.taxCode] = Number(current.taxAmount.amount);
                 return acc;
               },
@@ -142,6 +141,34 @@ class PnrDetailsService extends AbstractServices {
                 totalCountryTax += breakdown[taxType];
               }
             }
+
+            // TAXES COMMISSION
+            let taxesCommission;
+            if (['TK', 'CZ'].includes(flights[0].airlineCode)) {
+              taxesCommission = taxBreakdown?.taxBreakdown?.filter(
+                (item) => item.taxCode === 'YQ'
+              );
+            } else if (['MH', 'AI'].includes(flights[0].airlineCode)) {
+              taxesCommission = taxBreakdown?.taxBreakdown?.filter(
+                (item) => item.taxCode === 'YR'
+              );
+
+              console.log({
+                taxesCommission,
+                airline: flights[0].airlineCode,
+                BR: taxBreakdown,
+              });
+            }
+
+            const taxes_commission = taxesCommission?.map((item) => {
+              return {
+                airline_taxes: item.taxAmount,
+                airline_commission: numRound(item.taxAmount.amount) * 0.07,
+                airline_tax_type: item.taxCode,
+              };
+            });
+
+            console.log({ taxes_commission });
 
             const baseFareCommission = numRound(
               ticket.commission.commissionAmount
@@ -198,6 +225,7 @@ class PnrDetailsService extends AbstractServices {
 
               flight_details,
               pax_passports,
+              taxes_commission,
 
               route_sectors,
             };

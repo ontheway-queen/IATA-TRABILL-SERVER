@@ -202,7 +202,14 @@ class InvoiceAirticketModel extends AbstractModels {
       .leftJoin('trabill_airports as airport_to', {
         'airport_to.airline_id':
           'trabill_invoice_airticket_items_flight_details.fltdetails_to_airport_id',
-      });
+      })
+      .groupBy(
+        'fltdetails_from_airport_id',
+        'fltdetails_to_airport_id',
+        'fltdetails_airline_id',
+        'fltdetails_flight_no',
+        'fltdetails_fly_date'
+      );
   };
 
   public getViewAirticketItems = async (invoiceId: idType) => {

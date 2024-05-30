@@ -445,7 +445,8 @@ class CommonInvoiceModel extends AbstractModels {
       .andWhereNot('p_is_deleted', 1)
       .leftJoin('trabill_passport_details', {
         p_passport_id: 'passport_id',
-      });
+      })
+      .groupBy('passport_id');
   };
 
   public async getViewInvoiceInfo(invoiceId: idType) {

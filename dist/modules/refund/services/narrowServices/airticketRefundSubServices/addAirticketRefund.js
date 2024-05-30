@@ -79,7 +79,7 @@ class AddAirTicketRefund extends abstract_services_1.default {
                 let crefund_actransaction_id = null;
                 const cl_return_amount = (0, lib_1.numRound)(crefund_total_amount) - (0, lib_1.numRound)(crefund_charge_amount);
                 if (crefund_payment_type === 'ADJUST') {
-                    const ctrxn_note = `REFUND TOTAL ${crefund_total_amount}/- \nREFUND CHARGE ${crefund_charge_amount}\nRETURN AMOUNT ${cl_return_amount}/-`;
+                    const ctrxn_note = `REFUND TOTAL ${crefund_total_amount}/- \nREFUND CHARGE ${crefund_charge_amount}/-\nRETURN AMOUNT ${cl_return_amount}/-`;
                     const clTrxnBody = {
                         ctrxn_type: 'CREDIT',
                         ctrxn_amount: crefund_total_amount,
@@ -109,7 +109,9 @@ class AddAirTicketRefund extends abstract_services_1.default {
                         ctrxn_pax: passportName.join(', '),
                         ctrxn_route: airticketRoute.join(', '),
                     };
-                    crefund_charge_ctrxnid = yield trxns.clTrxnInsert(clRefundChargeTrxnBody);
+                    if (crefund_charge_amount > 0) {
+                        crefund_charge_ctrxnid = yield trxns.clTrxnInsert(clRefundChargeTrxnBody);
+                    }
                     // INVOICE CLIENT PAYMENT
                     const cl_due = yield mr_conn.getInvoicesIdAndAmount(client_id, combined_id);
                     let paidAmountNow = 0;
@@ -213,7 +215,7 @@ class AddAirTicketRefund extends abstract_services_1.default {
                 // airticket vendor refund
                 const airticketVendorRefunds = [];
                 for (const item of vendor_refund_info) {
-                    const { vrefund_account_id, airticket_id, airticket_combvendor, vrefund_total_amount, vrefund_charge_amount, vrefund_payment_type, vrefund_return_amount, invoice_category_id, payment_method, trxn_charge_amount, vrefund_note, } = item;
+                    const { vrefund_account_id, airticket_id, airticket_combvendor, vrefund_total_amount, vrefund_charge_amount, vrefund_payment_type, vrefund_return_amount, invoice_category_id, payment_method, } = item;
                     const { vendor_id, combined_id } = (0, common_helper_1.separateCombClientToId)(airticket_combvendor);
                     const { airticket_pnr, airticket_routes, passport_name, airticket_ticket_no, } = yield conn.getAitRefundInfo(item.airticket_id, item.invoice_category_id);
                     let vrefund_vtrxn_id = null;

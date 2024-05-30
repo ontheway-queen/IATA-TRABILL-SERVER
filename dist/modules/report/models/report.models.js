@@ -143,20 +143,57 @@ class ReportModel extends abstract_models_1.default {
             return clients;
         });
         // CLIENT DUE ADVANCE
-        this.getClientWiseDueSummary = (client_id) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.query()
+        this.getClientWiseDueSummary = (search, page = 1, size = 50) => __awaiter(this, void 0, void 0, function* () {
+            const offset = (+page - 1) * +size;
+            const results = yield this.query()
                 .select('invoice_org_agency', 'invoice_client_id', 'invoice_combined_id', 'client_name', this.db.raw('SUM(purchase) as purchase'), this.db.raw('SUM(sales) as sales'), this.db.raw('SUM(pay) as pay'), this.db.raw('SUM(due) as due'), this.db.raw('SUM(profit) as profit'), this.db.raw('GROUP_CONCAT(airlines) AS airlines_code'))
                 .from(this.db
                 .select('invoice_org_agency', 'invoice_client_id', 'invoice_combined_id', 'client_name', this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'), this.db.raw("CONCAT(airline_code, '(', COUNT(*), ')') AS airlines"))
                 .from('trabill.v_invoices_due')
                 .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('client_name', `%${search}%`).orWhereILike('airline_code', `%${search}%`);
+                    });
+                }
+            })
                 .groupBy('invoice_client_id', 'invoice_combined_id', 'airline_id')
                 .as('inv_due'))
-                .groupBy('inv_due.invoice_client_id', 'inv_due.invoice_combined_id');
-            return data;
+                .groupBy('inv_due.invoice_client_id', 'inv_due.invoice_combined_id')
+                .offset(offset)
+                .limit(size);
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from(this.db
+                .select('invoice_client_id', 'invoice_combined_id')
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('client_name', `%${search}%`).orWhereILike('airline_code', `%${search}%`);
+                    });
+                }
+            })
+                .groupBy('invoice_client_id', 'invoice_combined_id')
+                .as('inv_due')));
+            const total = yield this.query()
+                .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'))
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('client_name', `%${search}%`).orWhereILike('airline_code', `%${search}%`);
+                    });
+                }
+            });
+            return { count, data: { results, total } };
         });
-        this.DueDetails = (client_id) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.query()
+        this.DueDetails = (search, client_id, combine_id, airline_id, from_date, to_date, page = 1, size = 50) => __awaiter(this, void 0, void 0, function* () {
+            const offset = (+page - 1) * +size;
+            const results = yield this.query()
                 .select([
                 'invoice_id',
                 'invoice_org_agency',
@@ -176,11 +213,97 @@ class ReportModel extends abstract_models_1.default {
                 'airline_code as airlines_code',
             ])
                 .from('trabill.v_invoices_due')
-                .where('invoice_org_agency', this.org_agency);
-            return data;
+                .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('airline_name', `%${search}%`)
+                            .orWhereILike('airline_code', `%${search}%`)
+                            .orWhereILike('client_name', `%${search}%`);
+                    });
+                }
+                if (client_id || combine_id) {
+                    queryBuilder.where(function () {
+                        this.where('invoice_client_id', client_id).andWhere('invoice_combined_id', combine_id);
+                    });
+                }
+                if (airline_id || airline_id === null) {
+                    queryBuilder.where(function () {
+                        this.where('airline_id', airline_id);
+                    });
+                }
+                if (from_date && to_date) {
+                    queryBuilder.whereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+                        from_date,
+                        to_date,
+                    ]);
+                }
+            })
+                .offset(offset)
+                .limit(size);
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('airline_name', `%${search}%`)
+                            .orWhereILike('airline_code', `%${search}%`)
+                            .orWhereILike('client_name', `%${search}%`);
+                    });
+                }
+                if (client_id || combine_id) {
+                    queryBuilder.where(function () {
+                        this.where('invoice_client_id', client_id).andWhere('invoice_combined_id', combine_id);
+                    });
+                }
+                if (airline_id || airline_id === null) {
+                    queryBuilder.where(function () {
+                        this.where('airline_id', airline_id);
+                    });
+                }
+                if (from_date && to_date) {
+                    queryBuilder.whereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+                        from_date,
+                        to_date,
+                    ]);
+                }
+            }));
+            const total = yield this.query()
+                .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'))
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('airline_name', `%${search}%`)
+                            .orWhereILike('airline_code', `%${search}%`)
+                            .orWhereILike('client_name', `%${search}%`);
+                    });
+                }
+                if (client_id || combine_id) {
+                    queryBuilder.where(function () {
+                        this.where('invoice_client_id', client_id).andWhere('invoice_combined_id', combine_id);
+                    });
+                }
+                if (airline_id || airline_id === null) {
+                    queryBuilder.where(function () {
+                        this.where('airline_id', airline_id);
+                    });
+                }
+                if (from_date && to_date) {
+                    queryBuilder.whereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+                        from_date,
+                        to_date,
+                    ]);
+                }
+            });
+            return { count, data: { results, total } };
         });
-        this.getAirlineWiseClientDueSummary = (client_id) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.query()
+        this.getAirlineWiseClientDueSummary = (search, page = 1, size = 50) => __awaiter(this, void 0, void 0, function* () {
+            const offset = (+page - 1) * +size;
+            const results = yield this.query()
                 .select([
                 'invoice_org_agency',
                 'airline_id',
@@ -192,9 +315,68 @@ class ReportModel extends abstract_models_1.default {
                 'airline_code as airlines_code',
                 'airline_name',
             ])
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('airline_name', `%${search}%`).orWhereILike('airline_code', `%${search}%`);
+                    });
+                }
+            })
                 .groupBy('airline_id')
-                .where('invoice_org_agency', this.org_agency);
-            return data;
+                .offset(offset)
+                .limit(size);
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('airline_name', `%${search}%`).orWhereILike('airline_code', `%${search}%`);
+                    });
+                }
+            })
+                .groupBy('airline_id'));
+            const total = (yield this.query()
+                .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'))
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('airline_name', `%${search}%`).orWhereILike('airline_code', `%${search}%`);
+                    });
+                }
+            }));
+            return { count, data: { results, total } };
+        });
+        this.clientAdvance = (search, page = 1, size = 20) => __awaiter(this, void 0, void 0, function* () {
+            const offset = (+page - 1) * +size;
+            const data = yield this.query()
+                .select('client_id', 'client_category_id', 'client_entry_id', 'client_type', 'client_name', 'client_lbalance', 'client_created_date')
+                .from('trabill.trabill_clients')
+                .where('client_org_agency', this.org_agency)
+                .modify((builder) => {
+                if (search) {
+                    builder
+                        .whereILike('client_name', `%${search}%`)
+                        .orWhereILike('client_entry_id', `%${search}%`)
+                        .orWhereILike('client_mobile', `%${search}%`);
+                }
+            })
+                .andWhereNot('client_is_deleted', 1)
+                .andWhere('client_lbalance', '>', 0)
+                .offset(offset)
+                .limit(size);
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from('trabill.trabill_clients')
+                .where('client_org_agency', this.org_agency)
+                .andWhereNot('client_is_deleted', 1)
+                .andWhere('client_lbalance', '>', 0));
+            return { count, data };
         });
         // INVOICE AND MONEY RECEIPT DISCOUNT
         this.invoiceAndMoneyReceiptDiscount = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {

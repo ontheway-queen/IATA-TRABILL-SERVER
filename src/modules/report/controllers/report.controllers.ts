@@ -88,6 +88,32 @@ class ReportController extends AbstractController {
     }
   );
 
+  public getDueAdvanceDetailsSummary = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.getDueAdvanceDetailsSummary(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Get client due or advance...');
+      }
+    }
+  );
+
+  public clientAdvance = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.clientAdvance(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Get client due or advance...');
+      }
+    }
+  );
+
   public vendorDueAdvance = this.assyncWrapper.wrap(
     this.validator.readReport,
     async (req: Request, res: Response) => {

@@ -172,7 +172,8 @@ class ClientModel extends AbstractModels {
         this.db.raw(
           'COALESCE(client_mobile, company_contact_no) as client_mobile'
         ),
-        'client_address'
+        'client_address',
+        'client_lbalance'
       )
       .from('trabill_clients')
       .leftJoin('trabill_client_company_information', {

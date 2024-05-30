@@ -20,6 +20,7 @@ import {
   IInvoiceInfoDb,
   InvoiceExtraAmount,
 } from '../../../../../common/types/Invoice.common.interface';
+import { uniqueArrJoin } from '../../../../../common/utils/libraries/lib';
 import { smsInvoiceData } from '../../../../smsSystem/types/sms.types';
 import CommonSmsSendServices from '../../../../smsSystem/utils/CommonSmsSend.services';
 import { InvoiceUtils } from '../../../utils/invoice.utils';
@@ -92,9 +93,9 @@ class AddInvoiceAirticket extends AbstractServices {
         invoice_combined_id as number
       );
 
-      const ctrxn_pnr =
-        ticketInfo.length &&
-        ticketInfo.map((item) => item.ticket_details.airticket_pnr).join(', ');
+      const ctrxn_pnr = ticketInfo?.map(
+        (item) => item.ticket_details.airticket_pnr
+      );
 
       const ticket_no =
         ticketInfo[0] &&
@@ -102,21 +103,29 @@ class AddInvoiceAirticket extends AbstractServices {
           .map((item) => item.ticket_details.airticket_ticket_no)
           .join(', ');
 
-      const routes =
-        ticketInfo &&
-        ticketInfo.map(
-          (item) => item?.ticket_details?.airticket_route_or_sector
-        );
-      const flattenedRoutes = ([] as number[]).concat(...routes);
+      const routes = ticketInfo?.map(
+        (item) => item?.ticket_details?.airticket_route_or_sector
+      );
 
-      let ctrxn_route;
-      if (flattenedRoutes.length > 0) {
-        ctrxn_route = await common_conn.getRoutesInfo(flattenedRoutes);
+      const uniqueRoutes = [
+        ...new Set(
+          routes
+            .filter((route) => route !== undefined)
+            .map((route) => JSON.stringify(route))
+        ),
+      ].map((route) => JSON.parse(route));
+
+      let ctrxn_route = '';
+
+      for (const iterator of uniqueRoutes) {
+        const route = await common_conn.getRoutesInfo(iterator);
+
+        ctrxn_route += route + '\n';
       }
 
       const clientTransId = await utils.clientTrans(trxns, {
-        ctrxn_pnr: ctrxn_pnr as string,
-        ctrxn_route: ctrxn_route as string,
+        ctrxn_pnr: uniqueArrJoin(ctrxn_pnr),
+        ctrxn_route,
         extra_particular: 'Air Ticket',
         invoice_no,
         ticket_no,

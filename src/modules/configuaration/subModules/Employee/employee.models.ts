@@ -1,5 +1,6 @@
 import AbstractModels from '../../../../abstracts/abstract.models';
 import { idType } from '../../../../common/types/common.types';
+import CustomError from '../../../../common/utils/errors/customError';
 import { EmployeeReqBody } from '../../types/configuration.interfaces';
 
 class EmployeeModel extends AbstractModels {
@@ -9,6 +10,25 @@ class EmployeeModel extends AbstractModels {
       .into('trabill_employees');
 
     return employee[0];
+  }
+  public async getSineAndId(sine: string, id: string) {
+    const [{ count }] = await this.query()
+      .count('* as count')
+      .from('trabill_employees')
+      .where('employee_org_agency', this.org_agency)
+      .modify((builder) => {
+        builder
+          .where('employee_creation_sign', sine)
+          .orWhere('employee_card_id', id);
+      });
+
+    if (count > 0) {
+      throw new CustomError(
+        'Employee ID card number or creation sine already exists!',
+        400,
+        'Invalid input'
+      );
+    }
   }
 
   public async updateEmployee(data: EmployeeReqBody, employee_id: idType) {

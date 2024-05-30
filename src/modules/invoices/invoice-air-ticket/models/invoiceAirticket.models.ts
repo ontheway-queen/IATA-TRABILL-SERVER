@@ -723,6 +723,9 @@ class InvoiceAirticketModel extends AbstractModels {
           'COALESCE(cl.client_name, ccl.combine_name) AS client_name'
         ),
         this.db.raw(
+          `COALESCE(concat('client-', invclientpayment_client_id), concat('combined-', invclientpayment_combined_id)) AS comb_client`
+        ),
+        this.db.raw(
           'COALESCE(mr.receipt_money_receipt_no, mr.receipt_vouchar_no, invclientpayment_purpose) AS receipt_money_receipt_no'
         ),
         'mr.receipt_payment_to',

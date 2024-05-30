@@ -70,6 +70,30 @@ class ReportServices extends abstract_services_1.default {
             const data = yield conn.clientDueAdvance(client_id, String(payment_date), Number(page) || 1, Number(size) || 20);
             return Object.assign({ success: true, client_id }, data);
         });
+        // DUE ADVANCE DETAILS & SUMMARY
+        this.getDueAdvanceDetailsSummary = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { airline_id, comb_client, data_type, search, from_date, to_date } = req.body;
+            const { page, size } = req.query;
+            const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
+            const conn = this.models.reportModel(req);
+            let data = { count: 0, data: { results: [], total: {} } };
+            if (data_type === 'CLIENT') {
+                data = yield conn.getClientWiseDueSummary(search, +page, +size);
+            }
+            else if (data_type === 'AIRLINE') {
+                data = yield conn.getAirlineWiseClientDueSummary(search, +page, +size);
+            }
+            else if (data_type === 'DETAILS') {
+                data = yield conn.DueDetails(search, client_id, combined_id, airline_id, from_date, to_date, +page, +size);
+            }
+            return Object.assign({ success: true }, data);
+        });
+        this.clientAdvance = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { search, page, size } = req.query;
+            const conn = this.models.reportModel(req);
+            const data = yield conn.clientAdvance(search, +page, +size);
+            return Object.assign({ success: true }, data);
+        });
         this.getDueAdvanceCombined = (req) => __awaiter(this, void 0, void 0, function* () {
             const { combined_id } = req.params;
             const { payment_date, page, size } = req.query;

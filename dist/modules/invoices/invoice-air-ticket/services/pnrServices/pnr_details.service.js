@@ -22,7 +22,7 @@ class PnrDetailsService extends abstract_services_1.default {
         super();
         this.pnrDetails = (req, pnrNo) => __awaiter(this, void 0, void 0, function* () {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d;
+                var _a, _b, _c, _d, _e, _f;
                 const pnr = req.params.pnr || pnrNo;
                 if (pnr && pnr.trim().length !== 6) {
                     throw new customError_1.default('Invalid pnr no.', 404, 'RESOURCE_NOT_FOUND');
@@ -42,6 +42,10 @@ class PnrDetailsService extends abstract_services_1.default {
                 try {
                     const response = yield axios_1.default.get(api_url, { headers });
                     const pnrResponse = response.data.data;
+                    // ERROR THROW FROM SABRE RESPONSE
+                    if ((_a = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.errors) === null || _a === void 0 ? void 0 : _a.length) {
+                        throw new customError_1.default(pnrResponse.errors[0].description, 400, pnrResponse.errors[0].category);
+                    }
                     if (response.data.success &&
                         (pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.flights) &&
                         (pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.fares)) {
@@ -50,8 +54,8 @@ class PnrDetailsService extends abstract_services_1.default {
                         const invoice_sales_man_id = yield conn.getEmployeeByCreationSign(creationDetails === null || creationDetails === void 0 ? void 0 : creationDetails.creationUserSine);
                         const ticket_details = [];
                         // TICKET DETAILS
-                        for (const ticket of pnrResponse.flightTickets) {
-                            const flightsId = (_a = ticket.flightCoupons) === null || _a === void 0 ? void 0 : _a.map((item) => item.itemId);
+                        for (const [index, ticket] of pnrResponse.flightTickets.entries()) {
+                            const flightsId = (_b = ticket.flightCoupons) === null || _b === void 0 ? void 0 : _b.map((item) => item.itemId);
                             if (!flightsId) {
                                 throw new customError_1.default('The ticket has already been refunded or reissued.', 400, 'Invalid PNR');
                             }
@@ -90,39 +94,29 @@ class PnrDetailsService extends abstract_services_1.default {
                             const flights = pnrResponse.flights.filter((item) => flightsId === null || flightsId === void 0 ? void 0 : flightsId.includes(item.itemId));
                             const { flight_details, airticket_route_or_sector, route_sectors } = yield (0, pnr_lib_1.formatFlightDetailsRoute)(flights, conn);
                             // TAX BREAKDOWN
-                            const taxBreakdown = pnrResponse.fares.find((item) => { var _a; return (_a = item.travelerIndices) === null || _a === void 0 ? void 0 : _a.includes(ticket.travelerIndex); });
+                            // const taxBreakdown = pnrResponse.fares.find((item) =>
+                            //   item.travelerIndices?.includes(ticket.travelerIndex)
+                            // );
+                            const taxBreakdown = pnrResponse.fares[index];
                             const breakdown = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown.reduce((acc, current) => {
                                 acc[current.taxCode] = Number(current.taxAmount.amount);
                                 return acc;
                             }, {});
                             let totalCountryTax = 0;
                             for (const taxType in breakdown) {
-                                if ((_b = ['BD', 'UT', 'E5']) === null || _b === void 0 ? void 0 : _b.includes(taxType)) {
+                                if ((_c = ['BD', 'UT', 'E5']) === null || _c === void 0 ? void 0 : _c.includes(taxType)) {
                                     totalCountryTax += breakdown[taxType];
                                 }
                             }
                             // TAXES COMMISSION
                             let taxesCommission;
                             if (['TK', 'CZ'].includes(flights[0].airlineCode)) {
-                                taxesCommission = (_c = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _c === void 0 ? void 0 : _c.filter((item) => item.taxCode === 'YQ');
+                                taxesCommission = (_d = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _d === void 0 ? void 0 : _d.filter((item) => item.taxCode === 'YQ');
                             }
                             else if (['MH', 'AI'].includes(flights[0].airlineCode)) {
-                                taxesCommission = (_d = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _d === void 0 ? void 0 : _d.filter((item) => item.taxCode === 'YR');
-                                console.log({
-                                    taxesCommission,
-                                    airline: flights[0].airlineCode,
-                                    BR: taxBreakdown,
-                                });
+                                taxesCommission = (_e = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _e === void 0 ? void 0 : _e.filter((item) => item.taxCode === 'YR');
                             }
-                            const taxes_commission = taxesCommission === null || taxesCommission === void 0 ? void 0 : taxesCommission.map((item) => {
-                                return {
-                                    airline_taxes: item.taxAmount,
-                                    airline_commission: (0, lib_1.numRound)(item.taxAmount.amount) * 0.07,
-                                    airline_tax_type: item.taxCode,
-                                };
-                            });
-                            console.log({ taxes_commission });
-                            const baseFareCommission = (0, lib_1.numRound)(ticket.commission.commissionAmount);
+                            const baseFareCommission = (0, lib_1.numRound)((_f = ticket === null || ticket === void 0 ? void 0 : ticket.commission) === null || _f === void 0 ? void 0 : _f.commissionAmount);
                             const countryTaxAit = Number(1 || 0) * 0.003;
                             const grossAit = Number(ticket.payment.total || 0) * 0.003;
                             const airticket_ait = Math.round(grossAit - countryTaxAit);
@@ -136,6 +130,14 @@ class PnrDetailsService extends abstract_services_1.default {
                             const airticket_return_date = airticket_segment > 1
                                 ? pnrResponse.allSegments[airticket_segment - 1].endDate
                                 : undefined;
+                            const taxes_commission = taxesCommission === null || taxesCommission === void 0 ? void 0 : taxesCommission.map((item) => {
+                                return {
+                                    airline_taxes: item.taxAmount.amount,
+                                    airline_commission: (0, lib_1.numRound)(item.taxAmount.amount) *
+                                        (airticket_commission_percent / 100),
+                                    airline_tax_type: item.taxCode,
+                                };
+                            });
                             const ticketData = Object.assign(Object.assign({}, breakdown), { airticket_ticket_no: ticket.number, airticket_gross_fare: ticket.payment.total, airticket_base_fare: ticket.payment.subtotal, airticket_comvendor: iata_vendor, airticket_commission_percent, airticket_commission_percent_total: baseFareCommission, airticket_ait,
                                 airticket_net_commssion, airticket_airline_id: owningAirline, airticket_route_or_sector, airticket_pnr: pnrResponse.bookingId, airticket_gds_id: 'Sabre', airticket_tax: ticket.payment.taxes, airticket_segment, airticket_issue_date: ticket.date, airticket_journey_date: pnrResponse.startDate, airticket_return_date, airticket_classes: flights[0].cabinTypeName, airticket_client_price: ticket.payment.total, airticket_purchase_price, airticket_profit: airticket_net_commssion, flight_details,
                                 pax_passports,

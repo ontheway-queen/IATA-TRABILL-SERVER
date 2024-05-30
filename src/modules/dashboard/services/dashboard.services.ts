@@ -131,12 +131,14 @@ class DashboardServices extends AbstractServices {
     const conn = this.models.dashboardModal(req);
     const daily_purchase = await conn.selectDailyPurchase();
     const daily_payment = await conn.selectDailyPayment();
+    const daily_refund = await conn.selectDailyRefund();
 
     return {
       success: true,
       data: {
         daily_purchase,
         daily_payment,
+        daily_refund,
       },
     };
   };
@@ -145,12 +147,14 @@ class DashboardServices extends AbstractServices {
     const conn = this.models.dashboardModal(req);
     const monthly_purchase = await conn.selectMonthlyPurchase();
     const monthly_payment = await conn.selectMonthlyPayment();
+    const monthly_refund = await conn.selectMonthlyRefund();
 
     return {
       success: true,
       data: {
         monthly_purchase,
         monthly_payment,
+        monthly_refund,
       },
     };
   };
@@ -159,12 +163,14 @@ class DashboardServices extends AbstractServices {
     const conn = this.models.dashboardModal(req);
     const yearly_purchase = await conn.selectYearlyPurchase();
     const yearly_payment = await conn.selectYearlyPayment();
+    const yearly_refund = await conn.selectYearlyRefund();
 
     return {
       success: true,
       data: {
         yearly_purchase,
         yearly_payment,
+        yearly_refund,
       },
     };
   };
@@ -336,8 +342,6 @@ class DashboardServices extends AbstractServices {
       // Use pdf-parse to parse the uploaded PDF file
       const pdfData = await PDFParser(req.file.path as any);
 
-      return { success: true, text: pdfData.text };
-
       const data = bspBillingFormatter(pdfData.text) as any;
 
       // from database
@@ -361,17 +365,19 @@ class DashboardServices extends AbstractServices {
         numRound(ticket_re_issue.purchase_amount) -
         numRound(ticket_refund.refund_amount);
 
-      const db_summary = {
+      const trabill_summary = {
         issue: numRound(ticket_issue.purchase_amount),
         reissue: numRound(ticket_re_issue.purchase_amount),
         refund: numRound(ticket_refund.refund_amount),
         combined: AMOUNT,
       };
 
-      data.db_summary = db_summary;
+      data.trabill_summary = trabill_summary;
 
-      if (withinRange(data.SUMMARY.AMOUNT, AMOUNT, 10)) {
-        const diffAmount = numRound(data.SUMMARY.AMOUNT) - numRound(AMOUNT);
+      console.log({ data });
+
+      if (withinRange(data.bsp_summary.AMOUNT, AMOUNT, 10)) {
+        const diffAmount = numRound(data.bsp_summary.AMOUNT) - numRound(AMOUNT);
 
         return {
           success: true,

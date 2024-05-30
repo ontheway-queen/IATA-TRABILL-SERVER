@@ -86,7 +86,8 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .andWhereNot('p_is_deleted', 1)
                 .leftJoin('trabill_passport_details', {
                 p_passport_id: 'passport_id',
-            });
+            })
+                .groupBy('passport_id');
         });
         this.getViewBillingInfo = (inovice_id, billingTable) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()

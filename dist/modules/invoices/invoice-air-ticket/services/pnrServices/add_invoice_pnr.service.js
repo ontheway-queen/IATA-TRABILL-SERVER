@@ -36,11 +36,11 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
             }
             const pnrResponse = pnrData.data;
             if (!pnrResponse.invoice_sales_man_id) {
-                throw new customError_1.default('SALES_MAIN_NOT_FOUND', 404, 'Sales man not found with pnr creation sign:' +
-                    pnrResponse.creation_sign);
+                throw new customError_1.default('Sales man not found with pnr creation sign:' +
+                    pnrResponse.creation_sign, 404, 'SALES_MAIN_NOT_FOUND');
             }
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
-                var _a;
+                var _a, _b;
                 const conn = this.models.invoiceAirticketModel(req, trx);
                 const pass_conn = this.models.passportModel(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
@@ -100,7 +100,7 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                 yield common_conn.insertInvoiceExtraAmount(invoiceExtraAmount);
                 // await common_conn.insertInvoicePreData(invoicePreData);
                 // ticket information
-                for (const [index, ticket] of pnrResponse.ticket_details.entries()) {
+                for (const ticket of pnrResponse.ticket_details) {
                     // vendor transaction
                     const vtrxn_pax = ticket === null || ticket === void 0 ? void 0 : ticket.pax_passports.map((item) => item.passport_name).join(',');
                     const VTrxnBody = {
@@ -145,6 +145,7 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                         airticket_tax: ticket.airticket_tax,
                         airticket_discount_type: 'amount',
                         airticket_journey_date: ticket.airticket_journey_date,
+                        airticket_return_date: ticket.airticket_return_date,
                         airticket_pnr: invoice_pnr,
                         airticket_gds_id: 'Sabre',
                         airticket_issue_date: ticket.airticket_issue_date,
@@ -194,11 +195,17 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                     });
                     yield common_conn.insertAirticketRoute(airticketRoutes);
                     // flight details
-                    // if (index === 0) {
                     const flightsDetails = (_a = ticket === null || ticket === void 0 ? void 0 : ticket.flight_details) === null || _a === void 0 ? void 0 : _a.map((item) => {
                         return Object.assign(Object.assign({}, item), { fltdetails_airticket_id: airticket_id, fltdetails_invoice_id: invoice_id });
                     });
                     yield conn.insertAirTicketFlightDetails(flightsDetails);
+                    // TAXES COMMISSION
+                    if (ticket.taxes_commission && (0, invoice_helpers_1.isNotEmpty)(ticket.taxes_commission[0])) {
+                        const taxesCommission = (_b = ticket.taxes_commission) === null || _b === void 0 ? void 0 : _b.map((item) => {
+                            return Object.assign(Object.assign({}, item), { airline_airticket_id: airticket_id, airline_invoice_id: invoice_id });
+                        });
+                        yield conn.insertAirTicketAirlineCommissions(taxesCommission);
+                    }
                 }
                 // }
                 // invoice history

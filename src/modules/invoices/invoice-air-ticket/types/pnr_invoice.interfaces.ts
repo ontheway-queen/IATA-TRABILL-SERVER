@@ -51,6 +51,7 @@ export interface TicketDetail {
   airticket_tax: number;
   currency: string;
   airticket_segment: number;
+  airticket_return_date: string;
   airticket_journey_date: string;
   airticket_commission_percent_total: number;
   airticket_commission_percent: number;
@@ -121,6 +122,8 @@ export interface IPnrResponse {
   timestamp: string;
   bookingSignature: string;
   request: Request;
+
+  errors: any;
 }
 
 export interface CreationDetails {

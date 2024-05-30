@@ -18,9 +18,9 @@ class ServicesEmployee extends abstract_services_1.default {
     constructor() {
         super();
         this.CreateEmployee = (req) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.models.configModel
-                .employeeModel(req)
-                .createEmployee(req.body);
+            const conn = this.models.configModel.employeeModel(req);
+            yield conn.getSineAndId(req.body.employee_creation_sign, req.body.employee_card_id);
+            const data = yield conn.createEmployee(req.body);
             return { success: true, data: { employee_id: data } };
         });
         this.UpdateEmployee = (req) => __awaiter(this, void 0, void 0, function* () {

@@ -54,3 +54,18 @@ export type IListQuery = {
   page: idType;
   size: idType;
 };
+export type IQuery = {
+  from_date: string;
+  to_date: string;
+  page: idType;
+  size: idType;
+};
+
+export interface IDueAdvanceDetailsBody {
+  comb_client: string;
+  data_type: 'CLIENT' | 'DETAILS' | 'AIRLINE';
+  airline_id: number;
+  search: string;
+  from_date: string;
+  to_date: string;
+}

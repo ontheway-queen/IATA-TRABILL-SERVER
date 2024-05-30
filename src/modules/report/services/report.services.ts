@@ -3,7 +3,11 @@ import AbstractServices from '../../../abstracts/abstract.services';
 import { separateCombClientToId } from '../../../common/helpers/common.helper';
 import { idType } from '../../../common/types/common.types';
 import CustomError from '../../../common/utils/errors/customError';
-import { IListQuery } from '../types/report.interfaces';
+import {
+  IDueAdvanceDetailsBody,
+  IListQuery,
+  IQuery,
+} from '../types/report.interfaces';
 class ReportServices extends AbstractServices {
   constructor() {
     super();
@@ -161,6 +165,59 @@ class ReportServices extends AbstractServices {
       client_id,
       ...data,
     };
+  };
+
+  // DUE ADVANCE DETAILS & SUMMARY
+  getDueAdvanceDetailsSummary = async (req: Request) => {
+    const { airline_id, comb_client, data_type, search, from_date, to_date } =
+      req.body as IDueAdvanceDetailsBody;
+
+    const { page, size } = req.query as IQuery;
+
+    const { client_id, combined_id } = separateCombClientToId(comb_client);
+
+    const conn = this.models.reportModel(req);
+
+    let data: {
+      count: number;
+      data: {
+        results: any[];
+        total: any;
+      };
+    } = { count: 0, data: { results: [], total: {} } };
+
+    if (data_type === 'CLIENT') {
+      data = await conn.getClientWiseDueSummary(search, +page, +size);
+    } else if (data_type === 'AIRLINE') {
+      data = await conn.getAirlineWiseClientDueSummary(search, +page, +size);
+    } else if (data_type === 'DETAILS') {
+      data = await conn.DueDetails(
+        search,
+        client_id,
+        combined_id,
+        airline_id,
+        from_date,
+        to_date,
+        +page,
+        +size
+      );
+    }
+
+    return { success: true, ...data };
+  };
+
+  public clientAdvance = async (req: Request) => {
+    const { search, page, size } = req.query as {
+      search: string;
+      page: string;
+      size: string;
+    };
+
+    const conn = this.models.reportModel(req);
+
+    const data = await conn.clientAdvance(search, +page, +size);
+
+    return { success: true, ...data };
   };
 
   public getDueAdvanceCombined = async (req: Request) => {

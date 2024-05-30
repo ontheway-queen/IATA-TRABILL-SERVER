@@ -267,6 +267,17 @@ class DashboardModels extends AbstractModels {
 
     return result?.value || 0;
   };
+
+  selectDailyRefund = async () => {
+    const [result] = await this.query()
+      .from('v_bsp_ticket_refund')
+      .select(this.db.raw('SUM(vrefund_return_amount) AS value'))
+      .where('vendor_org_agency', this.org_agency)
+      .andWhereRaw('DATE(vrefund_date) = CURDATE()');
+
+    return result?.value || 0;
+  };
+
   selectDailyExpense = async () => {
     const [result] = await this.query()
       .from('trabill_expenses')
@@ -324,6 +335,18 @@ class DashboardModels extends AbstractModels {
 
     return result?.value || 0;
   };
+
+  selectMonthlyRefund = async () => {
+    const [result] = await this.query()
+      .from('v_bsp_ticket_refund')
+      .select(this.db.raw('SUM(vrefund_return_amount) AS value'))
+      .where('vendor_org_agency', this.org_agency)
+      .whereRaw('YEAR(vrefund_date) = YEAR(CURDATE())')
+      .andWhereRaw('MONTH(vrefund_date) = MONTH(CURDATE())');
+
+    return result?.value || 0;
+  };
+
   selectMonthlyExpense = async () => {
     const [result] = await this.query()
       .from('trabill_expenses')
@@ -378,6 +401,17 @@ class DashboardModels extends AbstractModels {
 
     return result?.value || 0;
   };
+
+  selectYearlyRefund = async () => {
+    const [result] = await this.query()
+      .from('v_bsp_ticket_refund')
+      .select(this.db.raw('SUM(vrefund_return_amount) AS value'))
+      .where('vendor_org_agency', this.org_agency)
+      .whereRaw('YEAR(vrefund_date) = YEAR(CURDATE())');
+
+    return result?.value || 0;
+  };
+
   selectYearlyExpense = async () => {
     const [result] = await this.query()
       .from('trabill_expenses')

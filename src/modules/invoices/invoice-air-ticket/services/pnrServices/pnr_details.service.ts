@@ -45,6 +45,15 @@ class PnrDetailsService extends AbstractServices {
         const response = await axios.get(api_url, { headers });
         const pnrResponse = response.data.data as IPnrResponse;
 
+        // ERROR THROW FROM SABRE RESPONSE
+        if (pnrResponse?.errors?.length) {
+          throw new CustomError(
+            pnrResponse.errors[0].description,
+            400,
+            pnrResponse.errors[0].category
+          );
+        }
+
         if (
           response.data.success &&
           pnrResponse?.flights &&
@@ -60,7 +69,7 @@ class PnrDetailsService extends AbstractServices {
 
           const ticket_details: any[] = [];
           // TICKET DETAILS
-          for (const ticket of pnrResponse.flightTickets) {
+          for (const [index, ticket] of pnrResponse.flightTickets.entries()) {
             const flightsId = ticket.flightCoupons?.map((item) => item.itemId);
 
             if (!flightsId) {
@@ -122,9 +131,10 @@ class PnrDetailsService extends AbstractServices {
               await formatFlightDetailsRoute(flights, conn);
 
             // TAX BREAKDOWN
-            const taxBreakdown = pnrResponse.fares.find((item) =>
-              item.travelerIndices?.includes(ticket.travelerIndex)
-            );
+            // const taxBreakdown = pnrResponse.fares.find((item) =>
+            //   item.travelerIndices?.includes(ticket.travelerIndex)
+            // );
+            const taxBreakdown = pnrResponse.fares[index];
 
             const breakdown = taxBreakdown?.taxBreakdown.reduce(
               (acc: any, current) => {
@@ -152,26 +162,10 @@ class PnrDetailsService extends AbstractServices {
               taxesCommission = taxBreakdown?.taxBreakdown?.filter(
                 (item) => item.taxCode === 'YR'
               );
-
-              console.log({
-                taxesCommission,
-                airline: flights[0].airlineCode,
-                BR: taxBreakdown,
-              });
             }
 
-            const taxes_commission = taxesCommission?.map((item) => {
-              return {
-                airline_taxes: item.taxAmount,
-                airline_commission: numRound(item.taxAmount.amount) * 0.07,
-                airline_tax_type: item.taxCode,
-              };
-            });
-
-            console.log({ taxes_commission });
-
             const baseFareCommission = numRound(
-              ticket.commission.commissionAmount
+              ticket?.commission?.commissionAmount
             );
             const countryTaxAit = Number(1 || 0) * 0.003;
             const grossAit = Number(ticket.payment.total || 0) * 0.003;
@@ -197,6 +191,16 @@ class PnrDetailsService extends AbstractServices {
               airticket_segment > 1
                 ? pnrResponse.allSegments[airticket_segment - 1].endDate
                 : undefined;
+
+            const taxes_commission = taxesCommission?.map((item) => {
+              return {
+                airline_taxes: item.taxAmount.amount,
+                airline_commission:
+                  numRound(item.taxAmount.amount) *
+                  (airticket_commission_percent / 100),
+                airline_tax_type: item.taxCode,
+              };
+            });
 
             const ticketData = {
               ...breakdown,
@@ -243,6 +247,7 @@ class PnrDetailsService extends AbstractServices {
             },
           };
         }
+
         return { success: true, data: [] };
       } catch (error: any) {
         throw new CustomError(

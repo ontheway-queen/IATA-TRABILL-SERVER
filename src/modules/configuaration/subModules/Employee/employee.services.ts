@@ -1,7 +1,6 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
 import CustomError from '../../../../common/utils/errors/customError';
-import { idType } from '../../../../common/types/common.types';
 
 class ServicesEmployee extends AbstractServices {
   constructor() {
@@ -9,9 +8,13 @@ class ServicesEmployee extends AbstractServices {
   }
 
   public CreateEmployee = async (req: Request) => {
-    const data = await this.models.configModel
-      .employeeModel(req)
-      .createEmployee(req.body);
+    const conn = this.models.configModel.employeeModel(req);
+    await conn.getSineAndId(
+      req.body.employee_creation_sign,
+      req.body.employee_card_id
+    );
+
+    const data = await conn.createEmployee(req.body);
 
     return { success: true, data: { employee_id: data } };
   };

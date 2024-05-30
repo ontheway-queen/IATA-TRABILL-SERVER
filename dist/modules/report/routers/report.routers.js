@@ -27,6 +27,8 @@ class ReportRouter extends abstract_routers_1.default {
         /**
          * TOTAL DUE ADVANCE
          */
+        this.routers.post('/due-advance-details', this.controllers.getDueAdvanceDetailsSummary);
+        this.routers.get('/client-advance', this.controllers.clientAdvance);
         this.routers.get('/client-advance-due/:client_id', this.controllers.clientDueAdvance);
         this.routers.get('/vendor-advance-due/:vendor_id', this.controllers.vendorDueAdvance);
         this.routers.get('/due-advance/combined/:combined_id', this.controllers.getDueAdvanceCombined);

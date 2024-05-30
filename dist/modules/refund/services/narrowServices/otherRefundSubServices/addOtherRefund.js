@@ -92,7 +92,9 @@ class AddOtherRefund extends abstract_services_1.default {
                         ctrxn_route: airticket_route,
                     };
                     crefund_ctrxnid = yield trxns.clTrxnInsert(clTrxnBody);
-                    crefund_charge_ctrxnid = yield trxns.clTrxnInsert(clChargeTrxnBody);
+                    if (total_refund_charge > 0) {
+                        crefund_charge_ctrxnid = yield trxns.clTrxnInsert(clChargeTrxnBody);
+                    }
                     // INVOICE PAYMENT
                     const cl_due = yield mr_conn.getInvoicesIdAndAmount(client_id, combined_id);
                     let paidAmountNow = 0;

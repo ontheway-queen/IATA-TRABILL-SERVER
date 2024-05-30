@@ -283,7 +283,7 @@ class InvoiceHajjModels extends abstract_models_1.default {
     getHajjInvoiceRefund(invoice_id) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
-                .select('refund_id', this.db.raw(`COALESCE(client_name, combine_name) AS client_name`), 'refund_voucher_no', 'refund_client_total', 'refund_client_type', 'refund_client_payment_method', 'refund_client_acc_id', 'cl_acc.account_name AS client_account_name', 'v_acc.account_name AS vendor_account_name', 'refund_vendor_total', 'refund_vendor_type', 'refund_date')
+                .select('refund_id', this.db.raw(`COALESCE(client_name, combine_name) AS client_name`), this.db.raw(`COALESCE(concat('client-', refund_client_id), concat('combined-', refund_combine_id)) AS comb_client`), 'refund_voucher_no', 'refund_client_total', 'refund_client_type', 'refund_client_payment_method', 'refund_client_acc_id', 'cl_acc.account_name AS client_account_name', 'v_acc.account_name AS vendor_account_name', 'refund_vendor_total', 'refund_vendor_type', 'refund_date')
                 .from('trabill_invoice_hajj_refund')
                 .leftJoin('trabill_clients', { client_id: 'refund_client_id' })
                 .leftJoin('trabill_combined_clients', { combine_id: 'refund_combine_id' })

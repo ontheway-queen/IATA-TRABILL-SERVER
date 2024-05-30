@@ -139,7 +139,7 @@ class ClientModel extends abstract_models_1.default {
     getClientInfo(id) {
         return __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()
-                .select('client_type', this.db.raw(`COALESCE(client_name, company_name) as client_name`), 'client_email', 'company_email', this.db.raw('COALESCE(client_mobile, company_contact_no) as client_mobile'), 'client_address')
+                .select('client_type', this.db.raw(`COALESCE(client_name, company_name) as client_name`), 'client_email', 'company_email', this.db.raw('COALESCE(client_mobile, company_contact_no) as client_mobile'), 'client_address', 'client_lbalance')
                 .from('trabill_clients')
                 .leftJoin('trabill_client_company_information', {
                 company_client_id: 'client_id',

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.dateStrConverter = exports.numRound = exports.getDateRangeByWeek = exports.getNext15Day = exports.getIataDateRange = exports.getBspPdfDate = exports.getBspBillingDate = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
+exports.uniqueArrJoin = exports.dateStrConverter = exports.numRound = exports.getDateRangeByWeek = exports.getNext15Day = exports.getIataDateRange = exports.getBspPdfDate = exports.getBspBillingDate = exports.getPaymentType = exports.addOneWithInvoiceNo = void 0;
 const axios_1 = __importDefault(require("axios"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const dayjs_1 = __importDefault(require("dayjs"));
@@ -262,4 +262,10 @@ const dateStrConverter = (dateString) => {
     return new Date(+year, monthNumber, +day);
 };
 exports.dateStrConverter = dateStrConverter;
+// UNIQUE ARRAY JOIN
+const uniqueArrJoin = (arr) => {
+    const uniqueArr = [...new Set(arr)];
+    return uniqueArr.join(',');
+};
+exports.uniqueArrJoin = uniqueArrJoin;
 //# sourceMappingURL=lib.js.map

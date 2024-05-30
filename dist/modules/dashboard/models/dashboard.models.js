@@ -201,6 +201,14 @@ class DashboardModels extends abstract_models_1.default {
                 .andWhereRaw('DATE(payment_date) = CURDATE()');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
+        this.selectDailyRefund = () => __awaiter(this, void 0, void 0, function* () {
+            const [result] = yield this.query()
+                .from('v_bsp_ticket_refund')
+                .select(this.db.raw('SUM(vrefund_return_amount) AS value'))
+                .where('vendor_org_agency', this.org_agency)
+                .andWhereRaw('DATE(vrefund_date) = CURDATE()');
+            return (result === null || result === void 0 ? void 0 : result.value) || 0;
+        });
         this.selectDailyExpense = () => __awaiter(this, void 0, void 0, function* () {
             const [result] = yield this.query()
                 .from('trabill_expenses')
@@ -252,6 +260,15 @@ class DashboardModels extends abstract_models_1.default {
                 .andWhereRaw('MONTH(payment_date) = MONTH(CURDATE())');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
+        this.selectMonthlyRefund = () => __awaiter(this, void 0, void 0, function* () {
+            const [result] = yield this.query()
+                .from('v_bsp_ticket_refund')
+                .select(this.db.raw('SUM(vrefund_return_amount) AS value'))
+                .where('vendor_org_agency', this.org_agency)
+                .whereRaw('YEAR(vrefund_date) = YEAR(CURDATE())')
+                .andWhereRaw('MONTH(vrefund_date) = MONTH(CURDATE())');
+            return (result === null || result === void 0 ? void 0 : result.value) || 0;
+        });
         this.selectMonthlyExpense = () => __awaiter(this, void 0, void 0, function* () {
             const [result] = yield this.query()
                 .from('trabill_expenses')
@@ -298,6 +315,14 @@ class DashboardModels extends abstract_models_1.default {
                 .where('vpay_org_agency', this.org_agency)
                 .andWhereNot('vpay_is_deleted', 1)
                 .whereRaw('YEAR(payment_date) = YEAR(CURDATE())');
+            return (result === null || result === void 0 ? void 0 : result.value) || 0;
+        });
+        this.selectYearlyRefund = () => __awaiter(this, void 0, void 0, function* () {
+            const [result] = yield this.query()
+                .from('v_bsp_ticket_refund')
+                .select(this.db.raw('SUM(vrefund_return_amount) AS value'))
+                .where('vendor_org_agency', this.org_agency)
+                .whereRaw('YEAR(vrefund_date) = YEAR(CURDATE())');
             return (result === null || result === void 0 ? void 0 : result.value) || 0;
         });
         this.selectYearlyExpense = () => __awaiter(this, void 0, void 0, function* () {

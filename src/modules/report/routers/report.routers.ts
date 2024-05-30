@@ -49,6 +49,12 @@ class ReportRouter extends AbstractRouter {
      * TOTAL DUE ADVANCE
      */
 
+    this.routers.post(
+      '/due-advance-details',
+      this.controllers.getDueAdvanceDetailsSummary
+    );
+
+    this.routers.get('/client-advance', this.controllers.clientAdvance);
     this.routers.get(
       '/client-advance-due/:client_id',
       this.controllers.clientDueAdvance

@@ -130,7 +130,10 @@ class AddOtherRefund extends AbstractServices {
         };
 
         crefund_ctrxnid = await trxns.clTrxnInsert(clTrxnBody);
-        crefund_charge_ctrxnid = await trxns.clTrxnInsert(clChargeTrxnBody);
+
+        if (total_refund_charge > 0) {
+          crefund_charge_ctrxnid = await trxns.clTrxnInsert(clChargeTrxnBody);
+        }
 
         // INVOICE PAYMENT
         const cl_due = await mr_conn.getInvoicesIdAndAmount(

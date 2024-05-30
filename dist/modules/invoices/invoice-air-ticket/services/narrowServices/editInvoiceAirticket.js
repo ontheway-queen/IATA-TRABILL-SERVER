@@ -50,6 +50,7 @@ const abstract_services_1 = __importDefault(require("../../../../../abstracts/ab
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
 const invoice_helpers_1 = __importStar(require("../../../../../common/helpers/invoice.helpers"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
+const lib_1 = require("../../../../../common/utils/libraries/lib");
 const invoice_utils_1 = require("../../../utils/invoice.utils");
 class EditInvoiceAirticket extends abstract_services_1.default {
     constructor() {
@@ -81,22 +82,25 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                 const trxns = new Trxns_1.default(req, trx);
                 // CLIENT COMBINED TRANSACTIONS
                 const { prevCtrxnId, prevClChargeTransId } = yield common_conn.getPreviousInvoices(invoice_id);
-                const ctrxn_pnr = ticketInfo &&
-                    ticketInfo.map((item) => item.ticket_details.airticket_pnr).join(', ');
+                const ctrxn_pnr = ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.map((item) => item.ticket_details.airticket_pnr);
                 const ticket_no = ticketInfo[0] &&
                     ticketInfo
                         .map((item) => item.ticket_details.airticket_ticket_no)
                         .join(', ');
-                const routes = ticketInfo &&
-                    ticketInfo.map((item) => { var _a; return (_a = item === null || item === void 0 ? void 0 : item.ticket_details) === null || _a === void 0 ? void 0 : _a.airticket_route_or_sector; });
-                const flattenedRoutes = [].concat(...routes);
-                let ctrxn_route;
-                if ((flattenedRoutes === null || flattenedRoutes === void 0 ? void 0 : flattenedRoutes.length) > 0) {
-                    ctrxn_route = yield common_conn.getRoutesInfo(flattenedRoutes);
+                const routes = ticketInfo === null || ticketInfo === void 0 ? void 0 : ticketInfo.map((item) => { var _a; return (_a = item === null || item === void 0 ? void 0 : item.ticket_details) === null || _a === void 0 ? void 0 : _a.airticket_route_or_sector; });
+                const uniqueRoutes = [
+                    ...new Set(routes
+                        .filter((route) => route !== undefined)
+                        .map((route) => JSON.stringify(route))),
+                ].map((route) => JSON.parse(route));
+                let ctrxn_route = '';
+                for (const iterator of uniqueRoutes) {
+                    const route = yield common_conn.getRoutesInfo(iterator);
+                    ctrxn_route += route + '\n';
                 }
                 // CLIENT TRANSACTIONS
                 const clientTransId = yield utils.updateClientTrans(trxns, {
-                    ctrxn_pnr: ctrxn_pnr,
+                    ctrxn_pnr: (0, lib_1.uniqueArrJoin)(ctrxn_pnr),
                     ctrxn_route: ctrxn_route,
                     extra_particular: 'Air Ticket',
                     invoice_no,

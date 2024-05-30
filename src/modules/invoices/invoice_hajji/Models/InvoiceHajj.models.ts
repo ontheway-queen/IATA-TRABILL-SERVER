@@ -503,6 +503,9 @@ class InvoiceHajjModels extends AbstractModels {
       .select(
         'refund_id',
         this.db.raw(`COALESCE(client_name, combine_name) AS client_name`),
+        this.db.raw(
+          `COALESCE(concat('client-', refund_client_id), concat('combined-', refund_combine_id)) AS comb_client`
+        ),
         'refund_voucher_no',
         'refund_client_total',
         'refund_client_type',

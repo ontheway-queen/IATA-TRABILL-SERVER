@@ -327,3 +327,10 @@ export const dateStrConverter = (dateString: string) => {
 
   return new Date(+year, monthNumber, +day);
 };
+
+// UNIQUE ARRAY JOIN
+export const uniqueArrJoin = (arr: string[]) => {
+  const uniqueArr = [...new Set(arr)];
+
+  return uniqueArr.join(',');
+};

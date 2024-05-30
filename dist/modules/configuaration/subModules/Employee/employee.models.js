@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_models_1 = __importDefault(require("../../../../abstracts/abstract.models"));
+const customError_1 = __importDefault(require("../../../../common/utils/errors/customError"));
 class EmployeeModel extends abstract_models_1.default {
     createEmployee(data) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -20,6 +21,22 @@ class EmployeeModel extends abstract_models_1.default {
                 .insert(Object.assign(Object.assign({}, data), { employee_org_agency: this.org_agency }))
                 .into('trabill_employees');
             return employee[0];
+        });
+    }
+    getSineAndId(sine, id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [{ count }] = yield this.query()
+                .count('* as count')
+                .from('trabill_employees')
+                .where('employee_org_agency', this.org_agency)
+                .modify((builder) => {
+                builder
+                    .where('employee_creation_sign', sine)
+                    .orWhere('employee_card_id', id);
+            });
+            if (count > 0) {
+                throw new customError_1.default('Employee ID card number or creation sine already exists!', 400, 'Invalid input');
+            }
         });
     }
     updateEmployee(data, employee_id) {

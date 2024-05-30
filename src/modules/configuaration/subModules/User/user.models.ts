@@ -133,6 +133,7 @@ class UserModel extends AbstractModels {
         'user_email',
         'user_dial_code',
         'user_mobile',
+        'user_data_percent',
         'user_role_id'
       )
       .from('trabill_users')

@@ -147,7 +147,7 @@ class UserModel extends abstract_models_1.default {
     getUser(userId) {
         return __awaiter(this, void 0, void 0, function* () {
             const [user] = yield this.query()
-                .select('user_first_name', 'user_last_name', 'user_username', 'user_email', 'user_dial_code', 'user_mobile', 'user_role_id')
+                .select('user_first_name', 'user_last_name', 'user_username', 'user_email', 'user_dial_code', 'user_mobile', 'user_data_percent', 'user_role_id')
                 .from('trabill_users')
                 .where('user_agency_id', this.org_agency)
                 .andWhere('user_id', userId);

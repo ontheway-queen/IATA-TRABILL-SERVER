@@ -107,6 +107,7 @@ class AdminPanelServices extends abstract_services_1.default {
                     user_username,
                     user_agency_id,
                     user_role: 'SUPER_ADMIN',
+                    user_data_percent: null,
                 };
                 const user_id = yield user_conn.createAgencyUser(userInfo);
                 const salesInfo = {

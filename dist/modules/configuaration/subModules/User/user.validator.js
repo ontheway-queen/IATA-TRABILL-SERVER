@@ -62,6 +62,10 @@ class UserValidator extends abstract_validators_1.default {
             (0, express_validator_1.check)('password')
                 .isLength({ min: 8 })
                 .withMessage('Password must be at least 8 characters long'),
+            (0, express_validator_1.check)('user_data_percent')
+                .optional()
+                .isFloat()
+                .withMessage('Password must be at least 8 characters long'),
         ];
         this.updateUser = [
             // this.permissions.check(this.resources.users, "update"),
@@ -87,6 +91,10 @@ class UserValidator extends abstract_validators_1.default {
             (0, express_validator_1.check)('user_username')
                 .isString()
                 .notEmpty()
+                .withMessage('Please add your user name'),
+            (0, express_validator_1.check)('user_data_percent')
+                .optional()
+                .isFloat()
                 .withMessage('Please add your user name'),
         ];
         this.deleteUser = [];

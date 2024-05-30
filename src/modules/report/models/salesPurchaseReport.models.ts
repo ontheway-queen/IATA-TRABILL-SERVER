@@ -7,10 +7,22 @@ import dayjs from 'dayjs';
 import moment from 'moment';
 import AbstractModels from '../../../abstracts/abstract.models';
 import { idType } from '../../../common/types/common.types';
+import { separateCombClientToId } from '../../../common/helpers/common.helper';
 
 class SalesPurchasesReport extends AbstractModels {
-  salesPurchaseReport = async () => {
+  salesPurchaseReport = async (user_id: number) => {
     const today = new Date().toISOString().slice(0, 10);
+
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
+
+    const [{ total_sales }] = (await this.query()
+      .count('* as total_sales')
+      .from('view_invoice_total_billing')
+      .whereRaw('DATE(sales_date) = ?', today)
+      .where('org_agency_id', this.org_agency)) as { total_sales: number }[];
 
     const sales = await this.query()
       .select(
@@ -22,7 +34,18 @@ class SalesPurchasesReport extends AbstractModels {
       )
       .from('view_invoice_total_billing')
       .whereRaw('DATE(sales_date) = ?', today)
-      .where('org_agency_id', this.org_agency);
+      .where('org_agency_id', this.org_agency)
+      .limit(Math.round((total_sales || 0) * (+user.user_data_percent / 100)));
+
+    const [{ total_collection }] = (await this.query()
+      .count('* as total_collection')
+      .from('trabill_money_receipts')
+      .whereRaw('DATE(receipt_payment_date) = ?', today)
+      .andWhere('receipt_org_agency', this.org_agency)
+      .andWhereNot('receipt_has_deleted', 1)
+      .andWhereNot('receipt_payment_to', 'AGENT_COMMISSION')) as {
+      total_collection: number;
+    }[];
 
     const collection = await this.query()
       .select(
@@ -48,15 +71,30 @@ class SalesPurchasesReport extends AbstractModels {
       .whereRaw('DATE(receipt_payment_date) = ?', today)
       .andWhere('receipt_org_agency', this.org_agency)
       .andWhereNot('receipt_has_deleted', 1)
-      .andWhereNot('receipt_payment_to', 'AGENT_COMMISSION');
+      .andWhereNot('receipt_payment_to', 'AGENT_COMMISSION')
+      .limit(
+        Math.round((total_collection || 0) * (+user.user_data_percent / 100))
+      );
 
     return { sales, collection };
   };
-  paymentAndPurchase = async () => {
+  paymentAndPurchase = async (user_id: number) => {
     const date = dayjs().format('YYYY-MM-DD');
 
-    const purchase = await this.query()
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
 
+    const [{ total_count }] = (await this.query()
+      .count('* as total_count')
+      .from('view_invoices_billing')
+      .where('org_agency_id', this.org_agency)
+      .andWhereRaw('DATE_FORMAT(sales_date, "%Y-%m-%d") = ?', [date])) as {
+      total_count: number;
+    }[];
+
+    const purchase = await this.query()
       .select(
         'invoice_no',
         'cost_price',
@@ -64,10 +102,17 @@ class SalesPurchasesReport extends AbstractModels {
         'vendor_name',
         'create_date'
       )
-
       .from('view_invoices_billing')
       .where('org_agency_id', this.org_agency)
-      .andWhereRaw('DATE_FORMAT(sales_date, "%Y-%m-%d") = ?', [date]);
+      .andWhereRaw('DATE_FORMAT(sales_date, "%Y-%m-%d") = ?', [date])
+      .limit(Math.round((total_count * +user.user_data_percent) / 100));
+
+    const [{ total_payment }] = (await this.query()
+      .count('* as total_payment')
+      .from('trabill_vendor_payments')
+      .whereRaw('DATE_FORMAT(payment_date, "%Y-%m-%d") = ?', [date])
+      .andWhere('vpay_org_agency', this.org_agency)
+      .andWhereNot('vpay_is_deleted', 1)) as { total_payment: number }[];
 
     const payments = await this.query()
       .select(
@@ -89,45 +134,28 @@ class SalesPurchasesReport extends AbstractModels {
       })
       .whereRaw('DATE_FORMAT(payment_date, "%Y-%m-%d") = ?', [date])
       .andWhere('vpay_org_agency', this.org_agency)
-      .andWhereNot('vpay_is_deleted', 1);
+      .andWhereNot('vpay_is_deleted', 1)
+      .limit(
+        Math.round((total_payment || 0) * (+user.user_data_percent / 100))
+      );
 
     return { purchase, payments };
   };
 
   public async getSalesReport(
-    client_id: idType,
-    combined_id: idType,
+    comb_client: string,
     employee_id: idType,
     from_date: string,
     to_date: string,
     page: number,
-    size: number
+    size: number,
+    user_id: number
   ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
 
-    const data = await this.query()
-      .select('*')
-      .from('view_sales_and_purchase_report')
-      .andWhereRaw('DATE(invoice_sales_date) BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ])
-      .modify((builder) => {
-        if (employee_id && employee_id !== 'all') {
-          builder.where('invoice_sales_man_id', employee_id);
-        }
-        if (client_id && client_id !== 'all') {
-          builder.where('invoice_client_id', client_id);
-        }
-        if (combined_id && combined_id !== 'all') {
-          builder.where('invoice_combined_id', combined_id);
-        }
-      })
-      .andWhere('org_agency_id', this.org_agency)
-      .limit(size)
-      .offset(page_number);
+    const { client_id, combined_id } = separateCombClientToId(comb_client);
 
     const [{ count }] = await this.query()
       .count('* as count')
@@ -140,16 +168,35 @@ class SalesPurchasesReport extends AbstractModels {
         if (employee_id && employee_id !== 'all') {
           builder.where('invoice_sales_man_id', employee_id);
         }
-        if (client_id && client_id !== 'all') {
+        if (client_id) {
           builder.where('invoice_client_id', client_id);
         }
-        if (combined_id && combined_id !== 'all') {
+        if (combined_id) {
           builder.where('invoice_combined_id', combined_id);
         }
       })
       .andWhere('org_agency_id', this.org_agency);
 
-    const total = await this.query()
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
+
+    let total_count: number = count;
+
+    if (user && user.user_data_percent) {
+      total_count = Math.round((count * +user.user_data_percent) / 100);
+
+      if (size > total_count) {
+        size = total_count;
+      }
+      if (page - 1 > 0) {
+        size = total_count - offset;
+      }
+    }
+
+    const data = await this.query()
+      .select('*')
       .from('view_sales_and_purchase_report')
       .andWhereRaw('DATE(invoice_sales_date) BETWEEN ? AND ?', [
         from_date,
@@ -159,20 +206,43 @@ class SalesPurchasesReport extends AbstractModels {
         if (employee_id && employee_id !== 'all') {
           builder.where('invoice_sales_man_id', employee_id);
         }
-        if (client_id && client_id !== 'all') {
+        if (client_id) {
           builder.where('invoice_client_id', client_id);
         }
-        if (combined_id && combined_id !== 'all') {
+        if (combined_id) {
           builder.where('invoice_combined_id', combined_id);
         }
       })
       .andWhere('org_agency_id', this.org_agency)
-      .sum(`invoice_net_total as sales_price`)
-      .sum(`cost_price as cost_price`)
-      .sum(`total_profit as total_profit`)
-      .sum(`total_client_payments as total_client_payments`);
+      .limit(size)
+      .offset(offset);
 
-    return { count, data: { data, ...total[0] } };
+    const infos = data.reduce(
+      (
+        acc: {
+          sales_price: number;
+          cost_price: number;
+          total_profit: number;
+          total_client_payments: number;
+        },
+        item: any
+      ) => {
+        acc.sales_price += parseFloat(item.invoice_net_total) || 0;
+        acc.cost_price += parseFloat(item.cost_price) || 0;
+        acc.total_profit += parseFloat(item.total_profit) || 0;
+        acc.total_client_payments +=
+          parseFloat(item.total_client_payments) || 0;
+        return acc;
+      },
+      {
+        sales_price: 0,
+        cost_price: 0,
+        total_profit: 0,
+        total_client_payments: 0,
+      }
+    );
+
+    return { count: total_count, data: { data, ...infos } };
   }
 
   public async salesManWiseCollectionDue(
@@ -180,11 +250,46 @@ class SalesPurchasesReport extends AbstractModels {
     from_date: string,
     to_date: string,
     page: number,
-    size: number
+    size: number,
+    user_id: number
   ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
+
+    const [{ count }] = (await this.query()
+      .select(this.db.raw(`count(*) as count`))
+      .from('view_invoice_total_billing as view')
+      .modify((event) => {
+        if (employee_id && employee_id !== 'all') {
+          event.where('view.invoice_sales_man_id', employee_id);
+        }
+        if (from_date && to_date) {
+          event.whereRaw(
+            'DATE_FORMAT(view.sales_date,"%Y-%m-%d") BETWEEN ? AND ?',
+            [from_date, to_date]
+          );
+        }
+      })
+      .andWhere('view.org_agency_id', this.org_agency)) as { count: number }[];
+
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
+
+    let total_count: number = count;
+
+    if (user && user.user_data_percent) {
+      total_count = Math.round((count * +user.user_data_percent) / 100);
+
+      if (size > total_count) {
+        size = total_count;
+      }
+      if (page - 1 > 0) {
+        size = total_count - offset;
+      }
+    }
 
     const result = await this.query()
       .select(
@@ -196,7 +301,7 @@ class SalesPurchasesReport extends AbstractModels {
           `(view.sales_price - view.invoice_discount) as sales_price`
         ),
         'view.cost_price',
-        'view.invoice_total_pay AS client_payment',
+        'view.        AS client_payment',
         'view.create_date',
         'view.sales_date',
         'view.invoice_sales_man_id'
@@ -222,42 +327,27 @@ class SalesPurchasesReport extends AbstractModels {
       .andWhere('view.org_agency_id', this.org_agency)
 
       .limit(size)
-      .offset(page_number);
+      .offset(offset);
 
-    const [{ row_count }] = await this.query()
-      .select(this.db.raw(`count(*) as row_count`))
-      .from('view_invoice_total_billing as view')
-      .modify((event) => {
-        if (employee_id && employee_id !== 'all') {
-          event.where('view.invoice_sales_man_id', employee_id);
-        }
-        if (from_date && to_date) {
-          event.whereRaw(
-            'DATE_FORMAT(view.sales_date,"%Y-%m-%d") BETWEEN ? AND ?',
-            [from_date, to_date]
-          );
-        }
-      })
-      .andWhere('view.org_agency_id', this.org_agency);
+    const total = result.reduce(
+      (
+        acc: {
+          sales_price: number;
+          client_payment: number;
+        },
+        item: any
+      ) => {
+        acc.sales_price += parseFloat(item.sales_price) || 0;
+        acc.client_payment += parseFloat(item.invoice_total_pay) || 0;
+        return acc;
+      },
+      {
+        sales_price: 0,
+        client_payment: 0,
+      }
+    );
 
-    const total = await this.query()
-      .from('view_invoice_total_billing as view')
-      .modify((event) => {
-        if (employee_id && employee_id !== 'all') {
-          event.where('view.invoice_sales_man_id', employee_id);
-        }
-        if (from_date && to_date) {
-          event.whereRaw(
-            'DATE_FORMAT(view.sales_date,"%Y-%m-%d") BETWEEN ? AND ?',
-            [from_date, to_date]
-          );
-        }
-      })
-      .andWhere('view.org_agency_id', this.org_agency)
-      .sum('sales_price AS sales_price')
-      .sum('invoice_total_pay AS client_payment');
-
-    return { count: row_count, data: { result, ...total[0] } };
+    return { count: total_count, data: { result, ...total } };
   }
 
   public async getClientSales(
@@ -266,11 +356,48 @@ class SalesPurchasesReport extends AbstractModels {
     from_date: string,
     to_date: string,
     page: number,
-    size: number
+    size: number,
+    user_id: number
   ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
+
+    const [{ count }] = (await this.query()
+      .select(this.db.raw(`count(*) as count`))
+      .from('view_client_wise_sales ')
+
+      .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])
+      .modify((builder) => {
+        if (client_id && client_id !== 'all') {
+          builder.where('invoice_client_id', client_id);
+        }
+        if (combined_id && combined_id !== 'all') {
+          builder.where('invoice_combined_id', combined_id);
+        }
+      })
+      .andWhere('org_agency_id', this.org_agency)) as { count: number }[];
+
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
+
+    let total_count: number = count;
+
+    if (user && user.user_data_percent) {
+      total_count = Math.round((count * +user.user_data_percent) / 100);
+
+      if (size > total_count) {
+        size = total_count;
+      }
+      if (page - 1 > 0) {
+        size = total_count - offset;
+      }
+    }
 
     const sales_data = await this.query()
       .select(
@@ -301,53 +428,24 @@ class SalesPurchasesReport extends AbstractModels {
       })
       .andWhere('org_agency_id', this.org_agency)
       .limit(size)
-      .offset(page_number);
+      .offset(offset);
 
-    const total = await this.query()
-      .from('view_invoices_billing as inv')
-      .andWhereRaw('Date(inv.sales_date) BETWEEN ? AND ?', [from_date, to_date])
-      .modify((builder) => {
-        if (client_id && client_id !== 'all') {
-          builder.where('inv.invoice_client_id', client_id);
-        }
-        if (combined_id && combined_id !== 'all') {
-          builder.where('inv.invoice_combined_id', combined_id);
-        }
-      })
-      .andWhere('inv.org_agency_id', this.org_agency)
-      .sum(`sales_price as sales_price`);
+    const total = sales_data.reduce(
+      (
+        acc: {
+          sales_price: number;
+        },
+        item: any
+      ) => {
+        acc.sales_price += parseFloat(item.sales_price) || 0;
+        return acc;
+      },
+      {
+        sales_price: 0,
+      }
+    );
 
-    return { sales_data, ...total[0] };
-  }
-
-  public async countClientSalesDataRow(
-    client_id: idType,
-    combined_id: idType,
-    from_date: string,
-    to_date: string
-  ) {
-    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
-    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-
-    const [count] = await this.query()
-      .select(this.db.raw(`count(*) as row_count`))
-      .from('view_client_wise_sales ')
-
-      .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ])
-      .modify((builder) => {
-        if (client_id && client_id !== 'all') {
-          builder.where('invoice_client_id', client_id);
-        }
-        if (combined_id && combined_id !== 'all') {
-          builder.where('invoice_combined_id', combined_id);
-        }
-      })
-      .andWhere('org_agency_id', this.org_agency);
-
-    return count.row_count;
+    return { count: total_count, sales_data, ...total };
   }
 
   public async getClientCollectionClient(
@@ -356,11 +454,53 @@ class SalesPurchasesReport extends AbstractModels {
     from_date: string,
     to_date: string,
     page: number,
-    size: number
+    size: number,
+    user_id: number
   ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
+
+    const [{ count }] = (await this.query()
+      .select(this.db.raw(`count(*) as count`))
+      .from('trabill_money_receipts')
+      .leftJoin('trabill_transaction_type', {
+        trxntype_id: 'receipt_trnxtype_id',
+      })
+      .leftJoin('trabill_clients', { client_id: 'receipt_client_id' })
+      .leftJoin('trabill_users', { user_id: 'receipt_created_by' })
+      .modify((builder) => {
+        if (client_id !== 'all') {
+          builder.where('receipt_client_id', client_id);
+        }
+        if (combined_id && combined_id !== 'all') {
+          builder.where('receipt_combined_id', combined_id);
+        }
+      })
+      .whereNot('receipt_has_deleted', 1)
+      .andWhere('trabill_money_receipts.receipt_org_agency', this.org_agency)
+      .andWhereRaw('Date(receipt_payment_date) BETWEEN ? AND ?', [
+        from_date,
+        to_date,
+      ])) as { count: number }[];
+
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
+
+    let total_count: number = count;
+
+    if (user && user.user_data_percent) {
+      total_count = Math.round((count * +user.user_data_percent) / 100);
+
+      if (size > total_count) {
+        size = total_count;
+      }
+      if (page - 1 > 0) {
+        size = total_count - offset;
+      }
+    }
 
     const collection_data = await this.query()
       .select(
@@ -398,62 +538,24 @@ class SalesPurchasesReport extends AbstractModels {
         to_date,
       ])
       .limit(size)
-      .offset(page_number);
+      .offset(offset);
 
-    const total = await this.query()
-      .from('trabill_money_receipts')
-      .modify((builder) => {
-        if (client_id !== 'all') {
-          builder.where('receipt_client_id', client_id);
-        }
-        if (combined_id && combined_id !== 'all') {
-          builder.where('receipt_combined_id', combined_id);
-        }
-      })
-      .whereNot('receipt_has_deleted', 1)
-      .andWhere('trabill_money_receipts.receipt_org_agency', this.org_agency)
-      .andWhereRaw('Date(receipt_payment_date) BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ])
-      .sum(`receipt_total_amount as receipt_total_amount`);
+    const total = collection_data.reduce(
+      (
+        acc: {
+          receipt_total_amount: number;
+        },
+        item: any
+      ) => {
+        acc.receipt_total_amount += parseFloat(item.receipt_total_amount) || 0;
+        return acc;
+      },
+      {
+        receipt_total_amount: 0,
+      }
+    );
 
-    return { collection_data, ...total[0] };
-  }
-
-  public async countClientCollectionDataRow(
-    client_id: idType,
-    combined_id: idType,
-    from_date: string,
-    to_date: string
-  ) {
-    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
-    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-
-    const [count] = await this.query()
-      .select(this.db.raw(`count(*) as row_count`))
-      .from('trabill_money_receipts')
-      .leftJoin('trabill_transaction_type', {
-        trxntype_id: 'receipt_trnxtype_id',
-      })
-      .leftJoin('trabill_clients', { client_id: 'receipt_client_id' })
-      .leftJoin('trabill_users', { user_id: 'receipt_created_by' })
-      .modify((builder) => {
-        if (client_id !== 'all') {
-          builder.where('receipt_client_id', client_id);
-        }
-        if (combined_id && combined_id !== 'all') {
-          builder.where('receipt_combined_id', combined_id);
-        }
-      })
-      .whereNot('receipt_has_deleted', 1)
-      .andWhere('trabill_money_receipts.receipt_org_agency', this.org_agency)
-      .andWhereRaw('Date(receipt_payment_date) BETWEEN ? AND ?', [
-        from_date,
-        to_date,
-      ]);
-
-    return count.row_count;
+    return { count: total_count, collection_data, ...total };
   }
 
   public async getInvoicePurches(
@@ -467,7 +569,7 @@ class SalesPurchasesReport extends AbstractModels {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
 
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
 
     const data = await this.query()
       .select(
@@ -494,7 +596,7 @@ class SalesPurchasesReport extends AbstractModels {
       ])
       .orderBy('view.inv_id', 'desc')
       .limit(size)
-      .offset(page_number);
+      .offset(offset);
 
     return data;
   }
@@ -701,18 +803,58 @@ class SalesPurchasesReport extends AbstractModels {
   };
 
   public async getDailySalesReport(
-    client_id: idType,
-    combine_id: idType,
+    comb_client: string,
     employee_id: idType,
     product_id: idType,
     from_date: string,
     to_date: string,
     page: number,
-    size: number
+    size: number,
+    user_id: number
   ) {
     from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
     to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
     const offset = (page - 1) * size;
+
+    const { client_id, combined_id } = separateCombClientToId(comb_client);
+
+    const [user] = (await this.query()
+      .select('user_data_percent')
+      .from('trabill_users')
+      .where({ user_id })) as { user_data_percent: number }[];
+
+    const [count] = (await this.query()
+      .count('* as total')
+      .from('view_daily_sales_report')
+      .where('org_agency_id', this.org_agency)
+      .modify((event) => {
+        if (client_id) event.andWhere('invoice_client_id', client_id);
+
+        if (combined_id) event.andWhere('invoice_combined_id', combined_id);
+
+        if (product_id && product_id !== 'all')
+          event.andWhere('billing_product_id', product_id);
+
+        if (employee_id && employee_id !== 'all')
+          event.andWhere('employee_id', employee_id);
+      })
+      .andWhereRaw(`DATE_FORMAT(sales_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ])) as { total: number }[];
+
+    let total_count: number = count.total;
+
+    if (user && user.user_data_percent) {
+      total_count = Math.round((count.total * +user.user_data_percent) / 100);
+
+      if (size > total_count) {
+        size = total_count;
+      }
+      if (page - 1 > 0) {
+        size = total_count - offset;
+      }
+    }
 
     const data = await this.query()
       .select('*')
@@ -721,7 +863,7 @@ class SalesPurchasesReport extends AbstractModels {
       .modify((event) => {
         if (client_id) event.andWhere('invoice_client_id', client_id);
 
-        if (combine_id) event.andWhere('invoice_combined_id', combine_id);
+        if (combined_id) event.andWhere('invoice_combined_id', combined_id);
 
         if (product_id && product_id !== 'all')
           event.andWhere('billing_product_id', product_id);
@@ -736,57 +878,41 @@ class SalesPurchasesReport extends AbstractModels {
       .limit(size)
       .offset(offset);
 
-    const [count] = (await this.query()
-      .count('* as total')
-      .from('view_daily_sales_report')
-      .where('org_agency_id', this.org_agency)
-      .modify((event) => {
-        if (client_id) event.andWhere('invoice_client_id', client_id);
+    const infos = data.reduce(
+      (
+        acc: {
+          total_sales: number;
+          total_cost: number;
+          total_collection: number;
+          total_due: number;
+          total_service_charge: number;
+          total_discount: number;
+          total_payment: number;
+        },
+        item: any
+      ) => {
+        acc.total_sales += parseFloat(item.invoice_net_total) || 0;
+        acc.total_cost += parseFloat(item.cost_price) || 0;
+        acc.total_collection += parseFloat(item.client_pay_amount) || 0;
+        acc.total_due += parseFloat(item.due_amount) || 0;
+        acc.total_service_charge +=
+          parseFloat(item.invoice_service_charge) || 0;
+        acc.total_discount += parseFloat(item.invoice_discount) || 0;
+        acc.total_payment += parseFloat(item.vendor_pay_amount) || 0;
+        return acc;
+      },
+      {
+        total_sales: 0,
+        total_cost: 0,
+        total_collection: 0,
+        total_due: 0,
+        total_service_charge: 0,
+        total_discount: 0,
+        total_payment: 0,
+      }
+    );
 
-        if (combine_id) event.andWhere('invoice_combined_id', combine_id);
-
-        if (product_id && product_id !== 'all')
-          event.andWhere('billing_product_id', product_id);
-
-        if (employee_id && employee_id !== 'all')
-          event.andWhere('employee_id', employee_id);
-      })
-      .andWhereRaw(`DATE_FORMAT(sales_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
-        from_date,
-        to_date,
-      ])) as { total: number }[];
-
-    const [infos] = await this.query()
-      .select(
-        this.db.raw(`SUM(COALESCE(invoice_net_total, 0)) AS total_sales`),
-        this.db.raw(`SUM(COALESCE(cost_price, 0)) AS total_cost`),
-        this.db.raw(`SUM(COALESCE(client_pay_amount, 0)) AS total_collection`),
-        this.db.raw(`SUM(COALESCE(due_amount, 0)) AS total_due`),
-        this.db.raw(
-          `SUM(COALESCE(invoice_service_charge, 0)) AS total_service_charge`
-        ),
-        this.db.raw(`SUM(COALESCE(invoice_discount, 0)) AS total_discount`),
-        this.db.raw(`SUM(COALESCE(vendor_pay_amount, 0)) AS total_payment`)
-      )
-      .from('view_daily_sales_report')
-      .where('org_agency_id', this.org_agency)
-      .modify((event) => {
-        if (client_id) event.andWhere('invoice_client_id', client_id);
-
-        if (combine_id) event.andWhere('invoice_combined_id', combine_id);
-
-        if (product_id && product_id !== 'all')
-          event.andWhere('billing_product_id', product_id);
-
-        if (employee_id && employee_id !== 'all')
-          event.andWhere('employee_id', employee_id);
-      })
-      .andWhereRaw(`DATE_FORMAT(sales_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
-        from_date,
-        to_date,
-      ]);
-
-    return { count: count.total, data: { data, ...infos } };
+    return { count: total_count, data: { data, ...infos } };
   }
 
   // OVERALL PROFIT LOSS
@@ -845,7 +971,7 @@ class SalesPurchasesReport extends AbstractModels {
     page: number,
     size: number
   ) {
-    const page_number = (page - 1) * size;
+    const offset = (page - 1) * size;
 
     const data = await this.query()
       .select(
@@ -872,7 +998,7 @@ class SalesPurchasesReport extends AbstractModels {
       )
 
       .limit(size)
-      .offset(page_number);
+      .offset(offset);
 
     return { count: 0, data };
   }

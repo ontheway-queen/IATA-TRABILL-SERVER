@@ -604,30 +604,23 @@ class ReportExcelServices extends AbstractServices {
    */
 
   public getMonthlySalesEarninghExcel = async (req: Request, res: Response) => {
-    const { client_id: invoice_combclient_id, employee_id } = req.body as {
+    const { client_id, employee_id } = req.body as {
       employee_id: idType;
       client_id: string;
     };
 
     const { from_date, to_date, page, size } = req.query;
 
-    let clientCombine;
-    if (invoice_combclient_id && invoice_combclient_id !== 'all') {
-      clientCombine = separateCombClientToId(invoice_combclient_id);
-    }
-    let client_id: idType = clientCombine?.client_id || 'all';
-    let combined_id: idType = clientCombine?.combined_id || 'all';
-
     const conn = this.models.salesPurchasesReport(req);
 
     const data = await conn.getSalesReport(
-      client_id as string,
-      combined_id as string,
+      client_id,
       employee_id,
       String(from_date),
       String(to_date),
-      1,
-      this.rowSize
+      Number(page) || 1,
+      Number(size) || 20,
+      req.user_id
     );
 
     const workbook = new ExcelJS.Workbook();
@@ -713,9 +706,10 @@ class ReportExcelServices extends AbstractServices {
       airline_id,
       String(from_date),
       String(to_date),
-      1,
-      this.rowSize,
-      search as string
+      Number(page) || 1,
+      Number(size) || 20,
+      search as string,
+      req.user_id
     );
 
     const workbook = new ExcelJS.Workbook();
@@ -799,8 +793,9 @@ class ReportExcelServices extends AbstractServices {
       sales_man_id,
       String(from_date),
       String(to_date),
-      1,
-      this.rowSize
+      Number(page) || 1,
+      Number(size) || 20,
+      req.user_id
     );
 
     const workbook = new ExcelJS.Workbook();
@@ -887,8 +882,9 @@ class ReportExcelServices extends AbstractServices {
       combine_id,
       String(from_date),
       String(to_date),
-      1,
-      this.rowSize
+      Number(page) || 1,
+      Number(size) || 20,
+      req.user_id
     );
 
     const collection = await conn.getClientCollectionClient(
@@ -897,7 +893,8 @@ class ReportExcelServices extends AbstractServices {
       String(from_date),
       String(to_date),
       Number(page) || 1,
-      Number(size) || 20
+      Number(size) || 20,
+      req.user_id
     );
     const workbook = new ExcelJS.Workbook();
     const dirPath = path.join(__dirname, '../files');
@@ -1008,24 +1005,17 @@ class ReportExcelServices extends AbstractServices {
     res: Response
   ) => {
     const { comb_vendor } = req.params;
-    const { from_date, to_date } = req.query;
+    const { from_date, to_date, page, size } = req.query;
 
-    let separateVendor;
-
-    if (comb_vendor && comb_vendor !== 'all') {
-      separateVendor = separateCombClientToId(comb_vendor);
-    }
-    const vendor_id = separateVendor?.vendor_id || 'all';
-    const combined_id = separateVendor?.combined_id || 'all';
     const conn = this.models.reportModel(req);
 
     const data = await conn.getVendorWiseReport(
-      vendor_id,
-      combined_id,
+      comb_vendor,
       String(from_date),
       String(to_date),
-      1,
-      this.rowSize
+      Number(page) || 1,
+      Number(size) || 20,
+      req.user_id
     );
 
     const workbook = new ExcelJS.Workbook();
@@ -1047,7 +1037,7 @@ class ReportExcelServices extends AbstractServices {
     ];
 
     // Loop through data and populate rows
-    data.forEach((report: any, index: number) => {
+    data.data.forEach((report: any, index: number) => {
       report.serial = index + 1;
       ticketFromVendorWorksheet.addRow(report);
     });
@@ -1091,8 +1081,9 @@ class ReportExcelServices extends AbstractServices {
       sales_man_id,
       String(from_date),
       String(to_date),
-      1,
-      this.rowSize
+      Number(page) || 1,
+      Number(size) || 20,
+      req.user_id
     );
 
     const workbook = new ExcelJS.Workbook();
@@ -1176,30 +1167,16 @@ class ReportExcelServices extends AbstractServices {
     };
 
     const conn = this.models.salesPurchasesReport(req);
-    let combClients;
-    let clientId;
-    let combineId;
-    if (comb_client !== 'all') {
-      combClients = separateCombClientToId(comb_client);
-    }
-
-    if (combClients?.client_id) {
-      clientId = combClients.client_id;
-    }
-
-    if (combClients?.combined_id) {
-      combineId = combClients.combined_id;
-    }
 
     const { data } = await conn.getDailySalesReport(
-      clientId as number,
-      combineId as number,
+      comb_client,
       employee_id,
       product_id,
       from_date,
       to_date,
       1,
-      this.rowSize
+      this.rowSize,
+      req.user_id
     );
 
     const workbook = new ExcelJS.Workbook();
@@ -1264,7 +1241,7 @@ class ReportExcelServices extends AbstractServices {
     res: Response
   ) => {
     const conn = this.models.salesPurchasesReport(req);
-    const data = await conn.salesPurchaseReport();
+    const data = await conn.salesPurchaseReport(req.user_id);
 
     const workbook = new ExcelJS.Workbook();
     const dirPath = path.join(__dirname, '../files');
@@ -1430,7 +1407,7 @@ class ReportExcelServices extends AbstractServices {
 
   public getDailyPurchasePaymentExcel = async (req: Request, res: Response) => {
     const conn = this.models.salesPurchasesReport(req);
-    const data = await conn.paymentAndPurchase();
+    const data = await conn.paymentAndPurchase(req.user_id);
 
     const workbook = new ExcelJS.Workbook();
     const dirPath = path.join(__dirname, '../files');
@@ -1602,8 +1579,9 @@ class ReportExcelServices extends AbstractServices {
       visa_id,
       String(from_date),
       String(to_date),
-      1,
-      this.rowSize
+      Number(page) || 1,
+      Number(size) || 20,
+      req.user_id
     );
     const workbook = new ExcelJS.Workbook();
     const worksheet = workbook.addWorksheet('Visa Wise Profit Loss');
@@ -1678,9 +1656,12 @@ class ReportExcelServices extends AbstractServices {
     };
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.profitLossReport(req, trx);
+      const user_percentage = await conn.getUserPercentage(req.user_id);
+
       const { total_sales_price, total_cost_price } = await conn.totalSales(
         String(from_date),
-        String(to_date)
+        String(to_date),
+        user_percentage
       );
 
       const total_refun_profit = await conn.refundProfitAir(
@@ -1689,24 +1670,29 @@ class ReportExcelServices extends AbstractServices {
       );
       const total_employee_salary = await conn.getEmployeeExpense(
         String(from_date),
-        String(to_date)
+        String(to_date),
+        user_percentage
       );
       const incentive = await conn.allIncentive(
         String(from_date),
-        String(to_date)
+        String(to_date),
+        user_percentage
       );
       const expense_total = await conn.allExpenses(
         String(from_date),
-        String(to_date)
+        String(to_date),
+        user_percentage
       );
       const client_discount = await conn.getAllClientDiscount(
         String(from_date),
-        String(to_date)
+        String(to_date),
+        user_percentage
       );
 
       const service_charge = await conn.getInvoicesServiceCharge(
         from_date,
-        to_date
+        to_date,
+        user_percentage
       );
 
       // const tour_profit = await conn.getTourProfitLoss(from_date, to_date);
@@ -1987,11 +1973,12 @@ class ReportExcelServices extends AbstractServices {
       ticket_id,
       from_date,
       to_date,
-      1,
-      this.rowSize
+      Number(page) || 1,
+      Number(size) || 20,
+      req.user_id
     );
     let data: any[] = [];
-    for (const ticket of tickets) {
+    for (const ticket of tickets.data) {
       const invoiceId = ticket?.invoice_id;
       if (invoiceId) {
         const invoiceDue = await this.models
@@ -2095,7 +2082,7 @@ class ReportExcelServices extends AbstractServices {
     ];
 
     // Loop through data and populate rows
-    data.forEach((report: any, index: number) => {
+    data.data.forEach((report: any, index: number) => {
       report.serial = index + 1;
       const date = new Date(report.created_date);
       const monthNames = [

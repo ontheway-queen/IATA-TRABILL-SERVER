@@ -174,6 +174,7 @@ class AdminPanelServices extends AbstractServices {
         user_username,
         user_agency_id,
         user_role: 'SUPER_ADMIN',
+        user_data_percent: null,
       };
 
       const user_id = await user_conn.createAgencyUser(userInfo);

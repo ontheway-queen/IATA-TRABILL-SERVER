@@ -60,3 +60,19 @@ view_invoice_visalist -- update this view from local;
 all_users -- update this view from local;
 alter table trabill_users
 add column user_data_percent decimal(10, 2) DEFAULT NULL after user_email;
+
+CREATE TABLE
+    trabill_invoice_info_passports (
+        tip_id INT AUTO_INCREMENT PRIMARY KEY,
+        tip_invoice_id INT DEFAULT NULL,
+        tip_name VARCHAR(50) DEFAULT NULL,
+        tip_pax_type VARCHAR(30) DEFAULT NULL,
+        tip_passport_no VARCHAR(30) DEFAULT NULL,
+        tip_mobile_no VARCHAR(30) DEFAULT NULL,
+        tip_email VARCHAR(50) DEFAULT NULL,
+        tip_dob TIMESTAMP DEFAULT NULL,
+        tip_doi TIMESTAMP DEFAULT NULL,
+        tip_doe TIMESTAMP DEFAULT NULL,
+        tip_is_deleted TINYINT DEFAULT 0,
+        FOREIGN KEY (tip_invoice_id) REFERENCES trabill_invoices (invoice_id)
+    )

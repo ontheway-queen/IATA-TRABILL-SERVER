@@ -1,7 +1,10 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import { InvoiceHistory } from '../../../../../common/types/common.types';
-import { IFakeInvoiceReqBody } from '../../types/invoiceAirticket.interface';
+import {
+  IFakeInvoicePassport,
+  IFakeInvoiceReqBody,
+} from '../../types/invoiceAirticket.interface';
 
 class AddInvoiceInfo extends AbstractServices {
   constructor() {
@@ -11,6 +14,7 @@ class AddInvoiceInfo extends AbstractServices {
   public add = async (req: Request) => {
     const {
       infos,
+      passports,
       ti_invoice_id,
       ti_invoice_total_due,
       ti_net_total,
@@ -39,6 +43,9 @@ class AddInvoiceInfo extends AbstractServices {
         ti_total_payment,
       });
 
+      // delete previous invoice items
+      await conn.deleteInvoiceInfoItems(ti_invoice_id);
+
       if (infos && infos.length) {
         for (const info of infos) {
           await conn.insertInvoiceInfoItems({
@@ -49,6 +56,17 @@ class AddInvoiceInfo extends AbstractServices {
             tii_invoice_id: ti_invoice_id,
           });
         }
+      }
+
+      // delete previous invoice passports
+      await conn.deleteFakeInvoicePassport(ti_invoice_id);
+
+      if (passports && passports.length) {
+        const passportInfo: IFakeInvoicePassport[] = passports.map((item) => {
+          return { ...item, tip_invoice_id: ti_invoice_id };
+        });
+
+        await conn.insertFakeInvoicePassport(passportInfo);
       }
 
       // invoice history
@@ -83,6 +101,7 @@ class AddInvoiceInfo extends AbstractServices {
 
       await conn.deleteInvoiceInfo(invoice_id);
       await conn.deleteInvoiceInfoItems(invoice_id);
+      await conn.deleteFakeInvoicePassport(invoice_id);
 
       await this.insertAudit(
         req,

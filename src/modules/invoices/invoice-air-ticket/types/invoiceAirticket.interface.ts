@@ -230,6 +230,19 @@ export interface IFakeInvoiceReqBody
     IFakeInvoiceInfoItems[],
     'tii_org_agency' | 'tii_ti_id' | 'tii_created_by' | 'tii_invoice_id'
   >;
+  passports: Omit<IFakeInvoicePassport[], 'tip_invoice_id'>;
+}
+
+export interface IFakeInvoicePassport {
+  tip_invoice_id: number;
+  tip_name: number;
+  tip_pax_type: number;
+  tip_passport_no: number;
+  tip_mobile_no: number;
+  tip_email: number;
+  tip_dob: number;
+  tip_doi: number;
+  tip_doe: number;
 }
 
 export interface IFakeInvoiceInfo {

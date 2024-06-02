@@ -251,35 +251,39 @@ class DashboardServices extends abstract_services_1.default {
                 const conn = this.models.dashboardModal(req);
                 // Use pdf-parse to parse the uploaded PDF file
                 const pdfData = yield (0, pdf_parse_1.default)(req.file.path);
-                const data = (0, dashbaor_utils_1.bspBillingFormatter)(pdfData.text);
-                // from database
-                const ticket_issue = yield conn.getBspTicketIssueInfo(data === null || data === void 0 ? void 0 : data.salesDateRange.from_date, data === null || data === void 0 ? void 0 : data.salesDateRange.to_date);
-                const ticket_re_issue = yield conn.getBspTicketReissueInfo(data === null || data === void 0 ? void 0 : data.salesDateRange.from_date, data === null || data === void 0 ? void 0 : data.salesDateRange.to_date);
-                const ticket_refund = yield conn.getBspTicketRefundInfo(data === null || data === void 0 ? void 0 : data.salesDateRange.from_date, data === null || data === void 0 ? void 0 : data.salesDateRange.to_date);
-                const AMOUNT = (0, lib_1.numRound)(ticket_issue.purchase_amount) +
-                    (0, lib_1.numRound)(ticket_re_issue.purchase_amount) -
-                    (0, lib_1.numRound)(ticket_refund.refund_amount);
-                const trabill_summary = {
-                    issue: (0, lib_1.numRound)(ticket_issue.purchase_amount),
-                    reissue: (0, lib_1.numRound)(ticket_re_issue.purchase_amount),
-                    refund: (0, lib_1.numRound)(ticket_refund.refund_amount),
-                    combined: AMOUNT,
-                };
-                data.trabill_summary = trabill_summary;
-                console.log({ data });
-                if ((0, dashbaor_utils_1.withinRange)(data.bsp_summary.AMOUNT, AMOUNT, 10)) {
-                    const diffAmount = (0, lib_1.numRound)(data.bsp_summary.AMOUNT) - (0, lib_1.numRound)(AMOUNT);
-                    return {
-                        success: true,
-                        data,
-                        message: 'DATA DIFFERENCE BETWEEN BSP BILL AND TRABILL-DB IS ' +
-                            Math.abs(diffAmount),
+                let data;
+                if (pdfData.text.includes('AGENT REMITTANCE DETAIL')) {
+                    data = (0, dashbaor_utils_1.bspBillingFormatter)(pdfData.text);
+                    // from database
+                    const ticket_issue = yield conn.getBspTicketIssueInfo(data === null || data === void 0 ? void 0 : data.salesDateRange.from_date, data === null || data === void 0 ? void 0 : data.salesDateRange.to_date);
+                    const ticket_re_issue = yield conn.getBspTicketReissueInfo(data === null || data === void 0 ? void 0 : data.salesDateRange.from_date, data === null || data === void 0 ? void 0 : data.salesDateRange.to_date);
+                    const ticket_refund = yield conn.getBspTicketRefundInfo(data === null || data === void 0 ? void 0 : data.salesDateRange.from_date, data === null || data === void 0 ? void 0 : data.salesDateRange.to_date);
+                    const AMOUNT = (0, lib_1.numRound)(ticket_issue.purchase_amount) +
+                        (0, lib_1.numRound)(ticket_re_issue.purchase_amount) -
+                        (0, lib_1.numRound)(ticket_refund.refund_amount);
+                    const trabill_summary = {
+                        issue: (0, lib_1.numRound)(ticket_issue.purchase_amount),
+                        reissue: (0, lib_1.numRound)(ticket_re_issue.purchase_amount),
+                        refund: (0, lib_1.numRound)(ticket_refund.refund_amount),
+                        combined: AMOUNT,
                     };
+                    data.trabill_summary = trabill_summary;
+                    if ((0, dashbaor_utils_1.withinRange)(data.bsp_summary.AMOUNT, AMOUNT, 10)) {
+                        const diffAmount = (0, lib_1.numRound)(data.bsp_summary.AMOUNT) - (0, lib_1.numRound)(AMOUNT);
+                        data.message =
+                            'DATA DIFFERENCE BETWEEN BSP BILL AND TRABILL-DB IS ' +
+                                Math.abs(diffAmount);
+                    }
+                    else {
+                        data.message = 'BSP BILLING CROSS CHECK NOT MATCHED...';
+                    }
+                }
+                else if (pdfData.text.includes('AGENT BILLING DETAILS')) {
+                    console.log({ text: pdfData.text });
                 }
                 return {
                     success: true,
                     data,
-                    message: 'BSP BILLING CROSS CHECK NOT MATCHED...',
                 };
             }
             catch (error) {

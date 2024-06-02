@@ -342,56 +342,58 @@ class DashboardServices extends AbstractServices {
       // Use pdf-parse to parse the uploaded PDF file
       const pdfData = await PDFParser(req.file.path as any);
 
-      const data = bspBillingFormatter(pdfData.text) as any;
+      let data;
 
-      // from database
-      const ticket_issue = await conn.getBspTicketIssueInfo(
-        data?.salesDateRange.from_date,
-        data?.salesDateRange.to_date
-      );
+      if (pdfData.text.includes('AGENT REMITTANCE DETAIL')) {
+        data = bspBillingFormatter(pdfData.text) as any;
 
-      const ticket_re_issue = await conn.getBspTicketReissueInfo(
-        data?.salesDateRange.from_date,
-        data?.salesDateRange.to_date
-      );
+        // from database
+        const ticket_issue = await conn.getBspTicketIssueInfo(
+          data?.salesDateRange.from_date,
+          data?.salesDateRange.to_date
+        );
 
-      const ticket_refund = await conn.getBspTicketRefundInfo(
-        data?.salesDateRange.from_date,
-        data?.salesDateRange.to_date
-      );
+        const ticket_re_issue = await conn.getBspTicketReissueInfo(
+          data?.salesDateRange.from_date,
+          data?.salesDateRange.to_date
+        );
 
-      const AMOUNT =
-        numRound(ticket_issue.purchase_amount) +
-        numRound(ticket_re_issue.purchase_amount) -
-        numRound(ticket_refund.refund_amount);
+        const ticket_refund = await conn.getBspTicketRefundInfo(
+          data?.salesDateRange.from_date,
+          data?.salesDateRange.to_date
+        );
 
-      const trabill_summary = {
-        issue: numRound(ticket_issue.purchase_amount),
-        reissue: numRound(ticket_re_issue.purchase_amount),
-        refund: numRound(ticket_refund.refund_amount),
-        combined: AMOUNT,
-      };
+        const AMOUNT =
+          numRound(ticket_issue.purchase_amount) +
+          numRound(ticket_re_issue.purchase_amount) -
+          numRound(ticket_refund.refund_amount);
 
-      data.trabill_summary = trabill_summary;
-
-      console.log({ data });
-
-      if (withinRange(data.bsp_summary.AMOUNT, AMOUNT, 10)) {
-        const diffAmount = numRound(data.bsp_summary.AMOUNT) - numRound(AMOUNT);
-
-        return {
-          success: true,
-          data,
-          message:
-            'DATA DIFFERENCE BETWEEN BSP BILL AND TRABILL-DB IS ' +
-            Math.abs(diffAmount),
+        const trabill_summary = {
+          issue: numRound(ticket_issue.purchase_amount),
+          reissue: numRound(ticket_re_issue.purchase_amount),
+          refund: numRound(ticket_refund.refund_amount),
+          combined: AMOUNT,
         };
+
+        data.trabill_summary = trabill_summary;
+
+        if (withinRange(data.bsp_summary.AMOUNT, AMOUNT, 10)) {
+          const diffAmount =
+            numRound(data.bsp_summary.AMOUNT) - numRound(AMOUNT);
+
+          data.message =
+            'DATA DIFFERENCE BETWEEN BSP BILL AND TRABILL-DB IS ' +
+            Math.abs(diffAmount);
+        } else {
+          data.message = 'BSP BILLING CROSS CHECK NOT MATCHED...';
+        }
+      } else if (pdfData.text.includes('AGENT BILLING DETAILS')) {
+        console.log({ text: pdfData.text });
       }
 
       return {
         success: true,
         data,
-        message: 'BSP BILLING CROSS CHECK NOT MATCHED...',
       };
     } catch (error) {
       console.error('Error parsing PDF:', error);

@@ -20,6 +20,14 @@ class AppConfigModels extends abstract_models_1.default {
         this.insertSignature = (data) => __awaiter(this, void 0, void 0, function* () {
             return yield this.db('trabill_signature_info').insert(data);
         });
+        this.checkSignatureTypeIsExist = () => __awaiter(this, void 0, void 0, function* () {
+            const [{ count }] = (yield this.db('trabill_signature_info')
+                .count('* as count')
+                .where('sig_type', 'AUTHORITY')
+                .andWhere('sig_org_id', this.org_agency));
+            console.log({ count });
+            return count;
+        });
         this.updateSignature = (data, sig_id) => __awaiter(this, void 0, void 0, function* () {
             return yield this.db('trabill_signature_info')
                 .update(data)

@@ -1,5 +1,6 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
+import CustomError from '../../../../common/utils/errors/customError';
 import {
   IAppConfig,
   ISignatureDB,
@@ -65,6 +66,19 @@ class AppConfigServices extends AbstractServices {
     const imageUrlObj: {
       sig_signature: string;
     } = Object.assign({}, ...imageList);
+
+    if (body.sig_type === 'AUTHORITY') {
+      const count = await conn.checkSignatureTypeIsExist();
+
+      if (count) {
+        await this.deleteFile.delete_image(imageUrlObj.sig_signature);
+        throw new CustomError(
+          'An authority signature already exists!',
+          400,
+          'Authority exists'
+        );
+      }
+    }
 
     const sig_data: ISignatureDB = {
       sig_employee_id: body.sig_employee_id,

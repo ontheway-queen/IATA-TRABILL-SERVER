@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
+const customError_1 = __importDefault(require("../../../../common/utils/errors/customError"));
 class AppConfigServices extends abstract_services_1.default {
     constructor() {
         super();
@@ -47,6 +48,13 @@ class AppConfigServices extends abstract_services_1.default {
             const body = req.body;
             const imageList = req.imgUrl;
             const imageUrlObj = Object.assign({}, ...imageList);
+            if (body.sig_type === 'AUTHORITY') {
+                const count = yield conn.checkSignatureTypeIsExist();
+                if (count) {
+                    yield this.deleteFile.delete_image(imageUrlObj.sig_signature);
+                    throw new customError_1.default('An authority signature already exists!', 400, 'Authority exists');
+                }
+            }
             const sig_data = {
                 sig_employee_id: body.sig_employee_id,
                 sig_user_id: body.sig_user_id,

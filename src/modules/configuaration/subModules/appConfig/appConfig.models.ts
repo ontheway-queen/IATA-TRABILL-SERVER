@@ -1,5 +1,6 @@
 import AbstractModels from '../../../../abstracts/abstract.models';
 import { idType } from '../../../../common/types/common.types';
+import CustomError from '../../../../common/utils/errors/customError';
 import {
   IAppConfig,
   ISignatureDB,
@@ -82,6 +83,17 @@ class AppConfigModels extends AbstractModels {
   // SIGNATURE
   insertSignature = async (data: ISignatureDB) => {
     return await this.db('trabill_signature_info').insert(data);
+  };
+
+  checkSignatureTypeIsExist = async () => {
+    const [{ count }] = (await this.db('trabill_signature_info')
+      .count('* as count')
+      .where('sig_type', 'AUTHORITY')
+      .andWhere('sig_org_id', this.org_agency)) as { count: number }[];
+
+    console.log({ count });
+
+    return count;
   };
 
   updateSignature = async (data: ISignatureDB, sig_id: idType) => {

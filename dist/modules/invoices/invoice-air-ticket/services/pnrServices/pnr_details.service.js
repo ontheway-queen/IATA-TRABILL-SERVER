@@ -22,7 +22,7 @@ class PnrDetailsService extends abstract_services_1.default {
         super();
         this.pnrDetails = (req, pnrNo) => __awaiter(this, void 0, void 0, function* () {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d, _e, _f;
+                var _a, _b, _c, _d, _e, _f, _g;
                 const pnr = req.params.pnr || pnrNo;
                 if (pnr && pnr.trim().length !== 6) {
                     throw new customError_1.default('Invalid pnr no.', 404, 'RESOURCE_NOT_FOUND');
@@ -60,43 +60,36 @@ class PnrDetailsService extends abstract_services_1.default {
                                 throw new customError_1.default('The ticket has already been refunded or reissued.', 400, 'Invalid PNR');
                             }
                             // TRAVELERS
-                            const travelers = pnrResponse.travelers.filter((item) => Number(item.nameAssociationId) === Number(ticket.travelerIndex));
-                            const pax_passports = travelers === null || travelers === void 0 ? void 0 : travelers.map((traveler) => {
+                            const traveler = pnrResponse.travelers[Number(ticket.travelerIndex) - 1];
+                            const mobile_no = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.specialServices.find((item) => {
                                 var _a;
-                                const mobile_no = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.specialServices.find((item) => {
-                                    var _a;
-                                    return item.code === 'CTCM' &&
-                                        ((_a = item.travelerIndices) === null || _a === void 0 ? void 0 : _a.includes((0, lib_1.numRound)(traveler.nameAssociationId)));
-                                });
-                                const email = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.specialServices.find((item) => {
-                                    var _a;
-                                    return item.code === 'CTCE' &&
-                                        ((_a = item.travelerIndices) === null || _a === void 0 ? void 0 : _a.includes((0, lib_1.numRound)(traveler.nameAssociationId)));
-                                });
-                                return {
-                                    passport_no: (traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments)
-                                        ? (_a = traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments[0]) === null || _a === void 0 ? void 0 : _a.documentNumber
-                                        : undefined,
-                                    passport_name: traveler.givenName + ' ' + traveler.surname,
-                                    passport_person_type: (0, pnr_lib_1.capitalize)(traveler === null || traveler === void 0 ? void 0 : traveler.type),
-                                    passport_mobile_no: (traveler === null || traveler === void 0 ? void 0 : traveler.phones)
-                                        ? traveler === null || traveler === void 0 ? void 0 : traveler.phones[0].number
-                                        : (0, pnr_lib_1.extractPaxStr)(mobile_no === null || mobile_no === void 0 ? void 0 : mobile_no.message),
-                                    passport_email: (traveler === null || traveler === void 0 ? void 0 : traveler.emails)
-                                        ? traveler === null || traveler === void 0 ? void 0 : traveler.emails[0]
-                                        : (0, pnr_lib_1.extractPaxStr)(email === null || email === void 0 ? void 0 : email.message),
-                                    identityDocuments: (traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments)
-                                        ? traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments[0]
-                                        : undefined,
-                                };
+                                return item.code === 'CTCM' &&
+                                    ((_a = item.travelerIndices) === null || _a === void 0 ? void 0 : _a.includes((0, lib_1.numRound)(traveler.nameAssociationId)));
                             });
+                            const email = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.specialServices.find((item) => {
+                                var _a;
+                                return item.code === 'CTCE' &&
+                                    ((_a = item.travelerIndices) === null || _a === void 0 ? void 0 : _a.includes((0, lib_1.numRound)(traveler.nameAssociationId)));
+                            });
+                            const pax_passports = {
+                                passport_no: (traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments)
+                                    ? (_c = traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments[0]) === null || _c === void 0 ? void 0 : _c.documentNumber
+                                    : undefined,
+                                passport_name: traveler.givenName + ' ' + traveler.surname,
+                                passport_person_type: (0, pnr_lib_1.capitalize)(traveler === null || traveler === void 0 ? void 0 : traveler.type),
+                                passport_mobile_no: (traveler === null || traveler === void 0 ? void 0 : traveler.phones)
+                                    ? traveler === null || traveler === void 0 ? void 0 : traveler.phones[0].number
+                                    : (0, pnr_lib_1.extractPaxStr)(mobile_no === null || mobile_no === void 0 ? void 0 : mobile_no.message),
+                                passport_email: (traveler === null || traveler === void 0 ? void 0 : traveler.emails)
+                                    ? traveler === null || traveler === void 0 ? void 0 : traveler.emails[0]
+                                    : (0, pnr_lib_1.extractPaxStr)(email === null || email === void 0 ? void 0 : email.message),
+                                identityDocuments: (traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments)
+                                    ? traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments[0]
+                                    : undefined,
+                            };
                             // FLIGHT DETAILS
                             const flights = pnrResponse.flights.filter((item) => flightsId === null || flightsId === void 0 ? void 0 : flightsId.includes(item.itemId));
                             const { flight_details, airticket_route_or_sector, route_sectors } = yield (0, pnr_lib_1.formatFlightDetailsRoute)(flights, conn);
-                            // TAX BREAKDOWN
-                            // const taxBreakdown = pnrResponse.fares.find((item) =>
-                            //   item.travelerIndices?.includes(ticket.travelerIndex)
-                            // );
                             const taxBreakdown = pnrResponse.fares[index];
                             const breakdown = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown.reduce((acc, current) => {
                                 acc[current.taxCode] = Number(current.taxAmount.amount);
@@ -104,19 +97,19 @@ class PnrDetailsService extends abstract_services_1.default {
                             }, {});
                             let totalCountryTax = 0;
                             for (const taxType in breakdown) {
-                                if ((_c = ['BD', 'UT', 'E5']) === null || _c === void 0 ? void 0 : _c.includes(taxType)) {
+                                if ((_d = ['BD', 'UT', 'E5']) === null || _d === void 0 ? void 0 : _d.includes(taxType)) {
                                     totalCountryTax += breakdown[taxType];
                                 }
                             }
                             // TAXES COMMISSION
                             let taxesCommission;
                             if (['TK', 'CZ'].includes(flights[0].airlineCode)) {
-                                taxesCommission = (_d = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _d === void 0 ? void 0 : _d.filter((item) => item.taxCode === 'YQ');
+                                taxesCommission = (_e = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _e === void 0 ? void 0 : _e.filter((item) => item.taxCode === 'YQ');
                             }
                             else if (['MH', 'AI'].includes(flights[0].airlineCode)) {
-                                taxesCommission = (_e = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _e === void 0 ? void 0 : _e.filter((item) => item.taxCode === 'YR');
+                                taxesCommission = (_f = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _f === void 0 ? void 0 : _f.filter((item) => item.taxCode === 'YR');
                             }
-                            const baseFareCommission = (0, lib_1.numRound)((_f = ticket === null || ticket === void 0 ? void 0 : ticket.commission) === null || _f === void 0 ? void 0 : _f.commissionAmount);
+                            const baseFareCommission = (0, lib_1.numRound)((_g = ticket === null || ticket === void 0 ? void 0 : ticket.commission) === null || _g === void 0 ? void 0 : _g.commissionAmount);
                             const countryTaxAit = Number(1 || 0) * 0.003;
                             const grossAit = Number(ticket.payment.total || 0) * 0.003;
                             const airticket_ait = Math.round(grossAit - countryTaxAit);
@@ -139,9 +132,7 @@ class PnrDetailsService extends abstract_services_1.default {
                                 };
                             });
                             const ticketData = Object.assign(Object.assign({}, breakdown), { airticket_ticket_no: ticket.number, airticket_gross_fare: ticket.payment.total, airticket_base_fare: ticket.payment.subtotal, airticket_comvendor: iata_vendor, airticket_commission_percent, airticket_commission_percent_total: baseFareCommission, airticket_ait,
-                                airticket_net_commssion, airticket_airline_id: owningAirline, airticket_route_or_sector, airticket_pnr: pnrResponse.bookingId, airticket_gds_id: 'Sabre', airticket_tax: ticket.payment.taxes, airticket_segment, airticket_issue_date: ticket.date, airticket_journey_date: pnrResponse.startDate, airticket_return_date, airticket_classes: flights[0].cabinTypeName, airticket_client_price: ticket.payment.total, airticket_purchase_price, airticket_profit: airticket_net_commssion, flight_details,
-                                pax_passports,
-                                taxes_commission,
+                                airticket_net_commssion, airticket_airline_id: owningAirline, airticket_route_or_sector, airticket_pnr: pnrResponse.bookingId, airticket_gds_id: 'Sabre', airticket_tax: ticket.payment.taxes, airticket_segment, airticket_issue_date: ticket.date, airticket_journey_date: pnrResponse.startDate, airticket_return_date, airticket_classes: flights[0].cabinTypeName, airticket_client_price: ticket.payment.total, airticket_purchase_price, airticket_profit: airticket_net_commssion, flight_details, pax_passports: [pax_passports], taxes_commission,
                                 route_sectors });
                             ticket_details.push(ticketData);
                         }
@@ -149,7 +140,7 @@ class PnrDetailsService extends abstract_services_1.default {
                             success: true,
                             data: {
                                 ticket_details,
-                                invoice_sales_date: creationDetails === null || creationDetails === void 0 ? void 0 : creationDetails.creationDate,
+                                invoice_sales_date: pnrResponse.flightTickets[0].date,
                                 invoice_sales_man_id,
                                 creation_sign: creationDetails === null || creationDetails === void 0 ? void 0 : creationDetails.creationUserSine,
                             },

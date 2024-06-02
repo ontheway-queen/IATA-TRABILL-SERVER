@@ -81,46 +81,42 @@ class PnrDetailsService extends AbstractServices {
             }
 
             // TRAVELERS
-            const travelers = pnrResponse.travelers.filter(
+            const traveler =
+              pnrResponse.travelers[Number(ticket.travelerIndex) - 1];
+
+            const mobile_no = pnrResponse?.specialServices.find(
               (item) =>
-                Number(item.nameAssociationId) === Number(ticket.travelerIndex)
+                item.code === 'CTCM' &&
+                item.travelerIndices?.includes(
+                  numRound(traveler.nameAssociationId)
+                )
             );
 
-            const pax_passports = travelers?.map((traveler) => {
-              const mobile_no = pnrResponse?.specialServices.find(
-                (item) =>
-                  item.code === 'CTCM' &&
-                  item.travelerIndices?.includes(
-                    numRound(traveler.nameAssociationId)
-                  )
-              );
+            const email = pnrResponse?.specialServices.find(
+              (item) =>
+                item.code === 'CTCE' &&
+                item.travelerIndices?.includes(
+                  numRound(traveler.nameAssociationId)
+                )
+            );
 
-              const email = pnrResponse?.specialServices.find(
-                (item) =>
-                  item.code === 'CTCE' &&
-                  item.travelerIndices?.includes(
-                    numRound(traveler.nameAssociationId)
-                  )
-              );
+            const pax_passports = {
+              passport_no: traveler?.identityDocuments
+                ? traveler?.identityDocuments[0]?.documentNumber
+                : undefined,
+              passport_name: traveler.givenName + ' ' + traveler.surname,
+              passport_person_type: capitalize(traveler?.type),
+              passport_mobile_no: traveler?.phones
+                ? traveler?.phones[0].number
+                : extractPaxStr(mobile_no?.message),
 
-              return {
-                passport_no: traveler?.identityDocuments
-                  ? traveler?.identityDocuments[0]?.documentNumber
-                  : undefined,
-                passport_name: traveler.givenName + ' ' + traveler.surname,
-                passport_person_type: capitalize(traveler?.type),
-                passport_mobile_no: traveler?.phones
-                  ? traveler?.phones[0].number
-                  : extractPaxStr(mobile_no?.message),
-
-                passport_email: traveler?.emails
-                  ? traveler?.emails[0]
-                  : extractPaxStr(email?.message),
-                identityDocuments: traveler?.identityDocuments
-                  ? traveler?.identityDocuments[0]
-                  : undefined,
-              };
-            });
+              passport_email: traveler?.emails
+                ? traveler?.emails[0]
+                : extractPaxStr(email?.message),
+              identityDocuments: traveler?.identityDocuments
+                ? traveler?.identityDocuments[0]
+                : undefined,
+            };
 
             // FLIGHT DETAILS
             const flights = pnrResponse.flights.filter((item) =>
@@ -130,10 +126,6 @@ class PnrDetailsService extends AbstractServices {
             const { flight_details, airticket_route_or_sector, route_sectors } =
               await formatFlightDetailsRoute(flights, conn);
 
-            // TAX BREAKDOWN
-            // const taxBreakdown = pnrResponse.fares.find((item) =>
-            //   item.travelerIndices?.includes(ticket.travelerIndex)
-            // );
             const taxBreakdown = pnrResponse.fares[index];
 
             const breakdown = taxBreakdown?.taxBreakdown.reduce(
@@ -228,7 +220,7 @@ class PnrDetailsService extends AbstractServices {
               airticket_profit: airticket_net_commssion,
 
               flight_details,
-              pax_passports,
+              pax_passports: [pax_passports],
               taxes_commission,
 
               route_sectors,
@@ -241,7 +233,7 @@ class PnrDetailsService extends AbstractServices {
             success: true,
             data: {
               ticket_details,
-              invoice_sales_date: creationDetails?.creationDate,
+              invoice_sales_date: pnrResponse.flightTickets[0].date,
               invoice_sales_man_id,
               creation_sign: creationDetails?.creationUserSine,
             },

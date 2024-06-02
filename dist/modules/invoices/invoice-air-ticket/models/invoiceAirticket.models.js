@@ -438,35 +438,26 @@ class InvoiceAirticketModel extends abstract_models_1.default {
     }
     insertInvoiceInfoItems(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const isExit = yield this.query()
-                .select('*')
-                .from('trabill_invoice_info_items')
-                .where('tii_invoice_id', data.tii_invoice_id)
-                .andWhere((event) => {
-                if (+data.tii_airticket_id) {
-                    event.andWhere('tii_airticket_id', data.tii_airticket_id);
-                }
-                if (+data.tii_billing_id) {
-                    event.andWhere('tii_billing_id', data.tii_billing_id);
-                }
-            });
-            if (isExit && isExit.length) {
-                return this.query()
-                    .update(data)
-                    .into('trabill_invoice_info_items')
-                    .where('tii_invoice_id', data.tii_invoice_id)
-                    .andWhere((event) => {
-                    if (+data.tii_airticket_id) {
-                        event.andWhere('tii_airticket_id', data.tii_airticket_id);
-                    }
-                    if (+data.tii_billing_id) {
-                        event.andWhere('tii_billing_id', data.tii_billing_id);
-                    }
-                });
-            }
-            else {
-                return yield this.query().insert(data).into('trabill_invoice_info_items');
-            }
+            const [id] = yield this.query()
+                .insert(data)
+                .into('trabill_invoice_info_items');
+            return id;
+        });
+    }
+    insertFakeInvoicePassport(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [id] = yield this.query()
+                .insert(data)
+                .into('trabill_invoice_info_passports');
+            return id;
+        });
+    }
+    deleteFakeInvoicePassport(invoice_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .update({ tip_is_deleted: 1 })
+                .into('trabill_invoice_info_passports')
+                .where('tip_invoice_id', invoice_id);
         });
     }
     deleteInvoiceInfoItems(invoice_id) {
@@ -490,7 +481,12 @@ class InvoiceAirticketModel extends abstract_models_1.default {
                 .from('trabill_invoice_info_items')
                 .where('tii_invoice_id', invoice_id)
                 .andWhereNot('tii_is_deleted', 1);
-            return Object.assign(Object.assign({}, data), { infos });
+            const passports = yield this.query()
+                .select(`tip_id`, `tip_invoice_id`, `tip_name`, `tip_pax_type`, `tip_passport_no`, `tip_mobile_no`, `tip_email`, `tip_dob`, `tip_doi`, `tip_doe`)
+                .from('trabill_invoice_info_passports')
+                .whereNot('tip_is_deleted', 1)
+                .andWhere('tip_invoice_id', invoice_id);
+            return Object.assign(Object.assign({}, data), { infos, passports });
         });
     }
 }

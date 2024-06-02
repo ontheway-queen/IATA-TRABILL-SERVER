@@ -17,7 +17,7 @@ class AddInvoiceInfo extends abstract_services_1.default {
     constructor() {
         super();
         this.add = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { infos, ti_invoice_id, ti_invoice_total_due, ti_net_total, ti_sub_total, ti_total_discount, ti_total_payment, } = req.body;
+            const { infos, passports, ti_invoice_id, ti_invoice_total_due, ti_net_total, ti_sub_total, ti_total_discount, ti_total_payment, } = req.body;
             const { user_id, agency_id } = req;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.invoiceAirticketModel(req, trx);
@@ -33,10 +33,20 @@ class AddInvoiceInfo extends abstract_services_1.default {
                     ti_total_discount,
                     ti_total_payment,
                 });
+                // delete previous invoice items
+                yield conn.deleteInvoiceInfoItems(ti_invoice_id);
                 if (infos && infos.length) {
                     for (const info of infos) {
                         yield conn.insertInvoiceInfoItems(Object.assign(Object.assign({}, info), { tii_created_by: user_id, tii_org_agency: agency_id, tii_ti_id: ti_id, tii_invoice_id: ti_invoice_id }));
                     }
+                }
+                // delete previous invoice passports
+                yield conn.deleteFakeInvoicePassport(ti_invoice_id);
+                if (passports && passports.length) {
+                    const passportInfo = passports.map((item) => {
+                        return Object.assign(Object.assign({}, item), { tip_invoice_id: ti_invoice_id });
+                    });
+                    yield conn.insertFakeInvoicePassport(passportInfo);
                 }
                 // invoice history
                 const content = `INVOICE BILL UPDATED NET TOTAL ${prev_inv_net_total}/- to ${ti_net_total}/-`;
@@ -63,6 +73,7 @@ class AddInvoiceInfo extends abstract_services_1.default {
                 const conn = this.models.invoiceAirticketModel(req, trx);
                 yield conn.deleteInvoiceInfo(invoice_id);
                 yield conn.deleteInvoiceInfoItems(invoice_id);
+                yield conn.deleteFakeInvoicePassport(invoice_id);
                 yield this.insertAudit(req, 'create', 'Invoice duplicate info created', user_id, 'INVOICES');
                 return {
                     success: true,

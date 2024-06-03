@@ -273,6 +273,23 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .where('extra_amount_invoice_id', invoiceId);
             return data;
         });
+        this.getAuthorizedBySignature = () => __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .select('sig_signature', 'sig_type', 'sig_name_title', 'sig_position', 'sig_phone_no')
+                .from('trabill_signature_info')
+                .where('sig_org_id', this.org_agency)
+                .andWhere('sig_type', 'AUTHORITY');
+            return data;
+        });
+        this.getInvoicePreparedBy = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .select('sig_signature', 'sig_type', 'sig_name_title', 'sig_position', 'sig_phone_no')
+                .from('trabill_invoices')
+                .leftJoin('trabill_signature_info', { sig_user_id: 'invoice_created_by' })
+                .where('invoice_id', invoice_id)
+                .andWhere('sig_type', 'PREPARE');
+            return data;
+        });
     }
     getAllInvoices(category_id, page, size, search_text = '', from_date, to_date) {
         return __awaiter(this, void 0, void 0, function* () {

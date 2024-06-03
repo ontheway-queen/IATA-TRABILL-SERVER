@@ -162,7 +162,7 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                             const identityDocuments = passport === null || passport === void 0 ? void 0 : passport.identityDocuments;
                             if (identityDocuments &&
                                 identityDocuments.documentType === 'PASSPORT') {
-                                let passport_id = yield pass_conn.getPassIdByPassNo(identityDocuments.documentNumber);
+                                let passport_id = yield pass_conn.getPassIdByPassNo(identityDocuments === null || identityDocuments === void 0 ? void 0 : identityDocuments.documentNumber);
                                 if (!passport_id) {
                                     const PassportData = {
                                         passport_person_type: (0, pnr_lib_1.capitalize)(passport.passport_person_type),

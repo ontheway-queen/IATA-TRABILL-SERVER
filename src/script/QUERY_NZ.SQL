@@ -37,4 +37,18 @@ and not invoice_is_void = 1
 and invoice_net_total - coalesce(cl_pay.cl_pay, 0) > 0
 GROUP BY invoice_id
 ) as invoices
-left join trabill_airlines on trabill_airlines.airline_id = invoices.airline_id
+left join trabill_airlines on trabill_airlines.airline_id = invoices.airline_id;
+
+
+
+
+
+
+
+
+
+
+
+
+ALTER TABLE `trabill`.`trabill_signature_info` 
+ADD COLUMN `sig_phone_no` VARCHAR(45) NULL AFTER `sig_position`;

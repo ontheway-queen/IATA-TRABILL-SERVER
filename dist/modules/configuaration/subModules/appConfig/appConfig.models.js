@@ -46,7 +46,7 @@ class AppConfigModels extends abstract_models_1.default {
         });
         this.selectSignature = () => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.db('trabill_signature_info')
-                .select('sig_id', 'sig_org_id', 'sig_employee_id', 'employee_full_name', 'sig_user_id', 'pre_by.user_full_name as prepared_by', 'sig_type', 'sig_name_title', 'sig_position', 'sig_company_name', 'sig_address', 'sig_city', 'sig_state', 'sig_zip_code', 'sig_phone_number', 'sig_email', 'sig_signature', 'sig_created_date as created_date', 'sig_status', 'created_by.user_full_name as created_by')
+                .select('sig_id', 'sig_employee_id', 'employee_full_name', 'sig_user_id', 'pre_by.user_full_name as prepared_by', 'sig_type', 'sig_name_title', 'sig_position', 'sig_phone_no', 'sig_company_name', 'sig_address', 'sig_city', 'sig_state', 'sig_zip_code', 'sig_phone_number', 'sig_email', 'sig_signature', 'sig_created_date as created_date', 'sig_status', 'created_by.user_full_name as created_by')
                 .where('sig_org_id', this.org_agency)
                 .leftJoin('trabill_users as created_by', {
                 'created_by.user_id': 'sig_created_by',

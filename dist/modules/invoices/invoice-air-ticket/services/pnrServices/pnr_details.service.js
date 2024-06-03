@@ -22,7 +22,7 @@ class PnrDetailsService extends abstract_services_1.default {
         super();
         this.pnrDetails = (req, pnrNo) => __awaiter(this, void 0, void 0, function* () {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d, _e, _f, _g;
+                var _a, _b, _c, _d, _e, _f, _g, _h, _j;
                 const pnr = req.params.pnr || pnrNo;
                 if (pnr && pnr.trim().length !== 6) {
                     throw new customError_1.default('Invalid pnr no.', 404, 'RESOURCE_NOT_FOUND');
@@ -32,9 +32,8 @@ class PnrDetailsService extends abstract_services_1.default {
                 if (!ota_info.ota_api_url && !ota_info.ota_token) {
                     return { success: true, message: 'Empty token and base url' };
                 }
-                const api_url = ota_info.ota_api_url + '/' + pnr;
-                // const api_url =
-                // 'http://192.168.0.158:9008/api/v1/public/get-booking' + '/' + pnr;
+                // const api_url = ota_info.ota_api_url + '/' + pnr;
+                const api_url = 'http://192.168.0.158:9008/api/v1/public/get-booking' + '/' + pnr;
                 const headers = {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${ota_info.ota_token}`,
@@ -64,12 +63,12 @@ class PnrDetailsService extends abstract_services_1.default {
                             const mobile_no = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.specialServices.find((item) => {
                                 var _a;
                                 return item.code === 'CTCM' &&
-                                    ((_a = item.travelerIndices) === null || _a === void 0 ? void 0 : _a.includes((0, lib_1.numRound)(traveler.nameAssociationId)));
+                                    ((_a = item.travelerIndices) === null || _a === void 0 ? void 0 : _a.includes(ticket.travelerIndex));
                             });
                             const email = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.specialServices.find((item) => {
                                 var _a;
                                 return item.code === 'CTCE' &&
-                                    ((_a = item.travelerIndices) === null || _a === void 0 ? void 0 : _a.includes((0, lib_1.numRound)(traveler.nameAssociationId)));
+                                    ((_a = item.travelerIndices) === null || _a === void 0 ? void 0 : _a.includes(ticket.travelerIndex));
                             });
                             const pax_passports = {
                                 passport_no: (traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments)
@@ -90,26 +89,27 @@ class PnrDetailsService extends abstract_services_1.default {
                             // FLIGHT DETAILS
                             const flights = pnrResponse.flights.filter((item) => flightsId === null || flightsId === void 0 ? void 0 : flightsId.includes(item.itemId));
                             const { flight_details, airticket_route_or_sector, route_sectors } = yield (0, pnr_lib_1.formatFlightDetailsRoute)(flights, conn);
-                            const taxBreakdown = pnrResponse.fares[index];
+                            const taxBreakdown = ((_d = pnrResponse.fares) === null || _d === void 0 ? void 0 : _d.find((item) => item.travelerIndices.includes(ticket.travelerIndex))) ||
+                                ((_e = pnrResponse.fares) === null || _e === void 0 ? void 0 : _e.find((item) => item.airlineCode === flights[0].airlineCode));
                             const breakdown = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown.reduce((acc, current) => {
                                 acc[current.taxCode] = Number(current.taxAmount.amount);
                                 return acc;
                             }, {});
                             let totalCountryTax = 0;
                             for (const taxType in breakdown) {
-                                if ((_d = ['BD', 'UT', 'E5']) === null || _d === void 0 ? void 0 : _d.includes(taxType)) {
+                                if ((_f = ['BD', 'UT', 'E5']) === null || _f === void 0 ? void 0 : _f.includes(taxType)) {
                                     totalCountryTax += breakdown[taxType];
                                 }
                             }
                             // TAXES COMMISSION
                             let taxesCommission;
                             if (['TK', 'CZ'].includes(flights[0].airlineCode)) {
-                                taxesCommission = (_e = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _e === void 0 ? void 0 : _e.filter((item) => item.taxCode === 'YQ');
+                                taxesCommission = (_g = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _g === void 0 ? void 0 : _g.filter((item) => item.taxCode === 'YQ');
                             }
                             else if (['MH', 'AI'].includes(flights[0].airlineCode)) {
-                                taxesCommission = (_f = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _f === void 0 ? void 0 : _f.filter((item) => item.taxCode === 'YR');
+                                taxesCommission = (_h = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _h === void 0 ? void 0 : _h.filter((item) => item.taxCode === 'YR');
                             }
-                            const baseFareCommission = (0, lib_1.numRound)((_g = ticket === null || ticket === void 0 ? void 0 : ticket.commission) === null || _g === void 0 ? void 0 : _g.commissionAmount);
+                            const baseFareCommission = (0, lib_1.numRound)((_j = ticket === null || ticket === void 0 ? void 0 : ticket.commission) === null || _j === void 0 ? void 0 : _j.commissionAmount);
                             const countryTaxAit = Number(1 || 0) * 0.003;
                             const grossAit = Number(ticket.payment.total || 0) * 0.003;
                             const airticket_ait = Math.round(grossAit - countryTaxAit);

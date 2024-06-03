@@ -279,7 +279,21 @@ class DashboardServices extends abstract_services_1.default {
                     }
                 }
                 else if (pdfData.text.includes('AGENT BILLING DETAILS')) {
-                    console.log({ text: pdfData.text });
+                    const agentBillingDetails = (0, dashbaor_utils_1.formatAgentBillingDetails)(pdfData === null || pdfData === void 0 ? void 0 : pdfData.text);
+                    // from database
+                    const ticket_issue = yield conn.getBspTicketIssueInfo(agentBillingDetails.from_date, agentBillingDetails.to_date);
+                    const ticket_re_issue = yield conn.getBspTicketReissueInfo(agentBillingDetails.from_date, agentBillingDetails.to_date);
+                    const ticket_refund = yield conn.getBspTicketRefundInfo(agentBillingDetails.from_date, agentBillingDetails.to_date);
+                    const grandTotal = (0, lib_1.numRound)(ticket_issue.purchase_amount) +
+                        (0, lib_1.numRound)(ticket_re_issue.purchase_amount) -
+                        (0, lib_1.numRound)(ticket_refund.refund_amount);
+                    const trabill_summary = {
+                        issue: (0, lib_1.numRound)(ticket_issue.purchase_amount),
+                        reissue: (0, lib_1.numRound)(ticket_re_issue.purchase_amount),
+                        refund: (0, lib_1.numRound)(ticket_refund.refund_amount),
+                        grandTotal,
+                    };
+                    console.log({ agentBillingDetails, trabill_summary });
                 }
                 return {
                     success: true,

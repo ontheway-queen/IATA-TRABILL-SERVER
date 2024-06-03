@@ -53,6 +53,8 @@ class InvoiceAirticketService extends abstract_services_1.default {
             const conn = this.models.invoiceAirticketModel(req);
             const common_conn = this.models.CommonInvoiceModel(req);
             const data = yield common_conn.getViewInvoiceInfo(invoice_id);
+            const prepared_by = yield common_conn.getInvoicePreparedBy(invoice_id);
+            const authorized_by = yield common_conn.getAuthorizedBySignature();
             const pax_details = yield common_conn.getInvoiceAirTicketPaxDetails(invoice_id);
             const flights = yield conn.getAirTicketFlights(invoice_id);
             const airticket_information = yield conn.getViewAirticketItems(invoice_id);
@@ -64,7 +66,9 @@ class InvoiceAirticketService extends abstract_services_1.default {
             const tax_refund = yield conn.viewAirTicketTaxRefund(invoice_id);
             return {
                 success: true,
-                data: Object.assign(Object.assign({}, data), { reissued,
+                data: Object.assign(Object.assign({}, data), { authorized_by,
+                    prepared_by,
+                    reissued,
                     refunds,
                     pax_details,
                     flights,

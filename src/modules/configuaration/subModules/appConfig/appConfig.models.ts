@@ -1,6 +1,5 @@
 import AbstractModels from '../../../../abstracts/abstract.models';
 import { idType } from '../../../../common/types/common.types';
-import CustomError from '../../../../common/utils/errors/customError';
 import {
   IAppConfig,
   ISignatureDB,
@@ -123,7 +122,6 @@ class AppConfigModels extends AbstractModels {
     const data = await this.db('trabill_signature_info')
       .select(
         'sig_id',
-        'sig_org_id',
         'sig_employee_id',
         'employee_full_name',
         'sig_user_id',
@@ -131,6 +129,7 @@ class AppConfigModels extends AbstractModels {
         'sig_type',
         'sig_name_title',
         'sig_position',
+        'sig_phone_no',
         'sig_company_name',
         'sig_address',
         'sig_city',

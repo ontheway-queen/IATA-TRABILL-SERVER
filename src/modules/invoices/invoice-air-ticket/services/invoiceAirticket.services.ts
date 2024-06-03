@@ -73,6 +73,8 @@ class InvoiceAirticketService extends AbstractServices {
     const common_conn = this.models.CommonInvoiceModel(req);
 
     const data = await common_conn.getViewInvoiceInfo(invoice_id);
+    const prepared_by = await common_conn.getInvoicePreparedBy(invoice_id);
+    const authorized_by = await common_conn.getAuthorizedBySignature();
 
     const pax_details = await common_conn.getInvoiceAirTicketPaxDetails(
       invoice_id
@@ -96,6 +98,8 @@ class InvoiceAirticketService extends AbstractServices {
       success: true,
       data: {
         ...data,
+        authorized_by,
+        prepared_by,
         reissued,
         refunds,
         pax_details,

@@ -238,6 +238,7 @@ export interface ISignatureReqBody {
   sig_zip_code: string;
   sig_email: string;
   sig_signature: string | null;
+  sig_phone_no: string;
 }
 export interface ISignatureDB extends ISignatureReqBody {
   sig_org_id: number;

@@ -247,7 +247,7 @@ class AddInvoiceWithPnr extends AbstractServices {
               identityDocuments.documentType === 'PASSPORT'
             ) {
               let passport_id = await pass_conn.getPassIdByPassNo(
-                identityDocuments.documentNumber
+                identityDocuments?.documentNumber
               );
 
               if (!passport_id) {
@@ -274,6 +274,7 @@ class AddInvoiceWithPnr extends AbstractServices {
 
                 passport_id = await pass_conn.addPassport(PassportData);
               }
+
               await common_conn.insertInvoiceAirticketPax(
                 invoice_id,
                 airticket_id,

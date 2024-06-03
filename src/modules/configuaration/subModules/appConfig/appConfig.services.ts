@@ -95,6 +95,7 @@ class AppConfigServices extends AbstractServices {
       sig_signature: imageUrlObj.sig_signature,
       sig_org_id: req.agency_id,
       sig_created_by: req.user_id,
+      sig_phone_no: body.sig_phone_no,
     };
 
     await conn.insertSignature(sig_data);
@@ -128,6 +129,7 @@ class AppConfigServices extends AbstractServices {
       sig_signature: body?.sig_signature || imageUrlObj?.sig_signature || null,
       sig_org_id: req.agency_id,
       sig_created_by: req.user_id,
+      sig_phone_no: body.sig_phone_no,
     };
 
     await conn.updateSignature(sig_data, sig_id);

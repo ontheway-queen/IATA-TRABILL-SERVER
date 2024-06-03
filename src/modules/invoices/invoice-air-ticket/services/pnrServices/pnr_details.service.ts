@@ -31,10 +31,10 @@ class PnrDetailsService extends AbstractServices {
         return { success: true, message: 'Empty token and base url' };
       }
 
-      const api_url = ota_info.ota_api_url + '/' + pnr;
+      // const api_url = ota_info.ota_api_url + '/' + pnr;
 
-      // const api_url =
-      // 'http://192.168.0.158:9008/api/v1/public/get-booking' + '/' + pnr;
+      const api_url =
+        'http://192.168.0.158:9008/api/v1/public/get-booking' + '/' + pnr;
 
       const headers = {
         'Content-Type': 'application/json',
@@ -87,17 +87,13 @@ class PnrDetailsService extends AbstractServices {
             const mobile_no = pnrResponse?.specialServices.find(
               (item) =>
                 item.code === 'CTCM' &&
-                item.travelerIndices?.includes(
-                  numRound(traveler.nameAssociationId)
-                )
+                item.travelerIndices?.includes(ticket.travelerIndex)
             );
 
             const email = pnrResponse?.specialServices.find(
               (item) =>
                 item.code === 'CTCE' &&
-                item.travelerIndices?.includes(
-                  numRound(traveler.nameAssociationId)
-                )
+                item.travelerIndices?.includes(ticket.travelerIndex)
             );
 
             const pax_passports = {
@@ -126,7 +122,13 @@ class PnrDetailsService extends AbstractServices {
             const { flight_details, airticket_route_or_sector, route_sectors } =
               await formatFlightDetailsRoute(flights, conn);
 
-            const taxBreakdown = pnrResponse.fares[index];
+            const taxBreakdown =
+              pnrResponse.fares?.find((item) =>
+                item.travelerIndices.includes(ticket.travelerIndex)
+              ) ||
+              pnrResponse.fares?.find(
+                (item) => item.airlineCode === flights[0].airlineCode
+              );
 
             const breakdown = taxBreakdown?.taxBreakdown.reduce(
               (acc: any, current) => {

@@ -860,6 +860,39 @@ class CommonInvoiceModel extends AbstractModels {
 
     return data;
   };
+
+  getAuthorizedBySignature = async () => {
+    const [data] = await this.query()
+      .select(
+        'sig_signature',
+        'sig_type',
+        'sig_name_title',
+        'sig_position',
+        'sig_phone_no'
+      )
+      .from('trabill_signature_info')
+      .where('sig_org_id', this.org_agency)
+      .andWhere('sig_type', 'AUTHORITY');
+
+    return data;
+  };
+
+  getInvoicePreparedBy = async (invoice_id: idType) => {
+    const [data] = await this.query()
+      .select(
+        'sig_signature',
+        'sig_type',
+        'sig_name_title',
+        'sig_position',
+        'sig_phone_no'
+      )
+      .from('trabill_invoices')
+      .leftJoin('trabill_signature_info', { sig_user_id: 'invoice_created_by' })
+      .where('invoice_id', invoice_id)
+      .andWhere('sig_type', 'PREPARE');
+
+    return data;
+  };
 }
 
 export default CommonInvoiceModel;

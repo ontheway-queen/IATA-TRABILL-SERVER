@@ -70,6 +70,7 @@ class AppConfigServices extends abstract_services_1.default {
                 sig_signature: imageUrlObj.sig_signature,
                 sig_org_id: req.agency_id,
                 sig_created_by: req.user_id,
+                sig_phone_no: body.sig_phone_no,
             };
             yield conn.insertSignature(sig_data);
             return { success: true, imageUrlObj };
@@ -95,6 +96,7 @@ class AppConfigServices extends abstract_services_1.default {
                 sig_signature: (body === null || body === void 0 ? void 0 : body.sig_signature) || (imageUrlObj === null || imageUrlObj === void 0 ? void 0 : imageUrlObj.sig_signature) || null,
                 sig_org_id: req.agency_id,
                 sig_created_by: req.user_id,
+                sig_phone_no: body.sig_phone_no,
             };
             yield conn.updateSignature(sig_data, sig_id);
             // DELETE PREVIOUS SIGNATURE

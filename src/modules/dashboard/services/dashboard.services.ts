@@ -12,7 +12,11 @@ import {
   BspBillingQueryType,
   BspBillingSummaryQueryType,
 } from '../types/dashboard.types';
-import { bspBillingFormatter, withinRange } from '../utils/dashbaor.utils';
+import {
+  bspBillingFormatter,
+  formatAgentBillingDetails,
+  withinRange,
+} from '../utils/dashbaor.utils';
 
 class DashboardServices extends AbstractServices {
   constructor() {
@@ -388,7 +392,37 @@ class DashboardServices extends AbstractServices {
           data.message = 'BSP BILLING CROSS CHECK NOT MATCHED...';
         }
       } else if (pdfData.text.includes('AGENT BILLING DETAILS')) {
-        console.log({ text: pdfData.text });
+        const agentBillingDetails = formatAgentBillingDetails(pdfData?.text);
+
+        // from database
+        const ticket_issue = await conn.getBspTicketIssueInfo(
+          agentBillingDetails.from_date as Date,
+          agentBillingDetails.to_date as Date
+        );
+
+        const ticket_re_issue = await conn.getBspTicketReissueInfo(
+          agentBillingDetails.from_date as Date,
+          agentBillingDetails.to_date as Date
+        );
+
+        const ticket_refund = await conn.getBspTicketRefundInfo(
+          agentBillingDetails.from_date as Date,
+          agentBillingDetails.to_date as Date
+        );
+
+        const grandTotal =
+          numRound(ticket_issue.purchase_amount) +
+          numRound(ticket_re_issue.purchase_amount) -
+          numRound(ticket_refund.refund_amount);
+
+        const trabill_summary = {
+          issue: numRound(ticket_issue.purchase_amount),
+          reissue: numRound(ticket_re_issue.purchase_amount),
+          refund: numRound(ticket_refund.refund_amount),
+          grandTotal,
+        };
+
+        console.log({ agentBillingDetails, trabill_summary });
       }
 
       return {

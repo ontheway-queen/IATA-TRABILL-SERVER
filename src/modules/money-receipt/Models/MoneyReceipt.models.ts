@@ -42,21 +42,6 @@ class MoneyReceiptModels extends AbstractModels {
     }
   }
 
-  public getPrevInvoiceClPay = async (receiptId: idType) => {
-    const [data] = await this.query()
-      .from('trabill_invoice_client_payments')
-      .select(
-        this.db.raw(
-          "coalesce(concat('client-',invclientpayment_client_id), concat('combined-',invclientpayment_combined_id)) as comb_client"
-        ),
-        'invclientpayment_cltrxn_id'
-      )
-      .where('invclientpayment_moneyreceipt_id', receiptId)
-      .andWhereNot('invclientpayment_is_deleted', 1);
-
-    return data as { prevClTrxnId: number; comb_client: string };
-  };
-
   public deletePrevInvoiceClPay = async (
     receiptId: idType,
     invclientpayment_deleted_by: idType
@@ -1302,7 +1287,7 @@ class MoneyReceiptModels extends AbstractModels {
   };
 
   public getPreviousPaidAmount = async (receiptId: idType) => {
-    const amount = await this.query()
+    const [data] = (await this.query()
       .from('trabill_money_receipts')
       .select(
         'acctrxn_ac_id AS prevAccId',
@@ -1335,11 +1320,9 @@ class MoneyReceiptModels extends AbstractModels {
       )
       .leftJoin('trabill_invoice_client_payments', {
         invclientpayment_moneyreceipt_id: 'receipt_id',
-      });
+      })) as IPervMoneyReceipt[];
 
-    return amount[0].receipt_payment_type !== 4
-      ? (amount[0] as IPervMoneyReceipt)
-      : undefined;
+    return data;
   };
 
   public getInvoicesByMoneyReceiptId = async (receiptId: idType) => {

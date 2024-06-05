@@ -19,34 +19,20 @@ class DeleteMoneyReceipt extends AbstractServices {
 
       const previousBillingData = await conn.getPreviousPaidAmount(receipt_id);
 
-      const getClientPayTrxnId = await conn.getPrevInvoiceClPay(receipt_id);
+      await conn.deleteMoneyreceipt(receipt_id, receipt_deleted_by);
 
       await conn.deletePrevMoneyReceiptChequeInfo(
         receipt_id,
         receipt_deleted_by
       );
 
-      await conn.deleteMoneyreceipt(receipt_id, receipt_deleted_by);
+      await conn.deletePrevInvoiceClPay(receipt_id, receipt_deleted_by);
+
       if (previousBillingData) {
         const { prevClTrxn, prevCombClient, prevAccTrxnId } =
           previousBillingData;
 
-        await conn.deletePrevInvoiceClPay(receipt_id, receipt_deleted_by);
-        await conn.deletePrevMoneyReceiptChequeInfo(
-          receipt_id,
-          receipt_deleted_by
-        );
-
-        if (prevClTrxn) {
-          await trxns.deleteClTrxn(prevClTrxn, prevCombClient);
-        }
-
-        if (getClientPayTrxnId && getClientPayTrxnId.prevClTrxnId) {
-          await trxns.deleteClTrxn(
-            getClientPayTrxnId.prevClTrxnId,
-            getClientPayTrxnId.comb_client
-          );
-        }
+        if (prevClTrxn) await trxns.deleteClTrxn(prevClTrxn, prevCombClient);
 
         if (previousBillingData?.receipt_trxn_charge_id) {
           await this.models
@@ -56,7 +42,7 @@ class DeleteMoneyReceipt extends AbstractServices {
             );
         }
 
-        await trxns.deleteAccTrxn(prevAccTrxnId);
+        if (prevAccTrxnId) await trxns.deleteAccTrxn(prevAccTrxnId);
       }
 
       // delete money receipt

@@ -25,25 +25,20 @@ class DeleteMoneyReceipt extends abstract_services_1.default {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const previousBillingData = yield conn.getPreviousPaidAmount(receipt_id);
-                const getClientPayTrxnId = yield conn.getPrevInvoiceClPay(receipt_id);
-                yield conn.deletePrevMoneyReceiptChequeInfo(receipt_id, receipt_deleted_by);
                 yield conn.deleteMoneyreceipt(receipt_id, receipt_deleted_by);
+                yield conn.deletePrevMoneyReceiptChequeInfo(receipt_id, receipt_deleted_by);
+                yield conn.deletePrevInvoiceClPay(receipt_id, receipt_deleted_by);
                 if (previousBillingData) {
                     const { prevClTrxn, prevCombClient, prevAccTrxnId } = previousBillingData;
-                    yield conn.deletePrevInvoiceClPay(receipt_id, receipt_deleted_by);
-                    yield conn.deletePrevMoneyReceiptChequeInfo(receipt_id, receipt_deleted_by);
-                    if (prevClTrxn) {
+                    if (prevClTrxn)
                         yield trxns.deleteClTrxn(prevClTrxn, prevCombClient);
-                    }
-                    if (getClientPayTrxnId && getClientPayTrxnId.prevClTrxnId) {
-                        yield trxns.deleteClTrxn(getClientPayTrxnId.prevClTrxnId, getClientPayTrxnId.comb_client);
-                    }
                     if (previousBillingData === null || previousBillingData === void 0 ? void 0 : previousBillingData.receipt_trxn_charge_id) {
                         yield this.models
                             .vendorModel(req, trx)
                             .deleteOnlineTrxnCharge(previousBillingData === null || previousBillingData === void 0 ? void 0 : previousBillingData.receipt_trxn_charge_id);
                     }
-                    yield trxns.deleteAccTrxn(prevAccTrxnId);
+                    if (prevAccTrxnId)
+                        yield trxns.deleteAccTrxn(prevAccTrxnId);
                 }
                 // delete money receipt
                 const invoice = yield conn.getInvoicesByMoneyReceiptId(receipt_id);

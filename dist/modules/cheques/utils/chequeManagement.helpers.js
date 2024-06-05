@@ -344,6 +344,7 @@ ChequeManagementHelpers.moneyReceiptChequeUpdate = (req, conn, trx, agent_conn) 
         };
         const client_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);
         const moneyReceiptAccountInfo = {
+            receipt_account_id: account_id,
             receipt_actransaction_id: account_trxn_id,
             receipt_ctrxn_id: client_trxn_id,
             receipt_agent_trxn_id,

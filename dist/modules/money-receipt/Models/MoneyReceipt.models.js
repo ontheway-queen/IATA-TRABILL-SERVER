@@ -25,14 +25,6 @@ class MoneyReceiptModels extends abstract_models_1.default {
                 .insert(insertedData);
             return id[0];
         });
-        this.getPrevInvoiceClPay = (receiptId) => __awaiter(this, void 0, void 0, function* () {
-            const [data] = yield this.query()
-                .from('trabill_invoice_client_payments')
-                .select(this.db.raw("coalesce(concat('client-',invclientpayment_client_id), concat('combined-',invclientpayment_combined_id)) as comb_client"), 'invclientpayment_cltrxn_id')
-                .where('invclientpayment_moneyreceipt_id', receiptId)
-                .andWhereNot('invclientpayment_is_deleted', 1);
-            return data;
-        });
         this.deletePrevInvoiceClPay = (receiptId, invclientpayment_deleted_by) => __awaiter(this, void 0, void 0, function* () {
             yield this.query()
                 .into('trabill_invoice_client_payments')
@@ -710,7 +702,7 @@ class MoneyReceiptModels extends abstract_models_1.default {
             return data;
         });
         this.getPreviousPaidAmount = (receiptId) => __awaiter(this, void 0, void 0, function* () {
-            const amount = yield this.query()
+            const [data] = (yield this.query()
                 .from('trabill_money_receipts')
                 .select('acctrxn_ac_id AS prevAccId', this.db.raw('CAST(receipt_total_amount AS DECIMAL(15,2)) AS prevReceiptTotal'), 'receipt_client_id as prevClientId', 'receipt_combined_id as prevCombId', 'receipt_payment_type', this.db.raw("CASE WHEN receipt_client_id IS NOT NULL THEN CONCAT('client-',receipt_client_id) ELSE CONCAT('combined-',receipt_combined_id) END AS prevCombClient"), 'receipt_ctrxn_id as prevClTrxn', 'receipt_actransaction_id as prevAccTrxnId', 'receipt_agent_id as prevAgentId', 'receipt_agent_trxn_id as prevAgentTrxnId', 'invclientpayment_invoice_id as prevInvoiceId', 'receipt_trxn_charge_id', 'receipt_vouchar_no', 'receipt_trxn_charge')
                 .where('receipt_id', receiptId)
@@ -718,10 +710,8 @@ class MoneyReceiptModels extends abstract_models_1.default {
                 .leftJoin(`${this.trxn}.acc_trxn`, `${this.trxn}.acc_trxn.acctrxn_id`, 'receipt_actransaction_id')
                 .leftJoin('trabill_invoice_client_payments', {
                 invclientpayment_moneyreceipt_id: 'receipt_id',
-            });
-            return amount[0].receipt_payment_type !== 4
-                ? amount[0]
-                : undefined;
+            }));
+            return data;
         });
         this.getInvoicesByMoneyReceiptId = (receiptId) => __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()

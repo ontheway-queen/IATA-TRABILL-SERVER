@@ -501,6 +501,7 @@ class ChequeManagementHelpers {
       const client_trxn_id = await trxns.clTrxnInsert(clTrxnBody);
 
       const moneyReceiptAccountInfo = {
+        receipt_account_id: account_id,
         receipt_actransaction_id: account_trxn_id as number,
         receipt_ctrxn_id: client_trxn_id as number,
         receipt_agent_trxn_id,

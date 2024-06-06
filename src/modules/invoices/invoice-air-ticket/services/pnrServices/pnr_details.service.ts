@@ -123,10 +123,13 @@ class PnrDetailsService extends AbstractServices {
               await formatFlightDetailsRoute(flights, conn);
 
             const taxBreakdown =
-              pnrResponse.fares?.find((item) =>
-                item.travelerIndices.includes(ticket.travelerIndex)
-              ) ||
-              pnrResponse.fares?.find(
+              pnrResponse.fares?.find((item) => {
+                return (
+                  item?.travelerIndices &&
+                  item?.travelerIndices.includes(ticket.travelerIndex)
+                );
+              }) ||
+              pnrResponse?.fares?.find(
                 (item) => item.airlineCode === flights[0].airlineCode
               );
 

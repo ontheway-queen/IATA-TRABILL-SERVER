@@ -90,8 +90,11 @@ class PnrDetailsService extends abstract_services_1.default {
                             // FLIGHT DETAILS
                             const flights = pnrResponse.flights.filter((item) => flightsId === null || flightsId === void 0 ? void 0 : flightsId.includes(item.itemId));
                             const { flight_details, airticket_route_or_sector, route_sectors } = yield (0, pnr_lib_1.formatFlightDetailsRoute)(flights, conn);
-                            const taxBreakdown = ((_d = pnrResponse.fares) === null || _d === void 0 ? void 0 : _d.find((item) => item.travelerIndices.includes(ticket.travelerIndex))) ||
-                                ((_e = pnrResponse.fares) === null || _e === void 0 ? void 0 : _e.find((item) => item.airlineCode === flights[0].airlineCode));
+                            const taxBreakdown = ((_d = pnrResponse.fares) === null || _d === void 0 ? void 0 : _d.find((item) => {
+                                return ((item === null || item === void 0 ? void 0 : item.travelerIndices) &&
+                                    (item === null || item === void 0 ? void 0 : item.travelerIndices.includes(ticket.travelerIndex)));
+                            })) ||
+                                ((_e = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.fares) === null || _e === void 0 ? void 0 : _e.find((item) => item.airlineCode === flights[0].airlineCode));
                             const breakdown = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown.reduce((acc, current) => {
                                 acc[current.taxCode] = Number(current.taxAmount.amount);
                                 return acc;

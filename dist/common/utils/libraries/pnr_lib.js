@@ -25,6 +25,11 @@ const formatFlightDetailsRoute = (flights, conn) => __awaiter(void 0, void 0, vo
             route_sectors.push(flight.toAirportCode);
         }
         else {
+            if (flights[index - 1].toAirportCode !== flight.fromAirportCode) {
+                const from_airport_id = yield conn.airportIdByCode(flight.fromAirportCode);
+                airticket_route_or_sector.push(from_airport_id);
+                route_sectors.push(flight.fromAirportCode);
+            }
             airticket_route_or_sector.push(fltdetails_to_airport_id);
             route_sectors.push(flight.toAirportCode);
         }

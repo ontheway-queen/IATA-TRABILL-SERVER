@@ -272,6 +272,8 @@ class ReportModel extends AbstractModels {
   // CLIENT DUE ADVANCE
   getClientWiseDueSummary = async (
     search: string,
+    client_id: null | number,
+    combine_id: null | number,
     page: number = 1,
     size: number = 50
   ) => {
@@ -312,6 +314,15 @@ class ReportModel extends AbstractModels {
                 this.whereILike('client_name', `%${search}%`).orWhereILike(
                   'airline_code',
                   `%${search}%`
+                );
+              });
+            }
+
+            if (client_id || combine_id) {
+              queryBuilder.where(function () {
+                this.where('invoice_client_id', client_id).andWhere(
+                  'invoice_combined_id',
+                  combine_id
                 );
               });
             }
@@ -362,6 +373,15 @@ class ReportModel extends AbstractModels {
             this.whereILike('client_name', `%${search}%`).orWhereILike(
               'airline_code',
               `%${search}%`
+            );
+          });
+        }
+
+        if (client_id || combine_id) {
+          queryBuilder.where(function () {
+            this.where('invoice_client_id', client_id).andWhere(
+              'invoice_combined_id',
+              combine_id
             );
           });
         }
@@ -511,6 +531,7 @@ class ReportModel extends AbstractModels {
 
   getAirlineWiseClientDueSummary = async (
     search: string,
+    airline_id: number,
     page: number = 1,
     size: number = 50
   ) => {
@@ -539,6 +560,11 @@ class ReportModel extends AbstractModels {
             );
           });
         }
+        if (airline_id || airline_id === null) {
+          queryBuilder.where(function () {
+            this.where('airline_id', airline_id);
+          });
+        }
       })
       .groupBy('airline_id')
       .offset(offset)
@@ -555,6 +581,11 @@ class ReportModel extends AbstractModels {
               'airline_code',
               `%${search}%`
             );
+          });
+        }
+        if (airline_id || airline_id === null) {
+          queryBuilder.where(function () {
+            this.where('airline_id', airline_id);
           });
         }
       })
@@ -577,6 +608,11 @@ class ReportModel extends AbstractModels {
               'airline_code',
               `%${search}%`
             );
+          });
+        }
+        if (airline_id || airline_id === null) {
+          queryBuilder.where(function () {
+            this.where('airline_id', airline_id);
           });
         }
       })) as { count: number }[];
@@ -2387,6 +2423,33 @@ class ReportModel extends AbstractModels {
       })) as { count: number }[];
 
     return { count, data };
+  }
+
+  public async getAirTicketTotalSummary(from_date: string, to_date: string) {
+    const [data] = await this.query()
+      .sum('client_amount as total_sales')
+      .sum('total_purchase as total_purchase')
+      .sum('net_profit_loss as total_profit_loss')
+      .sum('receive_amount as total_received')
+      // .sum('commission_percent_total as commission_percent_total')
+      // .sum('ait as ait')
+      // .sum('net_commission as net_commission')
+      // .sum('gross_profit as gross_profit')
+      // .sum('discount as discount')
+      // .sum('overall_discount as overall_discount')
+      // .sum('tax as tax')
+      .from('v_air_ticket_total_summary')
+      .andWhere('invoice_org_agency', this.org_agency)
+      .modify((builder) => {
+        if (from_date && to_date) {
+          builder.andWhereRaw('Date(invoice_sales_date) BETWEEN ? AND ?', [
+            from_date,
+            to_date,
+          ]);
+        }
+      });
+
+    return data;
   }
 
   public async countAitClientCount(

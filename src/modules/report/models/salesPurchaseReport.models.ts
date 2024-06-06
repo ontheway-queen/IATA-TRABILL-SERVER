@@ -898,7 +898,6 @@ class SalesPurchasesReport extends AbstractModels {
         acc.total_service_charge +=
           parseFloat(item.invoice_service_charge) || 0;
         acc.total_discount += parseFloat(item.invoice_discount) || 0;
-        acc.total_payment += parseFloat(item.vendor_pay_amount) || 0;
         return acc;
       },
       {

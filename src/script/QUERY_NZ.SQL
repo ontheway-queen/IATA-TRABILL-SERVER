@@ -52,3 +52,6 @@ left join trabill_airlines on trabill_airlines.airline_id = invoices.airline_id;
 
 ALTER TABLE `trabill`.`trabill_signature_info` 
 ADD COLUMN `sig_phone_no` VARCHAR(45) NULL AFTER `sig_position`;
+
+
+-- REMOVE test_client_amount FROM v_air_ticket_total_summary VIEW;

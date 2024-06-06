@@ -110,6 +110,8 @@ class invoiceTourServices extends AbstractServices {
     const invoiceId = req.params.invoice_id;
 
     const invoices = await common_conn.getViewInvoiceInfo(invoiceId);
+    const prepared_by = await common_conn.getInvoicePreparedBy(invoiceId);
+    const authorized_by = await common_conn.getAuthorizedBySignature();
 
     const clientlBalance = await conn.getInvoiceClientlBalance(invoiceId);
 
@@ -121,6 +123,8 @@ class invoiceTourServices extends AbstractServices {
       success: true,
       data: {
         ...invoices,
+        authorized_by,
+        prepared_by,
         ...clientlBalance,
         ...invoiceTourData,
         refund,

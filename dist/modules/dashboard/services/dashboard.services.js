@@ -142,6 +142,7 @@ class DashboardServices extends abstract_services_1.default {
         // BSP BILLING
         this.getBSPBilling = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.dashboardModal(req);
+            const report_conn = this.models.reportModel(req);
             let { billingType, from_date, to_date } = req.query;
             if (from_date === 'Invalid Date' && to_date === 'Invalid Date') {
                 let dateRange = (0, lib_1.getBspBillingDate)(billingType);
@@ -151,6 +152,7 @@ class DashboardServices extends abstract_services_1.default {
             const ticket_issue = yield conn.getBspTicketIssueInfo(from_date, to_date);
             const ticket_re_issue = yield conn.getBspTicketReissueInfo(from_date, to_date);
             const ticket_refund = yield conn.getBspTicketRefundInfo(from_date, to_date);
+            const client_sales = yield report_conn.getAirTicketTotalSummary(from_date, to_date);
             // BILLING DATE
             const billing_from_date = (0, lib_1.getNext15Day)(from_date);
             const billing_to_date = (0, lib_1.getNext15Day)(to_date);
@@ -165,6 +167,7 @@ class DashboardServices extends abstract_services_1.default {
                     ticket_issue,
                     ticket_re_issue,
                     ticket_refund,
+                    client_sales,
                 },
             };
         });

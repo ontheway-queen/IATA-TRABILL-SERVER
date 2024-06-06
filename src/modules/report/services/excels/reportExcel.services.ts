@@ -1195,7 +1195,6 @@ class ReportExcelServices extends AbstractServices {
       { header: 'Cost price', key: 'cost_price', width: 20 },
       { header: 'Collect amount', key: 'client_pay_amount', width: 20 },
       { header: 'Due amount', key: 'due_amount', width: 20 },
-      { header: 'Vendor payment', key: 'vendor_pay_amount', width: 20 },
       { header: 'Refund amount', key: 'refund_total_amount', width: 20 },
       { header: 'Refund profit', key: 'refund_profit', width: 20 },
     ];
@@ -1207,7 +1206,6 @@ class ReportExcelServices extends AbstractServices {
       report.cost_price = Number(report.cost_price);
       report.client_pay_amount = Number(report.client_pay_amount);
       report.due_amount = Number(report.due_amount);
-      report.vendor_pay_amount = Number(report.vendor_pay_amount);
       report.refund_total_amount = Number(report.refund_total_amount);
       report.refund_profit = Number(report.refund_profit);
       ticketFromVendorWorksheet.addRow(report);

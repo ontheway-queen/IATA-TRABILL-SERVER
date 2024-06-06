@@ -78,12 +78,15 @@ class invoiceTourServices extends abstract_services_1.default {
             const conn = this.models.invoiceTourModels(req);
             const invoiceId = req.params.invoice_id;
             const invoices = yield common_conn.getViewInvoiceInfo(invoiceId);
+            const prepared_by = yield common_conn.getInvoicePreparedBy(invoiceId);
+            const authorized_by = yield common_conn.getAuthorizedBySignature();
             const clientlBalance = yield conn.getInvoiceClientlBalance(invoiceId);
             const invoiceTourData = yield conn.viewTourInvoiceData(invoiceId);
             const refund = yield conn.getTourRefunds(invoiceId);
             return {
                 success: true,
-                data: Object.assign(Object.assign(Object.assign(Object.assign({}, invoices), clientlBalance), invoiceTourData), { refund }),
+                data: Object.assign(Object.assign(Object.assign(Object.assign(Object.assign({}, invoices), { authorized_by,
+                    prepared_by }), clientlBalance), invoiceTourData), { refund }),
             };
         });
         // ============= narrow services ==============

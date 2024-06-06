@@ -16,6 +16,7 @@ const createDbConn = () => {
             host: config_1.default.DB_HOST,
             user: config_1.default.DB_USER,
             password: config_1.default.DB_PASS,
+            // timezone: 'Z',
         },
         pool: { min: 0, max: 1000 },
     });

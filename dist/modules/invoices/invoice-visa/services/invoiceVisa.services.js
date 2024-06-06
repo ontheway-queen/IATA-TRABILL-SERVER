@@ -123,11 +123,16 @@ class InvoiceVisaServices extends abstract_services_1.default {
             const conn = this.models.invoiceVisaModel(req);
             // INVOICE DATA
             const invoice = yield common_conn.getViewInvoiceInfo(invoice_id);
+            const prepared_by = yield common_conn.getInvoicePreparedBy(invoice_id);
+            const authorized_by = yield common_conn.getAuthorizedBySignature();
             const passport_information = yield conn.getPassportInfo(invoice_id);
             const billing_information = yield conn.getViewBillingInfo(invoice_id);
             return {
                 success: true,
-                data: Object.assign(Object.assign({}, invoice), { passport_information, billing_information }),
+                data: Object.assign(Object.assign({}, invoice), { authorized_by,
+                    prepared_by,
+                    passport_information,
+                    billing_information }),
             };
         });
         // ============= narrow services ==============

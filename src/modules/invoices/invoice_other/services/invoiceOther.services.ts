@@ -43,6 +43,8 @@ class InivoiceOther extends AbstractServices {
     const common_conn = this.models.CommonInvoiceModel(req);
 
     const invoice = await common_conn.getViewInvoiceInfo(invoice_id);
+    const prepared_by = await common_conn.getInvoicePreparedBy(invoice_id);
+    const authorized_by = await common_conn.getAuthorizedBySignature();
 
     const passport_information = await conn.getInvoiceOtherPassInfo(invoice_id);
     const ticket_information = await conn.getInvoiceTicketInfo(invoice_id);
@@ -60,6 +62,8 @@ class InivoiceOther extends AbstractServices {
       success: true,
       data: {
         ...invoice,
+        authorized_by,
+        prepared_by,
         refunds,
         passport_information,
         ticket_information,

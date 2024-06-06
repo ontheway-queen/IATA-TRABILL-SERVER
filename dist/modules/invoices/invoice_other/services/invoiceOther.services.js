@@ -32,6 +32,8 @@ class InivoiceOther extends abstract_services_1.default {
             const conn = this.models.invoiceOtherModel(req);
             const common_conn = this.models.CommonInvoiceModel(req);
             const invoice = yield common_conn.getViewInvoiceInfo(invoice_id);
+            const prepared_by = yield common_conn.getInvoicePreparedBy(invoice_id);
+            const authorized_by = yield common_conn.getAuthorizedBySignature();
             const passport_information = yield conn.getInvoiceOtherPassInfo(invoice_id);
             const ticket_information = yield conn.getInvoiceTicketInfo(invoice_id);
             const hotel_information = yield conn.getInvoiceHotelInfo(invoice_id);
@@ -42,7 +44,9 @@ class InivoiceOther extends abstract_services_1.default {
                 .getOtherRefundItems(invoice_id);
             return {
                 success: true,
-                data: Object.assign(Object.assign({}, invoice), { refunds,
+                data: Object.assign(Object.assign({}, invoice), { authorized_by,
+                    prepared_by,
+                    refunds,
                     passport_information,
                     ticket_information,
                     hotel_information,

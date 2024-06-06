@@ -182,6 +182,7 @@ class DashboardServices extends AbstractServices {
   // BSP BILLING
   public getBSPBilling = async (req: Request) => {
     const conn = this.models.dashboardModal(req);
+    const report_conn = this.models.reportModel(req);
     let { billingType, from_date, to_date } = req.query as BspBillingQueryType;
 
     if (from_date === 'Invalid Date' && to_date === 'Invalid Date') {
@@ -199,6 +200,11 @@ class DashboardServices extends AbstractServices {
 
     const ticket_refund = await conn.getBspTicketRefundInfo(from_date, to_date);
 
+    const client_sales = await report_conn.getAirTicketTotalSummary(
+      from_date as string,
+      to_date as string
+    );
+
     // BILLING DATE
     const billing_from_date = getNext15Day(from_date);
     const billing_to_date = getNext15Day(to_date);
@@ -214,6 +220,7 @@ class DashboardServices extends AbstractServices {
         ticket_issue,
         ticket_re_issue,
         ticket_refund,
+        client_sales,
       },
     };
   };

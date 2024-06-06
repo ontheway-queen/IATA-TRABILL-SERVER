@@ -48,7 +48,7 @@ class AddInvoiceOther extends abstract_services_1.default {
         this.addInvoiceOther = (req) => __awaiter(this, void 0, void 0, function* () {
             const { invoice_net_total, invoice_combclient_id, invoice_created_by, invoice_note, invoice_sales_date, invoice_due_date, invoice_sales_man_id, invoice_sub_total, invoice_vat, invoice_service_charge, invoice_discount, invoice_agent_id, invoice_agent_com_amount, money_receipt, billing_information, hotel_information, ticketInfo, transport_information, passport_information, invoice_reference, } = req.body;
             // VALIDATE CLIENT AND VENDOR
-            const { invoice_total_profit, invoice_total_vendor_price, pax_name } = yield (0, invoice_helpers_1.InvoiceClientAndVendorValidate)(billing_information, invoice_combclient_id);
+            const { invoice_total_profit, invoice_total_vendor_price } = yield (0, invoice_helpers_1.InvoiceClientAndVendorValidate)(billing_information, invoice_combclient_id);
             // VALIDATE MONEY RECEIPT AMOUNT
             (0, invoice_helpers_1.MoneyReceiptAmountIsValid)(money_receipt, invoice_net_total);
             // CLIENT AND COMBINED CLIENT

@@ -41,6 +41,8 @@ class InvoiceHajjServices extends abstract_services_1.default {
             const conn = this.models.InvoiceHajjModels(req);
             // INVOICE DATA
             const invoice = yield common_conn.getViewInvoiceInfo(invoice_id);
+            const prepared_by = yield common_conn.getInvoicePreparedBy(invoice_id);
+            const authorized_by = yield common_conn.getAuthorizedBySignature();
             const haji_information = yield conn.getInvoiceHajjPilgrimsInfo(invoice_id);
             const hotel_information = yield conn.getHajiHotelInfo(invoice_id);
             const transport_information = yield conn.getHajiTransportInfo(invoice_id);
@@ -49,7 +51,9 @@ class InvoiceHajjServices extends abstract_services_1.default {
             const routes = yield common_conn.getInvoiceRoutesName(invoice_id);
             return {
                 success: true,
-                data: Object.assign(Object.assign({}, invoice), { routes,
+                data: Object.assign(Object.assign({}, invoice), { authorized_by,
+                    prepared_by,
+                    routes,
                     haji_information,
                     hotel_information,
                     transport_information,

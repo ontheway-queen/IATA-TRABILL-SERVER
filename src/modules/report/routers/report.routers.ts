@@ -36,6 +36,7 @@ class ReportRouter extends AbstractRouter {
       '/air-ticket-summary',
       this.controllers.airTicketTotalReport
     );
+
     this.routers.get(
       '/air-ticket-summary-excel',
       this.controllers.airTicketTotalReportExcel

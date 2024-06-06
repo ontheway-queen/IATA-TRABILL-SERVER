@@ -58,7 +58,7 @@ class AddInvoiceOther extends AbstractServices {
     } = req.body as IOtherInvoiceReq;
 
     // VALIDATE CLIENT AND VENDOR
-    const { invoice_total_profit, invoice_total_vendor_price, pax_name } =
+    const { invoice_total_profit, invoice_total_vendor_price } =
       await InvoiceClientAndVendorValidate(
         billing_information,
         invoice_combclient_id

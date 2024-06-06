@@ -187,9 +187,20 @@ class ReportServices extends AbstractServices {
     } = { count: 0, data: { results: [], total: {} } };
 
     if (data_type === 'CLIENT') {
-      data = await conn.getClientWiseDueSummary(search, +page, +size);
+      data = await conn.getClientWiseDueSummary(
+        search,
+        client_id,
+        combined_id,
+        +page,
+        +size
+      );
     } else if (data_type === 'AIRLINE') {
-      data = await conn.getAirlineWiseClientDueSummary(search, +page, +size);
+      data = await conn.getAirlineWiseClientDueSummary(
+        search,
+        airline_id,
+        +page,
+        +size
+      );
     } else if (data_type === 'DETAILS') {
       data = await conn.DueDetails(
         search,
@@ -1414,6 +1425,7 @@ class ReportServices extends AbstractServices {
   };
 
   // AIR TICKET TOTAL REPORT
+
   airTicketTotalReport = async (req: Request) => {
     const { from_date, to_date, page, size, client } = req.query as {
       from_date: string;
@@ -1465,6 +1477,7 @@ class ReportServices extends AbstractServices {
 
     return { success: true, data: { list: data, ...sum }, count };
   };
+
   invoiceAndMoneyReceiptDiscount = async (req: Request) => {
     const { from_date, to_date } = req.query as {
       from_date: string;

@@ -31,6 +31,8 @@ class InvoiceNonCommission extends abstract_services_1.default {
             const common_conn = this.models.CommonInvoiceModel(req);
             const conn = this.models.invoiceNonCommission(req);
             const data = yield common_conn.getViewInvoiceInfo(invoice_id);
+            const prepared_by = yield common_conn.getInvoicePreparedBy(invoice_id);
+            const authorized_by = yield common_conn.getAuthorizedBySignature();
             const airticket_information = yield conn.getViewAirticketNonCom(invoice_id);
             const pax_details = yield common_conn.getInvoiceAirTicketPaxDetails(invoice_id);
             const flights = yield conn.getFlightDetails(invoice_id);
@@ -40,7 +42,9 @@ class InvoiceNonCommission extends abstract_services_1.default {
                 .getAirticketRefundItems(invoice_id);
             return {
                 success: true,
-                data: Object.assign(Object.assign({}, data), { reissued,
+                data: Object.assign(Object.assign({}, data), { authorized_by,
+                    prepared_by,
+                    reissued,
                     refunds,
                     airticket_information,
                     flights,

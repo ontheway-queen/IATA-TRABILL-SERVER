@@ -194,6 +194,8 @@ class InvoiceVisaServices extends AbstractServices {
 
     // INVOICE DATA
     const invoice = await common_conn.getViewInvoiceInfo(invoice_id);
+    const prepared_by = await common_conn.getInvoicePreparedBy(invoice_id);
+    const authorized_by = await common_conn.getAuthorizedBySignature();
 
     const passport_information = await conn.getPassportInfo(invoice_id);
 
@@ -201,7 +203,13 @@ class InvoiceVisaServices extends AbstractServices {
 
     return {
       success: true,
-      data: { ...invoice, passport_information, billing_information },
+      data: {
+        ...invoice,
+        authorized_by,
+        prepared_by,
+        passport_information,
+        billing_information,
+      },
     };
   };
 

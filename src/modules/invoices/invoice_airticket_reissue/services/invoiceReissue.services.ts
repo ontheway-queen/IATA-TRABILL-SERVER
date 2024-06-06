@@ -47,6 +47,8 @@ class ReissueAirticket extends AbstractServices {
     const conn = this.models.reissueAirticket(req);
 
     const invoice = await common_conn.getViewInvoiceInfo(invoice_id);
+    const prepared_by = await common_conn.getInvoicePreparedBy(invoice_id);
+    const authorized_by = await common_conn.getAuthorizedBySignature();
 
     const refunds = await this.models
       .refundModel(req)
@@ -67,6 +69,8 @@ class ReissueAirticket extends AbstractServices {
       success: true,
       data: {
         ...invoice,
+        authorized_by,
+        prepared_by,
         reissued,
         refunds,
         airticket_information,

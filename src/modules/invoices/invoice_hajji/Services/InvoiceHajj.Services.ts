@@ -44,6 +44,9 @@ class InvoiceHajjServices extends AbstractServices {
 
     // INVOICE DATA
     const invoice = await common_conn.getViewInvoiceInfo(invoice_id);
+    const prepared_by = await common_conn.getInvoicePreparedBy(invoice_id);
+    const authorized_by = await common_conn.getAuthorizedBySignature();
+
     const haji_information = await conn.getInvoiceHajjPilgrimsInfo(invoice_id);
     const hotel_information = await conn.getHajiHotelInfo(invoice_id);
     const transport_information = await conn.getHajiTransportInfo(invoice_id);
@@ -61,6 +64,8 @@ class InvoiceHajjServices extends AbstractServices {
 
       data: {
         ...invoice,
+        authorized_by,
+        prepared_by,
         routes,
         haji_information,
         hotel_information,

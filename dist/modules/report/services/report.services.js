@@ -78,10 +78,10 @@ class ReportServices extends abstract_services_1.default {
             const conn = this.models.reportModel(req);
             let data = { count: 0, data: { results: [], total: {} } };
             if (data_type === 'CLIENT') {
-                data = yield conn.getClientWiseDueSummary(search, +page, +size);
+                data = yield conn.getClientWiseDueSummary(search, client_id, combined_id, +page, +size);
             }
             else if (data_type === 'AIRLINE') {
-                data = yield conn.getAirlineWiseClientDueSummary(search, +page, +size);
+                data = yield conn.getAirlineWiseClientDueSummary(search, airline_id, +page, +size);
             }
             else if (data_type === 'DETAILS') {
                 data = yield conn.DueDetails(search, client_id, combined_id, airline_id, from_date, to_date, +page, +size);

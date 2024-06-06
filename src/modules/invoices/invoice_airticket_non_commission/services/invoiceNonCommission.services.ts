@@ -44,6 +44,8 @@ class InvoiceNonCommission extends AbstractServices {
     const conn = this.models.invoiceNonCommission(req);
 
     const data = await common_conn.getViewInvoiceInfo(invoice_id);
+    const prepared_by = await common_conn.getInvoicePreparedBy(invoice_id);
+    const authorized_by = await common_conn.getAuthorizedBySignature();
 
     const airticket_information = await conn.getViewAirticketNonCom(invoice_id);
 
@@ -63,6 +65,8 @@ class InvoiceNonCommission extends AbstractServices {
       success: true,
       data: {
         ...data,
+        authorized_by,
+        prepared_by,
         reissued,
         refunds,
         airticket_information,

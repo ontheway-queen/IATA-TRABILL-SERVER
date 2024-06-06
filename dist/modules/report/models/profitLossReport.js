@@ -337,7 +337,7 @@ class ProfitLossReport extends abstract_models_1.default {
                 .select(this.db.raw('sum(refund_profit) as refund_profit'))
                 .from('view_refunds_profit')
                 .where('agency_id', this.org_agency)
-                .andWhereRaw('Date(created_date) BETWEEN ? AND ?', [from_date, to_date]);
+                .andWhereRaw('Date(atrefund_date) BETWEEN ? AND ?', [from_date, to_date]);
             return Number(infos.refund_profit);
         });
     }

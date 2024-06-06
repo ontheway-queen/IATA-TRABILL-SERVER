@@ -32,8 +32,9 @@ class PnrDetailsService extends abstract_services_1.default {
                 if (!ota_info.ota_api_url && !ota_info.ota_token) {
                     return { success: true, message: 'Empty token and base url' };
                 }
-                // const api_url = ota_info.ota_api_url + '/' + pnr;
-                const api_url = 'http://192.168.0.158:9008/api/v1/public/get-booking' + '/' + pnr;
+                const api_url = ota_info.ota_api_url + '/' + pnr;
+                // const api_url =
+                //   'http://192.168.0.158:9008/api/v1/public/get-booking' + '/' + pnr;
                 const headers = {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${ota_info.ota_token}`,

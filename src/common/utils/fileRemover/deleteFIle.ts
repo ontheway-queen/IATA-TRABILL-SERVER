@@ -4,7 +4,7 @@ import fs from 'fs';
 import config from '../../../config/config';
 
 class DeleteFile {
-  constructor() { }
+  constructor() {}
 
   public delete_image = async (
     blobUrl: string,

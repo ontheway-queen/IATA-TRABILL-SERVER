@@ -60,7 +60,7 @@ class ReissueRefundService extends AbstractServices {
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const voucher = generateVoucherNumber(6, 'R');
+      const voucher = generateVoucherNumber(4, 'RRF');
 
       // TRANSACTIONs
       let refund_client_trx_id = null;

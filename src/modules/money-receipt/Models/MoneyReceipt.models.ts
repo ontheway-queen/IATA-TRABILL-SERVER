@@ -1518,6 +1518,7 @@ class MoneyReceiptModels extends AbstractModels {
       .from('trabill_advance_return')
       .select(
         this.db.raw('CAST(advr_amount AS DECIMAL(15,2)) AS prevAmoun'),
+        'advr_vouchar_no',
         'advr_account_id as prevAccId',
         'advr_payment_type as prevPayType',
         'advr_combined_id as prevCombinedId',
@@ -1543,6 +1544,7 @@ class MoneyReceiptModels extends AbstractModels {
       advr_ctrxn_id: number;
       prevClientId: string;
       advr_trxn_charge_id: number;
+      advr_vouchar_no: string;
     };
   };
   public deletePrevAdvrCheques = async (

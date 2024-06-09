@@ -39,7 +39,7 @@ class ReissueRefundService extends abstract_services_1.default {
                 const conn = this.models.reissueAirticket(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const voucher = (0, invoice_helpers_1.generateVoucherNumber)(6, 'R');
+                const voucher = (0, invoice_helpers_1.generateVoucherNumber)(4, 'RRF');
                 // TRANSACTIONs
                 let refund_client_trx_id = null;
                 let refund_client_account_trx_id = null;

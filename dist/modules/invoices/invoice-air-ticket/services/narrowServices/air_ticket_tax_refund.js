@@ -27,7 +27,7 @@ class AirTicketTaxRefund extends abstract_services_1.default {
                 const conn = this.models.invoiceAirticketModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
-                const refund_voucher = (0, invoice_helpers_1.generateVoucherNumber)(6, 'TRF');
+                const refund_voucher = (0, invoice_helpers_1.generateVoucherNumber)(4, 'TRF');
                 let refund_c_trxn_id = null;
                 let client_account_trxn_id = null;
                 let vendor_account_trxn_id = null;

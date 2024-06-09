@@ -55,7 +55,7 @@ class AddLoan extends abstract_services_1.default {
                     };
                     loan_actransaction_id = yield trxns.AccTrxnInsert(AccTrxnBody);
                 }
-                const loan_vouchar = (0, invoice_helpers_1.generateVoucherNumber)(6, 'ln');
+                const loan_vouchar = (0, invoice_helpers_1.generateVoucherNumber)(4, 'LN');
                 let loan_charge_id = null;
                 if (payment_type === 3 && charge_amount) {
                     const online_charge_trxn = {

@@ -146,9 +146,9 @@ class ReportModel extends abstract_models_1.default {
         this.getClientWiseDueSummary = (search, client_id, combine_id, page = 1, size = 50) => __awaiter(this, void 0, void 0, function* () {
             const offset = (+page - 1) * +size;
             const results = yield this.query()
-                .select('invoice_org_agency', 'invoice_client_id', 'invoice_combined_id', 'client_name', this.db.raw('SUM(purchase) as purchase'), this.db.raw('SUM(sales) as sales'), this.db.raw('SUM(pay) as pay'), this.db.raw('SUM(due) as due'), this.db.raw('SUM(profit) as profit'), this.db.raw('GROUP_CONCAT(airlines) AS airlines_code'))
+                .select('invoice_org_agency', 'invoice_client_id', 'invoice_combined_id', 'client_name', 'last_balance', this.db.raw('SUM(purchase) as purchase'), this.db.raw('SUM(sales) as sales'), this.db.raw('SUM(pay) as pay'), this.db.raw('SUM(due) as due'), this.db.raw('SUM(profit) as profit'), this.db.raw('GROUP_CONCAT(airlines) AS airlines_code'))
                 .from(this.db
-                .select('invoice_org_agency', 'invoice_client_id', 'invoice_combined_id', 'client_name', this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'), this.db.raw("CONCAT(airline_code, '(', COUNT(*), ')') AS airlines"))
+                .select('invoice_org_agency', 'invoice_client_id', 'invoice_combined_id', 'client_name', 'last_balance', this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'), this.db.raw("CONCAT(airline_code, '(', COUNT(*), ')') AS airlines"))
                 .from('trabill.v_invoices_due')
                 .where('invoice_org_agency', this.org_agency)
                 .modify(function (queryBuilder) {
@@ -183,7 +183,7 @@ class ReportModel extends abstract_models_1.default {
             })
                 .groupBy('invoice_client_id', 'invoice_combined_id')
                 .as('inv_due')));
-            const total = yield this.query()
+            const [total] = yield this.query()
                 .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'))
                 .from('trabill.v_invoices_due')
                 .where('invoice_org_agency', this.org_agency)
@@ -199,6 +199,27 @@ class ReportModel extends abstract_models_1.default {
                     });
                 }
             });
+            const [client_l_balance] = yield this.query()
+                .select(this.db.raw('SUM(last_balance) as last_balance'))
+                .from(this.db
+                .select('last_balance')
+                .from('trabill.v_invoices_due')
+                .where('invoice_org_agency', this.org_agency)
+                .modify(function (queryBuilder) {
+                if (search) {
+                    queryBuilder.where(function () {
+                        this.whereILike('client_name', `%${search}%`).orWhereILike('airline_code', `%${search}%`);
+                    });
+                }
+                if (client_id || combine_id) {
+                    queryBuilder.where(function () {
+                        this.where('invoice_client_id', client_id).andWhere('invoice_combined_id', combine_id);
+                    });
+                }
+            })
+                .groupBy('invoice_client_id', 'invoice_combined_id')
+                .as('inv_due'));
+            total.last_balance = client_l_balance.last_balance || 0;
             return { count, data: { results, total } };
         });
         this.DueDetails = (search, client_id, combine_id, airline_id, from_date, to_date, page = 1, size = 50) => __awaiter(this, void 0, void 0, function* () {
@@ -280,7 +301,7 @@ class ReportModel extends abstract_models_1.default {
                     ]);
                 }
             }));
-            const total = yield this.query()
+            const [total] = yield this.query()
                 .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'))
                 .from('trabill.v_invoices_due')
                 .where('invoice_org_agency', this.org_agency)
@@ -359,7 +380,7 @@ class ReportModel extends abstract_models_1.default {
                 }
             })
                 .groupBy('airline_id'));
-            const total = (yield this.query()
+            const [total] = (yield this.query()
                 .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'))
                 .from('trabill.v_invoices_due')
                 .where('invoice_org_agency', this.org_agency)
@@ -379,7 +400,7 @@ class ReportModel extends abstract_models_1.default {
         });
         this.clientAdvance = (search, page = 1, size = 20) => __awaiter(this, void 0, void 0, function* () {
             const offset = (+page - 1) * +size;
-            const data = yield this.query()
+            const results = yield this.query()
                 .select('client_id', 'client_category_id', 'client_entry_id', 'client_type', 'client_name', 'client_lbalance', 'client_created_date')
                 .from('trabill.trabill_clients')
                 .where('client_org_agency', this.org_agency)
@@ -395,13 +416,27 @@ class ReportModel extends abstract_models_1.default {
                 .andWhere('client_lbalance', '>', 0)
                 .offset(offset)
                 .limit(size);
+            const [total] = yield this.query()
+                .sum('client_lbalance as total_advance')
+                .from('trabill.trabill_clients')
+                .where('client_org_agency', this.org_agency)
+                .modify((builder) => {
+                if (search) {
+                    builder
+                        .whereILike('client_name', `%${search}%`)
+                        .orWhereILike('client_entry_id', `%${search}%`)
+                        .orWhereILike('client_mobile', `%${search}%`);
+                }
+            })
+                .andWhereNot('client_is_deleted', 1)
+                .andWhere('client_lbalance', '>', 0);
             const [{ count }] = (yield this.query()
                 .count('* as count')
                 .from('trabill.trabill_clients')
                 .where('client_org_agency', this.org_agency)
                 .andWhereNot('client_is_deleted', 1)
                 .andWhere('client_lbalance', '>', 0));
-            return { count, data };
+            return { count, data: { results, total } };
         });
         // INVOICE AND MONEY RECEIPT DISCOUNT
         this.invoiceAndMoneyReceiptDiscount = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {

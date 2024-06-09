@@ -428,8 +428,6 @@ class DashboardServices extends AbstractServices {
           refund: numRound(ticket_refund.refund_amount),
           grandTotal,
         };
-
-        console.log({ agentBillingDetails, trabill_summary });
       }
 
       return {

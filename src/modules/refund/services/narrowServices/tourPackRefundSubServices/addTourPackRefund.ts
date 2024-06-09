@@ -36,7 +36,7 @@ class AddTourPackRefund extends AbstractServices {
       itineraries,
     } = req.body as ITourRefundReqBody;
 
-    const tour_vouchar_number = generateVoucherNumber(7, 'TOUR-REF');
+    const tour_vouchar_number = generateVoucherNumber(4, 'TRF');
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);

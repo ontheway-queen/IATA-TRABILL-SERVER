@@ -35,7 +35,7 @@ class AddAdvanceReturn extends AbstractServices {
 
       const { vendor_id, combined_id } = separateCombClientToId(comb_vendor);
 
-      const advr_vouchar_no = generateVoucherNumber(7, 'ADVR');
+      const advr_vouchar_no = generateVoucherNumber(4, 'ADVR');
 
       let advr_actransaction_id: number | null = null;
 

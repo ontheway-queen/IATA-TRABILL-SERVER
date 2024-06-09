@@ -90,8 +90,6 @@ class AppConfigModels extends AbstractModels {
       .where('sig_type', 'AUTHORITY')
       .andWhere('sig_org_id', this.org_agency)) as { count: number }[];
 
-    console.log({ count });
-
     return count;
   };
 

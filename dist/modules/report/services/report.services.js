@@ -70,7 +70,7 @@ class ReportServices extends abstract_services_1.default {
             const data = yield conn.clientDueAdvance(client_id, String(payment_date), Number(page) || 1, Number(size) || 20);
             return Object.assign({ success: true, client_id }, data);
         });
-        // DUE ADVANCE DETAILS & SUMMARY
+        // DUE ADVANCE DETAILS & SUMMARY -> CLIENT | AIRLINE | DETAILS | ADVANCE
         this.getDueAdvanceDetailsSummary = (req) => __awaiter(this, void 0, void 0, function* () {
             const { airline_id, comb_client, data_type, search, from_date, to_date } = req.body;
             const { page, size } = req.query;

@@ -25,7 +25,7 @@ class CreatePayroll extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.payrollModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const payroll_vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(7, 'PR');
+                const payroll_vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(4, 'PRL');
                 let payroll_charge_id = null;
                 if (payroll_pay_type === 3 && payroll_transection_charge) {
                     const online_charge_trxn = {

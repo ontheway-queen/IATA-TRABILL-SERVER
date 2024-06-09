@@ -76,7 +76,7 @@ class AddLoan extends AbstractServices {
         loan_actransaction_id = await trxns.AccTrxnInsert(AccTrxnBody);
       }
 
-      const loan_vouchar = generateVoucherNumber(6, 'ln');
+      const loan_vouchar = generateVoucherNumber(4, 'LN');
 
       let loan_charge_id: number | null = null;
       if (payment_type === 3 && charge_amount) {

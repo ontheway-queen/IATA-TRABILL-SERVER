@@ -38,7 +38,7 @@ class HajjRefundServices extends abstract_services_1.default {
                 const conn = this.models.InvoiceHajjModels(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxn = new Trxns_1.default(req, trx);
-                const voucher_no = (0, invoice_helpers_1.generateVoucherNumber)(6, 'HR');
+                const voucher_no = (0, invoice_helpers_1.generateVoucherNumber)(4, 'HRF');
                 const { combined_id, client_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
                 let refund_client_acc_trxn_id = null;
                 let refund_ctrxn_id = null;

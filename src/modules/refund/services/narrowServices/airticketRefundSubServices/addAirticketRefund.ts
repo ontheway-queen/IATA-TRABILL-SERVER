@@ -49,7 +49,7 @@ class AddAirTicketRefund extends AbstractServices {
 
     const { client_id, combined_id } = separateCombClientToId(comb_client);
 
-    const voucher_number = generateVoucherNumber(7, 'AR-REF');
+    const voucher_number = generateVoucherNumber(4, 'ARF');
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);

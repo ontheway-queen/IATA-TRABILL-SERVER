@@ -39,7 +39,7 @@ class CommonHajjDetailsInsert extends abstract_services_1.default {
                 }
                 if ((0, invoice_helpers_1.isNotEmpty)(pilgrims_information)) {
                     for (const item of pilgrims_information) {
-                        const haji_info_vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(10);
+                        const haji_info_vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(4);
                         const pilgrimsId = item.haji_info_id;
                         const hajjHajjiInfo = {
                             hajiinfo_gender: item.hajiinfo_gender,

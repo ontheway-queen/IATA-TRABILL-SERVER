@@ -167,7 +167,7 @@ class ReportServices extends AbstractServices {
     };
   };
 
-  // DUE ADVANCE DETAILS & SUMMARY
+  // DUE ADVANCE DETAILS & SUMMARY -> CLIENT | AIRLINE | DETAILS | ADVANCE
   getDueAdvanceDetailsSummary = async (req: Request) => {
     const { airline_id, comb_client, data_type, search, from_date, to_date } =
       req.body as IDueAdvanceDetailsBody;

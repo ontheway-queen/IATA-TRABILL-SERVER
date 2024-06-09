@@ -62,7 +62,7 @@ class CreatePayroll extends AbstractServices {
       const conn = this.models.payrollModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const payroll_vouchar_no = generateVoucherNumber(7, 'PR');
+      const payroll_vouchar_no = generateVoucherNumber(4, 'PRL');
 
       let payroll_charge_id: number | null = null;
       if (payroll_pay_type === 3 && payroll_transection_charge) {

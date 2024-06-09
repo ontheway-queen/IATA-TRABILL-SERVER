@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../common/helpers/common.helper");
-const invoice_helpers_1 = require("../../../../common/helpers/invoice.helpers");
 class EditAdvanceReturn extends abstract_services_1.default {
     constructor() {
         super();
@@ -27,7 +26,6 @@ class EditAdvanceReturn extends abstract_services_1.default {
                 const conn = this.models.MoneyReceiptModels(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const advr_vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(10);
                 // =============== @ GET PREVIOUS RETURN INFO @ ======================
                 const previous_billing = yield conn.getPrevAdvrIfo(advr_id);
                 const { prevPayType, advr_ctrxn_id, advr_actransaction_id } = previous_billing;
@@ -52,7 +50,7 @@ class EditAdvanceReturn extends abstract_services_1.default {
                     const AccTrxnBody = {
                         acctrxn_ac_id: advr_account_id,
                         acctrxn_type: 'DEBIT',
-                        acctrxn_voucher: advr_vouchar_no,
+                        acctrxn_voucher: previous_billing.advr_vouchar_no,
                         acctrxn_amount: advr_amount,
                         acctrxn_created_at: advr_payment_date,
                         acctrxn_created_by: advr_created_by,
@@ -66,7 +64,7 @@ class EditAdvanceReturn extends abstract_services_1.default {
                         ctrxn_type: 'DEBIT',
                         ctrxn_amount: advr_amount,
                         ctrxn_cl: advr_combclient,
-                        ctrxn_voucher: advr_vouchar_no,
+                        ctrxn_voucher: previous_billing.advr_vouchar_no,
                         ctrxn_particular_id: 33,
                         ctrxn_created_at: advr_payment_date,
                         ctrxn_note: advr_note,
@@ -112,7 +110,7 @@ class EditAdvanceReturn extends abstract_services_1.default {
                     advr_amount,
                     advr_client_id: client_id,
                     advr_combined_id: combined_id,
-                    advr_vouchar_no,
+                    advr_vouchar_no: previous_billing.advr_vouchar_no,
                     advr_updated_by: advr_created_by,
                     advr_ctrxn_id: client_trxn_id,
                     advr_note,

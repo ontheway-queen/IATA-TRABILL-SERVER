@@ -25,7 +25,7 @@ class AddClientBillAdjustment extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.accountsModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const voucher_no = (0, invoice_helpers_1.generateVoucherNumber)(7, 'CB');
+                const voucher_no = (0, invoice_helpers_1.generateVoucherNumber)(4, 'CB');
                 let trxn_type = bill_type === 'INCREASE' ? 'CREDIT' : 'DEBIT';
                 const clTrxnBody = {
                     ctrxn_type: trxn_type,

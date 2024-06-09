@@ -296,7 +296,6 @@ class DashboardServices extends abstract_services_1.default {
                         refund: (0, lib_1.numRound)(ticket_refund.refund_amount),
                         grandTotal,
                     };
-                    console.log({ agentBillingDetails, trabill_summary });
                 }
                 return {
                     success: true,

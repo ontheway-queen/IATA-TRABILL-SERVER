@@ -30,7 +30,7 @@ class AddClientBillAdjustment extends AbstractServices {
       const conn = this.models.accountsModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const voucher_no = generateVoucherNumber(7, 'CB');
+      const voucher_no = generateVoucherNumber(4, 'CB');
 
       let trxn_type: 'CREDIT' | 'DEBIT' =
         bill_type === 'INCREASE' ? 'CREDIT' : 'DEBIT';

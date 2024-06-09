@@ -24,7 +24,7 @@ class AddAdvanceReturn extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.vendorModel(req, trx);
                 const { vendor_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_vendor);
-                const advr_vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(7, 'ADVR');
+                const advr_vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(4, 'ADVR');
                 let advr_actransaction_id = null;
                 let advr_vtrxn_id = null;
                 // PAYMENT METHOD

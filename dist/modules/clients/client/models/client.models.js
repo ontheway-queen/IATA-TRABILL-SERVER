@@ -183,7 +183,8 @@ class ClientModel extends abstract_models_1.default {
                     event
                         .where('client_org_agency', this.org_agency)
                         .andWhere('client_activity_status', 1)
-                        .andWhere(this.db.raw('LOWER(client_name)'), 'LIKE', `%${search}%`)
+                        .andWhere(this.db.raw('LOWER(client_id)'), 'LIKE', `%${search}%`)
+                        .orWhere(this.db.raw('LOWER(client_name)'), 'LIKE', `%${search}%`)
                         .orWhere(this.db.raw('LOWER(mobile)'), 'LIKE', `%${search}%`);
                 }
             })

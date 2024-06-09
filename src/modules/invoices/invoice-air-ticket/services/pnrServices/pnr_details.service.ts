@@ -45,15 +45,6 @@ class PnrDetailsService extends AbstractServices {
         const response = await axios.get(api_url, { headers });
         const pnrResponse = response.data.data as IPnrResponse;
 
-        // ERROR THROW FROM SABRE RESPONSE
-        if (pnrResponse?.errors?.length) {
-          throw new CustomError(
-            pnrResponse.errors[0].description,
-            400,
-            pnrResponse.errors[0].category
-          );
-        }
-
         if (
           response.data.success &&
           pnrResponse?.flights &&
@@ -244,7 +235,6 @@ class PnrDetailsService extends AbstractServices {
             },
           };
         }
-
         return { success: true, data: [] };
       } catch (error: any) {
         throw new CustomError(

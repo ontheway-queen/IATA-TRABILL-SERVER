@@ -47,7 +47,7 @@ class AddOtherRefund extends AbstractServices {
       total_refund_charge,
     } = client_refund_info;
 
-    const other_vouchar_number = generateVoucherNumber(7, 'OTHER-REF');
+    const other_vouchar_number = generateVoucherNumber(4, 'ORF');
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);

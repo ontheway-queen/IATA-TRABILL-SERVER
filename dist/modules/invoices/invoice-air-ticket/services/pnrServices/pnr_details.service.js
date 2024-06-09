@@ -22,7 +22,7 @@ class PnrDetailsService extends abstract_services_1.default {
         super();
         this.pnrDetails = (req, pnrNo) => __awaiter(this, void 0, void 0, function* () {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c, _d, _e, _f, _g, _h, _j;
+                var _a, _b, _c, _d, _e, _f, _g, _h;
                 const pnr = req.params.pnr || pnrNo;
                 if (pnr && pnr.trim().length !== 6) {
                     throw new customError_1.default('Invalid pnr no.', 404, 'RESOURCE_NOT_FOUND');
@@ -42,10 +42,6 @@ class PnrDetailsService extends abstract_services_1.default {
                 try {
                     const response = yield axios_1.default.get(api_url, { headers });
                     const pnrResponse = response.data.data;
-                    // ERROR THROW FROM SABRE RESPONSE
-                    if ((_a = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.errors) === null || _a === void 0 ? void 0 : _a.length) {
-                        throw new customError_1.default(pnrResponse.errors[0].description, 400, pnrResponse.errors[0].category);
-                    }
                     if (response.data.success &&
                         (pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.flights) &&
                         (pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.fares)) {
@@ -55,7 +51,7 @@ class PnrDetailsService extends abstract_services_1.default {
                         const ticket_details = [];
                         // TICKET DETAILS
                         for (const [index, ticket] of pnrResponse.flightTickets.entries()) {
-                            const flightsId = (_b = ticket.flightCoupons) === null || _b === void 0 ? void 0 : _b.map((item) => item.itemId);
+                            const flightsId = (_a = ticket.flightCoupons) === null || _a === void 0 ? void 0 : _a.map((item) => item.itemId);
                             if (!flightsId) {
                                 throw new customError_1.default('The ticket has already been refunded or reissued.', 400, 'Invalid PNR');
                             }
@@ -73,7 +69,7 @@ class PnrDetailsService extends abstract_services_1.default {
                             });
                             const pax_passports = {
                                 passport_no: (traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments)
-                                    ? (_c = traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments[0]) === null || _c === void 0 ? void 0 : _c.documentNumber
+                                    ? (_b = traveler === null || traveler === void 0 ? void 0 : traveler.identityDocuments[0]) === null || _b === void 0 ? void 0 : _b.documentNumber
                                     : undefined,
                                 passport_name: traveler.givenName + ' ' + traveler.surname,
                                 passport_person_type: (0, pnr_lib_1.capitalize)(traveler === null || traveler === void 0 ? void 0 : traveler.type),
@@ -90,30 +86,30 @@ class PnrDetailsService extends abstract_services_1.default {
                             // FLIGHT DETAILS
                             const flights = pnrResponse.flights.filter((item) => flightsId === null || flightsId === void 0 ? void 0 : flightsId.includes(item.itemId));
                             const { flight_details, airticket_route_or_sector, route_sectors } = yield (0, pnr_lib_1.formatFlightDetailsRoute)(flights, conn);
-                            const taxBreakdown = ((_d = pnrResponse.fares) === null || _d === void 0 ? void 0 : _d.find((item) => {
+                            const taxBreakdown = ((_c = pnrResponse.fares) === null || _c === void 0 ? void 0 : _c.find((item) => {
                                 return ((item === null || item === void 0 ? void 0 : item.travelerIndices) &&
                                     (item === null || item === void 0 ? void 0 : item.travelerIndices.includes(ticket.travelerIndex)));
                             })) ||
-                                ((_e = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.fares) === null || _e === void 0 ? void 0 : _e.find((item) => item.airlineCode === flights[0].airlineCode));
+                                ((_d = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.fares) === null || _d === void 0 ? void 0 : _d.find((item) => item.airlineCode === flights[0].airlineCode));
                             const breakdown = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown.reduce((acc, current) => {
                                 acc[current.taxCode] = Number(current.taxAmount.amount);
                                 return acc;
                             }, {});
                             let totalCountryTax = 0;
                             for (const taxType in breakdown) {
-                                if ((_f = ['BD', 'UT', 'E5']) === null || _f === void 0 ? void 0 : _f.includes(taxType)) {
+                                if ((_e = ['BD', 'UT', 'E5']) === null || _e === void 0 ? void 0 : _e.includes(taxType)) {
                                     totalCountryTax += breakdown[taxType];
                                 }
                             }
                             // TAXES COMMISSION
                             let taxesCommission;
                             if (['TK', 'CZ'].includes(flights[0].airlineCode)) {
-                                taxesCommission = (_g = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _g === void 0 ? void 0 : _g.filter((item) => item.taxCode === 'YQ');
+                                taxesCommission = (_f = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _f === void 0 ? void 0 : _f.filter((item) => item.taxCode === 'YQ');
                             }
                             else if (['MH', 'AI'].includes(flights[0].airlineCode)) {
-                                taxesCommission = (_h = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _h === void 0 ? void 0 : _h.filter((item) => item.taxCode === 'YR');
+                                taxesCommission = (_g = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _g === void 0 ? void 0 : _g.filter((item) => item.taxCode === 'YR');
                             }
-                            const baseFareCommission = (0, lib_1.numRound)((_j = ticket === null || ticket === void 0 ? void 0 : ticket.commission) === null || _j === void 0 ? void 0 : _j.commissionAmount);
+                            const baseFareCommission = (0, lib_1.numRound)((_h = ticket === null || ticket === void 0 ? void 0 : ticket.commission) === null || _h === void 0 ? void 0 : _h.commissionAmount);
                             const countryTaxAit = Number(1 || 0) * 0.003;
                             const grossAit = Number(ticket.payment.total || 0) * 0.003;
                             const airticket_ait = Math.round(grossAit - countryTaxAit);

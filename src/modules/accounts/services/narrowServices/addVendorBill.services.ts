@@ -31,7 +31,7 @@ class AddVendorBillAdjustment extends AbstractServices {
       const vendor_conn = this.models.vendorModel(req, trx);
       const trxn_conn = this.models.trxnModels(req, trx);
 
-      const voucher_no = generateVoucherNumber(7, 'VB');
+      const voucher_no = generateVoucherNumber(4, 'VB');
 
       let trxType: 'DEBIT' | 'CREDIT' = 'CREDIT';
       if (bill_type === 'INCREASE') {

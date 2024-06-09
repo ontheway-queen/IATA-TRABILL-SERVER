@@ -27,7 +27,7 @@ class AddPartialRefundServices extends abstract_services_1.default {
         this.add = (req) => __awaiter(this, void 0, void 0, function* () {
             const { vendor_refund_info, invoice_id, comb_client, created_by, prfnd_account_id, prfnd_charge_amount, prfnd_return_amount, prfnd_profit_amount, prfnd_total_amount, date, note, prfnd_payment_type, prfnd_payment_method, } = req.body;
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
-            const voucher_no = (0, invoice_helpers_1.generateVoucherNumber)(7, 'PRF');
+            const voucher_no = (0, invoice_helpers_1.generateVoucherNumber)(4, 'PRF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
                 const mr_conn = this.models.MoneyReceiptModels(req, trx);

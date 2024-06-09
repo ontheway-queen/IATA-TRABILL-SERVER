@@ -46,7 +46,7 @@ class AddPartialRefundServices extends AbstractServices {
 
     const { client_id, combined_id } = separateCombClientToId(comb_client);
 
-    const voucher_no = generateVoucherNumber(7, 'PRF');
+    const voucher_no = generateVoucherNumber(4, 'PRF');
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.refundModel(req, trx);

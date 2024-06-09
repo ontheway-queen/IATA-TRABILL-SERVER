@@ -878,7 +878,32 @@ class SalesPurchasesReport extends AbstractModels {
       .limit(size)
       .offset(offset);
 
-    const infos = data.reduce(
+    const [infos] = await this.query()
+      .sum('invoice_net_total as total_sales')
+      .sum('cost_price as total_cost')
+      .sum('client_pay_amount as total_collection')
+      .sum('due_amount as total_due')
+      .sum('invoice_service_charge as total_service_charge')
+      .sum('invoice_discount as total_discount')
+      .from('view_daily_sales_report')
+      .where('org_agency_id', this.org_agency)
+      .modify((event) => {
+        if (client_id) event.andWhere('invoice_client_id', client_id);
+
+        if (combined_id) event.andWhere('invoice_combined_id', combined_id);
+
+        if (product_id && product_id !== 'all')
+          event.andWhere('billing_product_id', product_id);
+
+        if (employee_id && employee_id !== 'all')
+          event.andWhere('employee_id', employee_id);
+      })
+      .andWhereRaw(`DATE_FORMAT(sales_date,'%Y-%m-%d') BETWEEN ? AND ?`, [
+        from_date,
+        to_date,
+      ]);
+
+    /*     const infos = data.reduce(
       (
         acc: {
           total_sales: number;
@@ -909,7 +934,7 @@ class SalesPurchasesReport extends AbstractModels {
         total_discount: 0,
         total_payment: 0,
       }
-    );
+    ); */
 
     return { count: total_count, data: { data, ...infos } };
   }

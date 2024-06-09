@@ -64,7 +64,7 @@ class CommonHajjDetailsInsert extends AbstractServices {
 
       if (isNotEmpty(pilgrims_information)) {
         for (const item of pilgrims_information) {
-          const haji_info_vouchar_no = generateVoucherNumber(10);
+          const haji_info_vouchar_no = generateVoucherNumber(4);
 
           const pilgrimsId = item.haji_info_id;
 

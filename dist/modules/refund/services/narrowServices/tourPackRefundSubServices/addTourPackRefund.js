@@ -22,7 +22,7 @@ class AddTourPackRefund extends abstract_services_1.default {
         super();
         this.add = (req) => __awaiter(this, void 0, void 0, function* () {
             const { comb_client, client_refund_info, created_by, invoice_id, note, date, invoice_category_id, itineraries, } = req.body;
-            const tour_vouchar_number = (0, invoice_helpers_1.generateVoucherNumber)(7, 'TOUR-REF');
+            const tour_vouchar_number = (0, invoice_helpers_1.generateVoucherNumber)(4, 'TRF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
                 const mr_conn = this.models.MoneyReceiptModels(req, trx);

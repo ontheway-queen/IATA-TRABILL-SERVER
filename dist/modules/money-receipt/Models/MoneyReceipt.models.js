@@ -797,7 +797,7 @@ class MoneyReceiptModels extends abstract_models_1.default {
         this.getPrevAdvrIfo = (id) => __awaiter(this, void 0, void 0, function* () {
             const data = yield this.query()
                 .from('trabill_advance_return')
-                .select(this.db.raw('CAST(advr_amount AS DECIMAL(15,2)) AS prevAmoun'), 'advr_account_id as prevAccId', 'advr_payment_type as prevPayType', 'advr_combined_id as prevCombinedId', 'advr_actransaction_id', 'advr_ctrxn_id', this.db.raw("CASE WHEN advr_client_id IS NOT NULL THEN CONCAT('client-',advr_client_id) ELSE CONCAT('combined-',advr_combined_id) END AS prevClientId"), 'advr_trxn_charge_id')
+                .select(this.db.raw('CAST(advr_amount AS DECIMAL(15,2)) AS prevAmoun'), 'advr_vouchar_no', 'advr_account_id as prevAccId', 'advr_payment_type as prevPayType', 'advr_combined_id as prevCombinedId', 'advr_actransaction_id', 'advr_ctrxn_id', this.db.raw("CASE WHEN advr_client_id IS NOT NULL THEN CONCAT('client-',advr_client_id) ELSE CONCAT('combined-',advr_combined_id) END AS prevClientId"), 'advr_trxn_charge_id')
                 .where('advr_id', id);
             if (!data.length) {
                 throw new customError_1.default('Please provide a valid id', 400, 'Invalid id');

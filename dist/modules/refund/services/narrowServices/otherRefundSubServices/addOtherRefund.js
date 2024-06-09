@@ -23,7 +23,7 @@ class AddOtherRefund extends abstract_services_1.default {
         this.add = (req) => __awaiter(this, void 0, void 0, function* () {
             const { comb_client, vendor_refund_info, client_refund_info, date, note, created_by, invoice_id, } = req.body;
             const { crefund_payment_type, payment_type_id, trxn_charge_amount, account_id, total_refund_amount, total_refund_charge, } = client_refund_info;
-            const other_vouchar_number = (0, invoice_helpers_1.generateVoucherNumber)(7, 'OTHER-REF');
+            const other_vouchar_number = (0, invoice_helpers_1.generateVoucherNumber)(4, 'ORF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);

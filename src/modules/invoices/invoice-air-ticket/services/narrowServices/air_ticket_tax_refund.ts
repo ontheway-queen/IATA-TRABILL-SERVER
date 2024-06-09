@@ -45,7 +45,7 @@ class AirTicketTaxRefund extends AbstractServices {
 
       const { client_id, combined_id } = separateCombClientToId(comb_client);
 
-      const refund_voucher = generateVoucherNumber(6, 'TRF');
+      const refund_voucher = generateVoucherNumber(4, 'TRF');
 
       let refund_c_trxn_id = null;
       let client_account_trxn_id = null;

@@ -2,7 +2,6 @@ import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
 import Trxns from '../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../common/helpers/common.helper';
-import { generateVoucherNumber } from '../../../../common/helpers/invoice.helpers';
 import {
   IAcTrxn,
   IClTrxnUpdate,
@@ -43,9 +42,6 @@ class EditAdvanceReturn extends AbstractServices {
       const conn = this.models.MoneyReceiptModels(req, trx);
       const vendor_conn = this.models.vendorModel(req, trx);
       const trxns = new Trxns(req, trx);
-
-      const advr_vouchar_no = generateVoucherNumber(10);
-
       // =============== @ GET PREVIOUS RETURN INFO @ ======================
 
       const previous_billing = await conn.getPrevAdvrIfo(advr_id);
@@ -74,7 +70,7 @@ class EditAdvanceReturn extends AbstractServices {
         const AccTrxnBody: IAcTrxn = {
           acctrxn_ac_id: advr_account_id,
           acctrxn_type: 'DEBIT',
-          acctrxn_voucher: advr_vouchar_no,
+          acctrxn_voucher: previous_billing.advr_vouchar_no,
           acctrxn_amount: advr_amount,
           acctrxn_created_at: advr_payment_date,
           acctrxn_created_by: advr_created_by,
@@ -89,7 +85,7 @@ class EditAdvanceReturn extends AbstractServices {
           ctrxn_type: 'DEBIT',
           ctrxn_amount: advr_amount,
           ctrxn_cl: advr_combclient,
-          ctrxn_voucher: advr_vouchar_no,
+          ctrxn_voucher: previous_billing.advr_vouchar_no,
           ctrxn_particular_id: 33,
           ctrxn_created_at: advr_payment_date,
           ctrxn_note: advr_note,
@@ -147,7 +143,7 @@ class EditAdvanceReturn extends AbstractServices {
         advr_amount,
         advr_client_id: client_id,
         advr_combined_id: combined_id,
-        advr_vouchar_no,
+        advr_vouchar_no: previous_billing.advr_vouchar_no,
         advr_updated_by: advr_created_by,
         advr_ctrxn_id: client_trxn_id,
         advr_note,

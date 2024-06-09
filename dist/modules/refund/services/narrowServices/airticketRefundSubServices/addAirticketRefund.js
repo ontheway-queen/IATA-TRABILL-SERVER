@@ -26,7 +26,7 @@ class AddAirTicketRefund extends abstract_services_1.default {
             const crefund_profit = totalVReturnAmount -
                 Number(client_refund_info.crefund_return_amount || 0);
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(comb_client);
-            const voucher_number = (0, invoice_helpers_1.generateVoucherNumber)(7, 'AR-REF');
+            const voucher_number = (0, invoice_helpers_1.generateVoucherNumber)(4, 'ARF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.refundModel(req, trx);
                 const mr_conn = this.models.MoneyReceiptModels(req, trx);

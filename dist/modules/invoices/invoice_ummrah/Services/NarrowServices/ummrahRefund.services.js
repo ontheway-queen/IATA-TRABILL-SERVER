@@ -34,7 +34,7 @@ class UmmrahRefundServices extends abstract_services_1.default {
             }
             const clientContent = `Total sales price: ${totalSales}/-, Refund charge: ${clientCharge}/-`;
             const vendorContent = `Total purchase price: ${totalPurchase}/-, Refund charge: ${vendorCharge}/-`;
-            const voucher_no = (0, invoice_helpers_1.generateVoucherNumber)(5, 'UR');
+            const voucher_no = (0, invoice_helpers_1.generateVoucherNumber)(4, 'URF');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.InvoiceUmmarhModels(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);

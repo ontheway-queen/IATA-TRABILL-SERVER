@@ -285,6 +285,7 @@ class ReportModel extends AbstractModels {
         'invoice_client_id',
         'invoice_combined_id',
         'client_name',
+        'last_balance',
         this.db.raw('SUM(purchase) as purchase'),
         this.db.raw('SUM(sales) as sales'),
         this.db.raw('SUM(pay) as pay'),
@@ -299,6 +300,7 @@ class ReportModel extends AbstractModels {
             'invoice_client_id',
             'invoice_combined_id',
             'client_name',
+            'last_balance',
             this.db.raw('SUM(invoice_total_vendor_price) as purchase'),
             this.db.raw('SUM(invoice_net_total) as sales'),
             this.db.raw('SUM(cl_pay) as pay'),
@@ -357,7 +359,7 @@ class ReportModel extends AbstractModels {
       count: number;
     }[];
 
-    const total = await this.query()
+    const [total] = await this.query()
       .select(
         this.db.raw('SUM(invoice_total_vendor_price) as purchase'),
         this.db.raw('SUM(invoice_net_total) as sales'),
@@ -386,6 +388,39 @@ class ReportModel extends AbstractModels {
           });
         }
       });
+
+    const [client_l_balance] = await this.query()
+      .select(this.db.raw('SUM(last_balance) as last_balance'))
+      .from(
+        this.db
+          .select('last_balance')
+          .from('trabill.v_invoices_due')
+          .where('invoice_org_agency', this.org_agency)
+          .modify(function (queryBuilder) {
+            if (search) {
+              queryBuilder.where(function () {
+                this.whereILike('client_name', `%${search}%`).orWhereILike(
+                  'airline_code',
+                  `%${search}%`
+                );
+              });
+            }
+
+            if (client_id || combine_id) {
+              queryBuilder.where(function () {
+                this.where('invoice_client_id', client_id).andWhere(
+                  'invoice_combined_id',
+                  combine_id
+                );
+              });
+            }
+          })
+          .groupBy('invoice_client_id', 'invoice_combined_id')
+
+          .as('inv_due')
+      );
+
+    total.last_balance = client_l_balance.last_balance || 0;
 
     return { count, data: { results, total } };
   };
@@ -487,7 +522,7 @@ class ReportModel extends AbstractModels {
         }
       })) as { count: number }[];
 
-    const total = await this.query()
+    const [total] = await this.query()
       .select(
         this.db.raw('SUM(invoice_total_vendor_price) as purchase'),
         this.db.raw('SUM(invoice_net_total) as sales'),
@@ -591,7 +626,7 @@ class ReportModel extends AbstractModels {
       })
       .groupBy('airline_id')) as { count: number }[];
 
-    const total = (await this.query()
+    const [total] = (await this.query()
       .select(
         this.db.raw('SUM(invoice_total_vendor_price) as purchase'),
         this.db.raw('SUM(invoice_net_total) as sales'),
@@ -626,7 +661,7 @@ class ReportModel extends AbstractModels {
     size: number = 20
   ) => {
     const offset = (+page - 1) * +size;
-    const data = await this.query()
+    const results = await this.query()
       .select(
         'client_id',
         'client_category_id',
@@ -651,6 +686,21 @@ class ReportModel extends AbstractModels {
       .offset(offset)
       .limit(size);
 
+    const [total] = await this.query()
+      .sum('client_lbalance as total_advance')
+      .from('trabill.trabill_clients')
+      .where('client_org_agency', this.org_agency)
+      .modify((builder) => {
+        if (search) {
+          builder
+            .whereILike('client_name', `%${search}%`)
+            .orWhereILike('client_entry_id', `%${search}%`)
+            .orWhereILike('client_mobile', `%${search}%`);
+        }
+      })
+      .andWhereNot('client_is_deleted', 1)
+      .andWhere('client_lbalance', '>', 0);
+
     const [{ count }] = (await this.query()
       .count('* as count')
       .from('trabill.trabill_clients')
@@ -658,7 +708,7 @@ class ReportModel extends AbstractModels {
       .andWhereNot('client_is_deleted', 1)
       .andWhere('client_lbalance', '>', 0)) as { count: number }[];
 
-    return { count, data };
+    return { count, data: { results, total } };
   };
 
   public async getDueAdvanceVendor(

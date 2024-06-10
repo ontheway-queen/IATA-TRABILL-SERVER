@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
 import AbstractController from '../../../abstracts/abstract.controllers';
+import ReportExcelServices from '../services/excels/reportExcel.services';
 import ReportServices from '../services/report.services';
 import ReportValidator from '../validators/report.validator';
-import ReportExcelServices from '../services/excels/reportExcel.services';
 class ReportController extends AbstractController {
   private validator = new ReportValidator();
   private services = new ReportServices();

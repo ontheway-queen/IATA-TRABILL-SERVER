@@ -10,6 +10,24 @@ export const toNum = (strNum: string) => Number(strNum.replace(/,/g, ''));
 export function withinRange(num1: number, num2: number, range: number) {
   return Math.abs(numRound(num1) - numRound(num2)) <= numRound(range);
 }
+
+export const splitText = (text: string, startText: string, endText: string) => {
+  const startIndex = text.indexOf(startText);
+  const endIndex = text.indexOf(endText);
+
+  return text.substring(startIndex, endIndex);
+};
+
+function formatDate(inputDate: string) {
+  // inputDate = 010MAR24 | 0OD14MAR24 | 010MAR24
+  const datePart = inputDate.match(/[0-9]{2}[A-Z]{3}[0-9]{2}/);
+  if (datePart) {
+    return new Date(datePart[0]); // 2024-03-13T18:00:00.000Z
+  } else {
+    return null;
+  }
+}
+
 // UTILS END
 
 export const bspBillingFormatter = (text: string) => {
@@ -52,6 +70,35 @@ export const bspBillingFormatter = (text: string) => {
   return { bsp_summary, salesDateRange, billingDateRange };
 };
 
+export const formatAgentBillingCommission = (arrayOfTickets: any[]) => {
+  let commission: any[] = [];
+  arrayOfTickets.forEach((item) => {
+    if (
+      item.includes('0.00') ||
+      (item.includes('7.00') && item.includes('0.00'))
+    ) {
+      commission.push(item);
+    }
+  });
+
+  const formatedCommission = commission.map((item) => {
+    const replaceItem = item
+      .replace(/7.00/g, ' 7.00 ')
+      .replace(/0.00/g, ' 0.00 ');
+
+    const value = replaceItem.split(' ');
+
+    return {
+      commission_parcentage: value[1],
+      commission_amount: toNum(value[2]),
+      ait: toNum(value[4]),
+    };
+  });
+
+  return formatedCommission;
+};
+
+// AGENT BILLING DETAILS
 export const formatAgentBillingDetails = (text: string) => {
   const salesPeriodRegex = /Billing Period:\s*(\d+)\s*\((.*?)\s*to\s*(.*?)\)/;
 
@@ -78,11 +125,47 @@ export const formatAgentBillingDetails = (text: string) => {
       ]
     : '';
 
-  return {
+  const iata_summary = {
     from_date,
     to_date,
-    issueTotal: toNum(issues),
-    refundsTotal: toNum(refunds),
-    grandTotal: toNum(issues) - toNum(refunds),
+    iata_issues: toNum(issues),
+    iata_refunds: toNum(refunds),
+    iata_grand_total: toNum(issues) - toNum(refunds),
   };
+
+  // ============ TICKETING....
+  const ticketsText = splitText(text, '*** ISSUES', 'ISSUES TOTAL');
+
+  const arrayOfTickets = ticketsText.split('\n');
+
+  const filterTickets = arrayOfTickets
+    .filter((item) => item.includes('FFVV') || item.includes('TKTT'))
+    .map((mapItem) => {
+      if (mapItem.includes('7.00') && mapItem.includes('0.00')) {
+        const data = mapItem.split(',');
+        data.pop();
+
+        return data.join(',');
+      } else {
+        return mapItem;
+      }
+    });
+
+  const formattedCommission = formatAgentBillingCommission(arrayOfTickets);
+
+  const tickets = filterTickets.map((item, index) => {
+    const arrItem = item.split(' ');
+
+    return {
+      id: index + 1,
+      ticket_no: arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, ''),
+      issue_date: formatDate(arrItem[4]),
+      gross_fare: toNum(arrItem[1]),
+      base_fare: toNum(arrItem[2]),
+      ...formattedCommission[index],
+      purchase_price: toNum(arrItem[3]),
+    };
+  });
+
+  return { iata_summary, tickets };
 };

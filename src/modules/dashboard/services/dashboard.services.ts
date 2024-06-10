@@ -209,6 +209,11 @@ class DashboardServices extends AbstractServices {
     const billing_from_date = getNext15Day(from_date);
     const billing_to_date = getNext15Day(to_date);
 
+    const iata_payment = await conn.getBSPBillingPayment(
+      billing_from_date,
+      billing_to_date
+    );
+
     return {
       success: true,
       message: 'The request is OK',
@@ -221,6 +226,7 @@ class DashboardServices extends AbstractServices {
         ticket_re_issue,
         ticket_refund,
         client_sales,
+        iata_payment,
       },
     };
   };
@@ -399,35 +405,44 @@ class DashboardServices extends AbstractServices {
           data.message = 'BSP BILLING CROSS CHECK NOT MATCHED...';
         }
       } else if (pdfData.text.includes('AGENT BILLING DETAILS')) {
-        const agentBillingDetails = formatAgentBillingDetails(pdfData?.text);
+        const { iata_summary, tickets } = formatAgentBillingDetails(
+          pdfData?.text
+        );
 
-        // from database
         const ticket_issue = await conn.getBspTicketIssueInfo(
-          agentBillingDetails.from_date as Date,
-          agentBillingDetails.to_date as Date
+          iata_summary.from_date as Date,
+          iata_summary.to_date as Date
         );
 
         const ticket_re_issue = await conn.getBspTicketReissueInfo(
-          agentBillingDetails.from_date as Date,
-          agentBillingDetails.to_date as Date
+          iata_summary.from_date as Date,
+          iata_summary.to_date as Date
         );
 
         const ticket_refund = await conn.getBspTicketRefundInfo(
-          agentBillingDetails.from_date as Date,
-          agentBillingDetails.to_date as Date
+          iata_summary.from_date as Date,
+          iata_summary.to_date as Date
         );
 
-        const grandTotal =
+        const db_issue =
+          numRound(ticket_issue.purchase_amount) +
+          numRound(ticket_re_issue.purchase_amount);
+
+        const db_grand_total =
           numRound(ticket_issue.purchase_amount) +
           numRound(ticket_re_issue.purchase_amount) -
           numRound(ticket_refund.refund_amount);
 
-        const trabill_summary = {
-          issue: numRound(ticket_issue.purchase_amount),
-          reissue: numRound(ticket_re_issue.purchase_amount),
-          refund: numRound(ticket_refund.refund_amount),
-          grandTotal,
+        const summary = {
+          ...iata_summary,
+          db_issue,
+          db_refund: numRound(ticket_refund.refund_amount),
+          db_grand_total,
+          difference_amount: Math.abs(db_issue - iata_summary.iata_issues),
         };
+        data = { summary, tickets };
+
+        console.log({ data });
       }
 
       return {

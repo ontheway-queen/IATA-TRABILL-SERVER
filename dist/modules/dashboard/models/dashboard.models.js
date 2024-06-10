@@ -407,6 +407,23 @@ class DashboardModels extends abstract_models_1.default {
             ]));
             return data;
         });
+        // BSP IATA PAYMENT
+        this.getBSPBillingPayment = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
+            if (!from_date || !to_date) {
+                return [];
+            }
+            return yield this.db
+                .queryBuilder()
+                .from('trabill_vendor_payments')
+                .select('vpay_id', 'vouchar_no', 'payment_method_id', 'payment_amount', 'payment_date', 'vendor_id', 'vendor_name', 'account_id', 'account_name', 'user_id', 'user_full_name')
+                .leftJoin('trabill_vendors', 'vendor_id', 'vpay_vendor_id')
+                .leftJoin('trabill_accounts', 'account_id', 'vpay_account_id')
+                .leftJoin('trabill_users', 'user_id', 'created_by')
+                .where('vendor_org_agency', this.org_agency)
+                .andWhereNot('vpay_is_deleted', 1)
+                .andWhere('vendor_type', 'IATA')
+                .andWhereRaw('Date(payment_date) BETWEEN ? AND ?', [from_date, to_date]);
+        });
         this.getBspTicketRefundSummary = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
             const ticket_refund = yield this.query()
                 .select('*')
@@ -414,15 +431,6 @@ class DashboardModels extends abstract_models_1.default {
                 .where('vendor_org_agency', this.org_agency)
                 .andWhere('vendor_type', 'IATA')
                 .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
-            // const [{ total_ticket_refund }] = (await this.query()
-            //   .sum('vrefund_return_amount as total_ticket_refund')
-            //   .from('v_bsp_ticket_refund')
-            //   .where('vendor_org_agency', this.org_agency)
-            //   .andWhere('vendor_type', 'IATA')
-            //   .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [
-            //     from_date,
-            //     to_date,
-            //   ])) as { total_ticket_refund: string }[];
             return { ticket_refund };
         });
         // GET ACCOUNT DETAILS BY ACCOUNT TYPE

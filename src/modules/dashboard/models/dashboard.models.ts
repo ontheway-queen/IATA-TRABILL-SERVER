@@ -571,6 +571,40 @@ class DashboardModels extends AbstractModels {
     return data;
   };
 
+  // BSP IATA PAYMENT
+  getBSPBillingPayment = async (
+    from_date: string | Date,
+    to_date: string | Date
+  ) => {
+    if (!from_date || !to_date) {
+      return [];
+    }
+
+    return await this.db
+      .queryBuilder()
+      .from('trabill_vendor_payments')
+      .select(
+        'vpay_id',
+        'vouchar_no',
+        'payment_method_id',
+        'payment_amount',
+        'payment_date',
+        'vendor_id',
+        'vendor_name',
+        'account_id',
+        'account_name',
+        'user_id',
+        'user_full_name'
+      )
+      .leftJoin('trabill_vendors', 'vendor_id', 'vpay_vendor_id')
+      .leftJoin('trabill_accounts', 'account_id', 'vpay_account_id')
+      .leftJoin('trabill_users', 'user_id', 'created_by')
+      .where('vendor_org_agency', this.org_agency)
+      .andWhereNot('vpay_is_deleted', 1)
+      .andWhere('vendor_type', 'IATA')
+      .andWhereRaw('Date(payment_date) BETWEEN ? AND ?', [from_date, to_date]);
+  };
+
   getBspTicketRefundSummary = async (
     from_date: string | Date,
     to_date: string | Date
@@ -581,16 +615,6 @@ class DashboardModels extends AbstractModels {
       .where('vendor_org_agency', this.org_agency)
       .andWhere('vendor_type', 'IATA')
       .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
-
-    // const [{ total_ticket_refund }] = (await this.query()
-    //   .sum('vrefund_return_amount as total_ticket_refund')
-    //   .from('v_bsp_ticket_refund')
-    //   .where('vendor_org_agency', this.org_agency)
-    //   .andWhere('vendor_type', 'IATA')
-    //   .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [
-    //     from_date,
-    //     to_date,
-    //   ])) as { total_ticket_refund: string }[];
 
     return { ticket_refund };
   };

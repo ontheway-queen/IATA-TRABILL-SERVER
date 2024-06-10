@@ -156,6 +156,7 @@ class DashboardServices extends abstract_services_1.default {
             // BILLING DATE
             const billing_from_date = (0, lib_1.getNext15Day)(from_date);
             const billing_to_date = (0, lib_1.getNext15Day)(to_date);
+            const iata_payment = yield conn.getBSPBillingPayment(billing_from_date, billing_to_date);
             return {
                 success: true,
                 message: 'The request is OK',
@@ -168,6 +169,7 @@ class DashboardServices extends abstract_services_1.default {
                     ticket_re_issue,
                     ticket_refund,
                     client_sales,
+                    iata_payment,
                 },
             };
         });
@@ -282,20 +284,18 @@ class DashboardServices extends abstract_services_1.default {
                     }
                 }
                 else if (pdfData.text.includes('AGENT BILLING DETAILS')) {
-                    const agentBillingDetails = (0, dashbaor_utils_1.formatAgentBillingDetails)(pdfData === null || pdfData === void 0 ? void 0 : pdfData.text);
-                    // from database
-                    const ticket_issue = yield conn.getBspTicketIssueInfo(agentBillingDetails.from_date, agentBillingDetails.to_date);
-                    const ticket_re_issue = yield conn.getBspTicketReissueInfo(agentBillingDetails.from_date, agentBillingDetails.to_date);
-                    const ticket_refund = yield conn.getBspTicketRefundInfo(agentBillingDetails.from_date, agentBillingDetails.to_date);
-                    const grandTotal = (0, lib_1.numRound)(ticket_issue.purchase_amount) +
+                    const { iata_summary, tickets } = (0, dashbaor_utils_1.formatAgentBillingDetails)(pdfData === null || pdfData === void 0 ? void 0 : pdfData.text);
+                    const ticket_issue = yield conn.getBspTicketIssueInfo(iata_summary.from_date, iata_summary.to_date);
+                    const ticket_re_issue = yield conn.getBspTicketReissueInfo(iata_summary.from_date, iata_summary.to_date);
+                    const ticket_refund = yield conn.getBspTicketRefundInfo(iata_summary.from_date, iata_summary.to_date);
+                    const db_issue = (0, lib_1.numRound)(ticket_issue.purchase_amount) +
+                        (0, lib_1.numRound)(ticket_re_issue.purchase_amount);
+                    const db_grand_total = (0, lib_1.numRound)(ticket_issue.purchase_amount) +
                         (0, lib_1.numRound)(ticket_re_issue.purchase_amount) -
                         (0, lib_1.numRound)(ticket_refund.refund_amount);
-                    const trabill_summary = {
-                        issue: (0, lib_1.numRound)(ticket_issue.purchase_amount),
-                        reissue: (0, lib_1.numRound)(ticket_re_issue.purchase_amount),
-                        refund: (0, lib_1.numRound)(ticket_refund.refund_amount),
-                        grandTotal,
-                    };
+                    const summary = Object.assign(Object.assign({}, iata_summary), { db_issue, db_refund: (0, lib_1.numRound)(ticket_refund.refund_amount), db_grand_total, difference_amount: Math.abs(db_issue - iata_summary.iata_issues) });
+                    data = { summary, tickets };
+                    console.log({ data });
                 }
                 return {
                     success: true,

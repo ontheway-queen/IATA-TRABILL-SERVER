@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatAgentBillingDetails = exports.bspBillingFormatter = exports.withinRange = exports.toNum = void 0;
+exports.formatAgentBillingDetails = exports.formatAgentBillingCommission = exports.bspBillingFormatter = exports.splitText = exports.withinRange = exports.toNum = void 0;
 const lib_1 = require("../../../common/utils/libraries/lib");
 // START UTILS
 const toNum = (strNum) => Number(strNum.replace(/,/g, ''));
@@ -9,6 +9,22 @@ function withinRange(num1, num2, range) {
     return Math.abs((0, lib_1.numRound)(num1) - (0, lib_1.numRound)(num2)) <= (0, lib_1.numRound)(range);
 }
 exports.withinRange = withinRange;
+const splitText = (text, startText, endText) => {
+    const startIndex = text.indexOf(startText);
+    const endIndex = text.indexOf(endText);
+    return text.substring(startIndex, endIndex);
+};
+exports.splitText = splitText;
+function formatDate(inputDate) {
+    // inputDate = 010MAR24 | 0OD14MAR24 | 010MAR24
+    const datePart = inputDate.match(/[0-9]{2}[A-Z]{3}[0-9]{2}/);
+    if (datePart) {
+        return new Date(datePart[0]); // 2024-03-13T18:00:00.000Z
+    }
+    else {
+        return null;
+    }
+}
 // UTILS END
 const bspBillingFormatter = (text) => {
     const summaryStartIndex = text.indexOf('REMITTANCE TOTAL');
@@ -39,6 +55,29 @@ const bspBillingFormatter = (text) => {
     return { bsp_summary, salesDateRange, billingDateRange };
 };
 exports.bspBillingFormatter = bspBillingFormatter;
+const formatAgentBillingCommission = (arrayOfTickets) => {
+    let commission = [];
+    arrayOfTickets.forEach((item) => {
+        if (item.includes('0.00') ||
+            (item.includes('7.00') && item.includes('0.00'))) {
+            commission.push(item);
+        }
+    });
+    const formatedCommission = commission.map((item) => {
+        const replaceItem = item
+            .replace(/7.00/g, ' 7.00 ')
+            .replace(/0.00/g, ' 0.00 ');
+        const value = replaceItem.split(' ');
+        return {
+            commission_parcentage: value[1],
+            commission_amount: (0, exports.toNum)(value[2]),
+            ait: (0, exports.toNum)(value[4]),
+        };
+    });
+    return formatedCommission;
+};
+exports.formatAgentBillingCommission = formatAgentBillingCommission;
+// AGENT BILLING DETAILS
 const formatAgentBillingDetails = (text) => {
     const salesPeriodRegex = /Billing Period:\s*(\d+)\s*\((.*?)\s*to\s*(.*?)\)/;
     const salesPeriodMatch = text.match(salesPeriodRegex);
@@ -56,13 +95,34 @@ const formatAgentBillingDetails = (text) => {
     const refunds = combinedTotal.includes('REFUNDS')
         ? combinedTotal[6].split(/[\s-]+/)[combinedTotal[6].split(/[\s-]+/).length - 1]
         : '';
-    return {
+    const iata_summary = {
         from_date,
         to_date,
-        issueTotal: (0, exports.toNum)(issues),
-        refundsTotal: (0, exports.toNum)(refunds),
-        grandTotal: (0, exports.toNum)(issues) - (0, exports.toNum)(refunds),
+        iata_issues: (0, exports.toNum)(issues),
+        iata_refunds: (0, exports.toNum)(refunds),
+        iata_grand_total: (0, exports.toNum)(issues) - (0, exports.toNum)(refunds),
     };
+    // ============ TICKETING....
+    const ticketsText = (0, exports.splitText)(text, '*** ISSUES', 'ISSUES TOTAL');
+    const arrayOfTickets = ticketsText.split('\n');
+    const filterTickets = arrayOfTickets
+        .filter((item) => item.includes('FFVV') || item.includes('TKTT'))
+        .map((mapItem) => {
+        if (mapItem.includes('7.00') && mapItem.includes('0.00')) {
+            const data = mapItem.split(',');
+            data.pop();
+            return data.join(',');
+        }
+        else {
+            return mapItem;
+        }
+    });
+    const formattedCommission = (0, exports.formatAgentBillingCommission)(arrayOfTickets);
+    const tickets = filterTickets.map((item, index) => {
+        const arrItem = item.split(' ');
+        return Object.assign(Object.assign({ id: index + 1, ticket_no: arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, ''), issue_date: formatDate(arrItem[4]), gross_fare: (0, exports.toNum)(arrItem[1]), base_fare: (0, exports.toNum)(arrItem[2]) }, formattedCommission[index]), { purchase_price: (0, exports.toNum)(arrItem[3]) });
+    });
+    return { iata_summary, tickets };
 };
 exports.formatAgentBillingDetails = formatAgentBillingDetails;
 //# sourceMappingURL=dashbaor.utils.js.map

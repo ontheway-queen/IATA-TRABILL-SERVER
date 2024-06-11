@@ -6,16 +6,15 @@ import {
   getBspBillingDate,
   getDateRangeByWeek,
   getNext15Day,
-  numRound,
 } from '../../../common/utils/libraries/lib';
 import {
   BspBillingQueryType,
   BspBillingSummaryQueryType,
 } from '../types/dashboard.types';
 import {
-  bspBillingFormatter,
-  formatAgentBillingDetails,
-  withinRange,
+  formatAgentRefund,
+  formatAgentTicket,
+  getAgentBillingSummary,
 } from '../utils/dashbaor.utils';
 
 class DashboardServices extends AbstractServices {
@@ -349,98 +348,29 @@ class DashboardServices extends AbstractServices {
 
   // BSP BILLING CROSS CHECK
   bspBillingCrossCheck = async (req: Request) => {
-    try {
-      if (!req.file) {
-        throw new CustomError('No file uploaded', 400, 'File not found');
-      }
+    if (!req.file) {
+      throw new CustomError('No file uploaded', 400, 'File not found');
+    }
 
+    const type: string = 'REFUND';
+
+    try {
       const conn = this.models.dashboardModal(req);
 
-      // Use pdf-parse to parse the uploaded PDF file
       const pdfData = await PDFParser(req.file.path as any);
 
       let data;
 
-      if (pdfData.text.includes('AGENT REMITTANCE DETAIL')) {
-        data = bspBillingFormatter(pdfData.text) as any;
-
-        // from database
-        const ticket_issue = await conn.getBspTicketIssueInfo(
-          data?.salesDateRange.from_date,
-          data?.salesDateRange.to_date
-        );
-
-        const ticket_re_issue = await conn.getBspTicketReissueInfo(
-          data?.salesDateRange.from_date,
-          data?.salesDateRange.to_date
-        );
-
-        const ticket_refund = await conn.getBspTicketRefundInfo(
-          data?.salesDateRange.from_date,
-          data?.salesDateRange.to_date
-        );
-
-        const AMOUNT =
-          numRound(ticket_issue.purchase_amount) +
-          numRound(ticket_re_issue.purchase_amount) -
-          numRound(ticket_refund.refund_amount);
-
-        const trabill_summary = {
-          issue: numRound(ticket_issue.purchase_amount),
-          reissue: numRound(ticket_re_issue.purchase_amount),
-          refund: numRound(ticket_refund.refund_amount),
-          combined: AMOUNT,
-        };
-
-        data.trabill_summary = trabill_summary;
-
-        if (withinRange(data.bsp_summary.AMOUNT, AMOUNT, 10)) {
-          const diffAmount =
-            numRound(data.bsp_summary.AMOUNT) - numRound(AMOUNT);
-
-          data.message =
-            'DATA DIFFERENCE BETWEEN BSP BILL AND TRABILL-DB IS ' +
-            Math.abs(diffAmount);
+      if (pdfData.text.includes('AGENT BILLING DETAILS')) {
+        if (type === 'SUMMARY') {
+          data = await getAgentBillingSummary(pdfData?.text, conn);
+        } else if (type === 'TICKET') {
+          data = await formatAgentTicket(pdfData?.text, conn);
+        } else if (type === 'REFUND') {
+          data = await formatAgentRefund(pdfData?.text, conn);
         } else {
-          data.message = 'BSP BILLING CROSS CHECK NOT MATCHED...';
+          data = [];
         }
-      } else if (pdfData.text.includes('AGENT BILLING DETAILS')) {
-        const { iata_summary, tickets } = formatAgentBillingDetails(
-          pdfData?.text
-        );
-
-        const ticket_issue = await conn.getBspTicketIssueInfo(
-          iata_summary.from_date as Date,
-          iata_summary.to_date as Date
-        );
-
-        const ticket_re_issue = await conn.getBspTicketReissueInfo(
-          iata_summary.from_date as Date,
-          iata_summary.to_date as Date
-        );
-
-        const ticket_refund = await conn.getBspTicketRefundInfo(
-          iata_summary.from_date as Date,
-          iata_summary.to_date as Date
-        );
-
-        const db_issue =
-          numRound(ticket_issue.purchase_amount) +
-          numRound(ticket_re_issue.purchase_amount);
-
-        const db_grand_total =
-          numRound(ticket_issue.purchase_amount) +
-          numRound(ticket_re_issue.purchase_amount) -
-          numRound(ticket_refund.refund_amount);
-
-        const summary = {
-          ...iata_summary,
-          db_issue,
-          db_refund: numRound(ticket_refund.refund_amount),
-          db_grand_total,
-          difference_amount: Math.abs(db_issue - iata_summary.iata_issues),
-        };
-        data = { summary, tickets };
 
         console.log({ data });
       }

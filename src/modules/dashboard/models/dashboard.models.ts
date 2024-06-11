@@ -788,6 +788,49 @@ class DashboardModels extends AbstractModels {
 
     return result;
   };
+
+  getTicketInfoByTicket = async (ticket_no: string) => {
+    const [ticket] = await this.query()
+      .select([
+        'invoice_id',
+        'invoice_no',
+        'invoice_category_id',
+        'airticket_ticket_no',
+        'airticket_sales_date',
+        'airticket_gross_fare',
+        'airticket_base_fare',
+        'airticket_commission_percent',
+        'airticket_commission_percent_total',
+        'airticket_ait',
+        'airticket_purchase_price',
+      ])
+      .from('trabill.v_bsp_ticket_issue')
+      .where('airticket_ticket_no', 'like', `%${ticket_no}%`)
+      .andWhere('vendor_org_agency', this.org_agency);
+
+    return ticket;
+  };
+
+  getTicketInfoByRefund = async (ticket_no: string) => {
+    const [ticket] = await this.query()
+      .select(
+        'atrefund_vouchar_number',
+        { refund_id: 'vrefund_refund_id' },
+        'client_name',
+        'comb_client',
+        'refund_type',
+        'vrefund_total_amount',
+        'vrefund_charge_amount',
+        'vrefund_date',
+        'airticket_ticket_no',
+        'airline_name'
+      )
+      .from('trabill.v_bsp_ticket_refund')
+      .where('airticket_ticket_no', 'like', `%${ticket_no}%`)
+      .andWhere('vendor_org_agency', this.org_agency);
+
+    return ticket;
+  };
 }
 
 export default DashboardModels;

@@ -178,7 +178,7 @@ class UserServices extends AbstractServices {
 
       if (!checkPassword(password)) {
         throw new CustomError(
-          `Password must be minimum 8 charecter and one special charecter required`,
+          `Password must be minimum 8 character and one special character required`,
           400,
           'Bad request'
         );
@@ -191,7 +191,7 @@ class UserServices extends AbstractServices {
 
     return {
       success: true,
-      message: 'Resetting password of super admin was successfull',
+      message: 'Resetting password of super admin was successful',
     };
   }
   // RESET USER PASSWORD
@@ -209,7 +209,7 @@ class UserServices extends AbstractServices {
 
       if (!checkPassword(new_password)) {
         throw new CustomError(
-          `Password must be minimum 8 charecter and one special charecter required`,
+          `Password must be minimum 8 character and one special character required`,
           400,
           'Bad request'
         );
@@ -226,7 +226,7 @@ class UserServices extends AbstractServices {
 
     return {
       success: true,
-      message: 'Changing password of super admin was successfull',
+      message: 'Changing password of super admin was successful',
     };
   }
 
@@ -264,7 +264,7 @@ class UserServices extends AbstractServices {
 
     if (is_exist) {
       throw new CustomError(
-        `This role name alrady exist, enter unique name`,
+        `This role name already exist, enter unique name`,
         400,
         'Bad request'
       );
@@ -286,7 +286,7 @@ class UserServices extends AbstractServices {
 
     return {
       success: true,
-      message: role ? 'Role name alrady exist' : 'Role name. is uniqe',
+      message: role ? 'Role name already exist' : 'Role name. is unique',
       data: {
         is_uniqe: role ? true : false,
       },

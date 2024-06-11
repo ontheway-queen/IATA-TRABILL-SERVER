@@ -1,8 +1,8 @@
 import {
   dateStrConverter,
-  getBspPdfDate,
   numRound,
 } from '../../../common/utils/libraries/lib';
+import DashboardModels from '../models/dashboard.models';
 
 // START UTILS
 export const toNum = (strNum: string) => Number(strNum.replace(/,/g, ''));
@@ -28,48 +28,6 @@ function formatDate(inputDate: string) {
   }
 }
 
-// UTILS END
-
-export const bspBillingFormatter = (text: string) => {
-  const summaryStartIndex = text.indexOf('REMITTANCE TOTAL');
-  const summaryEndIndex = text.indexOf('BANK:');
-  const summaryText = text.slice(summaryStartIndex, summaryEndIndex);
-
-  const salesPeriodRegex = /Billing Period:\s*(\d+)\s*\((.*?)\s*to\s*(.*?)\)/;
-  const salesPeriodMatch = text.match(salesPeriodRegex);
-  const salesPeriod = salesPeriodMatch
-    ? dateStrConverter(salesPeriodMatch[3])
-    : null;
-
-  // BILLING PERIOD
-  const dateRegex = /\d{2}-[A-Z]{3}-\d{4}/;
-
-  const match = summaryText.match(dateRegex);
-
-  const billingPeriod = match ? dateStrConverter(match[0]) : null;
-
-  const summaryRegex =
-    /REMITTANCE TOTAL \(BDT\)\s*(\d+,\d+) (\d+,\d+) (\d+) ([\d,]+)/;
-
-  const summaryMatch = summaryText.match(summaryRegex);
-
-  const salesDateRange = getBspPdfDate(salesPeriod as Date);
-  const billingDateRange = getBspPdfDate(billingPeriod as Date);
-
-  const bsp_summary: any = {};
-
-  if (summaryMatch) {
-    bsp_summary.BILLED = parseInt(summaryMatch[1].replace(',', ''));
-    bsp_summary.BROUGHTFORWARD = parseInt(summaryMatch[2].replace(',', ''));
-    bsp_summary.DEFERRED = parseInt(summaryMatch[3]);
-    bsp_summary.AMOUNT = parseInt(summaryMatch[4].replace(/,/g, ''));
-    bsp_summary.SALES = salesPeriod;
-    bsp_summary.BILLING = billingPeriod;
-  }
-
-  return { bsp_summary, salesDateRange, billingDateRange };
-};
-
 export const formatAgentBillingCommission = (arrayOfTickets: any[]) => {
   let commission: any[] = [];
   arrayOfTickets.forEach((item) => {
@@ -81,7 +39,7 @@ export const formatAgentBillingCommission = (arrayOfTickets: any[]) => {
     }
   });
 
-  const formatedCommission = commission.map((item) => {
+  const formattedCommission = commission.map((item) => {
     const replaceItem = item
       .replace(/7.00/g, ' 7.00 ')
       .replace(/0.00/g, ' 0.00 ');
@@ -89,17 +47,113 @@ export const formatAgentBillingCommission = (arrayOfTickets: any[]) => {
     const value = replaceItem.split(' ');
 
     return {
-      commission_parcentage: value[1],
-      commission_amount: toNum(value[2]),
-      ait: toNum(value[4]),
+      iata_commission_percent: value[1],
+      iata_commission_percent_total: toNum(value[2]),
+      iata_ait: toNum(value[4]),
     };
   });
 
-  return formatedCommission;
+  return formattedCommission;
 };
 
 // AGENT BILLING DETAILS
-export const formatAgentBillingDetails = (text: string) => {
+export const formatAgentTicket = async (
+  text: string,
+  conn: DashboardModels
+) => {
+  const ticketsText = splitText(text, '*** ISSUES', 'ISSUES TOTAL');
+
+  const arrayOfTickets = ticketsText.split('\n');
+
+  const filterTickets = arrayOfTickets
+    .filter((item) => item.includes('FFVV') || item.includes('TKTT'))
+    .map((mapItem) => {
+      if (mapItem.includes('7.00') && mapItem.includes('0.00')) {
+        const data = mapItem.split(',');
+        data.pop();
+
+        return data.join(',');
+      } else {
+        return mapItem;
+      }
+    });
+
+  const formattedCommission = formatAgentBillingCommission(arrayOfTickets);
+
+  const tickets: any[] = [];
+
+  for (const [index, item] of filterTickets.entries()) {
+    const arrItem = item.split(' ');
+
+    const iata_ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, '');
+    const db_ticket = await conn.getTicketInfoByTicket(iata_ticket_no);
+
+    const iata_ticket = {
+      invoice_id: index + 1,
+      invoice_no: undefined,
+      invoice_category_id: undefined,
+      iata_sales_date: formatDate(arrItem[4]),
+      iata_ticket_no,
+      iata_gross_fare: toNum(arrItem[1]),
+      iata_base_fare: toNum(arrItem[2]),
+      ...formattedCommission[index],
+      iata_purchase_price: toNum(arrItem[3]),
+    };
+
+    tickets.push(iata_ticket);
+    tickets.push(db_ticket);
+  }
+
+  return tickets;
+};
+
+// AGENT BILLING DETAILS
+export const formatAgentRefund = async (
+  text: string,
+  conn: DashboardModels
+) => {
+  const refundsText = splitText(text, '*** REFUNDS', 'REFUNDS TOTAL');
+
+  const arrayOfRefund = refundsText.split('\n');
+
+  const formattedCommission = formatAgentBillingCommission(arrayOfRefund);
+
+  const filterRfArr = arrayOfRefund.filter((item) => item.includes('RFND'));
+
+  const refunds: any[] = [];
+
+  for (const [index, item] of filterRfArr.entries()) {
+    const formattedItem = item
+      .replace(/-/g, ' -')
+      .replace(/I|RFND/g, '')
+      .split(' ');
+    const iata_ticket_no = formattedItem[0];
+
+    const db_refund = await conn.getTicketInfoByRefund(iata_ticket_no);
+
+    const iata_refund = {
+      refund_id: index + 1,
+      iata_ticket_no,
+      iata_refund_date: formatDate(formattedItem[4]),
+      iata_purchase: toNum(formattedItem[1]),
+      iata_fare: toNum(formattedItem[2]),
+      iata_com_able: toNum(formattedItem[3]),
+      ...formattedCommission[index],
+      iata_payable: toNum(formattedItem[5]),
+    };
+
+    refunds.push(iata_refund);
+    refunds.push(db_refund);
+  }
+
+  return refunds;
+};
+
+// AGENT BILLING DETAILS
+export const getAgentBillingSummary = async (
+  text: string,
+  conn: DashboardModels
+) => {
   const salesPeriodRegex = /Billing Period:\s*(\d+)\s*\((.*?)\s*to\s*(.*?)\)/;
 
   const salesPeriodMatch = text.match(salesPeriodRegex);
@@ -133,39 +187,37 @@ export const formatAgentBillingDetails = (text: string) => {
     iata_grand_total: toNum(issues) - toNum(refunds),
   };
 
-  // ============ TICKETING....
-  const ticketsText = splitText(text, '*** ISSUES', 'ISSUES TOTAL');
+  const ticket_issue = await conn.getBspTicketIssueInfo(
+    iata_summary.from_date as Date,
+    iata_summary.to_date as Date
+  );
 
-  const arrayOfTickets = ticketsText.split('\n');
+  const ticket_re_issue = await conn.getBspTicketReissueInfo(
+    iata_summary.from_date as Date,
+    iata_summary.to_date as Date
+  );
 
-  const filterTickets = arrayOfTickets
-    .filter((item) => item.includes('FFVV') || item.includes('TKTT'))
-    .map((mapItem) => {
-      if (mapItem.includes('7.00') && mapItem.includes('0.00')) {
-        const data = mapItem.split(',');
-        data.pop();
+  const ticket_refund = await conn.getBspTicketRefundInfo(
+    iata_summary.from_date as Date,
+    iata_summary.to_date as Date
+  );
 
-        return data.join(',');
-      } else {
-        return mapItem;
-      }
-    });
+  const db_issue =
+    numRound(ticket_issue.purchase_amount) +
+    numRound(ticket_re_issue.purchase_amount);
 
-  const formattedCommission = formatAgentBillingCommission(arrayOfTickets);
+  const db_grand_total =
+    numRound(ticket_issue.purchase_amount) +
+    numRound(ticket_re_issue.purchase_amount) -
+    numRound(ticket_refund.refund_amount);
 
-  const tickets = filterTickets.map((item, index) => {
-    const arrItem = item.split(' ');
+  const summary = {
+    ...iata_summary,
+    db_issue,
+    db_refund: numRound(ticket_refund.refund_amount),
+    db_grand_total,
+    difference_amount: Math.abs(db_issue - iata_summary.iata_issues),
+  };
 
-    return {
-      id: index + 1,
-      ticket_no: arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, ''),
-      issue_date: formatDate(arrItem[4]),
-      gross_fare: toNum(arrItem[1]),
-      base_fare: toNum(arrItem[2]),
-      ...formattedCommission[index],
-      purchase_price: toNum(arrItem[3]),
-    };
-  });
-
-  return { iata_summary, tickets };
+  return { summary };
 };

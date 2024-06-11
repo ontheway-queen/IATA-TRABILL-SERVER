@@ -11,6 +11,7 @@ import {
   IVpayChackDetails,
 } from '../../types/vendor.interfaces';
 import { IInvoiceVendorPayment } from '../../types/vendorPayment.interface';
+import { getPaymentType } from '../../../../common/utils/libraries/lib';
 
 class AddVendorPayment extends AbstractServices {
   constructor() {
@@ -38,6 +39,7 @@ class AddVendorPayment extends AbstractServices {
       vpay_payment_to,
       specific_inv_vendors,
       com_vendor,
+      payment_by,
     } = req.body as IAddVendorPayReqBody;
 
     return await this.models.db.transaction(async (trx) => {
@@ -53,16 +55,7 @@ class AddVendorPayment extends AbstractServices {
         Number(payment_amount) + (vendor_ait | 0) + (online_charge | 0);
 
       // PAYMENT METHOD
-      let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-      if (payment_method_id === 1) {
-        accPayType = 'CASH';
-      } else if (payment_method_id === 2) {
-        accPayType = 'BANK';
-      } else if (payment_method_id === 3) {
-        accPayType = 'MOBILE BANKING';
-      } else {
-        accPayType = 'CASH';
-      }
+      const accPayType = getPaymentType(payment_method_id);
 
       if (![4, 5].includes(payment_method_id)) {
         const AccTrxnBody: IAcTrxn = {
@@ -116,6 +109,7 @@ class AddVendorPayment extends AbstractServices {
         vendor_ait,
         vpay_payment_to,
         online_charge_id,
+        vpay_payment_by: payment_by,
       };
 
       const { combined_id, vendor_id } = separateCombClientToId(com_vendor);

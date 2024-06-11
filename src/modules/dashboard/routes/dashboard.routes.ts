@@ -48,6 +48,14 @@ class DashboardRoutes extends AbstractRouter {
       upload.single('file'),
       this.controllers.bspBillingCrossCheck
     );
+
+    // upload BSP Doc
+    this.routers
+      .route('/bsp-docs')
+      .post(this.uploader.imageUpload('logos'), this.controllers.uploadBSPDocs)
+      .get(this.controllers.getBSPDocs);
+
+    this.routers.delete('/bsp-docs/:tbd_id', this.controllers.deleteBSPDocs);
   }
 }
 export default DashboardRoutes;

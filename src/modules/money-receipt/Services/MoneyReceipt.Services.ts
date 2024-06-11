@@ -28,6 +28,7 @@ import DeleteAdvanceReturn from './NarrowServices/DeleteAdvanceReturn';
 import DeleteMoneyReceipt from './NarrowServices/DeleteMoneyReceipt';
 import EditAdvanceReturn from './NarrowServices/EditAdvanceReturn';
 import EditMoneyReceipt from './NarrowServices/EditMoneyReceipt';
+import { getPaymentType } from '../../../common/utils/libraries/lib';
 
 class MoneyReceiptServices extends AbstractServices {
   constructor() {
@@ -77,9 +78,6 @@ class MoneyReceiptServices extends AbstractServices {
           receipt_agent_id
         );
 
-        const updatedAgentLBalance =
-          agentLBalance + Number(receipt_agent_amount);
-
         const agentTransactionData: IAgentProfileTransaction = {
           agtrxn_agency_id: req.agency_id,
           agtrxn_voucher: vouchar_no,
@@ -96,16 +94,7 @@ class MoneyReceiptServices extends AbstractServices {
           agentTransactionData
         );
 
-        let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-        if (receipt_payment_type === 1) {
-          accPayType = 'CASH';
-        } else if (receipt_payment_type === 2) {
-          accPayType = 'BANK';
-        } else if (receipt_payment_type === 3) {
-          accPayType = 'MOBILE BANKING';
-        } else {
-          accPayType = 'CASH';
-        }
+        let accPayType = getPaymentType(receipt_payment_type);
 
         const AccTrxnBody: IAcTrxn = {
           acctrxn_ac_id: account_id,
@@ -159,6 +148,7 @@ class MoneyReceiptServices extends AbstractServices {
         receipt_trxn_charge_id,
         receipt_account_id: account_id,
         receipt_trxn_no,
+        receipt_received_by: null,
       };
 
       receipt_id = await conn.insertMoneyReceipt(receiptInfo);

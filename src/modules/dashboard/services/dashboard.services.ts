@@ -384,5 +384,49 @@ class DashboardServices extends AbstractServices {
       throw new CustomError('Error parsing PDF', 500, 'Something went wrong!');
     }
   };
+
+  public uploadBSPDocs = async (req: Request) => {
+    const { tbd_date } = req.body as { tbd_date: string };
+
+    const conn = this.models.dashboardModal(req);
+
+    await conn.insertBSPDocs({
+      tbd_agency_id: req.agency_id,
+      tbd_date,
+      tbd_doc: req.image_files['scan_copy_0'],
+    });
+
+    return {
+      success: true,
+      message: 'BSP Doc upload successfully',
+    };
+  };
+
+  public deleteBSPDocs = async (req: Request) => {
+    const tbd_id = req.params.tbd_id as string;
+
+    const conn = this.models.dashboardModal(req);
+
+    const prev_url = await conn.deleteBSPDocs(tbd_id);
+
+    if (prev_url) this.deleteFile.delete_image(prev_url);
+
+    return {
+      success: true,
+      message: 'BSP Doc delete successfully',
+    };
+  };
+
+  public getBSPDocs = async (req: Request) => {
+    const conn = this.models.dashboardModal(req);
+
+    const data = await conn.getBSPDocs();
+
+    return {
+      success: true,
+      message: 'The request is Ok.',
+      ...data,
+    };
+  };
 }
 export default DashboardServices;

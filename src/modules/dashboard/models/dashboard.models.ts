@@ -1,7 +1,7 @@
 import moment from 'moment';
 import AbstractModels from '../../../abstracts/abstract.models';
 import { idType } from '../../../common/types/common.types';
-import { IAirTicketSummary } from '../types/dashboard.types';
+import { IAirTicketSummary, IBspDocs } from '../types/dashboard.types';
 
 class DashboardModels extends AbstractModels {
   // @Search Invoices
@@ -831,6 +831,42 @@ class DashboardModels extends AbstractModels {
 
     return ticket;
   };
+
+  public async insertBSPDocs(data: IBspDocs) {
+    const [id] = await this.query().insert(data).into('trabill_bsp_docs');
+
+    return id;
+  }
+
+  public async deleteBSPDocs(tbd_id: idType) {
+    const [{ tbd_doc }] = (await this.query()
+      .select('tbd_doc')
+      .from('trabill_bsp_docs')
+      .where({ tbd_id })) as { tbd_doc: string }[];
+
+    await this.query()
+      .update({ tbd_is_deleted: 1 })
+      .into('trabill_bsp_docs')
+      .where({ tbd_id });
+
+    return tbd_doc;
+  }
+
+  public async getBSPDocs() {
+    const data = await this.query()
+      .select('tbd_id', 'tbd_doc', 'tbd_date')
+      .from('trabill_bsp_docs')
+      .whereNot('tbd_is_deleted', 1)
+      .andWhere('tbd_agency_id', this.org_agency);
+
+    const [{ count }] = (await this.query()
+      .count('* as count')
+      .from('trabill_bsp_docs')
+      .whereNot('tbd_is_deleted', 1)
+      .andWhere('tbd_agency_id', this.org_agency)) as { count: number }[];
+
+    return { count, data };
+  }
 }
 
 export default DashboardModels;

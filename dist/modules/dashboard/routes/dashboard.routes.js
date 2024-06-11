@@ -32,6 +32,12 @@ class DashboardRoutes extends abstract_routers_1.default {
         this.routers.get('/best-employee', this.controllers.getBestEmployee);
         this.routers.get('/iata-limit', this.controllers.iataBankGuaranteeLimit);
         this.routers.post('/bsp-bill-check', upload.single('file'), this.controllers.bspBillingCrossCheck);
+        // upload BSP Doc
+        this.routers
+            .route('/bsp-docs')
+            .post(this.uploader.imageUpload('logos'), this.controllers.uploadBSPDocs)
+            .get(this.controllers.getBSPDocs);
+        this.routers.delete('/bsp-docs/:tbd_id', this.controllers.deleteBSPDocs);
     }
 }
 exports.default = DashboardRoutes;

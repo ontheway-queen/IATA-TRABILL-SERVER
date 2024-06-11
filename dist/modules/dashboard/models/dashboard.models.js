@@ -576,6 +576,40 @@ class DashboardModels extends abstract_models_1.default {
             return data;
         });
     }
+    insertBSPDocs(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [id] = yield this.query().insert(data).into('trabill_bsp_docs');
+            return id;
+        });
+    }
+    deleteBSPDocs(tbd_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [{ tbd_doc }] = (yield this.query()
+                .select('tbd_doc')
+                .from('trabill_bsp_docs')
+                .where({ tbd_id }));
+            yield this.query()
+                .update({ tbd_is_deleted: 1 })
+                .into('trabill_bsp_docs')
+                .where({ tbd_id });
+            return tbd_doc;
+        });
+    }
+    getBSPDocs() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.query()
+                .select('tbd_id', 'tbd_doc', 'tbd_date')
+                .from('trabill_bsp_docs')
+                .whereNot('tbd_is_deleted', 1)
+                .andWhere('tbd_agency_id', this.org_agency);
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from('trabill_bsp_docs')
+                .whereNot('tbd_is_deleted', 1)
+                .andWhere('tbd_agency_id', this.org_agency));
+            return { count, data };
+        });
+    }
 }
 exports.default = DashboardModels;
 //# sourceMappingURL=dashboard.models.js.map

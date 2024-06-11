@@ -137,6 +137,24 @@ class DashboardControllers extends abstract_controllers_1.default {
                 res.status(200).json(data);
             }
         }));
+        this.uploadBSPDocs = this.assyncWrapper.wrap(this.validator.uploadBSP, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.uploadBSPDocs(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+        }));
+        this.deleteBSPDocs = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.deleteBSPDocs(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+        }));
+        this.getBSPDocs = this.assyncWrapper.wrap([], (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getBSPDocs(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+        }));
     }
 }
 exports.default = DashboardControllers;

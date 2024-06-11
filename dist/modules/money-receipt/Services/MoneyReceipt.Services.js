@@ -23,6 +23,7 @@ const DeleteAdvanceReturn_1 = __importDefault(require("./NarrowServices/DeleteAd
 const DeleteMoneyReceipt_1 = __importDefault(require("./NarrowServices/DeleteMoneyReceipt"));
 const EditAdvanceReturn_1 = __importDefault(require("./NarrowServices/EditAdvanceReturn"));
 const EditMoneyReceipt_1 = __importDefault(require("./NarrowServices/EditMoneyReceipt"));
+const lib_1 = require("../../../common/utils/libraries/lib");
 class MoneyReceiptServices extends abstract_services_1.default {
     constructor() {
         super();
@@ -45,7 +46,6 @@ class MoneyReceiptServices extends abstract_services_1.default {
                 let receipt_id;
                 if (receipt_payment_type !== 4) {
                     const agentLBalance = yield agent_conn.getAgentLastBalance(receipt_agent_id);
-                    const updatedAgentLBalance = agentLBalance + Number(receipt_agent_amount);
                     const agentTransactionData = {
                         agtrxn_agency_id: req.agency_id,
                         agtrxn_voucher: vouchar_no,
@@ -58,19 +58,7 @@ class MoneyReceiptServices extends abstract_services_1.default {
                         agtrxn_note: receipt_note,
                     };
                     receipt_agent_trxn_id = yield agent_conn.insertAgentTransaction(agentTransactionData);
-                    let accPayType;
-                    if (receipt_payment_type === 1) {
-                        accPayType = 'CASH';
-                    }
-                    else if (receipt_payment_type === 2) {
-                        accPayType = 'BANK';
-                    }
-                    else if (receipt_payment_type === 3) {
-                        accPayType = 'MOBILE BANKING';
-                    }
-                    else {
-                        accPayType = 'CASH';
-                    }
+                    let accPayType = (0, lib_1.getPaymentType)(receipt_payment_type);
                     const AccTrxnBody = {
                         acctrxn_ac_id: account_id,
                         acctrxn_type: 'DEBIT',
@@ -119,6 +107,7 @@ class MoneyReceiptServices extends abstract_services_1.default {
                     receipt_trxn_charge_id,
                     receipt_account_id: account_id,
                     receipt_trxn_no,
+                    receipt_received_by: null,
                 };
                 receipt_id = yield conn.insertMoneyReceipt(receiptInfo);
                 if (receipt_payment_type == 4) {

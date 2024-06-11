@@ -21,7 +21,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
     constructor() {
         super();
         this.addMoneyReceipt = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { receipt_combclient, receipt_payment_to, receipt_total_amount, receipt_money_receipt_no, receipt_payment_type, receipt_payment_date, receipt_note, cheque_number, cheque_withdraw_date, cheque_bank_name, account_id, receipt_created_by, invoices, tickets, charge_amount, receipt_total_discount, trans_no, receipt_walking_customer_name, } = req.body;
+            const { receipt_combclient, receipt_payment_to, receipt_total_amount, receipt_money_receipt_no, receipt_payment_type, receipt_payment_date, receipt_note, cheque_number, cheque_withdraw_date, cheque_bank_name, account_id, receipt_created_by, invoices, tickets, charge_amount, receipt_total_discount, trans_no, receipt_walking_customer_name, received_by, } = req.body;
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(receipt_combclient);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.MoneyReceiptModels(req, trx);
@@ -100,6 +100,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                     receipt_trxn_charge_id,
                     receipt_trxn_no: trans_no,
                     receipt_walking_customer_name,
+                    receipt_received_by: received_by,
                 };
                 const receipt_id = yield conn.insertMoneyReceipt(receiptInfo);
                 // money receipt to invoice

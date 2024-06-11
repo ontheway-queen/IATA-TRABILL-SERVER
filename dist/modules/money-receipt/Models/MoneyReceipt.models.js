@@ -628,7 +628,7 @@ class MoneyReceiptModels extends abstract_models_1.default {
         this.getMoneyReceiptById = (receiptId) => __awaiter(this, void 0, void 0, function* () {
             let moneyReceipt = yield this.query()
                 .from('trabill_money_receipts')
-                .select(this.db.raw("CASE WHEN receipt_client_id IS NOT NULL THEN CONCAT('client-', receipt_client_id) ELSE CONCAT('combined-',receipt_combined_id) END AS    receipt_combclient     "), 'acc_trxn.acctrxn_ac_id as account_id', 'receipt_id', 'receipt_total_amount', 'receipt_total_discount', 'receipt_payment_to', 'receipt_money_receipt_no', 'receipt_payment_type', 'receipt_walking_customer_name', 'receipt_payment_date', 'receipt_note', 'cheque_bank_name', 'cheque_number', 'cheque_withdraw_date', 'receipt_trxn_charge as charge_amount', 'receipt_trxn_no as trans_no')
+                .select(this.db.raw("CASE WHEN receipt_client_id IS NOT NULL THEN CONCAT('client-', receipt_client_id) ELSE CONCAT('combined-',receipt_combined_id) END AS    receipt_combclient     "), 'acc_trxn.acctrxn_ac_id as account_id', 'receipt_id', 'receipt_total_amount', 'receipt_total_discount', 'receipt_payment_to', 'receipt_money_receipt_no', 'receipt_payment_type', 'receipt_walking_customer_name', 'receipt_payment_date', 'receipt_note', 'cheque_bank_name', 'cheque_number', 'cheque_withdraw_date', 'receipt_trxn_charge as charge_amount', 'receipt_trxn_no as trans_no', 'receipt_received_by')
                 .leftJoin(`${this.trxn}.acc_trxn`, `${this.trxn}.acc_trxn.acctrxn_id`, `receipt_actransaction_id`)
                 .leftJoin('trabill_money_receipts_cheque_details', {
                 cheque_receipt_id: 'receipt_id',

@@ -282,6 +282,35 @@ class DashboardServices extends abstract_services_1.default {
                 throw new customError_1.default('Error parsing PDF', 500, 'Something went wrong!');
             }
         });
+        this.uploadBSPDocs = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { tbd_date } = req.body;
+            const conn = this.models.dashboardModal(req);
+            yield conn.insertBSPDocs({
+                tbd_agency_id: req.agency_id,
+                tbd_date,
+                tbd_doc: req.image_files['scan_copy_0'],
+            });
+            return {
+                success: true,
+                message: 'BSP Doc upload successfully',
+            };
+        });
+        this.deleteBSPDocs = (req) => __awaiter(this, void 0, void 0, function* () {
+            const tbd_id = req.params.tbd_id;
+            const conn = this.models.dashboardModal(req);
+            const prev_url = yield conn.deleteBSPDocs(tbd_id);
+            if (prev_url)
+                this.deleteFile.delete_image(prev_url);
+            return {
+                success: true,
+                message: 'BSP Doc delete successfully',
+            };
+        });
+        this.getBSPDocs = (req) => __awaiter(this, void 0, void 0, function* () {
+            const conn = this.models.dashboardModal(req);
+            const data = yield conn.getBSPDocs();
+            return Object.assign({ success: true, message: 'The request is Ok.' }, data);
+        });
     }
 }
 exports.default = DashboardServices;

@@ -15,6 +15,7 @@ import {
   InvoiceHistory,
   InvoiceMoneyReceiptType,
 } from '../types/common.types';
+import { getPaymentType } from '../utils/libraries/lib';
 
 class CommonAddMoneyReceipt extends AbstractServices {
   constructor() {
@@ -84,16 +85,7 @@ class CommonAddMoneyReceipt extends AbstractServices {
         : receipt_note || '';
 
       if (receipt_payment_type !== 4) {
-        let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-        if (receipt_payment_type === 1) {
-          accPayType = 'CASH';
-        } else if (receipt_payment_type === 2) {
-          accPayType = 'BANK';
-        } else if (receipt_payment_type === 3) {
-          accPayType = 'MOBILE BANKING';
-        } else {
-          accPayType = 'CASH';
-        }
+        let accPayType = getPaymentType(receipt_payment_type);
 
         const AccTrxnBody: IAcTrxn = {
           acctrxn_ac_id: account_id,
@@ -161,6 +153,7 @@ class CommonAddMoneyReceipt extends AbstractServices {
         receipt_trxn_charge_id,
         receipt_account_id: account_id,
         receipt_trxn_no,
+        receipt_received_by: null,
       };
 
       const receipt_id = await conn.insertMoneyReceipt(receiptInfo);

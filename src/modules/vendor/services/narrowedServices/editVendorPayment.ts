@@ -14,7 +14,7 @@ import {
   IVpayChackDetails,
 } from '../../types/vendor.interfaces';
 import { IInvoiceVendorPayment } from '../../types/vendorPayment.interface';
-import CustomError from '../../../../common/utils/errors/customError';
+import { getPaymentType } from '../../../../common/utils/libraries/lib';
 
 class EditVendorPayment extends AbstractServices {
   constructor() {
@@ -42,6 +42,7 @@ class EditVendorPayment extends AbstractServices {
       invoice_id,
       com_vendor,
       specific_inv_vendors,
+      payment_by,
     } = req.body as IAddVendorPayReqBody;
 
     return await this.models.db.transaction(async (trx) => {
@@ -113,20 +114,12 @@ class EditVendorPayment extends AbstractServices {
         vendor_ait,
         vpay_payment_to,
         online_charge_id,
+        vpay_payment_by: payment_by,
       };
 
-      const { combined_id, vendor_id } = separateCombClientToId(com_vendor);
+      const { combined_id } = separateCombClientToId(com_vendor);
 
-      let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-      if (payment_method_id === 1) {
-        accPayType = 'CASH';
-      } else if (payment_method_id === 2) {
-        accPayType = 'BANK';
-      } else if (payment_method_id === 3) {
-        accPayType = 'MOBILE BANKING';
-      } else {
-        accPayType = 'CASH';
-      }
+      const accPayType = getPaymentType(payment_method_id);
 
       if (
         ![4, 5].includes(prevPayMethod) &&

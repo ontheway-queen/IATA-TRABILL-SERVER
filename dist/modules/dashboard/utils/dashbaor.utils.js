@@ -84,7 +84,7 @@ const formatAgentTicket = (text, conn) => __awaiter(void 0, void 0, void 0, func
             tickets.push(db_ticket);
         }
     }
-    return tickets;
+    return { tickets };
 });
 exports.formatAgentTicket = formatAgentTicket;
 // AGENT BILLING DETAILS
@@ -107,7 +107,7 @@ const formatAgentRefund = (text, conn) => __awaiter(void 0, void 0, void 0, func
             refunds.push(db_refund);
         }
     }
-    return refunds;
+    return { refunds };
 });
 exports.formatAgentRefund = formatAgentRefund;
 // AGENT BILLING DETAILS

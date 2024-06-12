@@ -107,7 +107,7 @@ export const formatAgentTicket = async (
     }
   }
 
-  return tickets;
+  return { tickets };
 };
 
 // AGENT BILLING DETAILS
@@ -153,7 +153,7 @@ export const formatAgentRefund = async (
     }
   }
 
-  return refunds;
+  return { refunds };
 };
 
 // AGENT BILLING DETAILS

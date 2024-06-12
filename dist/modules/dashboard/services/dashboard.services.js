@@ -284,12 +284,14 @@ class DashboardServices extends abstract_services_1.default {
             }
         });
         this.uploadBSPDocs = (req) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
             const { tbd_date } = req.body;
             const conn = this.models.dashboardModal(req);
+            const files = req.files;
             yield conn.insertBSPDocs({
                 tbd_agency_id: req.agency_id,
                 tbd_date,
-                tbd_doc: req.image_files['scan_copy_0'],
+                tbd_doc: (_a = files[0]) === null || _a === void 0 ? void 0 : _a.location,
             });
             return {
                 success: true,

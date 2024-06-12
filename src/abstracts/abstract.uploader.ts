@@ -6,6 +6,7 @@ const allowed_file_types = [
   'image/jpg',
   'image/png',
   'image/webp',
+  'application/pdf',
 ];
 
 abstract class AbstractUploader {

@@ -396,10 +396,12 @@ class DashboardServices extends AbstractServices {
 
     const conn = this.models.dashboardModal(req);
 
+    const files = req.files as Express.Multer.File[] | [];
+
     await conn.insertBSPDocs({
       tbd_agency_id: req.agency_id,
       tbd_date,
-      tbd_doc: req.image_files['scan_copy_0'],
+      tbd_doc: files[0]?.location as string,
     });
 
     return {

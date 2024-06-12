@@ -1,9 +1,11 @@
 import { Router } from 'express';
-import UploaderMW from '../common/middlewares/uploaderMW/uploaderMW';
+import Uploader from '../common/middlewares/uploader/uploader';
+import FileFolders from '../miscellaneous/fileFolder';
 
 abstract class AbstractRouter {
   readonly routers = Router();
-  protected uploader = new UploaderMW();
+  protected uploader = new Uploader();
+  protected fileFolder = FileFolders;
 }
 
 export default AbstractRouter;

@@ -17,6 +17,9 @@ const getConfig = () => {
         COOKIE_SECRET: process.env.COOKIE_SECRET,
         OTP_URL: process.env.OTP_URL,
         SENDER_ID: process.env.SENDER_ID,
+        AWS_S3_BUCKET: process.env.AWS_S3_BUCKET,
+        AWS_S3_ACCESS_KEY: process.env.AWS_S3_ACCESS_KEY,
+        AWS_S3_SECRET_KEY: process.env.AWS_S3_SECRET_KEY,
     };
 };
 const getSanitizedConfig = (config) => {

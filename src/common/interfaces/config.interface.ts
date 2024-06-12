@@ -8,6 +8,9 @@ export interface ENV {
   OTP_URL?: string;
   SENDER_ID?: string;
   AZURE_STORAGE_CONNECTION_STRING?: string;
+  AWS_S3_BUCKET?: string;
+  AWS_S3_ACCESS_KEY?: string;
+  AWS_S3_SECRET_KEY?: string;
 }
 
 export interface Config {
@@ -20,4 +23,7 @@ export interface Config {
   OTP_URL: string;
   SENDER_ID: string;
   AZURE_STORAGE_CONNECTION_STRING: string;
+  AWS_S3_BUCKET: string;
+  AWS_S3_ACCESS_KEY: string;
+  AWS_S3_SECRET_KEY: string;
 }

@@ -35,7 +35,7 @@ class DashboardRoutes extends abstract_routers_1.default {
         // UPLOAD BSP BILL
         this.routers
             .route('/bsp-bill')
-            .post(this.uploader.imageUpload('file'), this.controllers.uploadBSPDocs)
+            .post(this.uploader.cloudUploadRaw(this.fileFolder.BSP), this.controllers.uploadBSPDocs)
             .get(this.controllers.selectBspFiles);
         this.routers.get('/bsp-bill-list', this.controllers.bspFileList);
         this.routers.delete('/bsp-bill/:tbd_id', this.controllers.deleteBSPDocs);

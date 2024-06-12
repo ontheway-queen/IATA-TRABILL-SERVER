@@ -222,10 +222,21 @@ class DashboardControllers extends AbstractController {
     }
   );
 
-  getBSPDocs = this.assyncWrapper.wrap(
+  selectBspFiles = this.assyncWrapper.wrap(
     [],
     async (req: Request, res: Response) => {
-      const data = await this.services.getBSPDocs(req);
+      const data = await this.services.selectBspFiles(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
+
+  bspFileList = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response) => {
+      const data = await this.services.bspFileList(req);
 
       if (data.success) {
         res.status(200).json(data);

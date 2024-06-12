@@ -596,19 +596,70 @@ class DashboardModels extends abstract_models_1.default {
             return tbd_doc;
         });
     }
-    getBSPDocs() {
+    selectBspFiles(search, date) {
         return __awaiter(this, void 0, void 0, function* () {
+            date = date ? (0, moment_1.default)(new Date(date)).format('YYYY-MM-DD') : undefined;
             const data = yield this.query()
-                .select('tbd_id', 'tbd_doc', 'tbd_date')
-                .from('trabill_bsp_docs')
-                .whereNot('tbd_is_deleted', 1)
-                .andWhere('tbd_agency_id', this.org_agency);
-            const [{ count }] = (yield this.query()
+                .select('bsp_id', 'bsp_file_name')
+                .from('trabill_bsp_bill')
+                .where('bsp_agency_id', this.org_agency)
+                .andWhereNot('bsp_is_deleted', 1)
+                .modify((builder) => {
+                if (date) {
+                    builder.andWhereRaw('Date(bsp_bill_date)', date);
+                }
+                if (search) {
+                    builder.andWhereILike('bsp_file_name', `%${search}%`);
+                }
+            })
+                .limit(50);
+            return data;
+        });
+    }
+    bspFileList(search, page, size, date) {
+        return __awaiter(this, void 0, void 0, function* () {
+            date = date ? (0, moment_1.default)(new Date(date)).format('YYYY-MM-DD') : undefined;
+            const offset = (page - 1) * size;
+            const data = yield this.query()
+                .select('bsp_id', 'bsp_file_name', 'bsp_file_url', 'bsp_bill_date', 'bsp_created_date', 'user_full_name as created_by')
+                .from('trabill_bsp_bill')
+                .leftJoin('trabill_users', { user_id: 'bsp_created_by' })
+                .where('bsp_agency_id', this.org_agency)
+                .andWhereNot('bsp_is_deleted', 1)
+                .modify((builder) => {
+                if (date) {
+                    builder.andWhereRaw('Date(bsp_bill_date)', date);
+                }
+                if (search) {
+                    builder.andWhereILike('bsp_file_name', `%${search}%`);
+                }
+            })
+                .limit(page)
+                .offset(offset);
+            const [{ count }] = yield this.query()
                 .count('* as count')
-                .from('trabill_bsp_docs')
-                .whereNot('tbd_is_deleted', 1)
-                .andWhere('tbd_agency_id', this.org_agency));
-            return { count, data };
+                .from('trabill_bsp_bill')
+                .where('bsp_agency_id', this.org_agency)
+                .andWhereNot('bsp_is_deleted', 1)
+                .modify((builder) => {
+                if (date) {
+                    builder.andWhereRaw('Date(bsp_bill_date)', date);
+                }
+                if (search) {
+                    builder.andWhereILike('bsp_file_name', `%${search}%`);
+                }
+            });
+            return { data, count };
+        });
+    }
+    getBspFileUrl(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [data] = (yield this.query()
+                .select('bsp_file_url')
+                .from('trabill_bsp_bill')
+                .where('bsp_agency_id', this.org_agency)
+                .andWhere('bsp_id', id));
+            return data;
         });
     }
 }

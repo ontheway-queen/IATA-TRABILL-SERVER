@@ -31,12 +31,13 @@ class DashboardRoutes extends abstract_routers_1.default {
         this.routers.get('/best-clients', this.controllers.getBestClients);
         this.routers.get('/best-employee', this.controllers.getBestEmployee);
         this.routers.get('/iata-limit', this.controllers.iataBankGuaranteeLimit);
-        this.routers.post('/bsp-bill-check', upload.single('file'), this.controllers.bspBillingCrossCheck);
+        this.routers.get('/bsp-bill-check/:bsp_id', this.controllers.bspBillingCrossCheck);
         // UPLOAD BSP BILL
         this.routers
             .route('/bsp-bill')
             .post(this.uploader.cloudUploadRaw(this.fileFolder.BSP), this.controllers.uploadBSPDocs)
-            .get(this.controllers.getBSPDocs);
+            .get(this.controllers.selectBspFiles);
+        this.routers.get('/bsp-bill-list', this.controllers.bspFileList);
         this.routers.delete('/bsp-bill/:tbd_id', this.controllers.deleteBSPDocs);
     }
 }

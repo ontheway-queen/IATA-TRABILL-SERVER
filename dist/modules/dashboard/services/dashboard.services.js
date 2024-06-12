@@ -249,28 +249,29 @@ class DashboardServices extends abstract_services_1.default {
         });
         // BSP BILLING CROSS CHECK
         this.bspBillingCrossCheck = (req) => __awaiter(this, void 0, void 0, function* () {
-            if (!req.file) {
+            const { bsp_id } = req.params;
+            const type = req.query.type || 'SUMMARY';
+            const conn = this.models.dashboardModal(req);
+            const bsp = yield conn.getBspFileUrl(bsp_id);
+            if (!bsp.bsp_file_url) {
                 throw new customError_1.default('No file uploaded', 400, 'File not found');
             }
-            const type = req.query.type || 'SUMMARY';
             try {
-                const conn = this.models.dashboardModal(req);
-                const pdfData = yield (0, pdf_parse_1.default)(req.file.path);
+                const pdfData = yield (0, pdf_parse_1.default)(bsp.bsp_file_url);
                 let data;
-                if (pdfData.text.includes('AGENT BILLING DETAILS')) {
-                    if (type === 'SUMMARY') {
+                switch (type) {
+                    case 'SUMMARY':
                         data = yield (0, dashbaor_utils_1.getAgentBillingSummary)(pdfData === null || pdfData === void 0 ? void 0 : pdfData.text, conn);
-                    }
-                    else if (type === 'TICKET') {
+                        break;
+                    case 'TICKET':
                         data = yield (0, dashbaor_utils_1.formatAgentTicket)(pdfData === null || pdfData === void 0 ? void 0 : pdfData.text, conn);
-                    }
-                    else if (type === 'REFUND') {
+                        break;
+                    case 'REFUND':
                         data = yield (0, dashbaor_utils_1.formatAgentRefund)(pdfData === null || pdfData === void 0 ? void 0 : pdfData.text, conn);
-                    }
-                    else {
-                        data = [];
-                    }
-                    console.log({ data });
+                        break;
+                    default:
+                        data = yield (0, dashbaor_utils_1.getAgentBillingSummary)(pdfData === null || pdfData === void 0 ? void 0 : pdfData.text, conn);
+                        break;
                 }
                 return {
                     success: true,
@@ -308,9 +309,20 @@ class DashboardServices extends abstract_services_1.default {
                 message: 'BSP Doc delete successfully',
             };
         });
-        this.getBSPDocs = (req) => __awaiter(this, void 0, void 0, function* () {
+        this.selectBspFiles = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.dashboardModal(req);
-            const data = yield conn.getBSPDocs();
+            const { search, date } = req.query;
+            const data = yield conn.selectBspFiles(search, date);
+            return {
+                success: true,
+                message: 'The request is Ok.',
+                data,
+            };
+        });
+        this.bspFileList = (req) => __awaiter(this, void 0, void 0, function* () {
+            const conn = this.models.dashboardModal(req);
+            const { search, date, page, size } = req.query;
+            const data = yield conn.bspFileList(search, +page, +size, date);
             return Object.assign({ success: true, message: 'The request is Ok.' }, data);
         });
     }

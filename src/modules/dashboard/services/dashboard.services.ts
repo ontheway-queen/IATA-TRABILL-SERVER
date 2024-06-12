@@ -348,31 +348,37 @@ class DashboardServices extends AbstractServices {
 
   // BSP BILLING CROSS CHECK
   bspBillingCrossCheck = async (req: Request) => {
-    if (!req.file) {
+    const { bsp_id } = req.params;
+    const type = req.query.type || 'SUMMARY';
+    const conn = this.models.dashboardModal(req);
+
+    const bsp = await conn.getBspFileUrl(bsp_id);
+
+    if (!bsp.bsp_file_url) {
       throw new CustomError('No file uploaded', 400, 'File not found');
     }
 
-    const type = req.query.type || 'SUMMARY';
-
     try {
-      const conn = this.models.dashboardModal(req);
-
-      const pdfData = await PDFParser(req.file.path as any);
+      const pdfData = await PDFParser(bsp.bsp_file_url as any);
 
       let data;
 
-      if (pdfData.text.includes('AGENT BILLING DETAILS')) {
-        if (type === 'SUMMARY') {
+      switch (type) {
+        case 'SUMMARY':
           data = await getAgentBillingSummary(pdfData?.text, conn);
-        } else if (type === 'TICKET') {
-          data = await formatAgentTicket(pdfData?.text, conn);
-        } else if (type === 'REFUND') {
-          data = await formatAgentRefund(pdfData?.text, conn);
-        } else {
-          data = [];
-        }
+          break;
 
-        console.log({ data });
+        case 'TICKET':
+          data = await formatAgentTicket(pdfData?.text, conn);
+          break;
+
+        case 'REFUND':
+          data = await formatAgentRefund(pdfData?.text, conn);
+          break;
+
+        default:
+          data = await getAgentBillingSummary(pdfData?.text, conn);
+          break;
       }
 
       return {
@@ -419,10 +425,27 @@ class DashboardServices extends AbstractServices {
     };
   };
 
-  public getBSPDocs = async (req: Request) => {
+  public selectBspFiles = async (req: Request) => {
     const conn = this.models.dashboardModal(req);
+    const { search, date } = req.query as { search: string; date: string };
+    const data = await conn.selectBspFiles(search, date);
 
-    const data = await conn.getBSPDocs();
+    return {
+      success: true,
+      message: 'The request is Ok.',
+      data,
+    };
+  };
+
+  public bspFileList = async (req: Request) => {
+    const conn = this.models.dashboardModal(req);
+    const { search, date, page, size } = req.query as {
+      search: string;
+      date: string;
+      page: string;
+      size: string;
+    };
+    const data = await conn.bspFileList(search, +page, +size, date);
 
     return {
       success: true,

@@ -855,20 +855,85 @@ class DashboardModels extends AbstractModels {
     return tbd_doc;
   }
 
-  public async getBSPDocs() {
+  public async selectBspFiles(search: string, date?: string) {
+    date = date ? moment(new Date(date)).format('YYYY-MM-DD') : undefined;
     const data = await this.query()
-      .select('tbd_id', 'tbd_doc', 'tbd_date')
-      .from('trabill_bsp_docs')
-      .whereNot('tbd_is_deleted', 1)
-      .andWhere('tbd_agency_id', this.org_agency);
+      .select('bsp_id', 'bsp_file_name')
+      .from('trabill_bsp_bill')
+      .where('bsp_agency_id', this.org_agency)
+      .andWhereNot('bsp_is_deleted', 1)
+      .modify((builder) => {
+        if (date) {
+          builder.andWhereRaw('Date(bsp_bill_date)', date);
+        }
+        if (search) {
+          builder.andWhereILike('bsp_file_name', `%${search}%`);
+        }
+      })
+      .limit(50);
 
-    const [{ count }] = (await this.query()
+    return data;
+  }
+
+  public async bspFileList(
+    search: string,
+    page: number,
+    size: number,
+    date?: string
+  ) {
+    date = date ? moment(new Date(date)).format('YYYY-MM-DD') : undefined;
+
+    const offset = (page - 1) * size;
+
+    const data = await this.query()
+      .select(
+        'bsp_id',
+        'bsp_file_name',
+        'bsp_file_url',
+        'bsp_bill_date',
+        'bsp_created_date',
+        'user_full_name as created_by'
+      )
+      .from('trabill_bsp_bill')
+      .leftJoin('trabill_users', { user_id: 'bsp_created_by' })
+      .where('bsp_agency_id', this.org_agency)
+      .andWhereNot('bsp_is_deleted', 1)
+      .modify((builder) => {
+        if (date) {
+          builder.andWhereRaw('Date(bsp_bill_date)', date);
+        }
+        if (search) {
+          builder.andWhereILike('bsp_file_name', `%${search}%`);
+        }
+      })
+      .limit(page)
+      .offset(offset);
+
+    const [{ count }] = await this.query()
       .count('* as count')
-      .from('trabill_bsp_docs')
-      .whereNot('tbd_is_deleted', 1)
-      .andWhere('tbd_agency_id', this.org_agency)) as { count: number }[];
+      .from('trabill_bsp_bill')
+      .where('bsp_agency_id', this.org_agency)
+      .andWhereNot('bsp_is_deleted', 1)
+      .modify((builder) => {
+        if (date) {
+          builder.andWhereRaw('Date(bsp_bill_date)', date);
+        }
+        if (search) {
+          builder.andWhereILike('bsp_file_name', `%${search}%`);
+        }
+      });
 
-    return { count, data };
+    return { data, count };
+  }
+
+  public async getBspFileUrl(id: idType) {
+    const [data] = (await this.query()
+      .select('bsp_file_url')
+      .from('trabill_bsp_bill')
+      .where('bsp_agency_id', this.org_agency)
+      .andWhere('bsp_id', id)) as { bsp_file_url: string }[];
+
+    return data;
   }
 }
 

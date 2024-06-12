@@ -142,9 +142,9 @@ export const formatAgentRefund = async (
       date: formatDate(formattedItem[4]),
       iata_purchase: toNum(formattedItem[1]),
       iata_fare: toNum(formattedItem[2]),
-      iata_com_able: toNum(formattedItem[3]),
+      iata_com_able: toNum(formattedItem[5]),
       ...formattedCommission[index],
-      return_amount: toNum(formattedItem[5]),
+      return_amount: toNum(formattedItem[3]),
     };
 
     refunds.push(iata_refund);

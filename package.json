@@ -11,6 +11,7 @@
   "author": "Nazmul Hosen",
   "license": "ISC",
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.592.0",
     "@azure/identity": "^3.1.2",
     "@azure/storage-blob": "^12.15.0",
     "@types/moment-timezone": "^0.5.30",

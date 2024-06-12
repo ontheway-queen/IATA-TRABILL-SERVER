@@ -634,7 +634,8 @@ class DashboardModels extends AbstractModels {
       )
       .from('trabill_vendors')
       .whereNot('vendor_is_deleted', 1)
-      .andWhere('vendor_org_agency', this.org_agency);
+      .andWhere('vendor_org_agency', this.org_agency)
+      .limit(3);
 
     return data;
   }

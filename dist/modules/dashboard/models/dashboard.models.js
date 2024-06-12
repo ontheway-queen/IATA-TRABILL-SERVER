@@ -515,7 +515,8 @@ class DashboardModels extends abstract_models_1.default {
                 .select('trabill_vendors.vendor_id', 'vendor_name', 'vendor_bank_guarantee', 'vendor_lbalance', this.db.raw('COALESCE(vendor_bank_guarantee, 0) + vendor_lbalance AS remaining_bank_guarantee'), 'vendor_start_date', 'vendor_end_date')
                 .from('trabill_vendors')
                 .whereNot('vendor_is_deleted', 1)
-                .andWhere('vendor_org_agency', this.org_agency);
+                .andWhere('vendor_org_agency', this.org_agency)
+                .limit(3);
             return data;
         });
     }

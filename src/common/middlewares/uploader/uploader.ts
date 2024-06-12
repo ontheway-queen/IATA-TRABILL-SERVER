@@ -1,11 +1,11 @@
 import { S3Client } from '@aws-sdk/client-s3';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import multer from 'multer';
-import path from 'path';
 import multerS3 from 'multer-s3';
-import { allowAllFileTypes, rootFileFolder } from './uploaderConstants';
-import CustomError from '../../utils/errors/customError';
+import path from 'path';
 import config from '../../../config/config';
+import CustomError from '../../utils/errors/customError';
+import { allowAllFileTypes, rootFileFolder } from './uploaderConstants';
 const allowed_file_types = [
   'image/jpeg',
   'image/jpg',

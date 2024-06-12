@@ -6,13 +6,13 @@ import {
   IAcTrxn,
   IClTrxnBody,
 } from '../../../../common/interfaces/Trxn.interfaces';
+import CustomError from '../../../../common/utils/errors/customError';
 import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 import {
   IAdvanceReturnDB,
   IAdvrChequesDB,
   IMoneyReceiptAdvanceReturn,
 } from '../../Type/MoneyReceipt.Interfaces';
-import CustomError from '../../../../common/utils/errors/customError';
 
 class AddAdvanceReturn extends AbstractServices {
   constructor() {
@@ -92,7 +92,7 @@ class AddAdvanceReturn extends AbstractServices {
           acctrxn_created_by: advr_created_by,
           acctrxn_note: advr_note,
           acctrxn_particular_id: 118,
-          acctrxn_particular_type: 'Money receipt',
+          acctrxn_particular_type: 'Money Receipt',
           acctrxn_pay_type: accPayType,
         };
 
@@ -120,7 +120,7 @@ class AddAdvanceReturn extends AbstractServices {
           charge_from_client_id: client_id as number,
           charge_from_ccombined_id: combined_id as number,
           charge_amount: advr_trxn_charge,
-          charge_purpose: 'Money receipt advance return',
+          charge_purpose: 'Money Receipt Advance Return',
           charge_note: advr_note,
         };
 

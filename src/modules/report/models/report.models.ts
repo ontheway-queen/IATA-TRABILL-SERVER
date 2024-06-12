@@ -372,7 +372,7 @@ class ReportModel extends AbstractModels {
         this.db.raw('SUM(invoice_net_total) as sales'),
         this.db.raw('SUM(cl_pay) as pay'),
         this.db.raw('SUM(due_amount) as due'),
-        this.db.raw('SUM(invoice_total_profit) as profit'),
+        this.db.raw('SUM(overall_profit) as profit'),
         this.db.raw('SUM(invoice_service_charge) as service_charge'),
         this.db.raw('SUM(invoice_discount) as invoice_discount'),
         this.db.raw('SUM(overall_profit) as overall_profit')
@@ -541,7 +541,7 @@ class ReportModel extends AbstractModels {
         this.db.raw('SUM(invoice_net_total) as sales'),
         this.db.raw('SUM(cl_pay) as pay'),
         this.db.raw('SUM(due_amount) as due'),
-        this.db.raw('SUM(invoice_total_profit) as profit'),
+        this.db.raw('SUM(overall_profit) as profit'),
         this.db.raw('SUM(invoice_service_charge) as service_charge'),
         this.db.raw('SUM(invoice_discount) as invoice_discount'),
         this.db.raw('SUM(overall_profit) as overall_profit')
@@ -651,7 +651,7 @@ class ReportModel extends AbstractModels {
         this.db.raw('SUM(invoice_net_total) as sales'),
         this.db.raw('SUM(cl_pay) as pay'),
         this.db.raw('SUM(due_amount) as due'),
-        this.db.raw('SUM(invoice_total_profit) as profit'),
+        this.db.raw('SUM(overall_profit) as profit'),
         this.db.raw('SUM(invoice_service_charge) as service_charge'),
         this.db.raw('SUM(invoice_discount) as invoice_discount'),
         this.db.raw('SUM(overall_profit) as overall_profit')

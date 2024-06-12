@@ -5,11 +5,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_s3_1 = require("@aws-sdk/client-s3");
 const multer_1 = __importDefault(require("multer"));
-const path_1 = __importDefault(require("path"));
 const multer_s3_1 = __importDefault(require("multer-s3"));
-const uploaderConstants_1 = require("./uploaderConstants");
-const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const path_1 = __importDefault(require("path"));
 const config_1 = __importDefault(require("../../../config/config"));
+const customError_1 = __importDefault(require("../../utils/errors/customError"));
+const uploaderConstants_1 = require("./uploaderConstants");
 const allowed_file_types = [
     'image/jpeg',
     'image/jpg',

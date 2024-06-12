@@ -184,7 +184,7 @@ class ReportModel extends abstract_models_1.default {
                 .groupBy('invoice_client_id', 'invoice_combined_id')
                 .as('inv_due')));
             const [total] = yield this.query()
-                .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'), this.db.raw('SUM(invoice_service_charge) as service_charge'), this.db.raw('SUM(invoice_discount) as invoice_discount'), this.db.raw('SUM(overall_profit) as overall_profit'))
+                .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(overall_profit) as profit'), this.db.raw('SUM(invoice_service_charge) as service_charge'), this.db.raw('SUM(invoice_discount) as invoice_discount'), this.db.raw('SUM(overall_profit) as overall_profit'))
                 .from('trabill.v_invoices_due')
                 .where('invoice_org_agency', this.org_agency)
                 .modify(function (queryBuilder) {
@@ -305,7 +305,7 @@ class ReportModel extends abstract_models_1.default {
                 }
             }));
             const [total] = yield this.query()
-                .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'), this.db.raw('SUM(invoice_service_charge) as service_charge'), this.db.raw('SUM(invoice_discount) as invoice_discount'), this.db.raw('SUM(overall_profit) as overall_profit'))
+                .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(overall_profit) as profit'), this.db.raw('SUM(invoice_service_charge) as service_charge'), this.db.raw('SUM(invoice_discount) as invoice_discount'), this.db.raw('SUM(overall_profit) as overall_profit'))
                 .from('trabill.v_invoices_due')
                 .where('invoice_org_agency', this.org_agency)
                 .modify(function (queryBuilder) {
@@ -387,7 +387,7 @@ class ReportModel extends abstract_models_1.default {
             })
                 .groupBy('airline_id'));
             const [total] = (yield this.query()
-                .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(invoice_total_profit) as profit'), this.db.raw('SUM(invoice_service_charge) as service_charge'), this.db.raw('SUM(invoice_discount) as invoice_discount'), this.db.raw('SUM(overall_profit) as overall_profit'))
+                .select(this.db.raw('SUM(invoice_total_vendor_price) as purchase'), this.db.raw('SUM(invoice_net_total) as sales'), this.db.raw('SUM(cl_pay) as pay'), this.db.raw('SUM(due_amount) as due'), this.db.raw('SUM(overall_profit) as profit'), this.db.raw('SUM(invoice_service_charge) as service_charge'), this.db.raw('SUM(invoice_discount) as invoice_discount'), this.db.raw('SUM(overall_profit) as overall_profit'))
                 .from('trabill.v_invoices_due')
                 .where('invoice_org_agency', this.org_agency)
                 .modify(function (queryBuilder) {

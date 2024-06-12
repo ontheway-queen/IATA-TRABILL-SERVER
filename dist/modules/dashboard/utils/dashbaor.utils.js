@@ -48,9 +48,9 @@ const formatAgentBillingCommission = (arrayOfTickets) => {
             .replace(/0.00/g, ' 0.00 ');
         const value = replaceItem.split(' ');
         return {
-            iata_commission_percent: value[1],
-            iata_commission_percent_total: (0, exports.toNum)(value[2]),
-            iata_ait: (0, exports.toNum)(value[4]),
+            commission_percent: value[1],
+            commission_percent_total: (0, exports.toNum)(value[2]),
+            ait: (0, exports.toNum)(value[4]),
         };
     });
     return formattedCommission;
@@ -76,11 +76,13 @@ const formatAgentTicket = (text, conn) => __awaiter(void 0, void 0, void 0, func
     const tickets = [];
     for (const [index, item] of filterTickets.entries()) {
         const arrItem = item.split(' ');
-        const iata_ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, '');
-        const db_ticket = yield conn.getTicketInfoByTicket(iata_ticket_no);
-        const iata_ticket = Object.assign(Object.assign({ invoice_id: index + 1, invoice_no: undefined, invoice_category_id: undefined, iata_sales_date: formatDate(arrItem[4]), iata_ticket_no, iata_gross_fare: (0, exports.toNum)(arrItem[1]), iata_base_fare: (0, exports.toNum)(arrItem[2]) }, formattedCommission[index]), { iata_purchase_price: (0, exports.toNum)(arrItem[3]) });
+        const ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, '');
+        const db_ticket = yield conn.getTicketInfoByTicket(ticket_no);
+        const iata_ticket = Object.assign(Object.assign({ invoice_id: index + 1, type: 'IATA', invoice_no: undefined, invoice_category_id: undefined, ticket_no, sales_date: formatDate(arrItem[4]), gross_fare: (0, exports.toNum)(arrItem[1]), base_fare: (0, exports.toNum)(arrItem[2]) }, formattedCommission[index]), { purchase_price: (0, exports.toNum)(arrItem[3]) });
         tickets.push(iata_ticket);
-        tickets.push(db_ticket);
+        if (db_ticket) {
+            tickets.push(db_ticket);
+        }
     }
     return tickets;
 });
@@ -97,11 +99,13 @@ const formatAgentRefund = (text, conn) => __awaiter(void 0, void 0, void 0, func
             .replace(/-/g, ' -')
             .replace(/I|RFND/g, '')
             .split(' ');
-        const iata_ticket_no = formattedItem[0];
-        const db_refund = yield conn.getTicketInfoByRefund(iata_ticket_no);
-        const iata_refund = Object.assign(Object.assign({ refund_id: index + 1, iata_ticket_no, iata_refund_date: formatDate(formattedItem[4]), iata_purchase: (0, exports.toNum)(formattedItem[1]), iata_fare: (0, exports.toNum)(formattedItem[2]), iata_com_able: (0, exports.toNum)(formattedItem[3]) }, formattedCommission[index]), { iata_payable: (0, exports.toNum)(formattedItem[5]) });
+        const ticket_no = formattedItem[0];
+        const db_refund = yield conn.getTicketInfoByRefund(ticket_no);
+        const iata_refund = Object.assign(Object.assign({ refund_id: index + 1, type: 'IATA', ticket_no, vouchar_number: undefined, date: formatDate(formattedItem[4]), iata_purchase: (0, exports.toNum)(formattedItem[1]), iata_fare: (0, exports.toNum)(formattedItem[2]), iata_com_able: (0, exports.toNum)(formattedItem[3]) }, formattedCommission[index]), { return_amount: (0, exports.toNum)(formattedItem[5]) });
         refunds.push(iata_refund);
-        refunds.push(db_refund);
+        if (db_refund) {
+            refunds.push(db_refund);
+        }
     }
     return refunds;
 });

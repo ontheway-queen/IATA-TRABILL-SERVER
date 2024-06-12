@@ -252,7 +252,7 @@ class DashboardServices extends abstract_services_1.default {
             if (!req.file) {
                 throw new customError_1.default('No file uploaded', 400, 'File not found');
             }
-            const type = 'REFUND';
+            const type = req.query.type || 'SUMMARY';
             try {
                 const conn = this.models.dashboardModal(req);
                 const pdfData = yield (0, pdf_parse_1.default)(req.file.path);

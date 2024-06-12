@@ -792,17 +792,18 @@ class DashboardModels extends AbstractModels {
   getTicketInfoByTicket = async (ticket_no: string) => {
     const [ticket] = await this.query()
       .select([
-        'invoice_id',
+        'invoice_id as id',
+        this.db.raw("'DB' AS type"),
         'invoice_no',
         'invoice_category_id',
-        'airticket_ticket_no',
-        'airticket_sales_date',
-        'airticket_gross_fare',
-        'airticket_base_fare',
-        'airticket_commission_percent',
-        'airticket_commission_percent_total',
-        'airticket_ait',
-        'airticket_purchase_price',
+        'airticket_ticket_no as ticket_no',
+        'airticket_sales_date as sales_date',
+        'airticket_gross_fare as gross_fare',
+        'airticket_base_fare as base_fare',
+        'airticket_commission_percent as commission_percent',
+        'airticket_commission_percent_total as commission_percent_total',
+        'airticket_ait as ait',
+        'airticket_purchase_price as purchase_price',
       ])
       .from('trabill.v_bsp_ticket_issue')
       .where('airticket_ticket_no', 'like', `%${ticket_no}%`)
@@ -814,15 +815,17 @@ class DashboardModels extends AbstractModels {
   getTicketInfoByRefund = async (ticket_no: string) => {
     const [ticket] = await this.query()
       .select(
-        'atrefund_vouchar_number',
         { refund_id: 'vrefund_refund_id' },
+        this.db.raw("'DB' AS type"),
+        'airticket_ticket_no as ticket_no',
+        'atrefund_vouchar_number as vouchar_number',
         'client_name',
         'comb_client',
         'refund_type',
-        'vrefund_total_amount',
-        'vrefund_charge_amount',
-        'vrefund_date',
-        'airticket_ticket_no',
+        'vrefund_total_amount as total_amount',
+        'vrefund_charge_amount as charge_amount',
+        'vrefund_date as date',
+        'vrefund_return_amount as return_amount',
         'airline_name'
       )
       .from('trabill.v_bsp_ticket_refund')

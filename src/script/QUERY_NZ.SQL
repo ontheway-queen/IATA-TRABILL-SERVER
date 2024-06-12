@@ -1,4 +1,4 @@
-
+-- add         client_id, combine_id, in v_mr
 
 
 

@@ -47,9 +47,9 @@ export const formatAgentBillingCommission = (arrayOfTickets: any[]) => {
     const value = replaceItem.split(' ');
 
     return {
-      iata_commission_percent: value[1],
-      iata_commission_percent_total: toNum(value[2]),
-      iata_ait: toNum(value[4]),
+      commission_percent: value[1],
+      commission_percent_total: toNum(value[2]),
+      ait: toNum(value[4]),
     };
   });
 
@@ -85,23 +85,26 @@ export const formatAgentTicket = async (
   for (const [index, item] of filterTickets.entries()) {
     const arrItem = item.split(' ');
 
-    const iata_ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, '');
-    const db_ticket = await conn.getTicketInfoByTicket(iata_ticket_no);
+    const ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, '');
+    const db_ticket = await conn.getTicketInfoByTicket(ticket_no);
 
     const iata_ticket = {
       invoice_id: index + 1,
+      type: 'IATA',
       invoice_no: undefined,
       invoice_category_id: undefined,
-      iata_sales_date: formatDate(arrItem[4]),
-      iata_ticket_no,
-      iata_gross_fare: toNum(arrItem[1]),
-      iata_base_fare: toNum(arrItem[2]),
+      ticket_no,
+      sales_date: formatDate(arrItem[4]),
+      gross_fare: toNum(arrItem[1]),
+      base_fare: toNum(arrItem[2]),
       ...formattedCommission[index],
-      iata_purchase_price: toNum(arrItem[3]),
+      purchase_price: toNum(arrItem[3]),
     };
 
     tickets.push(iata_ticket);
-    tickets.push(db_ticket);
+    if (db_ticket) {
+      tickets.push(db_ticket);
+    }
   }
 
   return tickets;
@@ -127,23 +130,27 @@ export const formatAgentRefund = async (
       .replace(/-/g, ' -')
       .replace(/I|RFND/g, '')
       .split(' ');
-    const iata_ticket_no = formattedItem[0];
+    const ticket_no = formattedItem[0];
 
-    const db_refund = await conn.getTicketInfoByRefund(iata_ticket_no);
+    const db_refund = await conn.getTicketInfoByRefund(ticket_no);
 
     const iata_refund = {
       refund_id: index + 1,
-      iata_ticket_no,
-      iata_refund_date: formatDate(formattedItem[4]),
+      type: 'IATA',
+      ticket_no,
+      vouchar_number: undefined,
+      date: formatDate(formattedItem[4]),
       iata_purchase: toNum(formattedItem[1]),
       iata_fare: toNum(formattedItem[2]),
       iata_com_able: toNum(formattedItem[3]),
       ...formattedCommission[index],
-      iata_payable: toNum(formattedItem[5]),
+      return_amount: toNum(formattedItem[5]),
     };
 
     refunds.push(iata_refund);
-    refunds.push(db_refund);
+    if (db_refund) {
+      refunds.push(db_refund);
+    }
   }
 
   return refunds;

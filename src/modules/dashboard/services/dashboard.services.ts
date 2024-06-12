@@ -352,7 +352,7 @@ class DashboardServices extends AbstractServices {
       throw new CustomError('No file uploaded', 400, 'File not found');
     }
 
-    const type: string = 'REFUND';
+    const type = req.query.type || 'SUMMARY';
 
     try {
       const conn = this.models.dashboardModal(req);

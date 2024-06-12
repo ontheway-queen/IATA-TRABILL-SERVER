@@ -918,7 +918,8 @@ class VendorModel extends AbstractModels {
         this.db.raw(
           "DATE_FORMAT(vpcheque_withdraw_date, '%Y-%c-%e') as vpcheque_withdraw_date"
         ),
-        'note'
+        'note',
+        'vpay_payment_by'
       )
       .where('vpay_id', id)
       .andWhereNot('vpay_is_deleted', 1)

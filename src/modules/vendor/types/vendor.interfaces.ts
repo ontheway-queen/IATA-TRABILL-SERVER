@@ -98,6 +98,7 @@ export interface IAddVendorPayReqBody {
   invoice_id: number;
   vpay_payment_to: 'INVOICE' | 'VENDOR';
   com_vendor: string;
+  payment_by: number;
   specific_inv_vendors: specific_inv_vendors[];
 }
 
@@ -127,6 +128,7 @@ export interface IAddVendorPayment {
   vpay_vendor_id?: number | null;
   vpay_combined_id?: number | null;
   vpay_vtrxn_id?: number | null;
+  vpay_payment_by: number;
 }
 
 export interface IUpdateVendorPayment

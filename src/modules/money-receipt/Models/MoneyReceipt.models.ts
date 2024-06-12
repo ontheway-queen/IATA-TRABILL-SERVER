@@ -1054,7 +1054,8 @@ class MoneyReceiptModels extends AbstractModels {
         'cheque_number',
         'cheque_withdraw_date',
         'receipt_trxn_charge as charge_amount',
-        'receipt_trxn_no as trans_no'
+        'receipt_trxn_no as trans_no',
+        'receipt_received_by'
       )
       .leftJoin(
         `${this.trxn}.acc_trxn`,

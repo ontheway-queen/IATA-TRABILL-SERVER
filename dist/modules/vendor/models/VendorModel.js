@@ -677,7 +677,7 @@ class VendorModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const [payments] = yield this.query()
                 .from('trabill_vendor_payments')
-                .select('vpay_payment_to', this.db.raw("CASE WHEN vpay_vendor_id IS NOT NULL THEN CONCAT('vendor-',vpay_vendor_id) ELSE CONCAT('combined-',vpay_combined_id) END AS com_vendor"), 'vpay_invoice_id', 'invoice_no', 'vpay_account_id as account_id', 'payment_method_id', 'has_refer_passport', 'vpcheque_cheque_no as cheque_no', 'vpaypass_passport_id', 'vpay_receipt_no as vpay_receipt', 'online_charge', 'vendor_ait', 'payment_amount', 'vpcheque_bank_name', this.db.raw("DATE_FORMAT(trabill_vendor_payments.payment_date, '%Y-%c-%e') as payment_date"), this.db.raw("DATE_FORMAT(vpcheque_withdraw_date, '%Y-%c-%e') as vpcheque_withdraw_date"), 'note')
+                .select('vpay_payment_to', this.db.raw("CASE WHEN vpay_vendor_id IS NOT NULL THEN CONCAT('vendor-',vpay_vendor_id) ELSE CONCAT('combined-',vpay_combined_id) END AS com_vendor"), 'vpay_invoice_id', 'invoice_no', 'vpay_account_id as account_id', 'payment_method_id', 'has_refer_passport', 'vpcheque_cheque_no as cheque_no', 'vpaypass_passport_id', 'vpay_receipt_no as vpay_receipt', 'online_charge', 'vendor_ait', 'payment_amount', 'vpcheque_bank_name', this.db.raw("DATE_FORMAT(trabill_vendor_payments.payment_date, '%Y-%c-%e') as payment_date"), this.db.raw("DATE_FORMAT(vpcheque_withdraw_date, '%Y-%c-%e') as vpcheque_withdraw_date"), 'note', 'vpay_payment_by')
                 .where('vpay_id', id)
                 .andWhereNot('vpay_is_deleted', 1)
                 .leftJoin('trabill_vendor_payments_cheques', {

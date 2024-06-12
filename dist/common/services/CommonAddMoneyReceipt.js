@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../helpers/Trxns"));
 const invoice_helpers_1 = require("../helpers/invoice.helpers");
+const lib_1 = require("../utils/libraries/lib");
 class CommonAddMoneyReceipt extends abstract_services_1.default {
     constructor() {
         super();
@@ -42,19 +43,7 @@ class CommonAddMoneyReceipt extends abstract_services_1.default {
                     ? `Paid ${receipt_total_amount} discount ${receipt_total_discount}, ${receipt_note || ''}`
                     : receipt_note || '';
                 if (receipt_payment_type !== 4) {
-                    let accPayType;
-                    if (receipt_payment_type === 1) {
-                        accPayType = 'CASH';
-                    }
-                    else if (receipt_payment_type === 2) {
-                        accPayType = 'BANK';
-                    }
-                    else if (receipt_payment_type === 3) {
-                        accPayType = 'MOBILE BANKING';
-                    }
-                    else {
-                        accPayType = 'CASH';
-                    }
+                    let accPayType = (0, lib_1.getPaymentType)(receipt_payment_type);
                     const AccTrxnBody = {
                         acctrxn_ac_id: account_id,
                         acctrxn_type: 'CREDIT',
@@ -115,6 +104,7 @@ class CommonAddMoneyReceipt extends abstract_services_1.default {
                     receipt_trxn_charge_id,
                     receipt_account_id: account_id,
                     receipt_trxn_no,
+                    receipt_received_by: null,
                 };
                 const receipt_id = yield conn.insertMoneyReceipt(receiptInfo);
                 if (receipt_payment_type === 4) {

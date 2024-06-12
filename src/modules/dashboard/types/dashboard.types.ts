@@ -19,3 +19,9 @@ export type BspBillingQueryType = {
   from_date: string | Date | 'Invalid Date';
   to_date: string | Date | 'Invalid Date';
 };
+
+export interface IBspDocs {
+  tbd_agency_id: number;
+  tbd_doc: string;
+  tbd_date: string;
+}

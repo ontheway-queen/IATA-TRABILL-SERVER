@@ -15,12 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
 const common_helper_1 = require("../../../../common/helpers/common.helper");
 const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
+const lib_1 = require("../../../../common/utils/libraries/lib");
 class EditMoneyReceipt extends abstract_services_1.default {
     constructor() {
         super();
         this.editMoneyReceipt = (req) => __awaiter(this, void 0, void 0, function* () {
             const receipt_id = req.params.id;
-            const { receipt_combclient, receipt_payment_to, receipt_total_amount, receipt_total_discount, receipt_money_receipt_no, receipt_payment_type, receipt_payment_date, receipt_note, cheque_number, cheque_withdraw_date, cheque_bank_name, account_id, receipt_created_by, invoices, tickets, charge_amount, trans_no, receipt_walking_customer_name, } = req.body;
+            const { receipt_combclient, receipt_payment_to, receipt_total_amount, receipt_total_discount, receipt_money_receipt_no, receipt_payment_type, receipt_payment_date, receipt_note, cheque_number, cheque_withdraw_date, cheque_bank_name, account_id, receipt_created_by, invoices, tickets, charge_amount, trans_no, receipt_walking_customer_name, received_by, } = req.body;
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(receipt_combclient);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.MoneyReceiptModels(req, trx);
@@ -37,19 +38,7 @@ class EditMoneyReceipt extends abstract_services_1.default {
                     ? `Paid ${receipt_total_amount} discount ${receipt_total_discount}, ${receipt_note || ''}`
                     : receipt_note || '';
                 if (receipt_payment_type !== 4) {
-                    let accPayType;
-                    if (receipt_payment_type === 1) {
-                        accPayType = 'CASH';
-                    }
-                    else if (receipt_payment_type === 2) {
-                        accPayType = 'BANK';
-                    }
-                    else if (receipt_payment_type === 3) {
-                        accPayType = 'MOBILE BANKING';
-                    }
-                    else {
-                        accPayType = 'CASH';
-                    }
+                    let accPayType = (0, lib_1.getPaymentType)(receipt_payment_type);
                     const AccTrxnBody = {
                         acctrxn_ac_id: account_id,
                         acctrxn_type: 'CREDIT',
@@ -127,6 +116,7 @@ class EditMoneyReceipt extends abstract_services_1.default {
                     receipt_trxn_charge_id,
                     receipt_walking_customer_name,
                     receipt_account_id: account_id,
+                    receipt_received_by: received_by,
                 };
                 yield conn.updateMoneyReceipt(receiptInfo, receipt_id);
                 // DELETE PREVIOUS INVOCIE CLIENT PAYMENT

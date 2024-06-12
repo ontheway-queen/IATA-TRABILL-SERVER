@@ -44,6 +44,7 @@ class AddMoneyReceipt extends AbstractServices {
       receipt_total_discount,
       trans_no,
       receipt_walking_customer_name,
+      received_by,
     } = req.body as IMoneyReceiptReq;
 
     const { client_id, combined_id } =
@@ -143,6 +144,7 @@ class AddMoneyReceipt extends AbstractServices {
         receipt_trxn_charge_id,
         receipt_trxn_no: trans_no,
         receipt_walking_customer_name,
+        receipt_received_by: received_by,
       };
 
       const receipt_id = await conn.insertMoneyReceipt(receiptInfo);

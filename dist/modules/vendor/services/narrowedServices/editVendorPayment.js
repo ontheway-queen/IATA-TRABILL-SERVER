@@ -15,12 +15,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../common/helpers/common.helper");
+const lib_1 = require("../../../../common/utils/libraries/lib");
 class EditVendorPayment extends abstract_services_1.default {
     constructor() {
         super();
         this.editVendorPayment = (req) => __awaiter(this, void 0, void 0, function* () {
             const vpay_id = Number(req.params.id);
-            const { account_id, created_by, cheque_no, has_refer_passport, note, payment_method_id, payment_amount, vpay_creadit_card_no, payment_date, vpay_receipt, vpaypass_passport_id, vpcheque_withdraw_date, vpcheque_bank_name, online_charge, vendor_ait, invoice_id, com_vendor, specific_inv_vendors, } = req.body;
+            const { account_id, created_by, cheque_no, has_refer_passport, note, payment_method_id, payment_amount, vpay_creadit_card_no, payment_date, vpay_receipt, vpaypass_passport_id, vpcheque_withdraw_date, vpcheque_bank_name, online_charge, vendor_ait, invoice_id, com_vendor, specific_inv_vendors, payment_by, } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.vendorModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
@@ -68,21 +69,10 @@ class EditVendorPayment extends abstract_services_1.default {
                     vendor_ait,
                     vpay_payment_to,
                     online_charge_id,
+                    vpay_payment_by: payment_by,
                 };
-                const { combined_id, vendor_id } = (0, common_helper_1.separateCombClientToId)(com_vendor);
-                let accPayType;
-                if (payment_method_id === 1) {
-                    accPayType = 'CASH';
-                }
-                else if (payment_method_id === 2) {
-                    accPayType = 'BANK';
-                }
-                else if (payment_method_id === 3) {
-                    accPayType = 'MOBILE BANKING';
-                }
-                else {
-                    accPayType = 'CASH';
-                }
+                const { combined_id } = (0, common_helper_1.separateCombClientToId)(com_vendor);
+                const accPayType = (0, lib_1.getPaymentType)(payment_method_id);
                 if (![4, 5].includes(prevPayMethod) &&
                     ![4, 5].includes(payment_method_id)) {
                     const AccTrxnBody = {

@@ -20,9 +20,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = __importDefault(require("path"));
-const { BlobServiceClient } = require('@azure/storage-blob');
 const config_1 = __importDefault(require("../../../config/config"));
 const funcWrapper_1 = __importDefault(require("../../utils/assyncWrapper/funcWrapper"));
+const { BlobServiceClient } = require('@azure/storage-blob');
 class Azure {
     constructor() {
         this.funcWrapper = new funcWrapper_1.default();

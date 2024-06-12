@@ -1,9 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import path from 'path';
-const { BlobServiceClient } = require('@azure/storage-blob');
 import config from '../../../config/config';
 import FuncWrapper from '../../utils/assyncWrapper/funcWrapper';
 import { FilesType, TSubFolder } from '../types/MWTypes';
+const { BlobServiceClient } = require('@azure/storage-blob');
 
 class Azure {
   private funcWrapper: FuncWrapper;

@@ -272,7 +272,9 @@ class ExpenseModel extends AbstractModels {
         'expense_payment_type',
         'expense_acctrxn_id',
         'expense_total_amount',
-        'expense_charge_id'
+        'expense_charge_id',
+        'expense_voucher_url_1',
+        'expense_voucher_url_2'
       )
       .from('trabill_expenses')
       .where('expense_id', expense_id);
@@ -282,6 +284,8 @@ class ExpenseModel extends AbstractModels {
       expense_acctrxn_id: number;
       expense_total_amount: number;
       expense_charge_id: number;
+      expense_voucher_url_1: string;
+      expense_voucher_url_2: string;
     };
   }
 
@@ -345,7 +349,6 @@ class ExpenseModel extends AbstractModels {
 
     return infos;
   }
-
   public async getExpense(expens_id: idType) {
     const infos = await this.query()
       .select(
@@ -354,7 +357,9 @@ class ExpenseModel extends AbstractModels {
         'expense_acctrxn_id as prevAccTrxnId',
         'expense_accounts_id as prevAccId',
         'expense_charge_amount',
-        'expense_charge_id'
+        'expense_charge_id',
+        'expense_voucher_url_1',
+        'expense_voucher_url_2'
       )
 
       .from('trabill_expenses')
@@ -368,6 +373,8 @@ class ExpenseModel extends AbstractModels {
         prevAccId: number;
         expense_charge_amount: number;
         expense_charge_id: number;
+        expense_voucher_url_1: string;
+        expense_voucher_url_2: string;
       };
     }
 

@@ -226,6 +226,15 @@ class AgentProfileModels extends abstract_models_1.default {
             return data;
         });
     }
+    getPrevImages(agent_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [data] = (yield this.query()
+                .select('agent_image_copy', 'agent_nid_front', 'agent_nid_back')
+                .from('trabill_agents_profile')
+                .where({ agent_id }));
+            return Object.assign(Object.assign({}, data), { image_arr: Object.values(data) });
+        });
+    }
 }
 exports.default = AgentProfileModels;
 //# sourceMappingURL=agent_profile.models.js.map

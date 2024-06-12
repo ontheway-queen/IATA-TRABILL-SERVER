@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import CustomError from '../../utils/errors/customError';
-import DeleteFile from '../../utils/fileRemover/deleteFIle';
+import ManageFile from '../manageFile/manageFile';
 
 interface IcustomError {
   success: boolean;
@@ -11,7 +11,7 @@ interface IcustomError {
 
 class ErrorHandler {
   private customError: IcustomError;
-  private deleteFile: DeleteFile;
+  private manageFile: ManageFile;
 
   constructor() {
     this.customError = {
@@ -20,7 +20,7 @@ class ErrorHandler {
       type: 'Internal server error!',
     };
 
-    this.deleteFile = new DeleteFile();
+    this.manageFile = new ManageFile();
   }
 
   /**
@@ -33,18 +33,12 @@ class ErrorHandler {
     _next: NextFunction
   ) => {
     // file removing starts
-    const files = req.upFiles;
-    const folder = req.upFolder;
-    const image_files = req.image_files;
+    const files = req.files as Express.Multer.File[] | [];
 
-    if (files) {
-      this.deleteFile.delete(folder, files);
+    if (files && files.length) {
+      const images = files.map((item) => item.filename);
+      this.manageFile.deleteFromCloud(images);
     }
-
-    // if (image_files) {
-    //   this.deleteFile.delete_image(image_files);
-    // }
-    // file removing ends
 
     if (err instanceof CustomError) {
       this.customError.message =

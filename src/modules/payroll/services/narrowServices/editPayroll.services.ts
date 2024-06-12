@@ -53,16 +53,12 @@ class EditPayroll extends AbstractServices {
 
     const payrollId = req.params.id as string;
 
-    const imageList = req.imgUrl;
-
-    const imageUrlObj: {
-      payroll_image_url: string;
-    } = Object.assign({}, ...imageList);
-
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.payrollModel(req, trx);
       const vendor_conn = this.models.vendorModel(req, trx);
       const trxns = new Trxns(req, trx);
+
+      const files = req.files as Express.Multer.File[] | [];
 
       let {
         previous_net_balance,
@@ -71,9 +67,10 @@ class EditPayroll extends AbstractServices {
         prev_payroll_charge_id,
       } = await conn.getPrevTransectionAmount(payrollId);
 
-      if (imageUrlObj.payroll_image_url) {
+      if (files[0].filename) {
         const data = await conn.payrollImagesUrl(payrollId);
-        await this.deleteFile.delete_image(data?.payroll_image_url as string);
+        data?.payroll_image_url &&
+          (await this.manageFile.deleteFromCloud([data?.payroll_image_url]));
       }
 
       const payrollData = {
@@ -104,7 +101,7 @@ class EditPayroll extends AbstractServices {
         payroll_date,
         payroll_note,
         payroll_updated_by,
-        ...imageUrlObj,
+        payroll_image_url: files[0].filename,
       };
 
       let payroll_acctrxn_id;

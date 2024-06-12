@@ -6,7 +6,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const multer_1 = __importDefault(require("multer"));
 const abstract_routers_1 = __importDefault(require("../../../../abstracts/abstract.routers"));
 const agent_profile_controllers_1 = __importDefault(require("../Controllers/agent_profile.controllers"));
-const ImageUploadToAzure_rec_1 = require("../../../../common/helpers/ImageUploadToAzure_rec");
 const storage = multer_1.default.memoryStorage();
 const upload = (0, multer_1.default)({ storage });
 class AgentProfileRoutes extends abstract_routers_1.default {
@@ -17,20 +16,12 @@ class AgentProfileRoutes extends abstract_routers_1.default {
     }
     callRouter() {
         this.routers.patch('/activity/:agent_id', this.controllers.updateAgentsStatus);
-        this.routers.post('/create', upload.fields([
-            { name: 'agent_image_copy', maxCount: 1 },
-            { name: 'agent_nid_front', maxCount: 1 },
-            { name: 'agent_nid_back', maxCount: 1 },
-        ]), ImageUploadToAzure_rec_1.uploadImageToAzure_rec, this.controllers.createAgentProfile);
+        this.routers.post('/create', this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE), this.controllers.createAgentProfile);
         this.routers.get('/agents', this.controllers.getAllAgents);
         this.routers
             .route('/agent/:id')
             .get(this.controllers.getAgentById)
-            .patch(upload.fields([
-            { name: 'agent_image_copy', maxCount: 1 },
-            { name: 'agent_nid_front', maxCount: 1 },
-            { name: 'agent_nid_back', maxCount: 1 },
-        ]), ImageUploadToAzure_rec_1.uploadImageToAzure_rec, this.controllers.editEgentProfile)
+            .patch(this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE), this.controllers.editEgentProfile)
             .delete(this.controllers.deleteAgentProfiles);
         this.routers.get('/get-all', this.controllers.viewAgents);
         this.routers.get('/view_all', this.controllers.viewAllAgents);

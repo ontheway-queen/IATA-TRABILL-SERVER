@@ -1,7 +1,6 @@
 import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
 import ExpenseContorller from '../controllers/expense.controllers';
-import { uploadImageToAzure_trabill } from '../../../common/helpers/ImageUploadToAzure_trabill';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -21,11 +20,7 @@ class ExpenseRouter extends AbstractRouter {
     this.routers
       .route('/')
       .post(
-        upload.fields([
-          { name: 'expense_voucher_url_1', maxCount: 1 },
-          { name: 'expense_voucher_url_2', maxCount: 1 },
-        ]),
-        uploadImageToAzure_trabill,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.controllers.createExpense
       )
       .get(this.controllers.allExpenses);
@@ -34,11 +29,7 @@ class ExpenseRouter extends AbstractRouter {
       .route('/:expense_id')
       .get(this.controllers.singleExpenses)
       .patch(
-        upload.fields([
-          { name: 'expense_voucher_url_1', maxCount: 1 },
-          { name: 'expense_voucher_url_2', maxCount: 1 },
-        ]),
-        uploadImageToAzure_trabill,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.controllers.editExpense
       )
       .delete(this.controllers.deleteExpense);

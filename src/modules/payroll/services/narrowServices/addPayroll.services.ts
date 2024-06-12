@@ -10,18 +10,13 @@ import {
 } from '../../types/payroll.interfaces';
 import Trxns from '../../../../common/helpers/Trxns';
 import { IAcTrxn } from '../../../../common/interfaces/Trxn.interfaces';
+import { getPaymentType } from '../../../../common/utils/libraries/lib';
 
 class CreatePayroll extends AbstractServices {
   constructor() {
     super();
   }
   public createPayrollServices = async (req: Request) => {
-    const imageList = req.imgUrl;
-
-    const imageUrlObj: {
-      payroll_image_url: string;
-    } = Object.assign({}, ...imageList);
-
     const {
       payroll_employee_id,
       payroll_account_id,
@@ -63,6 +58,8 @@ class CreatePayroll extends AbstractServices {
       const trxns = new Trxns(req, trx);
 
       const payroll_vouchar_no = generateVoucherNumber(4, 'PRL');
+
+      const files = req.files as Express.Multer.File[] | [];
 
       let payroll_charge_id: number | null = null;
       if (payroll_pay_type === 3 && payroll_transection_charge) {
@@ -110,22 +107,13 @@ class CreatePayroll extends AbstractServices {
         payroll_other1,
         payroll_other2,
         payroll_other3,
-        ...imageUrlObj,
+        payroll_image_url: files[0].filename,
       };
 
       let payroll_id: number = 0;
 
       if (payroll_pay_type !== 4 && payroll_account_id) {
-        let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-        if (payroll_pay_type === 1) {
-          accPayType = 'CASH';
-        } else if (payroll_pay_type === 2) {
-          accPayType = 'BANK';
-        } else if (payroll_pay_type === 3) {
-          accPayType = 'MOBILE BANKING';
-        } else {
-          accPayType = 'CASH';
-        }
+        let accPayType = getPaymentType(payroll_pay_type);
 
         const AccTrxnBody: IAcTrxn = {
           acctrxn_ac_id: payroll_account_id,

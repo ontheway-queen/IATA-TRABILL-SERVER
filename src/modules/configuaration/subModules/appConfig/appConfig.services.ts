@@ -32,24 +32,26 @@ class AppConfigServices extends AbstractServices {
   };
 
   public updateAppConfigSignature = async (req: Request) => {
-    const imageList = req.imgUrl as string[];
-
-    const getImageWithURL: ImagesTypes = imageList.reduce(
-      (acc, image) => Object.assign(acc, image),
-      { tac_sig_url: '', tac_wtr_mark_url: '' }
-    );
+    const files = req.files as Express.Multer.File[] | [];
 
     const customBody: ImagesTypes = {};
 
-    if (getImageWithURL.tac_sig_url) {
-      customBody.tac_sig_url = getImageWithURL.tac_sig_url;
-    }
-
-    if (getImageWithURL.tac_wtr_mark_url) {
-      customBody.tac_wtr_mark_url = getImageWithURL.tac_wtr_mark_url;
-    }
-
     const conn = this.models.configModel.appConfig(req);
+    const { tac_sig_url, tac_wtr_mark_url } = await conn.getAppConfigInfo();
+
+    if (files) {
+      files.map((item) => {
+        if (item.fieldname === 'tac_sig_url') {
+          customBody.tac_sig_url = item.filename;
+          if (tac_sig_url) this.manageFile.deleteFromCloud([tac_sig_url]);
+        }
+        if (item.fieldname === 'tac_wtr_mark_url') {
+          customBody.tac_wtr_mark_url = item.filename;
+          if (tac_wtr_mark_url)
+            this.manageFile.deleteFromCloud([tac_wtr_mark_url]);
+        }
+      });
+    }
 
     await conn.updateAppConfigSignature(customBody);
 
@@ -61,17 +63,13 @@ class AppConfigServices extends AbstractServices {
     const conn = this.models.configModel.appConfig(req);
     const body = req.body as ISignatureReqBody;
 
-    const imageList = req.imgUrl;
-
-    const imageUrlObj: {
-      sig_signature: string;
-    } = Object.assign({}, ...imageList);
+    const files = req.files as Express.Multer.File[] | [];
 
     if (body.sig_type === 'AUTHORITY') {
       const count = await conn.checkSignatureTypeIsExist();
 
       if (count) {
-        await this.deleteFile.delete_image(imageUrlObj.sig_signature);
+        await this.manageFile.deleteFromCloud([files[0].filename]);
         throw new CustomError(
           'An authority signature already exists!',
           400,
@@ -92,7 +90,7 @@ class AppConfigServices extends AbstractServices {
       sig_state: body.sig_state,
       sig_zip_code: body.sig_zip_code,
       sig_email: body.sig_email,
-      sig_signature: imageUrlObj.sig_signature,
+      sig_signature: files[0].filename,
       sig_org_id: req.agency_id,
       sig_created_by: req.user_id,
       sig_phone_no: body.sig_phone_no,
@@ -100,7 +98,7 @@ class AppConfigServices extends AbstractServices {
 
     await conn.insertSignature(sig_data);
 
-    return { success: true, imageUrlObj };
+    return { success: true, imageUrlObj: files[0].filename };
   };
 
   public updateSignature = async (req: Request) => {
@@ -108,11 +106,7 @@ class AppConfigServices extends AbstractServices {
     const conn = this.models.configModel.appConfig(req);
     const body = req.body as ISignatureReqBody;
 
-    const imageList = req.imgUrl;
-
-    const imageUrlObj: {
-      sig_signature: string;
-    } = Object.assign({}, ...imageList);
+    const files = req.files as Express.Multer.File[] | [];
 
     const sig_data: ISignatureDB = {
       sig_employee_id: body.sig_employee_id,
@@ -126,22 +120,23 @@ class AppConfigServices extends AbstractServices {
       sig_state: body.sig_state,
       sig_zip_code: body.sig_zip_code,
       sig_email: body.sig_email,
-      sig_signature: body?.sig_signature || imageUrlObj?.sig_signature || null,
       sig_org_id: req.agency_id,
       sig_created_by: req.user_id,
       sig_phone_no: body.sig_phone_no,
     };
 
+    if (files[0].filename) sig_data.sig_signature = files[0].filename;
+
     await conn.updateSignature(sig_data, sig_id);
 
     // DELETE PREVIOUS SIGNATURE
-    if (!body?.sig_signature) {
+    if (files[0].filename) {
       const signature = await conn.previousSignature(sig_id);
 
-      await this.deleteFile.delete_image(signature);
+      signature && (await this.manageFile.deleteFromCloud([signature]));
     }
 
-    return { success: true, imageUrlObj };
+    return { success: true, imageUrlObj: files[0].filename };
   };
 
   public updateSignatureStatus = async (req: Request) => {

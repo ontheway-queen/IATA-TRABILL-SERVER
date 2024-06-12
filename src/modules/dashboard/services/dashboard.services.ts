@@ -397,11 +397,12 @@ class DashboardServices extends AbstractServices {
     const conn = this.models.dashboardModal(req);
 
     const files = req.files as Express.Multer.File[] | [];
+    console.log({ files });
 
     await conn.insertBSPDocs({
       tbd_agency_id: req.agency_id,
       tbd_date,
-      tbd_doc: files[0]?.location as string,
+      tbd_doc: files[0].filename as string,
     });
 
     return {
@@ -417,7 +418,7 @@ class DashboardServices extends AbstractServices {
 
     const prev_url = await conn.deleteBSPDocs(tbd_id);
 
-    if (prev_url) this.deleteFile.delete_image(prev_url);
+    if (prev_url) this.manageFile.deleteFromCloud([prev_url]);
 
     return {
       success: true,

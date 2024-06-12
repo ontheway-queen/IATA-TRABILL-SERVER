@@ -284,14 +284,14 @@ class DashboardServices extends abstract_services_1.default {
             }
         });
         this.uploadBSPDocs = (req) => __awaiter(this, void 0, void 0, function* () {
-            var _a;
             const { tbd_date } = req.body;
             const conn = this.models.dashboardModal(req);
             const files = req.files;
+            console.log({ files });
             yield conn.insertBSPDocs({
                 tbd_agency_id: req.agency_id,
                 tbd_date,
-                tbd_doc: (_a = files[0]) === null || _a === void 0 ? void 0 : _a.location,
+                tbd_doc: files[0].filename,
             });
             return {
                 success: true,
@@ -303,7 +303,7 @@ class DashboardServices extends abstract_services_1.default {
             const conn = this.models.dashboardModal(req);
             const prev_url = yield conn.deleteBSPDocs(tbd_id);
             if (prev_url)
-                this.deleteFile.delete_image(prev_url);
+                this.manageFile.deleteFromCloud([prev_url]);
             return {
                 success: true,
                 message: 'BSP Doc delete successfully',

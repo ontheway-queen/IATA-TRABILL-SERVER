@@ -1,10 +1,6 @@
 import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
-import { uploadImageToAzure_trabill } from '../../../common/helpers/ImageUploadToAzure_trabill';
 import PassportControllers from '../controllers/passport.controllers';
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 class PassportRouter extends AbstractRouter {
   private controllers = new PassportControllers();
@@ -24,12 +20,7 @@ class PassportRouter extends AbstractRouter {
     this.routers
       .route('/')
       .post(
-        upload.fields([
-          { name: 'passport_scan_copy', maxCount: 1 },
-          { name: 'passport_upload_photo', maxCount: 1 },
-          { name: 'passport_upload_others', maxCount: 1 },
-        ]),
-        uploadImageToAzure_trabill,
+        this.uploader.cloudUploadRaw(this.fileFolder.PASSPORT_FILE),
         this.controllers.addPassport
       )
       .get(this.controllers.allPassports);
@@ -48,12 +39,7 @@ class PassportRouter extends AbstractRouter {
       .route('/:passport_id')
       .get(this.controllers.singlePassport)
       .patch(
-        upload.fields([
-          { name: 'passport_scan_copy', maxCount: 1 },
-          { name: 'passport_upload_photo', maxCount: 1 },
-          { name: 'passport_upload_others', maxCount: 1 },
-        ]),
-        uploadImageToAzure_trabill,
+        this.uploader.cloudUploadRaw(this.fileFolder.PASSPORT_FILE),
         this.controllers.editPassport
       )
       .delete(this.controllers.deletePassport);

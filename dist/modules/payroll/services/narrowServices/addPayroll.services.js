@@ -15,17 +15,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
 const invoice_helpers_1 = require("../../../../common/helpers/invoice.helpers");
 const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
+const lib_1 = require("../../../../common/utils/libraries/lib");
 class CreatePayroll extends abstract_services_1.default {
     constructor() {
         super();
         this.createPayrollServices = (req) => __awaiter(this, void 0, void 0, function* () {
-            const imageList = req.imgUrl;
-            const imageUrlObj = Object.assign({}, ...imageList);
             const { payroll_employee_id, payroll_account_id, payroll_pay_type, payroll_salary, payroll_deductions, payroll_mobile_bill, payroll_transection_no, payroll_transection_charge, payroll_food_bill, payroll_bonus, payroll_commission, payroll_fastival_bonus, payroll_ta, payroll_advance, payroll_net_amount, payroll_date, payroll_note, payroll_cheque_no, cheque_withdraw_date, payroll_bank_name, payroll_created_by, payroll_accommodation, payroll_attendance, payroll_health, payroll_incentive, payroll_provident, gross_salary, daily_salary, payroll_profit_share, payment_month, payroll_other1, payroll_other2, payroll_other3, } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.payrollModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const payroll_vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(4, 'PRL');
+                const files = req.files;
                 let payroll_charge_id = null;
                 if (payroll_pay_type === 3 && payroll_transection_charge) {
                     const online_charge_trxn = {
@@ -39,7 +39,8 @@ class CreatePayroll extends abstract_services_1.default {
                         .insertOnlineTrxnCharge(online_charge_trxn);
                 }
                 // common for payroll
-                const payrollData = Object.assign({ payment_month,
+                const payrollData = {
+                    payment_month,
                     gross_salary,
                     daily_salary,
                     payroll_profit_share,
@@ -69,22 +70,12 @@ class CreatePayroll extends abstract_services_1.default {
                     payroll_provident,
                     payroll_other1,
                     payroll_other2,
-                    payroll_other3 }, imageUrlObj);
+                    payroll_other3,
+                    payroll_image_url: files[0].filename,
+                };
                 let payroll_id = 0;
                 if (payroll_pay_type !== 4 && payroll_account_id) {
-                    let accPayType;
-                    if (payroll_pay_type === 1) {
-                        accPayType = 'CASH';
-                    }
-                    else if (payroll_pay_type === 2) {
-                        accPayType = 'BANK';
-                    }
-                    else if (payroll_pay_type === 3) {
-                        accPayType = 'MOBILE BANKING';
-                    }
-                    else {
-                        accPayType = 'CASH';
-                    }
+                    let accPayType = (0, lib_1.getPaymentType)(payroll_pay_type);
                     const AccTrxnBody = {
                         acctrxn_ac_id: payroll_account_id,
                         acctrxn_type: 'DEBIT',

@@ -1,8 +1,5 @@
-import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
 import DashboardControllers from '../controllers/dashboard.controllers';
-
-const upload = multer({ dest: 'uploads/' });
 
 class DashboardRoutes extends AbstractRouter {
   private controllers = new DashboardControllers();

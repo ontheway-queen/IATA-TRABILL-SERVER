@@ -10,22 +10,26 @@ class CreateAgentProfile extends AbstractServices {
   public createAgentProfile = async (req: Request) => {
     const data = req.body as IAgentProfileReqBody;
 
-    const imageList = req.imgUrl as string[];
-
-    const { agent_image_copy, agent_nid_front, agent_nid_back, ...othersInfo } =
-      data;
-
-    const mergedImageObject = imageList.reduce(
-      (acc, image) => Object.assign(acc, image),
-      {}
-    );
-
-    const agentInfo = { ...othersInfo, ...mergedImageObject };
-
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.agentProfileModel(req, trx);
 
-      const agent_id = await conn.createAgentProfile(agentInfo);
+      const files = req.files as Express.Multer.File[] | [];
+
+      if (files && files.length) {
+        files.map((item) => {
+          if (item.fieldname === 'agent_image_copy') {
+            data.agent_image_copy = item.filename;
+          }
+          if (item.fieldname === 'agent_nid_front') {
+            data.agent_nid_front = item.filename;
+          }
+          if (item.fieldname === 'agent_nid_back') {
+            data.agent_nid_back = item.filename;
+          }
+        });
+      }
+
+      const agent_id = await conn.createAgentProfile(data);
 
       // insert audit
 

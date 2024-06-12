@@ -60,6 +60,7 @@ export interface ICreatePayroll
   payroll_acctrxn_id?: number;
   payroll_vouchar_no?: string;
   payroll_charge_id: number | null;
+  payroll_image_url: string;
 }
 
 export interface IDeletePayroll {

@@ -1,13 +1,5 @@
-import multer from 'multer';
 import AbstractRouter from '../../../../abstracts/abstract.routers';
-import {
-  signatureUploadToAzure,
-  uploadImageToAzure_trabill,
-} from '../../../../common/helpers/ImageUploadToAzure_trabill';
 import AppConfigControllers from './appConfig.controllers';
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 class AppConfigRoutes extends AbstractRouter {
   private controllers = new AppConfigControllers();
@@ -24,21 +16,18 @@ class AppConfigRoutes extends AbstractRouter {
       .get(this.controllers.getAppConfig)
       .patch(this.controllers.updateAppConfig);
 
-    this.routers.route('/app-config/signature').patch(
-      upload.fields([
-        { name: 'tac_sig_url', maxCount: 1 },
-        { name: 'tac_wtr_mark_url', maxCount: 1 },
-      ]),
-      uploadImageToAzure_trabill,
-      this.controllers.updateAppConfigSignature
-    );
+    this.routers
+      .route('/app-config/signature')
+      .patch(
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
+        this.controllers.updateAppConfigSignature
+      );
 
     // SIGNATURE
     this.routers
       .route('/signature')
       .post(
-        upload.fields([{ name: 'sig_signature', maxCount: 1 }]),
-        signatureUploadToAzure,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.controllers.addSignature
       )
       .get(this.controllers.getSignatures);
@@ -46,8 +35,7 @@ class AppConfigRoutes extends AbstractRouter {
     this.routers
       .route('/signature/:sig_id')
       .patch(
-        upload.fields([{ name: 'sig_signature', maxCount: 1 }]),
-        signatureUploadToAzure,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.controllers.updateSignature
       )
       .put(this.controllers.updateSignatureStatus);

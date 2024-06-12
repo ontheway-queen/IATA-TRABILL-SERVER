@@ -38,7 +38,10 @@ class AdminPanelRouters extends AbstractRouter {
 
     this.routers
       .route('/agency')
-      .post(this.uploader.imageUpload('logos'), this.controllers.createAgency)
+      .post(
+        this.uploader.cloudUploadRaw(this.fileFolder.LOGO),
+        this.controllers.createAgency
+      )
       .get(this.controllers.getAllAgency);
 
     this.routers.get('/agency/recent', this.controllers.resentAgency);
@@ -51,7 +54,7 @@ class AdminPanelRouters extends AbstractRouter {
     this.routers
       .route('/logo/:agency_id')
       .put(
-        this.uploader.imageUpload('logos'),
+        this.uploader.cloudUploadRaw(this.fileFolder.LOGO),
         this.controllers.updateAgencyLogo
       );
 

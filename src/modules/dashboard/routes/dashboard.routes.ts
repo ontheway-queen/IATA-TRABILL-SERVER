@@ -52,7 +52,10 @@ class DashboardRoutes extends AbstractRouter {
     // UPLOAD BSP BILL
     this.routers
       .route('/bsp-bill')
-      .post(this.uploader.imageUpload('file'), this.controllers.uploadBSPDocs)
+      .post(
+        this.uploader.cloudUploadRaw(this.fileFolder.BSP),
+        this.controllers.uploadBSPDocs
+      )
       .get(this.controllers.getBSPDocs);
 
     this.routers.delete('/bsp-bill/:tbd_id', this.controllers.deleteBSPDocs);

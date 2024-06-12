@@ -18,6 +18,11 @@ declare global {
         [fieldname: string]: string;
       };
     }
+    namespace Multer {
+      interface File {
+        location: string | null;
+      }
+    }
   }
 
   namespace jest {

@@ -35,13 +35,13 @@ class AdminPanelRouters extends abstract_routers_1.default {
             .delete(this.controllers.deleteModules);
         this.routers
             .route('/agency')
-            .post(this.uploader.imageUpload('logos'), this.controllers.createAgency)
+            .post(this.uploader.cloudUploadRaw(this.fileFolder.LOGO), this.controllers.createAgency)
             .get(this.controllers.getAllAgency);
         this.routers.get('/agency/recent', this.controllers.resentAgency);
         this.routers.get('/agency-excel-download', this.controllers.agencyExcelReport);
         this.routers
             .route('/logo/:agency_id')
-            .put(this.uploader.imageUpload('logos'), this.controllers.updateAgencyLogo);
+            .put(this.uploader.cloudUploadRaw(this.fileFolder.LOGO), this.controllers.updateAgencyLogo);
         this.routers.patch('/agency/sales-info', this.controllers.updatesSalesInfo);
         this.routers
             .route('/agency/:agency_id')

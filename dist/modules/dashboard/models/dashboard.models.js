@@ -616,7 +616,7 @@ class DashboardModels extends abstract_models_1.default {
             return data;
         });
     }
-    bspFileList(search, page, size, date) {
+    bspFileList(search, page = 1, size = 50, date) {
         return __awaiter(this, void 0, void 0, function* () {
             date = date ? (0, moment_1.default)(new Date(date)).format('YYYY-MM-DD') : undefined;
             const offset = (page - 1) * size;
@@ -628,13 +628,13 @@ class DashboardModels extends abstract_models_1.default {
                 .andWhereNot('bsp_is_deleted', 1)
                 .modify((builder) => {
                 if (date) {
-                    builder.andWhereRaw('Date(bsp_bill_date)', date);
+                    builder.whereRaw('Date(bsp_bill_date) = ?', [date]);
                 }
                 if (search) {
                     builder.andWhereILike('bsp_file_name', `%${search}%`);
                 }
             })
-                .limit(page)
+                .limit(size)
                 .offset(offset);
             const [{ count }] = yield this.query()
                 .count('* as count')
@@ -643,7 +643,7 @@ class DashboardModels extends abstract_models_1.default {
                 .andWhereNot('bsp_is_deleted', 1)
                 .modify((builder) => {
                 if (date) {
-                    builder.andWhereRaw('Date(bsp_bill_date)', date);
+                    builder.whereRaw('Date(bsp_bill_date) = ?', [date]);
                 }
                 if (search) {
                     builder.andWhereILike('bsp_file_name', `%${search}%`);

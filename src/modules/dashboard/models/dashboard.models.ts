@@ -877,8 +877,8 @@ class DashboardModels extends AbstractModels {
 
   public async bspFileList(
     search: string,
-    page: number,
-    size: number,
+    page: number = 1,
+    size: number = 50,
     date?: string
   ) {
     date = date ? moment(new Date(date)).format('YYYY-MM-DD') : undefined;
@@ -900,13 +900,13 @@ class DashboardModels extends AbstractModels {
       .andWhereNot('bsp_is_deleted', 1)
       .modify((builder) => {
         if (date) {
-          builder.andWhereRaw('Date(bsp_bill_date)', date);
+          builder.whereRaw('Date(bsp_bill_date) = ?', [date]);
         }
         if (search) {
           builder.andWhereILike('bsp_file_name', `%${search}%`);
         }
       })
-      .limit(page)
+      .limit(size)
       .offset(offset);
 
     const [{ count }] = await this.query()
@@ -916,7 +916,7 @@ class DashboardModels extends AbstractModels {
       .andWhereNot('bsp_is_deleted', 1)
       .modify((builder) => {
         if (date) {
-          builder.andWhereRaw('Date(bsp_bill_date)', date);
+          builder.whereRaw('Date(bsp_bill_date) = ?', [date]);
         }
         if (search) {
           builder.andWhereILike('bsp_file_name', `%${search}%`);

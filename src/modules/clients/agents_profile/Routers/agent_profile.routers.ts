@@ -2,7 +2,6 @@ import multer from 'multer';
 import AbstractRouter from '../../../../abstracts/abstract.routers';
 
 import AgentProfileControllers from '../Controllers/agent_profile.controllers';
-import { uploadImageToAzure_rec } from '../../../../common/helpers/ImageUploadToAzure_rec';
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });

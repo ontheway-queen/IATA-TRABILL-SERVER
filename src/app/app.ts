@@ -43,7 +43,6 @@ class App {
         skip: (req: Request, res: Response) => req.originalUrl === '/metrics',
       })
     );
-    this.app.use(cookieParser(config.COOKIE_SECRET));
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(cors({ origin: this.miniMW.cors, credentials: true }));
     this.app.use(express.static(path.join(__dirname, 'public')));

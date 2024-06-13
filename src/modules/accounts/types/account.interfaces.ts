@@ -49,9 +49,9 @@ export interface IOnlineTrxnCharge {
   charge_to_vcombined_id?: number;
   charge_from_vcombined_id?: number;
   charge_to_client_id?: number;
-  charge_from_client_id?: number;
-  charge_to_combined_id?: number;
-  charge_from_ccombined_id?: number;
+  charge_from_client_id: number | null;
+  charge_to_combined_id: number | null;
+  charge_from_ccombined_id: number | null;
   charge_amount: number;
   charge_purpose: string;
   charge_note?: string;

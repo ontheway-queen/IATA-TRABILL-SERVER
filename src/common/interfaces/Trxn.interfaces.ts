@@ -1,6 +1,7 @@
 import { idType } from '../types/common.types';
 
 export interface IClTrxnBody {
+  ctrxn_mr_id?: number;
   ctrxn_cl: string;
   ctrxn_voucher?: string;
   ctrxn_airticket_no?: string;
@@ -32,6 +33,7 @@ export interface IComTrxn {
   comtrxn_note: string;
   comtrxn_create_at: string;
   comtrxn_user_id: idType;
+  comtrxn_mr_id?: number;
   // comtrxn_pay_type?: string;
 }
 
@@ -121,6 +123,7 @@ export interface IAccTrxn {
 
 export interface IAcTrxn extends Omit<IAccTrxn, 'acctrxn_lbalance'> {
   acctrxn_voucher?: string;
+  acctrxn_mr_id?: number;
 }
 export interface IAcTrxnUpdate extends IAcTrxn {
   trxn_id: number;

@@ -1,4 +1,5 @@
--- add         client_id, combine_id, in v_mr
+-- add         client_id, combine_id, account_id in v_mr
+
 
 
 
@@ -26,11 +27,17 @@ SET org_logo = REPLACE(org_logo, 'https://trabillteststorage.blob.core.windows.n
 
 
 
--- ==================== TESTING ================== --
+
+
+-- ==================== TESTING REF TRANS ================== --
 ALTER TABLE `trxn`.`client_trxn` 
 ADD COLUMN `ctrxn_mr_id` INT NULL AFTER `ctrxn_agency_id`;
 ALTER TABLE trxn.client_trxn
 ADD COLUMN ctrxn_inv_id  INT NULL AFTER ctrxn_agency_id;
+
+ALTER TABLE `trxn`.`acc_trxn` 
+ADD COLUMN `acctrxn_mr_id` INT NULL AFTER `acctrxn_ac_id`;
+
 
 -- MOST IMPORTANT QU FOR UPDATE TABLE WITH JOIN
 UPDATE trxn.client_trxn t

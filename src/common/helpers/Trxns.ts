@@ -47,6 +47,7 @@ class Trxns extends AbstractServices {
       ctrxn_voucher,
       ctrxn_airticket_no,
       ctrxn_pay_type,
+      ctrxn_mr_id,
     } = body;
 
     const { client_id, combined_id } = separateCombClientToId(ctrxn_cl);
@@ -69,8 +70,9 @@ class Trxns extends AbstractServices {
         ctrxn_type,
         ctrxn_voucher,
         ctrxn_airticket_no,
-        // ctrxn_pay_type,
         ctrxn_user_id: this.req.user_id,
+        ctrxn_mr_id,
+        // ctrxn_pay_type,
       };
 
       trxnId = await this.conn.insertClTrxn(clTrxnBody);
@@ -91,6 +93,7 @@ class Trxns extends AbstractServices {
         comtrxn_note: ctrxn_note,
         comtrxn_create_at: ctrxn_created_at,
         comtrxn_user_id: this.req.user_id,
+        comtrxn_mr_id: ctrxn_mr_id,
         // comtrxn_pay_type: ctrxn_pay_type,
       };
 
@@ -113,6 +116,7 @@ class Trxns extends AbstractServices {
       acctrxn_note,
       acctrxn_created_by,
       acctrxn_voucher,
+      acctrxn_mr_id,
     } = body;
 
     const accBody: IAcTrxn = {
@@ -126,6 +130,7 @@ class Trxns extends AbstractServices {
       acctrxn_note,
       acctrxn_created_at,
       acctrxn_created_by,
+      acctrxn_mr_id,
     };
 
     const account_id = await this.conn.insertAccTrxn(accBody);

@@ -42,7 +42,7 @@ class AddAdvanceReturn extends AbstractServices {
       const conn_cl = this.models.clientModel(req, trx);
       const conn_acc = this.models.accountsModel(req, trx);
       const trxns = new Trxns(req, trx);
-      const vouchar_no = await this.generateVoucher(req, 'ADR');
+      const voucher_no = await this.generateVoucher(req, 'ADR');
 
       const cl_last_balance = await conn_cl.selectClientLBalance(
         advr_combclient
@@ -86,7 +86,7 @@ class AddAdvanceReturn extends AbstractServices {
         const AccTrxnBody: IAcTrxn = {
           acctrxn_ac_id: advr_account_id,
           acctrxn_type: 'DEBIT',
-          acctrxn_voucher: vouchar_no,
+          acctrxn_voucher: voucher_no,
           acctrxn_amount: advr_amount,
           acctrxn_created_at: advr_payment_date,
           acctrxn_created_by: advr_created_by,
@@ -102,7 +102,7 @@ class AddAdvanceReturn extends AbstractServices {
           ctrxn_type: 'DEBIT',
           ctrxn_amount: advr_amount,
           ctrxn_cl: advr_combclient,
-          ctrxn_voucher: vouchar_no,
+          ctrxn_voucher: voucher_no,
           ctrxn_particular_id: 118,
           ctrxn_created_at: advr_payment_date,
           ctrxn_note: advr_note,
@@ -145,7 +145,7 @@ class AddAdvanceReturn extends AbstractServices {
         advr_trxn_charge,
         advr_trxn_charge_id,
         advr_payment_type,
-        advr_vouchar_no: vouchar_no,
+        advr_vouchar_no: voucher_no,
       };
       const advr_id = await conn.insertAdvanceReturn(advanceReturnData);
 

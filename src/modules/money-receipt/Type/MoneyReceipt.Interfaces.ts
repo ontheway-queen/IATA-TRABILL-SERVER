@@ -22,13 +22,11 @@ export interface IAgentComReceipt {
 }
 
 export interface IMoneyReceiptDb {
-  receipt_actransaction_id?: number | null;
   receipt_account_id: number;
   receipt_trnxtype_id: number;
   receipt_vouchar_no: string;
   receipt_client_id: number | null;
   receipt_combined_id: number | null;
-  receipt_ctrxn_id?: idType | null;
   receipt_payment_to: 'INVOICE' | 'OVERALL' | 'TICKET' | 'AGENT_COMMISSION';
   receipt_invoice_id?: number;
   receipt_money_receipt_no?: string;
@@ -43,10 +41,10 @@ export interface IMoneyReceiptDb {
   receipt_created_by: number;
   receipt_total_discount?: number;
   receipt_trxn_charge: number;
-  receipt_trxn_charge_id: number | null;
   receipt_trxn_no: string;
   receipt_walking_customer_name?: string;
   receipt_received_by: number | null;
+  receipt_trxn_charge_id?: number;
 }
 
 export interface IPervMoneyReceipt {
@@ -90,7 +88,6 @@ export interface IMoneyReceiptReq {
   trans_no: string;
   charge_amount: number;
   invoice_id: number;
-  receipt_total_discount: number;
   receipt_walking_customer_name: string;
   received_by: number;
   tickets: {
@@ -112,7 +109,6 @@ export interface IInvoiceClPay {
   invclientpayment_invoice_id: number | null;
   invclientpayment_client_id: number | null;
   invclientpayment_combined_id: number | null;
-  invclientpayment_cltrxn_id: number;
   invclientpayment_amount: number;
   invclientpayment_date: string;
   invclientpayment_collected_by: number;

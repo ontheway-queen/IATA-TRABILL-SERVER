@@ -27,7 +27,7 @@ class AddAdvanceReturn extends abstract_services_1.default {
                 const conn_cl = this.models.clientModel(req, trx);
                 const conn_acc = this.models.accountsModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const vouchar_no = yield this.generateVoucher(req, 'ADR');
+                const voucher_no = yield this.generateVoucher(req, 'ADR');
                 const cl_last_balance = yield conn_cl.selectClientLBalance(advr_combclient);
                 const acc_last_balance = yield conn_acc.getAccountLastBalance(advr_account_id);
                 if (cl_last_balance < advr_amount) {
@@ -55,7 +55,7 @@ class AddAdvanceReturn extends abstract_services_1.default {
                     const AccTrxnBody = {
                         acctrxn_ac_id: advr_account_id,
                         acctrxn_type: 'DEBIT',
-                        acctrxn_voucher: vouchar_no,
+                        acctrxn_voucher: voucher_no,
                         acctrxn_amount: advr_amount,
                         acctrxn_created_at: advr_payment_date,
                         acctrxn_created_by: advr_created_by,
@@ -69,7 +69,7 @@ class AddAdvanceReturn extends abstract_services_1.default {
                         ctrxn_type: 'DEBIT',
                         ctrxn_amount: advr_amount,
                         ctrxn_cl: advr_combclient,
-                        ctrxn_voucher: vouchar_no,
+                        ctrxn_voucher: voucher_no,
                         ctrxn_particular_id: 118,
                         ctrxn_created_at: advr_payment_date,
                         ctrxn_note: advr_note,
@@ -107,7 +107,7 @@ class AddAdvanceReturn extends abstract_services_1.default {
                     advr_trxn_charge,
                     advr_trxn_charge_id,
                     advr_payment_type,
-                    advr_vouchar_no: vouchar_no,
+                    advr_vouchar_no: voucher_no,
                 };
                 const advr_id = yield conn.insertAdvanceReturn(advanceReturnData);
                 // ================ @ ADVANCE RETURN CHEQUE @ ========================

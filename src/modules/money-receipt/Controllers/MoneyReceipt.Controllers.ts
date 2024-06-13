@@ -204,7 +204,11 @@ class MoneyReceiptControllers extends AbstractController {
   public getAllMoneyReceiipt = this.assyncWrapper.wrap(
     this.validator.readMoneyReceipt,
     async (req: Request, res: Response) => {
-      const data = await this.services.getAllMoneyReceipt(req);
+      const data = (await this.services.getAllMoneyReceipt(req)) as {
+        message: string;
+        success: boolean;
+        data: any;
+      };
       if (data.success) {
         res.status(200).json(data);
       } else {

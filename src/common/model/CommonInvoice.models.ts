@@ -605,7 +605,9 @@ class CommonInvoiceModel extends AbstractModels {
       .where('airticket_invoice_id', invoiceId);
   };
 
-  public async insertInvoiceHistory(historyData: InvoiceHistory) {
+  public async insertInvoiceHistory(
+    historyData: InvoiceHistory | InvoiceHistory[]
+  ) {
     await this.query()
       .into('trabill_invoices_history')
       .insert({ ...historyData, history_org_agency: this.org_agency });

@@ -164,7 +164,7 @@ class MoneyReceiptControllers extends abstract_controllers_1.default {
         }));
         // @GET_ALL_MONEY_RECEIPT
         this.getAllMoneyReceiipt = this.assyncWrapper.wrap(this.validator.readMoneyReceipt, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.getAllMoneyReceipt(req);
+            const data = (yield this.services.getAllMoneyReceipt(req));
             if (data.success) {
                 res.status(200).json(data);
             }

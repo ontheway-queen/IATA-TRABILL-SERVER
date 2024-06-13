@@ -19,7 +19,7 @@ class Trxns extends abstract_services_1.default {
         super();
         // client
         this.clTrxnInsert = (body) => __awaiter(this, void 0, void 0, function* () {
-            const { ctrxn_amount, ctrxn_cl, ctrxn_created_at, ctrxn_note, ctrxn_particular_id, ctrxn_particular_type, ctrxn_pax, ctrxn_pnr, ctrxn_route, ctrxn_type, ctrxn_voucher, ctrxn_airticket_no, ctrxn_pay_type, } = body;
+            const { ctrxn_amount, ctrxn_cl, ctrxn_created_at, ctrxn_note, ctrxn_particular_id, ctrxn_particular_type, ctrxn_pax, ctrxn_pnr, ctrxn_route, ctrxn_type, ctrxn_voucher, ctrxn_airticket_no, ctrxn_pay_type, ctrxn_mr_id, } = body;
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(ctrxn_cl);
             let trxnId;
             if (client_id) {
@@ -37,8 +37,9 @@ class Trxns extends abstract_services_1.default {
                     ctrxn_type,
                     ctrxn_voucher,
                     ctrxn_airticket_no,
-                    // ctrxn_pay_type,
                     ctrxn_user_id: this.req.user_id,
+                    ctrxn_mr_id,
+                    // ctrxn_pay_type,
                 };
                 trxnId = yield this.conn.insertClTrxn(clTrxnBody);
             }
@@ -58,6 +59,7 @@ class Trxns extends abstract_services_1.default {
                     comtrxn_note: ctrxn_note,
                     comtrxn_create_at: ctrxn_created_at,
                     comtrxn_user_id: this.req.user_id,
+                    comtrxn_mr_id: ctrxn_mr_id,
                     // comtrxn_pay_type: ctrxn_pay_type,
                 };
                 trxnId = yield this.conn.insertComTrxn(comTrxnBody);
@@ -66,7 +68,7 @@ class Trxns extends abstract_services_1.default {
         });
         // INSERT ACCOUNT TRANS
         this.AccTrxnInsert = (body) => __awaiter(this, void 0, void 0, function* () {
-            const { acctrxn_ac_id, acctrxn_pay_type, acctrxn_particular_id, acctrxn_created_at, acctrxn_particular_type, acctrxn_type, acctrxn_amount, acctrxn_note, acctrxn_created_by, acctrxn_voucher, } = body;
+            const { acctrxn_ac_id, acctrxn_pay_type, acctrxn_particular_id, acctrxn_created_at, acctrxn_particular_type, acctrxn_type, acctrxn_amount, acctrxn_note, acctrxn_created_by, acctrxn_voucher, acctrxn_mr_id, } = body;
             const accBody = {
                 acctrxn_ac_id: acctrxn_ac_id,
                 acctrxn_pay_type,
@@ -78,6 +80,7 @@ class Trxns extends abstract_services_1.default {
                 acctrxn_note,
                 acctrxn_created_at,
                 acctrxn_created_by,
+                acctrxn_mr_id,
             };
             const account_id = yield this.conn.insertAccTrxn(accBody);
             return account_id;

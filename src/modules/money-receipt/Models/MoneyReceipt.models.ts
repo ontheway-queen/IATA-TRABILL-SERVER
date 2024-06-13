@@ -17,11 +17,12 @@ import {
 
 class MoneyReceiptModels extends AbstractModels {
   // @INVOICE_CLIENT_PAYMENT
-  public insertInvoiceClPay = async (insertedData: IInvoiceClPay) => {
-    const id = await this.query()
+  public insertInvoiceClPay = async (
+    insertedData: IInvoiceClPay | IInvoiceClPay[]
+  ) => {
+    await this.query()
       .into('trabill_invoice_client_payments')
       .insert(insertedData);
-    return id[0];
   };
 
   public async deleteMoneyreceipt(

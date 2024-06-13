@@ -100,95 +100,6 @@ class AddMoneyReceipt extends abstract_services_1.default {
                     receipt_received_by: received_by,
                 };
                 const receipt_id = yield conn.insertMoneyReceipt(receiptInfo);
-                // money receipt to invoice
-                if (receipt_payment_to === 'INVOICE') {
-                    for (const invoice of invoices) {
-                        const invoiceClientPaymentInfo = {
-                            invclientpayment_moneyreceipt_id: receipt_id,
-                            invclientpayment_invoice_id: invoice.invoice_id,
-                            invclientpayment_client_id: client_id,
-                            invclientpayment_combined_id: combined_id,
-                            invclientpayment_cltrxn_id: client_trxn_id,
-                            invclientpayment_amount: invoice.invoice_amount,
-                            invclientpayment_date: receipt_payment_date,
-                            invclientpayment_collected_by: receipt_created_by,
-                        };
-                        yield conn.insertInvoiceClPay(invoiceClientPaymentInfo);
-                        const history_data = {
-                            history_activity_type: 'INVOICE_PAYMENT_CREATED',
-                            history_invoice_id: invoice.invoice_id,
-                            history_created_by: receipt_created_by,
-                            history_invoice_payment_amount: invoice.invoice_amount,
-                            invoicelog_content: `Payment added to Invoice (Amount = ${invoice.invoice_amount})/-`,
-                        };
-                        yield common_conn.insertInvoiceHistory(history_data);
-                        online_charge_purpuse = 'Money receipt to specific invoice';
-                    }
-                }
-                // money receipt to ticket
-                else if (receipt_payment_to === 'TICKET') {
-                    for (const ticket of tickets) {
-                        const { invoice_amount, invoice_id, ticket_no } = ticket;
-                        const invoiceClientPaymentInfo = {
-                            invclientpayment_moneyreceipt_id: receipt_id,
-                            invclientpayment_invoice_id: invoice_id,
-                            invclientpayment_client_id: client_id,
-                            invclientpayment_combined_id: combined_id,
-                            invclientpayment_cltrxn_id: client_trxn_id,
-                            invclientpayment_amount: invoice_amount,
-                            invclientpayment_date: receipt_payment_date,
-                            invclientpayment_collected_by: receipt_created_by,
-                            invclientpayment_ticket_number: ticket_no,
-                        };
-                        yield conn.insertInvoiceClPay(invoiceClientPaymentInfo);
-                        const history_data = {
-                            history_activity_type: 'INVOICE_PAYMENT_CREATED',
-                            history_invoice_id: invoice_id,
-                            history_created_by: receipt_created_by,
-                            history_invoice_payment_amount: invoice_amount,
-                            invoicelog_content: 'Money receipt has been deleted',
-                        };
-                        yield common_conn.insertInvoiceHistory(history_data);
-                        online_charge_purpuse = 'Money receipt to specific ticket';
-                    }
-                }
-                // money receipt to overall
-                else if (receipt_payment_to === 'OVERALL') {
-                    const cl_due = yield conn.getInvoicesIdAndAmount(client_id, combined_id);
-                    let paidAmountNow = 0;
-                    for (const item of cl_due) {
-                        const { invoice_id, total_due } = item;
-                        const availableAmount = Number(receipt_total_amount) - paidAmountNow;
-                        const payment_amount = availableAmount >= total_due ? total_due : availableAmount;
-                        const invoiceClientPaymentInfo = {
-                            invclientpayment_moneyreceipt_id: receipt_id,
-                            invclientpayment_invoice_id: invoice_id,
-                            invclientpayment_client_id: client_id,
-                            invclientpayment_cltrxn_id: client_trxn_id,
-                            invclientpayment_amount: payment_amount,
-                            invclientpayment_date: receipt_payment_date,
-                            invclientpayment_collected_by: receipt_created_by,
-                            invclientpayment_combined_id: combined_id,
-                        };
-                        yield conn.insertInvoiceClPay(invoiceClientPaymentInfo);
-                        const history_data = {
-                            history_activity_type: 'INVOICE_PAYMENT_CREATED',
-                            history_invoice_id: invoice_id,
-                            history_created_by: receipt_created_by,
-                            history_invoice_payment_amount: payment_amount,
-                            invoicelog_content: `CLIENT PAYMENT FOR OVERALL BDT ${payment_amount}/-`,
-                        };
-                        yield common_conn.insertInvoiceHistory(history_data);
-                        paidAmountNow += payment_amount;
-                        if (total_due >= availableAmount) {
-                            break;
-                        }
-                        else {
-                            continue;
-                        }
-                    }
-                    online_charge_purpuse = 'Money receipt to overall';
-                }
                 if (receipt_payment_type === 4) {
                     const moneyReceiptChequeData = {
                         cheque_receipt_id: receipt_id,
@@ -199,6 +110,65 @@ class AddMoneyReceipt extends abstract_services_1.default {
                     };
                     yield conn.insertMoneyReceiptChequeInfo(moneyReceiptChequeData);
                 }
+                const commonInvInfo = [];
+                if (receipt_payment_to === 'INVOICE') {
+                    for (const invoice of invoices) {
+                        commonInvInfo.push({
+                            invoice_id: invoice.invoice_id,
+                            pay_amount: invoice.invoice_amount,
+                        });
+                    }
+                }
+                else if (receipt_payment_to === 'TICKET') {
+                    for (const ticket of tickets) {
+                        commonInvInfo.push({
+                            invoice_id: ticket.invoice_id,
+                            pay_amount: ticket.invoice_amount,
+                            ticket_no: ticket.ticket_no,
+                        });
+                    }
+                }
+                else {
+                    const cl_due = yield conn.getInvoicesIdAndAmount(client_id, combined_id);
+                    let paidAmountNow = 0;
+                    for (const { invoice_id, total_due } of cl_due) {
+                        const availableAmount = Number(receipt_total_amount) - paidAmountNow;
+                        const payment_amount = Math.min(availableAmount, total_due);
+                        commonInvInfo.push({
+                            invoice_id: invoice_id,
+                            pay_amount: payment_amount,
+                        });
+                        paidAmountNow += payment_amount;
+                        if (total_due >= availableAmount)
+                            break;
+                    }
+                }
+                let invClPayments = [];
+                let history_data = [];
+                for (const item of commonInvInfo) {
+                    invClPayments.push({
+                        invclientpayment_moneyreceipt_id: receipt_id,
+                        invclientpayment_invoice_id: item.invoice_id,
+                        invclientpayment_client_id: client_id,
+                        invclientpayment_combined_id: combined_id,
+                        invclientpayment_amount: item.pay_amount,
+                        invclientpayment_date: receipt_payment_date,
+                        invclientpayment_collected_by: receipt_created_by,
+                        invclientpayment_ticket_number: item === null || item === void 0 ? void 0 : item.ticket_no,
+                        invclientpayment_cltrxn_id: client_trxn_id,
+                    });
+                    history_data.push({
+                        history_activity_type: 'INVOICE_PAYMENT_CREATED',
+                        history_invoice_id: item.invoice_id,
+                        history_created_by: receipt_created_by,
+                        history_invoice_payment_amount: item.pay_amount,
+                        invoicelog_content: 'Money receipt has been deleted',
+                        history_org_agency: req.agency_id,
+                    });
+                }
+                yield conn.insertInvoiceClPay(invClPayments);
+                yield common_conn.insertInvHistory(history_data);
+                // update voucher, sms send & audit history
                 const smsInvoiceDate = {
                     invoice_client_id: client_id,
                     invoice_combined_id: combined_id,

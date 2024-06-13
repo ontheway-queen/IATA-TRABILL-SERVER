@@ -466,6 +466,7 @@ class DashboardModels extends AbstractModels {
   ) => {
     const [data] = await this.query()
       .select(
+        'airticket_vendor_id as vendor_id',
         this.db.raw('sum(airticket_gross_fare) as gross_fare'),
         this.db.raw('sum(airticket_tax) as tax'),
         this.db.raw('sum(airticket_base_fare) * 0.07 as iata_commission'),

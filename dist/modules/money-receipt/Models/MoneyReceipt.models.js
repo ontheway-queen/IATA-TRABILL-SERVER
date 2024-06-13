@@ -20,10 +20,9 @@ class MoneyReceiptModels extends abstract_models_1.default {
         super(...arguments);
         // @INVOICE_CLIENT_PAYMENT
         this.insertInvoiceClPay = (insertedData) => __awaiter(this, void 0, void 0, function* () {
-            const id = yield this.query()
+            yield this.query()
                 .into('trabill_invoice_client_payments')
                 .insert(insertedData);
-            return id[0];
         });
         this.getPrevInvoiceClPay = (receiptId) => __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()

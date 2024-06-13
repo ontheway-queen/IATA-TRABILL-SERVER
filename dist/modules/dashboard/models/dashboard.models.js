@@ -340,7 +340,7 @@ class DashboardModels extends abstract_models_1.default {
         });
         this.getBspTicketIssueInfo = (from_date, to_date) => __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
-                .select(this.db.raw('sum(airticket_gross_fare) as gross_fare'), this.db.raw('sum(airticket_tax) as tax'), this.db.raw('sum(airticket_base_fare) * 0.07 as iata_commission'), this.db.raw('sum(airticket_total_taxes_commission) as taxes_commission'), this.db.raw('SUM(airticket_ait) as ait'), this.db.raw('sum(airticket_purchase_price) as purchase_amount'), this.db.raw('sum(airticket_profit) as overall_profit'))
+                .select('airticket_vendor_id as vendor_id', this.db.raw('sum(airticket_gross_fare) as gross_fare'), this.db.raw('sum(airticket_tax) as tax'), this.db.raw('sum(airticket_base_fare) * 0.07 as iata_commission'), this.db.raw('sum(airticket_total_taxes_commission) as taxes_commission'), this.db.raw('SUM(airticket_ait) as ait'), this.db.raw('sum(airticket_purchase_price) as purchase_amount'), this.db.raw('sum(airticket_profit) as overall_profit'))
                 .from('v_bsp_ticket_issue')
                 .where('vendor_org_agency', this.org_agency)
                 .andWhere('vendor_type', 'IATA')

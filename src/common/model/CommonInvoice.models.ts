@@ -610,6 +610,9 @@ class CommonInvoiceModel extends AbstractModels {
       .into('trabill_invoices_history')
       .insert({ ...historyData, history_org_agency: this.org_agency });
   }
+  public async insertInvHistory(historyData: any[]) {
+    await this.query().into('trabill_invoices_history').insert(historyData);
+  }
 
   public getClientDue = async (clientId: idType) => {
     const invoices = await this.query()

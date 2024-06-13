@@ -112,7 +112,7 @@ export interface IInvoiceClPay {
   invclientpayment_invoice_id: number | null;
   invclientpayment_client_id: number | null;
   invclientpayment_combined_id: number | null;
-  invclientpayment_cltrxn_id: number;
+  invclientpayment_cltrxn_id: number | null;
   invclientpayment_amount: number;
   invclientpayment_date: string;
   invclientpayment_collected_by: number;

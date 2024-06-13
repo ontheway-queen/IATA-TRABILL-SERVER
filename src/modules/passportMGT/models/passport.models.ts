@@ -300,6 +300,40 @@ class PassportModel extends AbstractModels {
     return status;
   }
 
+  public async getPassportInfo(passport_id: idType) {
+    const [data] = (await this.query()
+      .select(
+        'passport_scan_copy',
+        'passport_upload_photo',
+        'passport_upload_others'
+      )
+      .from('trabill_passport_details')
+      .where({ passport_id })) as {
+      passport_scan_copy: string;
+      passport_upload_photo: string;
+      passport_upload_others: string;
+    }[];
+
+    return data;
+  }
+
+  public async getPassportFiles(passport_id: idType) {
+    const [data] = (await this.query()
+      .select(
+        'passport_scan_copy',
+        'passport_upload_photo',
+        'passport_upload_others'
+      )
+      .from('trabill_passport_details')
+      .where({ passport_id })) as {
+      passport_scan_copy: string;
+      passport_upload_photo: string;
+      passport_upload_others: string;
+    }[];
+
+    return Object.values(data);
+  }
+
   public async updatePstatusId(status_id: idType, pass_id: idType) {
     await this.query()
       .update({ passport_status_id: status_id })

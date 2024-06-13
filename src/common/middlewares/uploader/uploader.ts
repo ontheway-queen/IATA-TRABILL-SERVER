@@ -1,33 +1,15 @@
-import { S3Client } from '@aws-sdk/client-s3';
 import { NextFunction, Request, Response } from 'express';
 import multer from 'multer';
 import multerS3 from 'multer-s3';
 import path from 'path';
+import AbstractUploader from '../../../abstracts/abstract.uploader';
 import config from '../../../config/config';
-import CustomError from '../../utils/errors/customError';
 import { allowAllFileTypes, rootFileFolder } from './uploaderConstants';
-const allowed_file_types = [
-  'image/jpeg',
-  'image/jpg',
-  'image/png',
-  'image/webp',
-];
+import CustomError from '../../utils/errors/customError';
 
-class Uploader {
-  protected allowed_file_types: string[];
-  protected error_message: string;
-
-  protected s3Client: S3Client = new S3Client({
-    region: 'ap-south-1',
-    credentials: {
-      accessKeyId: config.AWS_S3_ACCESS_KEY,
-      secretAccessKey: config.AWS_S3_SECRET_KEY,
-    },
-  });
-
+class Uploader extends AbstractUploader {
   constructor() {
-    this.allowed_file_types = allowed_file_types;
-    this.error_message = `Only .jpg, .jpeg, .webp or .png formate allowed!`;
+    super();
   }
 
   // cloud upload raw

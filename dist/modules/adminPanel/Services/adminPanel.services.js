@@ -68,6 +68,7 @@ class AdminPanelServices extends abstract_services_1.default {
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.conn(req, trx);
                 const user_conn = this.models.configModel.userModel(req, trx);
+                const files = req.files;
                 // agency
                 const agencyOrgData = {
                     org_address1,
@@ -77,7 +78,7 @@ class AdminPanelServices extends abstract_services_1.default {
                     org_extra_info: org_extra_info === 'undefined' ? null : org_extra_info,
                     org_mobile_number,
                     org_owner_email,
-                    org_logo: req.image_files['scan_copy_0'],
+                    org_logo: files[0].filename,
                     org_name,
                     org_owner_full_name: user_first_name,
                     org_subscription_expired: date,
@@ -304,10 +305,11 @@ class AdminPanelServices extends abstract_services_1.default {
         this.updateAgencyLogo = (req) => __awaiter(this, void 0, void 0, function* () {
             const agency_id = req.params.agency_id;
             const conn = this.models.adminPanel(req);
-            const new_logo = req.image_files['scan_copy_0'];
+            const files = req.files;
+            const new_logo = files[0].filename;
             if (new_logo) {
                 const previous_logo = yield conn.updateAgencyLogo(new_logo, agency_id);
-                yield this.deleteFile.delete_image(previous_logo);
+                previous_logo && (yield this.manageFile.deleteFromCloud([previous_logo]));
             }
             // Insert Admin Activity
             const activityData = {

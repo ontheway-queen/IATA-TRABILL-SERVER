@@ -357,10 +357,10 @@ class AdminPanelModels extends AbstractModels {
   };
 
   updateAgencyLogo = async (logo_url: string, agency_id: idType) => {
-    const [previous_logo] = await this.query()
+    const [previous_logo] = (await this.query()
       .select('org_logo')
       .from('trabill_agency_organization_information')
-      .where('org_id', agency_id);
+      .where('org_id', agency_id)) as { org_logo: string }[];
 
     const is_update = await this.query()
       .update('org_logo', logo_url)
@@ -369,7 +369,7 @@ class AdminPanelModels extends AbstractModels {
 
     if (!is_update) {
       throw new CustomError(
-        'Please provice valid agency id',
+        'Please provide valid agency id',
         400,
         'Invalid agency'
       );
@@ -1303,11 +1303,11 @@ class AdminPanelModels extends AbstractModels {
   }
 
   public async getNoticeImageURL(id: idType) {
-    const [data] = await this.query()
+    const [data] = (await this.query()
       .select('ntc_bg_img')
       .from('trabill_agency_notice')
       .where('ntc_id', id)
-      .orderBy('ntc_id', 'desc');
+      .orderBy('ntc_id', 'desc')) as { ntc_bg_img: string }[];
 
     return data;
   }

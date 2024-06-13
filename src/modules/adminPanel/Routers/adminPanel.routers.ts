@@ -1,6 +1,5 @@
 import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
-import { uploadImageToAzure_trabill } from '../../../common/helpers/ImageUploadToAzure_trabill';
 import AdminConfigurationControllers from '../Controllers/adminConfiguration.controllers';
 import AdminPanelControllers from '../Controllers/adminPanel.controllers';
 
@@ -209,13 +208,11 @@ class AdminPanelRouters extends AbstractRouter {
       .route('/notice')
       .get(this.configControllers.getAllNotice)
       .post(
-        upload.fields([{ name: 'ntc_bg_img', maxCount: 1 }]),
-        uploadImageToAzure_trabill,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.configControllers.addNotice
       )
       .patch(
-        upload.fields([{ name: 'ntc_bg_img', maxCount: 1 }]),
-        uploadImageToAzure_trabill,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.configControllers.editNotice
       );
 

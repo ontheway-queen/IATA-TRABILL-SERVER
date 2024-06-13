@@ -22,13 +22,7 @@ class AgentProfileRoutes extends AbstractRouter {
 
     this.routers.post(
       '/create',
-      upload.fields([
-        { name: 'agent_image_copy', maxCount: 1 },
-        { name: 'agent_nid_front', maxCount: 1 },
-        { name: 'agent_nid_back', maxCount: 1 },
-      ]),
-      uploadImageToAzure_rec,
-
+      this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
       this.controllers.createAgentProfile
     );
 
@@ -38,12 +32,7 @@ class AgentProfileRoutes extends AbstractRouter {
       .route('/agent/:id')
       .get(this.controllers.getAgentById)
       .patch(
-        upload.fields([
-          { name: 'agent_image_copy', maxCount: 1 },
-          { name: 'agent_nid_front', maxCount: 1 },
-          { name: 'agent_nid_back', maxCount: 1 },
-        ]),
-        uploadImageToAzure_rec,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.controllers.editEgentProfile
       )
       .delete(this.controllers.deleteAgentProfiles);

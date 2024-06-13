@@ -8,17 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -27,45 +16,33 @@ const abstract_services_1 = __importDefault(require("../../../../../abstracts/ab
 class EditAgnetProfile extends abstract_services_1.default {
     constructor() {
         super();
-        this.RecruitContainer = 'recruitmentcon';
         this.editAgentProfile = (req) => __awaiter(this, void 0, void 0, function* () {
-            const body = req.body;
-            const imageList = req.imgUrl;
             const agentId = req.params.id;
-            const initialMergedImageObject = {
-                agent_image_copy: '',
-                agent_nid_front: '',
-                agent_nid_back: '',
-            };
-            const { agent_image_copy, agent_nid_front, agent_nid_back } = body, othersInfo = __rest(body, ["agent_image_copy", "agent_nid_front", "agent_nid_back"]);
-            const mergedImageObject = imageList.reduce((acc, image) => Object.assign(acc, image), initialMergedImageObject);
-            const updatedDataFromBody = {
-                agent_image_copy: mergedImageObject.agent_image_copy || agent_image_copy,
-                agent_nid_front: mergedImageObject.agent_nid_front || agent_nid_front,
-                agent_nid_back: mergedImageObject.agent_nid_back || agent_nid_back,
-            };
-            const AgentDataWithImage = Object.assign(Object.assign({}, othersInfo), updatedDataFromBody);
+            const body = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.agentProfileModel(req, trx);
-                if (mergedImageObject === null || mergedImageObject === void 0 ? void 0 : mergedImageObject.agent_image_copy) {
-                    const ImgURL = yield conn.getPreviousImage(agentId, 'agent_image_copy');
-                    if (ImgURL) {
-                        yield this.deleteFile.delete_image(ImgURL, this.RecruitContainer);
-                    }
+                const files = req.files;
+                const { agent_image_copy, agent_nid_back, agent_nid_front } = yield conn.getPrevImages(agentId);
+                if (files && files.length) {
+                    files.map((item) => __awaiter(this, void 0, void 0, function* () {
+                        if (item.fieldname === 'agent_image_copy') {
+                            body.agent_image_copy = item.filename;
+                            agent_image_copy &&
+                                (yield this.manageFile.deleteFromCloud([agent_image_copy]));
+                        }
+                        if (item.fieldname === 'agent_nid_front') {
+                            body.agent_nid_front = item.filename;
+                            agent_nid_front &&
+                                (yield this.manageFile.deleteFromCloud([agent_nid_front]));
+                        }
+                        if (item.fieldname === 'agent_nid_back') {
+                            body.agent_nid_back = item.filename;
+                            agent_nid_back &&
+                                (yield this.manageFile.deleteFromCloud([agent_nid_back]));
+                        }
+                    }));
                 }
-                if (mergedImageObject === null || mergedImageObject === void 0 ? void 0 : mergedImageObject.agent_nid_front) {
-                    const ImgURL = yield conn.getPreviousImage(agentId, 'agent_nid_front');
-                    if (ImgURL) {
-                        yield this.deleteFile.delete_image(ImgURL, this.RecruitContainer);
-                    }
-                }
-                if (mergedImageObject === null || mergedImageObject === void 0 ? void 0 : mergedImageObject.agent_nid_back) {
-                    const ImgURL = yield conn.getPreviousImage(agentId, 'agent_nid_back');
-                    if (ImgURL) {
-                        yield this.deleteFile.delete_image(ImgURL, this.RecruitContainer);
-                    }
-                }
-                yield conn.editAgentProfile(agentId, AgentDataWithImage);
+                yield conn.editAgentProfile(agentId, body);
                 const message = `Agent profile -${body.agent_name}- has been updated`;
                 yield this.insertAudit(req, 'update', message, body.agent_updated_by, 'ACCOUNTS');
                 return {

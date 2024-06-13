@@ -1,83 +1,46 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
-import {
-  AgentImagesTypes,
-  IAgentProfileReqBody,
-} from '../../Type/agent_profile.interfaces';
+import { IAgentProfileReqBody } from '../../Type/agent_profile.interfaces';
 
 class EditAgnetProfile extends AbstractServices {
   constructor() {
     super();
   }
-  private RecruitContainer: string = 'recruitmentcon';
 
   public editAgentProfile = async (req: Request) => {
-    const body = req.body as IAgentProfileReqBody;
-
-    const imageList = req.imgUrl as string[];
-
     const agentId = req.params.id as string;
-
-    const initialMergedImageObject = {
-      agent_image_copy: '',
-      agent_nid_front: '',
-      agent_nid_back: '',
-    };
-
-    const { agent_image_copy, agent_nid_front, agent_nid_back, ...othersInfo } =
-      body;
-
-    const mergedImageObject: AgentImagesTypes = imageList.reduce(
-      (acc, image) => Object.assign(acc, image),
-      initialMergedImageObject
-    );
-
-    const updatedDataFromBody = {
-      agent_image_copy: mergedImageObject.agent_image_copy || agent_image_copy,
-      agent_nid_front: mergedImageObject.agent_nid_front || agent_nid_front,
-      agent_nid_back: mergedImageObject.agent_nid_back || agent_nid_back,
-    };
-
-    const AgentDataWithImage = {
-      ...othersInfo,
-      ...updatedDataFromBody,
-    };
+    const body = req.body as IAgentProfileReqBody;
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.agentProfileModel(req, trx);
 
-      if (mergedImageObject?.agent_image_copy) {
-        const ImgURL = await conn.getPreviousImage(agentId, 'agent_image_copy');
+      const files = req.files as Express.Multer.File[] | [];
 
-        if (ImgURL) {
-          await this.deleteFile.delete_image(
-            ImgURL as string,
-            this.RecruitContainer
-          );
-        }
+      const { agent_image_copy, agent_nid_back, agent_nid_front } =
+        await conn.getPrevImages(agentId);
+
+      if (files && files.length) {
+        files.map(async (item) => {
+          if (item.fieldname === 'agent_image_copy') {
+            body.agent_image_copy = item.filename;
+
+            agent_image_copy &&
+              (await this.manageFile.deleteFromCloud([agent_image_copy]));
+          }
+          if (item.fieldname === 'agent_nid_front') {
+            body.agent_nid_front = item.filename;
+            agent_nid_front &&
+              (await this.manageFile.deleteFromCloud([agent_nid_front]));
+          }
+          if (item.fieldname === 'agent_nid_back') {
+            body.agent_nid_back = item.filename;
+            agent_nid_back &&
+              (await this.manageFile.deleteFromCloud([agent_nid_back]));
+          }
+        });
       }
 
-      if (mergedImageObject?.agent_nid_front) {
-        const ImgURL = await conn.getPreviousImage(agentId, 'agent_nid_front');
-        if (ImgURL) {
-          await this.deleteFile.delete_image(
-            ImgURL as string,
-            this.RecruitContainer
-          );
-        }
-      }
-
-      if (mergedImageObject?.agent_nid_back) {
-        const ImgURL = await conn.getPreviousImage(agentId, 'agent_nid_back');
-        if (ImgURL) {
-          await this.deleteFile.delete_image(
-            ImgURL as string,
-            this.RecruitContainer
-          );
-        }
-      }
-
-      await conn.editAgentProfile(agentId, AgentDataWithImage);
+      await conn.editAgentProfile(agentId, body);
 
       const message = `Agent profile -${body.agent_name}- has been updated`;
       await this.insertAudit(

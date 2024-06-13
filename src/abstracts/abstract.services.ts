@@ -2,14 +2,14 @@ import { Request } from 'express';
 import Models from '../common/model/Models';
 import { VoucherType, idType } from '../common/types/common.types';
 import CustomError from '../common/utils/errors/customError';
-import DeleteFile from '../common/utils/fileRemover/deleteFIle';
 import {
   actionType,
   auditModuleType,
 } from '../modules/report/types/report.interfaces';
+import ManageFile from '../common/middlewares/manageFile/manageFile';
 
 abstract class AbstractServices {
-  protected deleteFile = new DeleteFile();
+  protected manageFile = new ManageFile();
 
   // @Models
   protected models = new Models();

@@ -644,20 +644,14 @@ class AdminConfiguration extends AbstractServices {
   };
 
   public addNotice = async (req: Request) => {
-    interface IImageName {
-      ntc_bg_img: string;
-    }
-
     const body = req.body as INotice;
-    const imageList = req.imgUrl as string[];
-
-    const ImgUrlObj: IImageName = Object.assign({}, ...imageList);
-
     const conn = this.models.adminPanel(req);
+
+    const files = req.files as Express.Multer.File[] | [];
 
     const [data] = await conn.addNotice({
       ...body,
-      ntc_bg_img: ImgUrlObj.ntc_bg_img,
+      ntc_bg_img: files[0]?.filename,
     });
 
     return {
@@ -668,29 +662,22 @@ class AdminConfiguration extends AbstractServices {
   };
 
   public editNotice = async (req: Request) => {
-    interface IImageName {
-      ntc_bg_img: string;
-    }
-
     const body = req.body as INotice;
-    const imageList = req.imgUrl as string[];
-
-    const ImgUrlObj: IImageName = Object.assign({}, ...imageList);
 
     const conn = this.models.adminPanel(req);
 
-    if (ImgUrlObj.ntc_bg_img) {
+    const files = req.files as Express.Multer.File[] | [];
+
+    if (files[0].filename) {
       const PREV_IMG_URL = await conn.getNoticeImageURL(body.ntc_id);
-      await this.deleteFile.delete_image(PREV_IMG_URL?.ntc_bg_img);
+
+      await this.manageFile.deleteFromCloud([PREV_IMG_URL?.ntc_bg_img]);
     }
 
     const data = await conn.editNotice(
       {
         ...body,
-
-        ...(ImgUrlObj.ntc_bg_img && {
-          ntc_bg_img: ImgUrlObj.ntc_bg_img,
-        }),
+        ntc_bg_img: files[0].filename,
       },
       body.ntc_id
     );

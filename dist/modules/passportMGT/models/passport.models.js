@@ -226,6 +226,24 @@ class PassportModel extends abstract_models_1.default {
             return status;
         });
     }
+    getPassportInfo(passport_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [data] = (yield this.query()
+                .select('passport_scan_copy', 'passport_upload_photo', 'passport_upload_others')
+                .from('trabill_passport_details')
+                .where({ passport_id }));
+            return data;
+        });
+    }
+    getPassportFiles(passport_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [data] = (yield this.query()
+                .select('passport_scan_copy', 'passport_upload_photo', 'passport_upload_others')
+                .from('trabill_passport_details')
+                .where({ passport_id }));
+            return Object.values(data);
+        });
+    }
     updatePstatusId(status_id, pass_id) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.query()

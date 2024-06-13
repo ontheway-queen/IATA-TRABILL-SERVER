@@ -5,7 +5,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const multer_1 = __importDefault(require("multer"));
 const abstract_routers_1 = __importDefault(require("../../../abstracts/abstract.routers"));
-const ImageUploadToAzure_trabill_1 = require("../../../common/helpers/ImageUploadToAzure_trabill");
 const adminConfiguration_controllers_1 = __importDefault(require("../Controllers/adminConfiguration.controllers"));
 const adminPanel_controllers_1 = __importDefault(require("../Controllers/adminPanel.controllers"));
 const storage = multer_1.default.memoryStorage();
@@ -154,8 +153,8 @@ class AdminPanelRouters extends abstract_routers_1.default {
         this.routers
             .route('/notice')
             .get(this.configControllers.getAllNotice)
-            .post(upload.fields([{ name: 'ntc_bg_img', maxCount: 1 }]), ImageUploadToAzure_trabill_1.uploadImageToAzure_trabill, this.configControllers.addNotice)
-            .patch(upload.fields([{ name: 'ntc_bg_img', maxCount: 1 }]), ImageUploadToAzure_trabill_1.uploadImageToAzure_trabill, this.configControllers.editNotice);
+            .post(this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE), this.configControllers.addNotice)
+            .patch(this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE), this.configControllers.editNotice);
         this.routers
             .route('/active-notice')
             .get(this.configControllers.getActiveNotice);

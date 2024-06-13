@@ -1,1 +1,1 @@
-{"version":3,"file":"fileFolder.js","sourceRoot":"","sources":["../../src/miscellaneous/fileFolder.ts"],"names":[],"mappings":";;AAAA,MAAM,WAAW;;AACC,gBAAI,GAAG,MAAM,CAAC;AACd,eAAG,GAAG,KAAK,CAAC;AAE9B,kBAAe,WAAW,CAAC"}
+{"version":3,"file":"fileFolder.js","sourceRoot":"","sources":["../../src/miscellaneous/fileFolder.ts"],"names":[],"mappings":";;AAAA,MAAM,WAAW;;AACC,gBAAI,GAAG,MAAM,CAAC;AACd,eAAG,GAAG,KAAK,CAAC;AACZ,wBAAY,GAAG,cAAc,CAAC;AAC9B,yBAAa,GAAG,gBAAgB,CAAC;AAEnD,kBAAe,WAAW,CAAC"}

@@ -4,16 +4,16 @@ export type QDB = Knex.QueryBuilder<any, unknown[]> | Knex.Transaction;
 
 export interface InvoiceHistory {
   history_activity_type:
-  | 'INVOICE_AGENT_COMMISSION'
-  | 'INVOICE_CREATED'
-  | 'INVOICE_RESTORED'
-  | 'INVOICE_UPDATED'
-  | 'INVOICE_REFUNDED'
-  | 'INVOICE_DELETED'
-  | 'INVOICE_PAYMENT_CREATED'
-  | 'INVOICE_PAYMENT_RESTORED'
-  | 'INVOICE_PAYMENT_UPDATED'
-  | 'INVOICE_PAYMENT_DELETED';
+    | 'INVOICE_AGENT_COMMISSION'
+    | 'INVOICE_CREATED'
+    | 'INVOICE_RESTORED'
+    | 'INVOICE_UPDATED'
+    | 'INVOICE_REFUNDED'
+    | 'INVOICE_DELETED'
+    | 'INVOICE_PAYMENT_CREATED'
+    | 'INVOICE_PAYMENT_RESTORED'
+    | 'INVOICE_PAYMENT_UPDATED'
+    | 'INVOICE_PAYMENT_DELETED';
   history_invoice_id: idType;
   history_created_by?: number;
   history_invoice_payment_amount?: number;
@@ -91,7 +91,6 @@ export interface IPassportInvoice {
 
 export interface IPassportDb extends IPassportInvoice {
   passport_client_id?: number | null;
-  passport_rec_cl_id?: string | null;
   passport_combined_id?: number | null;
   passport_created_by?: number;
   passport_scan_copy?: string;

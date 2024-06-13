@@ -469,11 +469,11 @@ class AdminConfiguration extends abstract_services_1.default {
             };
         });
         this.addNotice = (req) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
             const body = req.body;
-            const imageList = req.imgUrl;
-            const ImgUrlObj = Object.assign({}, ...imageList);
             const conn = this.models.adminPanel(req);
-            const [data] = yield conn.addNotice(Object.assign(Object.assign({}, body), { ntc_bg_img: ImgUrlObj.ntc_bg_img }));
+            const files = req.files;
+            const [data] = yield conn.addNotice(Object.assign(Object.assign({}, body), { ntc_bg_img: (_a = files[0]) === null || _a === void 0 ? void 0 : _a.filename }));
             return {
                 success: true,
                 message: 'Notice Created Successfuly Done',
@@ -482,16 +482,13 @@ class AdminConfiguration extends abstract_services_1.default {
         });
         this.editNotice = (req) => __awaiter(this, void 0, void 0, function* () {
             const body = req.body;
-            const imageList = req.imgUrl;
-            const ImgUrlObj = Object.assign({}, ...imageList);
             const conn = this.models.adminPanel(req);
-            if (ImgUrlObj.ntc_bg_img) {
+            const files = req.files;
+            if (files[0].filename) {
                 const PREV_IMG_URL = yield conn.getNoticeImageURL(body.ntc_id);
-                yield this.deleteFile.delete_image(PREV_IMG_URL === null || PREV_IMG_URL === void 0 ? void 0 : PREV_IMG_URL.ntc_bg_img);
+                yield this.manageFile.deleteFromCloud([PREV_IMG_URL === null || PREV_IMG_URL === void 0 ? void 0 : PREV_IMG_URL.ntc_bg_img]);
             }
-            const data = yield conn.editNotice(Object.assign(Object.assign({}, body), (ImgUrlObj.ntc_bg_img && {
-                ntc_bg_img: ImgUrlObj.ntc_bg_img,
-            })), body.ntc_id);
+            const data = yield conn.editNotice(Object.assign(Object.assign({}, body), { ntc_bg_img: files[0].filename }), body.ntc_id);
             return {
                 success: true,
                 message: 'Notice Created Successfuly Done',

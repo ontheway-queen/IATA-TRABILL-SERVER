@@ -179,7 +179,7 @@ class ExpenseModel extends abstract_models_1.default {
     getPreviousData(expense_id) {
         return __awaiter(this, void 0, void 0, function* () {
             const [expense] = yield this.query()
-                .select('expense_payment_type', 'expense_acctrxn_id', 'expense_total_amount', 'expense_charge_id')
+                .select('expense_payment_type', 'expense_acctrxn_id', 'expense_total_amount', 'expense_charge_id', 'expense_voucher_url_1', 'expense_voucher_url_2')
                 .from('trabill_expenses')
                 .where('expense_id', expense_id);
             return expense;
@@ -222,7 +222,7 @@ class ExpenseModel extends abstract_models_1.default {
     getExpense(expens_id) {
         return __awaiter(this, void 0, void 0, function* () {
             const infos = yield this.query()
-                .select('expense_total_amount', 'expense_payment_type', 'expense_acctrxn_id as prevAccTrxnId', 'expense_accounts_id as prevAccId', 'expense_charge_amount', 'expense_charge_id')
+                .select('expense_total_amount', 'expense_payment_type', 'expense_acctrxn_id as prevAccTrxnId', 'expense_accounts_id as prevAccId', 'expense_charge_amount', 'expense_charge_id', 'expense_voucher_url_1', 'expense_voucher_url_2')
                 .from('trabill_expenses')
                 .where('expense_id', expens_id);
             if (infos[0]) {

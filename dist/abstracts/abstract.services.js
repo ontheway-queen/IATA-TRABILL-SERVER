@@ -14,10 +14,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const Models_1 = __importDefault(require("../common/model/Models"));
 const customError_1 = __importDefault(require("../common/utils/errors/customError"));
-const deleteFIle_1 = __importDefault(require("../common/utils/fileRemover/deleteFIle"));
+const manageFile_1 = __importDefault(require("../common/middlewares/manageFile/manageFile"));
 class AbstractServices {
     constructor() {
-        this.deleteFile = new deleteFIle_1.default();
+        this.manageFile = new manageFile_1.default();
         // @Models
         this.models = new Models_1.default();
         this.generateVoucher = (req, type) => __awaiter(this, void 0, void 0, function* () {

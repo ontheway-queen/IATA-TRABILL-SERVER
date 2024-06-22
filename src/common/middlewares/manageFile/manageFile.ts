@@ -21,7 +21,6 @@ class ManageFile extends AbstractUploader {
           const res = await this.s3Client.send(
             new DeleteObjectCommand(deleteParams)
           );
-          console.log({ res });
           console.log('file deleted -> ', files);
         }
       }

@@ -36,6 +36,7 @@ export const uploadImageToS3 = async (
       Key: s3Filename,
       Body: passThrough,
       ContentType: response.headers['content-type'],
+      ACL: 'public-read',
     };
 
     const uploadPromise = s3.upload(uploadParams).promise();
@@ -70,6 +71,7 @@ export const uploadImageWithBuffer = async (
       Key: s3Filename,
       Body: imageBuffer,
       ContentType: ContentType,
+      ACL: 'public-read',
     };
 
     const uploadPromise = s3.upload(uploadParams).promise();

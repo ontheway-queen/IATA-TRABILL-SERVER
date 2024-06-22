@@ -71,12 +71,13 @@ const formatAgentTicket = (text, conn) => __awaiter(void 0, void 0, void 0, func
         else {
             return mapItem;
         }
-    });
+    })
+        .filter((item) => !item.includes('+TKTT'));
     const formattedCommission = (0, exports.formatAgentBillingCommission)(arrayOfTickets);
     const tickets = [];
     for (const [index, item] of filterTickets.entries()) {
         const arrItem = item.split(' ');
-        const ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, '');
+        const ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF|FFSF/g, '');
         const db_ticket = yield conn.getTicketInfoByTicket(ticket_no);
         const iata_ticket = Object.assign(Object.assign({ invoice_id: index + 1, type: 'IATA', invoice_no: undefined, invoice_category_id: undefined, ticket_no, sales_date: formatDate(arrItem[4]), gross_fare: (0, exports.toNum)(arrItem[1]), base_fare: (0, exports.toNum)(arrItem[2]) }, formattedCommission[index]), { purchase_price: (0, exports.toNum)(arrItem[3]) });
         tickets.push(iata_ticket);
@@ -121,9 +122,9 @@ const getAgentBillingSummary = (text, conn) => __awaiter(void 0, void 0, void 0,
         to_date = (0, lib_1.dateStrConverter)(salesPeriodMatch[3]);
     }
     // GET COMBINED TOTAL
-    const combinedTotal = text === null || text === void 0 ? void 0 : text.split('COMBINED')[2].split('\n');
+    const combinedTotal = text === null || text === void 0 ? void 0 : text.split('COMBINED')[2];
     const issues = combinedTotal.includes('ISSUES')
-        ? combinedTotal[3].split(' ')[combinedTotal[3].split(' ').length - 2]
+        ? combinedTotal.split('ISSUES\n')[1].split(' ')[8]
         : '';
     const refunds = combinedTotal.includes('REFUNDS')
         ? combinedTotal[6].split(/[\s-]+/)[combinedTotal[6].split(/[\s-]+/).length - 1]

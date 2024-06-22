@@ -1,4 +1,5 @@
 import axios from 'axios';
+import dayjs from 'dayjs';
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import CustomError from '../../../../../common/utils/errors/customError';
@@ -229,7 +230,9 @@ class PnrDetailsService extends AbstractServices {
             success: true,
             data: {
               ticket_details,
-              invoice_sales_date: pnrResponse.flightTickets[0].date,
+              invoice_sales_date: dayjs(
+                pnrResponse.flightTickets[0].date
+              ).format('YYYY-MM-DD HH:mm:ss'),
               invoice_sales_man_id,
               creation_sign: creationDetails?.creationUserSine,
             },

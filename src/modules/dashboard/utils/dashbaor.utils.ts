@@ -76,7 +76,8 @@ export const formatAgentTicket = async (
       } else {
         return mapItem;
       }
-    });
+    })
+    .filter((item) => !item.includes('+TKTT'));
 
   const formattedCommission = formatAgentBillingCommission(arrayOfTickets);
 
@@ -85,7 +86,7 @@ export const formatAgentTicket = async (
   for (const [index, item] of filterTickets.entries()) {
     const arrItem = item.split(' ');
 
-    const ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF/g, '');
+    const ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF|FFSF/g, '');
     const db_ticket = await conn.getTicketInfoByTicket(ticket_no);
 
     const iata_ticket = {
@@ -174,10 +175,10 @@ export const getAgentBillingSummary = async (
   }
 
   // GET COMBINED TOTAL
-  const combinedTotal = text?.split('COMBINED')[2].split('\n');
+  const combinedTotal = text?.split('COMBINED')[2];
 
   const issues = combinedTotal.includes('ISSUES')
-    ? combinedTotal[3].split(' ')[combinedTotal[3].split(' ').length - 2]
+    ? combinedTotal.split('ISSUES\n')[1].split(' ')[8]
     : '';
 
   const refunds = combinedTotal.includes('REFUNDS')

@@ -49,7 +49,6 @@ class Uploader extends abstract_uploader_1.default {
                 },
             });
             upload.any()(req, res, (err) => {
-                console.log(req.files);
                 if (err) {
                     next(new customError_1.default(err.message, 500, 'Bad request'));
                 }

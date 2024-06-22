@@ -94,8 +94,6 @@ export const formatTicketDetails = async (
     const grossAit = Number(ticket.payment.total || 0) * 0.003;
     const airticket_ait = Math.round(grossAit - countryTaxAit);
 
-    console.log({ airticket_ait });
-
     const airticket_net_commssion = baseFareCommission - airticket_ait;
 
     const airticket_purchase_price =

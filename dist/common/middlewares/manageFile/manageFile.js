@@ -42,7 +42,6 @@ class ManageFile extends abstract_uploader_1.default {
                                     Key: `${uploaderConstants_1.rootFileFolder}/${file}`,
                                 };
                                 const res = yield this.s3Client.send(new client_s3_1.DeleteObjectCommand(deleteParams));
-                                console.log({ res });
                                 console.log('file deleted -> ', files);
                             }
                             finally {

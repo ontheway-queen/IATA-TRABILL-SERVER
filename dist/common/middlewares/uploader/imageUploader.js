@@ -41,6 +41,7 @@ const uploadImageToS3 = (imageUrl, bucketName, pathName) => __awaiter(void 0, vo
             Key: s3Filename,
             Body: passThrough,
             ContentType: response.headers['content-type'],
+            ACL: 'public-read',
         };
         const uploadPromise = s3.upload(uploadParams).promise();
         // Pipe the image stream to the pass-through stream
@@ -65,6 +66,7 @@ const uploadImageWithBuffer = (imageBuffer, fileName, ContentType) => __awaiter(
             Key: s3Filename,
             Body: imageBuffer,
             ContentType: ContentType,
+            ACL: 'public-read',
         };
         const uploadPromise = s3.upload(uploadParams).promise();
         // Wait for the upload to finish

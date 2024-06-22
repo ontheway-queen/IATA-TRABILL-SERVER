@@ -1,8 +1,10 @@
 import { Request } from 'express';
 import PDFParser from 'pdf-parse';
 import AbstractServices from '../../../abstracts/abstract.services';
+import { uploadImageWithBuffer } from '../../../common/middlewares/uploader/imageUploader';
 import CustomError from '../../../common/utils/errors/customError';
 import {
+  dateStrConverter,
   getBspBillingDate,
   getDateRangeByWeek,
   getNext15Day,
@@ -391,23 +393,80 @@ class DashboardServices extends AbstractServices {
     }
   };
 
-  public uploadBSPDocs = async (req: Request) => {
-    const { tbd_date } = req.body as { tbd_date: string };
+  public uploadBspFile = async (req: Request) => {
+    const files = req.files as any[];
 
-    const conn = this.models.dashboardModal(req);
+    if (!files) {
+      throw new CustomError(
+        'A PDF file is required for upload. Please ensure that a valid PDF file is provided.',
+        400,
+        'File Not Provided'
+      );
+    }
 
-    const files = req.files as Express.Multer.File[] | [];
-    console.log({ files });
+    for (const item of files) {
+      const { buffer, mimetype } = item;
+      const pdfData = await PDFParser(buffer as any);
 
-    await conn.insertBSPDocs({
-      tbd_agency_id: req.agency_id,
-      tbd_date,
-      tbd_doc: files[0].filename as string,
-    });
+      if (!pdfData.text.includes('AGENT BILLING DETAILS')) {
+        throw new CustomError(
+          'The provided agent billing details are invalid. Please ensure the BSP file contains accurate information.',
+          400,
+          'Invalid BSP File'
+        );
+      }
+
+      const salesPeriodRegex =
+        /Billing Period:\s*(\d+)\s*\((.*?)\s*to\s*(.*?)\)/;
+      const salesPeriodMatch = pdfData.text.match(salesPeriodRegex);
+
+      let from_date;
+      let to_date;
+      let bsp_bill_date;
+
+      if (salesPeriodMatch) {
+        from_date = salesPeriodMatch[2].split('-').join('');
+        to_date = salesPeriodMatch[3].split('-').join('');
+        bsp_bill_date = dateStrConverter(salesPeriodMatch[3] as string);
+      }
+
+      const match = pdfData.text.match(/REFERENCE:\s*(\d+)/);
+
+      const referenceNumber = match ? match[1] : undefined;
+
+      const file_name =
+        referenceNumber + '-' + from_date + '-' + to_date + '.PDF';
+
+      const conn = this.models.dashboardModal(req);
+
+      const isExist = await conn.checkBspFileIsExist(file_name);
+
+      if (isExist) {
+        throw new CustomError(
+          'The file you are attempting to upload already exists. Please upload a different file or rename the existing file.',
+          400,
+          'File Already Exists'
+        );
+      }
+
+      const bsp_file_url = (await uploadImageWithBuffer(
+        buffer,
+        file_name,
+        mimetype
+      )) as string;
+
+      await conn.insertBspFile({
+        bsp_agency_id: req.agency_id,
+        bsp_created_by: req.user_id,
+        bsp_file_url,
+        bsp_file_name: file_name,
+        bsp_bill_date: bsp_bill_date as Date,
+      });
+    }
 
     return {
       success: true,
-      message: 'BSP Doc upload successfully',
+      message: 'BSP file upload successfully',
     };
   };
 

@@ -1,4 +1,3 @@
-import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
 import PassportControllers from '../controllers/passport.controllers';
 

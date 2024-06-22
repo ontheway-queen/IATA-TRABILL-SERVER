@@ -200,10 +200,10 @@ class DashboardControllers extends AbstractController {
     }
   );
 
-  uploadBSPDocs = this.assyncWrapper.wrap(
+  uploadBspFile = this.assyncWrapper.wrap(
     this.validator.uploadBSP,
     async (req: Request, res: Response) => {
-      const data = await this.services.uploadBSPDocs(req);
+      const data = await this.services.uploadBspFile(req);
 
       if (data.success) {
         res.status(200).json(data);

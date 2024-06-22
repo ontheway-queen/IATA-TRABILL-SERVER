@@ -72,6 +72,7 @@ const formatTicketDetails = (conn, pnrData, airticket_route_or_sector) => __awai
         const countryTaxAit = Number(totalCountryTax || 0) * 0.003;
         const grossAit = Number(ticket.payment.total || 0) * 0.003;
         const airticket_ait = Math.round(grossAit - countryTaxAit);
+        console.log({ airticket_ait });
         const airticket_net_commssion = baseFareCommission - airticket_ait;
         const airticket_purchase_price = Number(ticket.payment.total || 0) - airticket_net_commssion;
         ticket_details.push(Object.assign({ airticket_comvendor: iata_vendor, airticket_gds_id: 'Sabre', airticket_ticket_no: ticket.number, airticket_issue_date: ticket.date, airticket_base_fare: ticket.payment.subtotal, airticket_gross_fare: ticket.payment.total, airticket_classes,

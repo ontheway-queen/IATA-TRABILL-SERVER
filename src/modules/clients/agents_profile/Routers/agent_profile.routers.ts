@@ -1,10 +1,7 @@
-import multer from 'multer';
 import AbstractRouter from '../../../../abstracts/abstract.routers';
 
 import AgentProfileControllers from '../Controllers/agent_profile.controllers';
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 class AgentProfileRoutes extends AbstractRouter {
   private controllers = new AgentProfileControllers();
 

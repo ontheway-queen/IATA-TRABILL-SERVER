@@ -15,10 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dayjs_1 = __importDefault(require("dayjs"));
 const abstract_services_1 = __importDefault(require("../../../abstracts/abstract.services"));
 const invoice_helpers_1 = require("../../../common/helpers/invoice.helpers");
-const customError_1 = __importDefault(require("../../../common/utils/errors/customError"));
-const lib_1 = __importDefault(require("../../../common/utils/libraries/lib"));
 const sendEmail_helper_1 = __importDefault(require("../../../common/helpers/sendEmail.helper"));
 const passportEmail_templates_1 = require("../../../common/templates/passportEmail.templates");
+const customError_1 = __importDefault(require("../../../common/utils/errors/customError"));
+const lib_1 = __importDefault(require("../../../common/utils/libraries/lib"));
 class PassportServices extends abstract_services_1.default {
     constructor() {
         super();

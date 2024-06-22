@@ -1,9 +1,5 @@
-import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
 import ExpenseContorller from '../controllers/expense.controllers';
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 class ExpenseRouter extends AbstractRouter {
   private controllers = new ExpenseContorller();

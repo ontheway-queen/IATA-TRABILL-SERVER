@@ -155,7 +155,7 @@ class PnrDetailsService extends AbstractServices {
             const baseFareCommission = numRound(
               ticket?.commission?.commissionAmount
             );
-            const countryTaxAit = Number(1 || 0) * 0.003;
+            const countryTaxAit = Number(totalCountryTax || 0) * 0.003;
             const grossAit = Number(ticket.payment.total || 0) * 0.003;
             const airticket_ait = Math.round(grossAit - countryTaxAit);
             const airticket_net_commssion = baseFareCommission - airticket_ait;

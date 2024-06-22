@@ -220,8 +220,13 @@ class AddMoneyReceipt extends AbstractServices {
         });
       }
 
-      await conn.insertInvoiceClPay(invClPayments);
-      await common_conn.insertInvHistory(history_data);
+      if (invClPayments.length) {
+        await conn.insertInvoiceClPay(invClPayments);
+      }
+
+      if (history_data.length) {
+        await common_conn.insertInvHistory(history_data);
+      }
 
       // update voucher, sms send & audit history
       const smsInvoiceDate: smsInvoiceData = {

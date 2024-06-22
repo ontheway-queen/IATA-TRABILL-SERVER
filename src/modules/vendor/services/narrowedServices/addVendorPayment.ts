@@ -49,7 +49,7 @@ class AddVendorPayment extends AbstractServices {
       let vpay_acctrxn_id: number | null = null;
       let online_charge_purpuse: string = 'Vendor payments';
 
-      const vouchar_no = generateVoucherNumber(4, 'VP');
+      const vouchar_no = generateVoucherNumber(5, 'VP');
 
       const totalPayment =
         Number(payment_amount) + (vendor_ait | 0) + (online_charge | 0);

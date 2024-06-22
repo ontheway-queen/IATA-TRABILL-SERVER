@@ -1,5 +1,9 @@
+import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
 import DashboardControllers from '../controllers/dashboard.controllers';
+// Set up multer to use memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 class DashboardRoutes extends AbstractRouter {
   private controllers = new DashboardControllers();
@@ -48,10 +52,7 @@ class DashboardRoutes extends AbstractRouter {
     // UPLOAD BSP BILL
     this.routers
       .route('/bsp-bill')
-      .post(
-        this.uploader.cloudUploadRaw(this.fileFolder.BSP),
-        this.controllers.uploadBSPDocs
-      )
+      .post(upload.array('file'), this.controllers.uploadBspFile)
       .get(this.controllers.selectBspFiles);
     this.routers.get('/bsp-bill-list', this.controllers.bspFileList);
 

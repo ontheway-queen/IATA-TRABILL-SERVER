@@ -3,11 +3,6 @@ import AbstractController from '../../../abstracts/abstract.controllers';
 import AdminPanelServices from '../Services/adminPanel.services';
 import AdminPanelValidators from '../Validators/adminPanel.validators';
 
-const multer = require('multer');
-
-// Create a Multer instance with the desired configuration
-const upload = multer({ dest: 'uploads/' });
-
 class AdminPanelControllers extends AbstractController {
   private services = new AdminPanelServices();
   private validator = new AdminPanelValidators();

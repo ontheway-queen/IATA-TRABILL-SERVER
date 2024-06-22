@@ -110,7 +110,7 @@ class PnrDetailsService extends abstract_services_1.default {
                                 taxesCommission = (_g = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _g === void 0 ? void 0 : _g.filter((item) => item.taxCode === 'YR');
                             }
                             const baseFareCommission = (0, lib_1.numRound)((_h = ticket === null || ticket === void 0 ? void 0 : ticket.commission) === null || _h === void 0 ? void 0 : _h.commissionAmount);
-                            const countryTaxAit = Number(1 || 0) * 0.003;
+                            const countryTaxAit = Number(totalCountryTax || 0) * 0.003;
                             const grossAit = Number(ticket.payment.total || 0) * 0.003;
                             const airticket_ait = Math.round(grossAit - countryTaxAit);
                             const airticket_net_commssion = baseFareCommission - airticket_ait;

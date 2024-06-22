@@ -27,7 +27,7 @@ class AddVendorPayment extends abstract_services_1.default {
                 const trxns = new Trxns_1.default(req, trx);
                 let vpay_acctrxn_id = null;
                 let online_charge_purpuse = 'Vendor payments';
-                const vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(4, 'VP');
+                const vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(5, 'VP');
                 const totalPayment = Number(payment_amount) + (vendor_ait | 0) + (online_charge | 0);
                 // PAYMENT METHOD
                 const accPayType = (0, lib_1.getPaymentType)(payment_method_id);

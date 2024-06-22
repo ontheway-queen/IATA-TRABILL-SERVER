@@ -2,6 +2,12 @@ import dayjs from 'dayjs';
 import { Request } from 'express';
 import AbstractServices from '../../../abstracts/abstract.services';
 import { getClientOrCombId } from '../../../common/helpers/invoice.helpers';
+import SendEmailHelper from '../../../common/helpers/sendEmail.helper';
+import {
+  completePassportStatus,
+  createPassport,
+  updatePassportStatus,
+} from '../../../common/templates/passportEmail.templates';
 import { IPassportDb } from '../../../common/types/common.types';
 import CustomError from '../../../common/utils/errors/customError';
 import Lib from '../../../common/utils/libraries/lib';
@@ -12,14 +18,7 @@ import {
   IPassportReqBody,
   IPassport_info,
   SMSlog,
-  UploadedImage,
 } from '../types/passport.interfaces';
-import SendEmailHelper from '../../../common/helpers/sendEmail.helper';
-import {
-  completePassportStatus,
-  createPassport,
-  updatePassportStatus,
-} from '../../../common/templates/passportEmail.templates';
 
 class PassportServices extends AbstractServices {
   constructor() {

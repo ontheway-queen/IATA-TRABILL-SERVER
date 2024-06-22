@@ -494,6 +494,15 @@ class DashboardModels extends abstract_models_1.default {
                 .andWhere('vendor_org_agency', this.org_agency);
             return ticket;
         });
+        this.checkBspFileIsExist = (fileName) => __awaiter(this, void 0, void 0, function* () {
+            const [{ count }] = (yield this.query()
+                .count('* as count')
+                .from('trabill_bsp_bill')
+                .where('bsp_agency_id', this.org_agency)
+                .andWhere('bsp_file_name', fileName)
+                .andWhereNot('bsp_is_deleted', 1));
+            return count;
+        });
     }
     // BSP BILLING INFORMATION /: DELETE FROM SERVICE
     bspBillingInformation(from_date, to_date) {
@@ -578,10 +587,9 @@ class DashboardModels extends abstract_models_1.default {
             return data;
         });
     }
-    insertBSPDocs(data) {
+    insertBspFile(data) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [id] = yield this.query().insert(data).into('trabill_bsp_docs');
-            return id;
+            yield this.query().insert(data).into('trabill_bsp_bill');
         });
     }
     deleteBSPDocs(tbd_id) {

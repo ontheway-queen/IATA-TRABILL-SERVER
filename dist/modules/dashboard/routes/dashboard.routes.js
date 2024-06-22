@@ -3,8 +3,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const multer_1 = __importDefault(require("multer"));
 const abstract_routers_1 = __importDefault(require("../../../abstracts/abstract.routers"));
 const dashboard_controllers_1 = __importDefault(require("../controllers/dashboard.controllers"));
+// Set up multer to use memory storage
+const storage = multer_1.default.memoryStorage();
+const upload = (0, multer_1.default)({ storage: storage });
 class DashboardRoutes extends abstract_routers_1.default {
     constructor() {
         super();
@@ -33,7 +37,7 @@ class DashboardRoutes extends abstract_routers_1.default {
         // UPLOAD BSP BILL
         this.routers
             .route('/bsp-bill')
-            .post(this.uploader.cloudUploadRaw(this.fileFolder.BSP), this.controllers.uploadBSPDocs)
+            .post(upload.array('file'), this.controllers.uploadBspFile)
             .get(this.controllers.selectBspFiles);
         this.routers.get('/bsp-bill-list', this.controllers.bspFileList);
         this.routers.delete('/bsp-bill/:tbd_id', this.controllers.deleteBSPDocs);

@@ -166,8 +166,12 @@ class AddMoneyReceipt extends abstract_services_1.default {
                         history_org_agency: req.agency_id,
                     });
                 }
-                yield conn.insertInvoiceClPay(invClPayments);
-                yield common_conn.insertInvHistory(history_data);
+                if (invClPayments.length) {
+                    yield conn.insertInvoiceClPay(invClPayments);
+                }
+                if (history_data.length) {
+                    yield common_conn.insertInvHistory(history_data);
+                }
                 // update voucher, sms send & audit history
                 const smsInvoiceDate = {
                     invoice_client_id: client_id,

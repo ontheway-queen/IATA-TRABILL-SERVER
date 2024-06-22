@@ -837,10 +837,8 @@ class DashboardModels extends AbstractModels {
     return ticket;
   };
 
-  public async insertBSPDocs(data: IBspDocs) {
-    const [id] = await this.query().insert(data).into('trabill_bsp_docs');
-
-    return id;
+  public async insertBspFile(data: IBspDocs) {
+    await this.query().insert(data).into('trabill_bsp_bill');
   }
 
   public async deleteBSPDocs(tbd_id: idType) {
@@ -937,6 +935,17 @@ class DashboardModels extends AbstractModels {
 
     return data;
   }
+
+  checkBspFileIsExist = async (fileName: string) => {
+    const [{ count }] = (await this.query()
+      .count('* as count')
+      .from('trabill_bsp_bill')
+      .where('bsp_agency_id', this.org_agency)
+      .andWhere('bsp_file_name', fileName)
+      .andWhereNot('bsp_is_deleted', 1)) as { count: number }[];
+
+    return count;
+  };
 }
 
 export default DashboardModels;

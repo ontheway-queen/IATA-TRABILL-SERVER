@@ -14,6 +14,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const pdf_parse_1 = __importDefault(require("pdf-parse"));
 const abstract_services_1 = __importDefault(require("../../../abstracts/abstract.services"));
+const imageUploader_1 = require("../../../common/middlewares/uploader/imageUploader");
 const customError_1 = __importDefault(require("../../../common/utils/errors/customError"));
 const lib_1 = require("../../../common/utils/libraries/lib");
 const dashbaor_utils_1 = require("../utils/dashbaor.utils");
@@ -283,19 +284,47 @@ class DashboardServices extends abstract_services_1.default {
                 throw new customError_1.default('Error parsing PDF', 500, 'Something went wrong!');
             }
         });
-        this.uploadBSPDocs = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { tbd_date } = req.body;
-            const conn = this.models.dashboardModal(req);
+        this.uploadBspFile = (req) => __awaiter(this, void 0, void 0, function* () {
             const files = req.files;
-            console.log({ files });
-            yield conn.insertBSPDocs({
-                tbd_agency_id: req.agency_id,
-                tbd_date,
-                tbd_doc: files[0].filename,
-            });
+            if (!files) {
+                throw new customError_1.default('A PDF file is required for upload. Please ensure that a valid PDF file is provided.', 400, 'File Not Provided');
+            }
+            for (const item of files) {
+                const { buffer, mimetype } = item;
+                const pdfData = yield (0, pdf_parse_1.default)(buffer);
+                if (!pdfData.text.includes('AGENT BILLING DETAILS')) {
+                    throw new customError_1.default('The provided agent billing details are invalid. Please ensure the BSP file contains accurate information.', 400, 'Invalid BSP File');
+                }
+                const salesPeriodRegex = /Billing Period:\s*(\d+)\s*\((.*?)\s*to\s*(.*?)\)/;
+                const salesPeriodMatch = pdfData.text.match(salesPeriodRegex);
+                let from_date;
+                let to_date;
+                let bsp_bill_date;
+                if (salesPeriodMatch) {
+                    from_date = salesPeriodMatch[2].split('-').join('');
+                    to_date = salesPeriodMatch[3].split('-').join('');
+                    bsp_bill_date = (0, lib_1.dateStrConverter)(salesPeriodMatch[3]);
+                }
+                const match = pdfData.text.match(/REFERENCE:\s*(\d+)/);
+                const referenceNumber = match ? match[1] : undefined;
+                const file_name = referenceNumber + '-' + from_date + '-' + to_date + '.PDF';
+                const conn = this.models.dashboardModal(req);
+                const isExist = yield conn.checkBspFileIsExist(file_name);
+                if (isExist) {
+                    throw new customError_1.default('The file you are attempting to upload already exists. Please upload a different file or rename the existing file.', 400, 'File Already Exists');
+                }
+                const bsp_file_url = (yield (0, imageUploader_1.uploadImageWithBuffer)(buffer, file_name, mimetype));
+                yield conn.insertBspFile({
+                    bsp_agency_id: req.agency_id,
+                    bsp_created_by: req.user_id,
+                    bsp_file_url,
+                    bsp_file_name: file_name,
+                    bsp_bill_date: bsp_bill_date,
+                });
+            }
             return {
                 success: true,
-                message: 'BSP Doc upload successfully',
+                message: 'BSP file upload successfully',
             };
         });
         this.deleteBSPDocs = (req) => __awaiter(this, void 0, void 0, function* () {

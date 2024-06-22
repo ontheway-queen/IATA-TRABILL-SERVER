@@ -16,6 +16,6 @@ class DashboardValidators extends AbstractValidator {
     this.permissions.check(this.resources.sales_report, 'read'),
   ];
 
-  uploadBSP = [check('tbd_date').notEmpty().toDate()];
+  uploadBSP = [];
 }
 export default DashboardValidators;

@@ -1,10 +1,6 @@
-import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
 import AdminConfigurationControllers from '../Controllers/adminConfiguration.controllers';
 import AdminPanelControllers from '../Controllers/adminPanel.controllers';
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 class AdminPanelRouters extends AbstractRouter {
   private controllers = new AdminPanelControllers();

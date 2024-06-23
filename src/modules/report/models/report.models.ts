@@ -3,7 +3,6 @@ import AbstractModels from '../../../abstracts/abstract.models';
 import { separateCombClientToId } from '../../../common/helpers/common.helper';
 import { idType } from '../../../common/types/common.types';
 import { numRound } from '../../../common/utils/libraries/lib';
-import { ITransaction } from '../types/report.interfaces';
 
 class ReportModel extends AbstractModels {
   loanReport = async (
@@ -291,6 +290,9 @@ class ReportModel extends AbstractModels {
         this.db.raw('SUM(pay) as pay'),
         this.db.raw('SUM(due) as due'),
         this.db.raw('SUM(profit) as profit'),
+        this.db.raw('SUM(invoice_service_charge) as service_charge'),
+        this.db.raw('SUM(invoice_discount) as invoice_discount'),
+        this.db.raw('SUM(overall_profit) as overall_profit'),
         this.db.raw('GROUP_CONCAT(airlines) AS airlines_code')
       )
       .from(
@@ -306,6 +308,11 @@ class ReportModel extends AbstractModels {
             this.db.raw('SUM(cl_pay) as pay'),
             this.db.raw('SUM(due_amount) as due'),
             this.db.raw('SUM(invoice_total_profit) as profit'),
+            this.db.raw(
+              'SUM(invoice_service_charge) as invoice_service_charge'
+            ),
+            this.db.raw('SUM(invoice_discount) as invoice_discount'),
+            this.db.raw('SUM(overall_profit) as overall_profit'),
             this.db.raw("CONCAT(airline_code, '(', COUNT(*), ')') AS airlines")
           )
           .from('trabill.v_invoices_due')
@@ -365,7 +372,10 @@ class ReportModel extends AbstractModels {
         this.db.raw('SUM(invoice_net_total) as sales'),
         this.db.raw('SUM(cl_pay) as pay'),
         this.db.raw('SUM(due_amount) as due'),
-        this.db.raw('SUM(invoice_total_profit) as profit')
+        this.db.raw('SUM(overall_profit) as profit'),
+        this.db.raw('SUM(invoice_service_charge) as service_charge'),
+        this.db.raw('SUM(invoice_discount) as invoice_discount'),
+        this.db.raw('SUM(overall_profit) as overall_profit')
       )
       .from('trabill.v_invoices_due')
       .where('invoice_org_agency', this.org_agency)
@@ -454,6 +464,9 @@ class ReportModel extends AbstractModels {
         'cl_pay as pay',
         'due_amount as due',
         'invoice_total_profit as profit',
+        'invoice_service_charge as service_charge',
+        'invoice_discount',
+        'overall_profit',
         'airline_code as airlines_code',
       ])
       .from('trabill.v_invoices_due')
@@ -528,7 +541,10 @@ class ReportModel extends AbstractModels {
         this.db.raw('SUM(invoice_net_total) as sales'),
         this.db.raw('SUM(cl_pay) as pay'),
         this.db.raw('SUM(due_amount) as due'),
-        this.db.raw('SUM(invoice_total_profit) as profit')
+        this.db.raw('SUM(overall_profit) as profit'),
+        this.db.raw('SUM(invoice_service_charge) as service_charge'),
+        this.db.raw('SUM(invoice_discount) as invoice_discount'),
+        this.db.raw('SUM(overall_profit) as overall_profit')
       )
       .from('trabill.v_invoices_due')
       .where('invoice_org_agency', this.org_agency)
@@ -581,6 +597,9 @@ class ReportModel extends AbstractModels {
         this.db.raw('SUM(cl_pay) as pay'),
         this.db.raw('SUM(due_amount) as due'),
         this.db.raw('SUM(invoice_total_profit) as profit'),
+        this.db.raw('SUM(invoice_service_charge) as service_charge'),
+        this.db.raw('SUM(invoice_discount) as invoice_discount'),
+        this.db.raw('SUM(overall_profit) as overall_profit'),
         'airline_code as airlines_code',
         'airline_name',
       ])
@@ -632,7 +651,10 @@ class ReportModel extends AbstractModels {
         this.db.raw('SUM(invoice_net_total) as sales'),
         this.db.raw('SUM(cl_pay) as pay'),
         this.db.raw('SUM(due_amount) as due'),
-        this.db.raw('SUM(invoice_total_profit) as profit')
+        this.db.raw('SUM(overall_profit) as profit'),
+        this.db.raw('SUM(invoice_service_charge) as service_charge'),
+        this.db.raw('SUM(invoice_discount) as invoice_discount'),
+        this.db.raw('SUM(overall_profit) as overall_profit')
       )
       .from('trabill.v_invoices_due')
       .where('invoice_org_agency', this.org_agency)
@@ -2481,13 +2503,6 @@ class ReportModel extends AbstractModels {
       .sum('total_purchase as total_purchase')
       .sum('net_profit_loss as total_profit_loss')
       .sum('receive_amount as total_received')
-      // .sum('commission_percent_total as commission_percent_total')
-      // .sum('ait as ait')
-      // .sum('net_commission as net_commission')
-      // .sum('gross_profit as gross_profit')
-      // .sum('discount as discount')
-      // .sum('overall_discount as overall_discount')
-      // .sum('tax as tax')
       .from('v_air_ticket_total_summary')
       .andWhere('invoice_org_agency', this.org_agency)
       .modify((builder) => {
@@ -2831,57 +2846,6 @@ class ReportModel extends AbstractModels {
       .select('invcat_id', 'invcat_title')
       .from('trabill_invoice_categories')
       .whereNot('invcat_is_deleted', 1);
-  }
-
-  public async getClientLedger(
-    client_id: idType,
-    from_date: string,
-    to_date: string,
-    page: number,
-    size: number
-  ) {
-    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
-    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-
-    const [[client_ledgers]] = await this.db.raw(
-      ` call ${this.database}.GetClientLedgers(${client_id}, '${from_date}',  '${to_date}','${this.org_agency}', ${page}, ${size})`
-    );
-
-    return client_ledgers as ITransaction[];
-  }
-
-  public async getCombinedLedger(
-    combined_id: idType,
-    from_date: string,
-    to_date: string,
-    page: number,
-    size: number
-  ) {
-    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
-    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-
-    const [[combined_ledgers]] = await this.db.raw(
-      ` call ${this.database}.get_combined_ledgers(${combined_id}, '${from_date}',  '${to_date}','${this.org_agency}', ${page}, ${size})`
-    );
-
-    return combined_ledgers;
-  }
-
-  public async getVendorLedger(
-    vendor_id: idType,
-    from_date: string,
-    to_date: string,
-    page: number,
-    size: number
-  ) {
-    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
-    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
-
-    const [[vendor_ledgers]] = await this.db.raw(
-      ` call ${this.database}.get_vendor_ledgers(${vendor_id}, '${from_date}',  '${to_date}', ${this.org_agency}, ${page}, ${size})`
-    );
-
-    return vendor_ledgers;
   }
 
   public async getAuditHistory(

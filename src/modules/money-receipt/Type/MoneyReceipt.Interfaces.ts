@@ -46,6 +46,7 @@ export interface IMoneyReceiptDb {
   receipt_trxn_charge_id: number | null;
   receipt_trxn_no: string;
   receipt_walking_customer_name?: string;
+  receipt_received_by: number | null;
 }
 
 export interface IPervMoneyReceipt {
@@ -91,6 +92,7 @@ export interface IMoneyReceiptReq {
   invoice_id: number;
   receipt_total_discount: number;
   receipt_walking_customer_name: string;
+  received_by: number;
   tickets: {
     ticket_no: string;
     invoice_id: number;
@@ -110,7 +112,7 @@ export interface IInvoiceClPay {
   invclientpayment_invoice_id: number | null;
   invclientpayment_client_id: number | null;
   invclientpayment_combined_id: number | null;
-  invclientpayment_cltrxn_id: number;
+  invclientpayment_cltrxn_id: number | null;
   invclientpayment_amount: number;
   invclientpayment_date: string;
   invclientpayment_collected_by: number;

@@ -20,26 +20,47 @@ class EditPayroll extends abstract_services_1.default {
         this.editPayrollServices = (req) => __awaiter(this, void 0, void 0, function* () {
             const { payroll_employee_id, payroll_account_id, payroll_pay_type, payroll_salary, payroll_deductions, payroll_mobile_bill, payroll_food_bill, payroll_bonus, payroll_commission, payroll_fastival_bonus, payroll_ta, payroll_advance, payroll_net_amount, payroll_date, payroll_note, payroll_cheque_no, payroll_bank_name, cheque_withdraw_date, payroll_updated_by, payroll_accommodation, payroll_attendance, payroll_health, payroll_incentive, payroll_provident, payroll_transection_charge, gross_salary, daily_salary, payroll_profit_share, payroll_other1, payroll_other2, payroll_other3, payment_month, } = req.body;
             const payrollId = req.params.id;
-            const imageList = req.imgUrl;
-            const imageUrlObj = Object.assign({}, ...imageList);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.payrollModel(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
+                const files = req.files;
                 let { previous_net_balance, prev_pay_type, prev_acctrxn_id, prev_payroll_charge_id, } = yield conn.getPrevTransectionAmount(payrollId);
-                if (imageUrlObj.payroll_image_url) {
+                if (files[0].filename) {
                     const data = yield conn.payrollImagesUrl(payrollId);
-                    yield this.deleteFile.delete_image(data === null || data === void 0 ? void 0 : data.payroll_image_url);
+                    (data === null || data === void 0 ? void 0 : data.payroll_image_url) &&
+                        (yield this.manageFile.deleteFromCloud([data === null || data === void 0 ? void 0 : data.payroll_image_url]));
                 }
-                const payrollData = Object.assign({ payroll_employee_id,
+                const payrollData = {
+                    payroll_employee_id,
                     payroll_account_id,
                     payroll_pay_type,
                     payment_month,
                     gross_salary,
-                    daily_salary, payroll_profit_share: payroll_profit_share || 0, payroll_salary: payroll_salary || 0, payroll_mobile_bill: payroll_mobile_bill || 0, payroll_food_bill: payroll_food_bill || 0, payroll_bonus: payroll_bonus || 0, payroll_commission: payroll_commission || 0, payroll_fastival_bonus: payroll_fastival_bonus || 0, payroll_ta: payroll_ta || 0, payroll_advance: payroll_advance || 0, payroll_accommodation: payroll_accommodation || 0, payroll_attendance: payroll_attendance || 0, payroll_health: payroll_health || 0, payroll_incentive: payroll_incentive || 0, payroll_provident: payroll_provident || 0, payroll_other1: payroll_other1 || 0, payroll_other2: payroll_other2 || 0, payroll_other3: payroll_other3 || 0, payroll_net_amount,
+                    daily_salary,
+                    payroll_profit_share: payroll_profit_share || 0,
+                    payroll_salary: payroll_salary || 0,
+                    payroll_mobile_bill: payroll_mobile_bill || 0,
+                    payroll_food_bill: payroll_food_bill || 0,
+                    payroll_bonus: payroll_bonus || 0,
+                    payroll_commission: payroll_commission || 0,
+                    payroll_fastival_bonus: payroll_fastival_bonus || 0,
+                    payroll_ta: payroll_ta || 0,
+                    payroll_advance: payroll_advance || 0,
+                    payroll_accommodation: payroll_accommodation || 0,
+                    payroll_attendance: payroll_attendance || 0,
+                    payroll_health: payroll_health || 0,
+                    payroll_incentive: payroll_incentive || 0,
+                    payroll_provident: payroll_provident || 0,
+                    payroll_other1: payroll_other1 || 0,
+                    payroll_other2: payroll_other2 || 0,
+                    payroll_other3: payroll_other3 || 0,
+                    payroll_net_amount,
                     payroll_date,
                     payroll_note,
-                    payroll_updated_by }, imageUrlObj);
+                    payroll_updated_by,
+                    payroll_image_url: files[0].filename,
+                };
                 let payroll_acctrxn_id;
                 if (payroll_pay_type !== 4) {
                     const AccTrxnBody = {

@@ -126,6 +126,8 @@ class AdminPanelServices extends AbstractServices {
 
       const user_conn = this.models.configModel.userModel(req, trx);
 
+      const files = req.files as Express.Multer.File[] | [];
+
       // agency
       const agencyOrgData: IAgencyOrganization = {
         org_address1,
@@ -135,7 +137,7 @@ class AdminPanelServices extends AbstractServices {
         org_extra_info: org_extra_info === 'undefined' ? null : org_extra_info,
         org_mobile_number,
         org_owner_email,
-        org_logo: req.image_files['scan_copy_0'],
+        org_logo: files[0].filename,
         org_name,
         org_owner_full_name: user_first_name,
         org_subscription_expired: date,
@@ -480,12 +482,14 @@ class AdminPanelServices extends AbstractServices {
 
     const conn = this.models.adminPanel(req);
 
-    const new_logo = req.image_files['scan_copy_0'];
+    const files = req.files as Express.Multer.File[] | [];
+
+    const new_logo = files[0].filename;
 
     if (new_logo) {
       const previous_logo = await conn.updateAgencyLogo(new_logo, agency_id);
 
-      await this.deleteFile.delete_image(previous_logo);
+      previous_logo && (await this.manageFile.deleteFromCloud([previous_logo]));
     }
 
     // Insert Admin Activity

@@ -548,6 +548,11 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .insert(Object.assign(Object.assign({}, historyData), { history_org_agency: this.org_agency }));
         });
     }
+    insertInvHistory(historyData) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.query().into('trabill_invoices_history').insert(historyData);
+        });
+    }
     createInvoiceVoidDetails(data) {
         return __awaiter(this, void 0, void 0, function* () {
             const [id] = yield this.query()

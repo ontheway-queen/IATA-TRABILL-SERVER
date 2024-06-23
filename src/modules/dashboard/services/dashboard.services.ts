@@ -1,21 +1,22 @@
 import { Request } from 'express';
 import PDFParser from 'pdf-parse';
 import AbstractServices from '../../../abstracts/abstract.services';
+import { uploadImageWithBuffer } from '../../../common/middlewares/uploader/imageUploader';
 import CustomError from '../../../common/utils/errors/customError';
 import {
+  dateStrConverter,
   getBspBillingDate,
   getDateRangeByWeek,
   getNext15Day,
-  numRound,
 } from '../../../common/utils/libraries/lib';
 import {
   BspBillingQueryType,
   BspBillingSummaryQueryType,
 } from '../types/dashboard.types';
 import {
-  bspBillingFormatter,
-  formatAgentBillingDetails,
-  withinRange,
+  formatAgentRefund,
+  formatAgentTicket,
+  getAgentBillingSummary,
 } from '../utils/dashbaor.utils';
 
 class DashboardServices extends AbstractServices {
@@ -209,6 +210,11 @@ class DashboardServices extends AbstractServices {
     const billing_from_date = getNext15Day(from_date);
     const billing_to_date = getNext15Day(to_date);
 
+    const iata_payment = await conn.getBSPBillingPayment(
+      billing_from_date,
+      billing_to_date
+    );
+
     return {
       success: true,
       message: 'The request is OK',
@@ -221,6 +227,7 @@ class DashboardServices extends AbstractServices {
         ticket_re_issue,
         ticket_refund,
         client_sales,
+        iata_payment,
       },
     };
   };
@@ -343,91 +350,37 @@ class DashboardServices extends AbstractServices {
 
   // BSP BILLING CROSS CHECK
   bspBillingCrossCheck = async (req: Request) => {
+    const { bsp_id } = req.params;
+    const type = req.query.type || 'SUMMARY';
+    const conn = this.models.dashboardModal(req);
+
+    const bsp = await conn.getBspFileUrl(bsp_id);
+
+    if (!bsp.bsp_file_url) {
+      throw new CustomError('No file uploaded', 400, 'File not found');
+    }
+
     try {
-      if (!req.file) {
-        throw new CustomError('No file uploaded', 400, 'File not found');
-      }
-
-      const conn = this.models.dashboardModal(req);
-
-      // Use pdf-parse to parse the uploaded PDF file
-      const pdfData = await PDFParser(req.file.path as any);
+      const pdfData = await PDFParser(bsp.bsp_file_url as any);
 
       let data;
 
-      if (pdfData.text.includes('AGENT REMITTANCE DETAIL')) {
-        data = bspBillingFormatter(pdfData.text) as any;
+      switch (type) {
+        case 'SUMMARY':
+          data = await getAgentBillingSummary(pdfData?.text, conn);
+          break;
 
-        // from database
-        const ticket_issue = await conn.getBspTicketIssueInfo(
-          data?.salesDateRange.from_date,
-          data?.salesDateRange.to_date
-        );
+        case 'TICKET':
+          data = await formatAgentTicket(pdfData?.text, conn);
+          break;
 
-        const ticket_re_issue = await conn.getBspTicketReissueInfo(
-          data?.salesDateRange.from_date,
-          data?.salesDateRange.to_date
-        );
+        case 'REFUND':
+          data = await formatAgentRefund(pdfData?.text, conn);
+          break;
 
-        const ticket_refund = await conn.getBspTicketRefundInfo(
-          data?.salesDateRange.from_date,
-          data?.salesDateRange.to_date
-        );
-
-        const AMOUNT =
-          numRound(ticket_issue.purchase_amount) +
-          numRound(ticket_re_issue.purchase_amount) -
-          numRound(ticket_refund.refund_amount);
-
-        const trabill_summary = {
-          issue: numRound(ticket_issue.purchase_amount),
-          reissue: numRound(ticket_re_issue.purchase_amount),
-          refund: numRound(ticket_refund.refund_amount),
-          combined: AMOUNT,
-        };
-
-        data.trabill_summary = trabill_summary;
-
-        if (withinRange(data.bsp_summary.AMOUNT, AMOUNT, 10)) {
-          const diffAmount =
-            numRound(data.bsp_summary.AMOUNT) - numRound(AMOUNT);
-
-          data.message =
-            'DATA DIFFERENCE BETWEEN BSP BILL AND TRABILL-DB IS ' +
-            Math.abs(diffAmount);
-        } else {
-          data.message = 'BSP BILLING CROSS CHECK NOT MATCHED...';
-        }
-      } else if (pdfData.text.includes('AGENT BILLING DETAILS')) {
-        const agentBillingDetails = formatAgentBillingDetails(pdfData?.text);
-
-        // from database
-        const ticket_issue = await conn.getBspTicketIssueInfo(
-          agentBillingDetails.from_date as Date,
-          agentBillingDetails.to_date as Date
-        );
-
-        const ticket_re_issue = await conn.getBspTicketReissueInfo(
-          agentBillingDetails.from_date as Date,
-          agentBillingDetails.to_date as Date
-        );
-
-        const ticket_refund = await conn.getBspTicketRefundInfo(
-          agentBillingDetails.from_date as Date,
-          agentBillingDetails.to_date as Date
-        );
-
-        const grandTotal =
-          numRound(ticket_issue.purchase_amount) +
-          numRound(ticket_re_issue.purchase_amount) -
-          numRound(ticket_refund.refund_amount);
-
-        const trabill_summary = {
-          issue: numRound(ticket_issue.purchase_amount),
-          reissue: numRound(ticket_re_issue.purchase_amount),
-          refund: numRound(ticket_refund.refund_amount),
-          grandTotal,
-        };
+        default:
+          data = await getAgentBillingSummary(pdfData?.text, conn);
+          break;
       }
 
       return {
@@ -438,6 +391,127 @@ class DashboardServices extends AbstractServices {
       console.error('Error parsing PDF:', error);
       throw new CustomError('Error parsing PDF', 500, 'Something went wrong!');
     }
+  };
+
+  public uploadBspFile = async (req: Request) => {
+    const files = req.files as any[];
+
+    if (!files) {
+      throw new CustomError(
+        'A PDF file is required for upload. Please ensure that a valid PDF file is provided.',
+        400,
+        'File Not Provided'
+      );
+    }
+
+    for (const item of files) {
+      const { buffer, mimetype } = item;
+      const pdfData = await PDFParser(buffer as any);
+
+      if (!pdfData.text.includes('AGENT BILLING DETAILS')) {
+        throw new CustomError(
+          'The provided agent billing details are invalid. Please ensure the BSP file contains accurate information.',
+          400,
+          'Invalid BSP File'
+        );
+      }
+
+      const salesPeriodRegex =
+        /Billing Period:\s*(\d+)\s*\((.*?)\s*to\s*(.*?)\)/;
+      const salesPeriodMatch = pdfData.text.match(salesPeriodRegex);
+
+      let from_date;
+      let to_date;
+      let bsp_bill_date;
+
+      if (salesPeriodMatch) {
+        from_date = salesPeriodMatch[2].split('-').join('');
+        to_date = salesPeriodMatch[3].split('-').join('');
+        bsp_bill_date = dateStrConverter(salesPeriodMatch[3] as string);
+      }
+
+      const match = pdfData.text.match(/REFERENCE:\s*(\d+)/);
+
+      const referenceNumber = match ? match[1] : undefined;
+
+      const file_name =
+        referenceNumber + '-' + from_date + '-' + to_date + '.PDF';
+
+      const conn = this.models.dashboardModal(req);
+
+      const isExist = await conn.checkBspFileIsExist(file_name);
+
+      if (isExist) {
+        throw new CustomError(
+          'The file you are attempting to upload already exists. Please upload a different file or rename the existing file.',
+          400,
+          'File Already Exists'
+        );
+      }
+
+      const bsp_file_url = (await uploadImageWithBuffer(
+        buffer,
+        file_name,
+        mimetype
+      )) as string;
+
+      await conn.insertBspFile({
+        bsp_agency_id: req.agency_id,
+        bsp_created_by: req.user_id,
+        bsp_file_url,
+        bsp_file_name: file_name,
+        bsp_bill_date: bsp_bill_date as Date,
+      });
+    }
+
+    return {
+      success: true,
+      message: 'BSP file upload successfully',
+    };
+  };
+
+  public deleteBSPDocs = async (req: Request) => {
+    const tbd_id = req.params.tbd_id as string;
+
+    const conn = this.models.dashboardModal(req);
+
+    const prev_url = await conn.deleteBSPDocs(tbd_id);
+
+    if (prev_url) this.manageFile.deleteFromCloud([prev_url]);
+
+    return {
+      success: true,
+      message: 'BSP Doc delete successfully',
+    };
+  };
+
+  public selectBspFiles = async (req: Request) => {
+    const conn = this.models.dashboardModal(req);
+    const { search, date } = req.query as { search: string; date: string };
+    const data = await conn.selectBspFiles(search, date);
+
+    return {
+      success: true,
+      message: 'The request is Ok.',
+      data,
+    };
+  };
+
+  public bspFileList = async (req: Request) => {
+    const conn = this.models.dashboardModal(req);
+    const { search, date, page, size } = req.query as {
+      search: string;
+      date: string;
+      page: string;
+      size: string;
+    };
+    const data = await conn.bspFileList(search, +page, +size, date);
+
+    return {
+      success: true,
+      message: 'The request is Ok.',
+      ...data,
+    };
   };
 }
 export default DashboardServices;

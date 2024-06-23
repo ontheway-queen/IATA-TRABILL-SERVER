@@ -1,11 +1,7 @@
-import multer from 'multer';
 import AbstractRouter from '../../../../abstracts/abstract.routers';
 
 import AgentProfileControllers from '../Controllers/agent_profile.controllers';
-import { uploadImageToAzure_rec } from '../../../../common/helpers/ImageUploadToAzure_rec';
 
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 class AgentProfileRoutes extends AbstractRouter {
   private controllers = new AgentProfileControllers();
 
@@ -22,13 +18,7 @@ class AgentProfileRoutes extends AbstractRouter {
 
     this.routers.post(
       '/create',
-      upload.fields([
-        { name: 'agent_image_copy', maxCount: 1 },
-        { name: 'agent_nid_front', maxCount: 1 },
-        { name: 'agent_nid_back', maxCount: 1 },
-      ]),
-      uploadImageToAzure_rec,
-
+      this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
       this.controllers.createAgentProfile
     );
 
@@ -38,12 +28,7 @@ class AgentProfileRoutes extends AbstractRouter {
       .route('/agent/:id')
       .get(this.controllers.getAgentById)
       .patch(
-        upload.fields([
-          { name: 'agent_image_copy', maxCount: 1 },
-          { name: 'agent_nid_front', maxCount: 1 },
-          { name: 'agent_nid_back', maxCount: 1 },
-        ]),
-        uploadImageToAzure_rec,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.controllers.editEgentProfile
       )
       .delete(this.controllers.deleteAgentProfiles);

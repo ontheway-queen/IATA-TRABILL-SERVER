@@ -300,5 +300,18 @@ class AgentProfileModels extends AbstractModels {
 
     return data;
   }
+
+  public async getPrevImages(agent_id: idType) {
+    const [data] = (await this.query()
+      .select('agent_image_copy', 'agent_nid_front', 'agent_nid_back')
+      .from('trabill_agents_profile')
+      .where({ agent_id })) as {
+      agent_image_copy: string;
+      agent_nid_front: string;
+      agent_nid_back: string;
+    }[];
+
+    return { ...data, image_arr: Object.values(data) };
+  }
 }
 export default AgentProfileModels;

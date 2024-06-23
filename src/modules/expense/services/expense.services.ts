@@ -13,6 +13,7 @@ import {
   IExpenseReqBody,
 } from '../types/expense.interfaces';
 import ExpenseHelper from '../utils/expenseHelper';
+import { getPaymentType } from '../../../common/utils/libraries/lib';
 
 class ExpneseService extends AbstractServices {
   constructor() {
@@ -35,16 +36,11 @@ class ExpneseService extends AbstractServices {
       expense_created_by,
     } = req.body as IExpenseReqBody;
 
-    const imageList = req.imgUrl;
-
-    const imageUrlObj: {
-      expense_voucher_url_1: string;
-      expense_voucher_url_2: string;
-    } = Object.assign({}, ...imageList);
-
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.expenseModel(req, trx);
       const trxns = new Trxns(req, trx);
+
+      const files = req.files as Express.Multer.File[] | [];
 
       const expense_vouchar_no = await this.generateVoucher(req, 'EXP');
 
@@ -71,22 +67,21 @@ class ExpneseService extends AbstractServices {
         expense_note,
         expense_charge_amount: charge_amount,
         expense_charge_id,
-        ...imageUrlObj,
       };
+
+      if (files) {
+        files.map((item) => {
+          if (item.fieldname === 'expense_voucher_url_1')
+            expenseInfo.expense_voucher_url_1 = item.filename;
+          if (item.fieldname === 'expense_voucher_url_2')
+            expenseInfo.expense_voucher_url_2 = item.filename;
+        });
+      }
 
       if (expense_payment_type !== 4 && expense_accounts_id) {
         // account transaction
 
-        let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-        if (expense_payment_type === 1) {
-          accPayType = 'CASH';
-        } else if (expense_payment_type === 2) {
-          accPayType = 'BANK';
-        } else if (expense_payment_type === 3) {
-          accPayType = 'MOBILE BANKING';
-        } else {
-          accPayType = 'CASH';
-        }
+        let accPayType = getPaymentType(expense_payment_type);
 
         const AccTrxnBody: IAcTrxn = {
           acctrxn_ac_id: expense_accounts_id,
@@ -173,21 +168,18 @@ class ExpneseService extends AbstractServices {
 
     const { expense_id } = req.params;
 
-    const imageList = req.imgUrl;
-
-    const imageUrlObj: {
-      expense_voucher_url_1: string;
-      expense_voucher_url_2: string;
-    } = Object.assign({}, ...imageList);
-
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.expenseModel(req, trx);
       const trxns = new Trxns(req, trx);
+
+      const files = req.files as Express.Multer.File[] | [];
 
       const {
         expense_payment_type: prev_ex_type,
         prevAccTrxnId,
         expense_charge_id,
+        expense_voucher_url_1,
+        expense_voucher_url_2,
       } = await conn.getExpense(expense_id);
 
       if (expense_charge_id) {
@@ -199,21 +191,6 @@ class ExpneseService extends AbstractServices {
           );
       }
 
-      if (imageUrlObj.expense_voucher_url_1) {
-        const data = await conn.expenseImagesUrl(expense_id);
-
-        await this.deleteFile.delete_image(
-          data?.expense_voucher_url_1 as string
-        );
-      }
-
-      if (imageUrlObj.expense_voucher_url_2) {
-        const data = await conn.expenseImagesUrl(expense_id);
-        await this.deleteFile.delete_image(
-          data?.expense_voucher_url_2 as string
-        );
-      }
-
       const expenseInfo: IExpense = {
         expense_payment_type,
         expense_total_amount,
@@ -222,8 +199,22 @@ class ExpneseService extends AbstractServices {
         expense_note,
         expense_charge_amount: charge_amount,
         expense_charge_id: null,
-        ...imageUrlObj,
       };
+
+      if (files) {
+        files.map((item) => {
+          if (item.fieldname === 'expense_voucher_url_1') {
+            expenseInfo.expense_voucher_url_1 = item.filename;
+            if (expense_voucher_url_1)
+              this.manageFile.deleteFromCloud([expense_voucher_url_1]);
+          }
+          if (item.fieldname === 'expense_voucher_url_2') {
+            expenseInfo.expense_voucher_url_2 = item.filename;
+            if (expense_voucher_url_2)
+              this.manageFile.deleteFromCloud([expense_voucher_url_2]);
+          }
+        });
+      }
 
       // account transaction
       if (payType !== 4) {
@@ -342,6 +333,8 @@ class ExpneseService extends AbstractServices {
         expense_acctrxn_id,
         expense_total_amount,
         expense_charge_id,
+        expense_voucher_url_1,
+        expense_voucher_url_2,
       } = await conn.getPreviousData(expense_id);
 
       if (expense_acctrxn_id) {
@@ -361,6 +354,12 @@ class ExpneseService extends AbstractServices {
           .vendorModel(req, trx)
           .deleteOnlineTrxnCharge(expense_charge_id);
       }
+
+      if (expense_voucher_url_1)
+        this.manageFile.deleteFromCloud([expense_voucher_url_1]);
+
+      if (expense_voucher_url_2)
+        this.manageFile.deleteFromCloud([expense_voucher_url_2]);
 
       await this.insertAudit(
         req,

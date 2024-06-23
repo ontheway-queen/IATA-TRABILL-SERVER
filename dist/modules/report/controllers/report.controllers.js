@@ -13,9 +13,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_controllers_1 = __importDefault(require("../../../abstracts/abstract.controllers"));
+const reportExcel_services_1 = __importDefault(require("../services/excels/reportExcel.services"));
 const report_services_1 = __importDefault(require("../services/report.services"));
 const report_validator_1 = __importDefault(require("../validators/report.validator"));
-const reportExcel_services_1 = __importDefault(require("../services/excels/reportExcel.services"));
 class ReportController extends abstract_controllers_1.default {
     constructor() {
         super();

@@ -16,32 +16,21 @@ const abstract_services_1 = __importDefault(require("../../../../abstracts/abstr
 const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../common/helpers/common.helper");
 const invoice_helpers_1 = require("../../../../common/helpers/invoice.helpers");
+const lib_1 = require("../../../../common/utils/libraries/lib");
 class AddVendorPayment extends abstract_services_1.default {
     constructor() {
         super();
         this.addVendorPayment = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { account_id, created_by, cheque_no, has_refer_passport, note, payment_method_id, payment_amount, vpay_creadit_card_no, payment_date, vpay_receipt, vpaypass_passport_id, vpcheque_withdraw_date, vpcheque_bank_name, online_charge, vendor_ait, invoice_id, vpay_payment_to, specific_inv_vendors, com_vendor, } = req.body;
+            const { account_id, created_by, cheque_no, has_refer_passport, note, payment_method_id, payment_amount, vpay_creadit_card_no, payment_date, vpay_receipt, vpaypass_passport_id, vpcheque_withdraw_date, vpcheque_bank_name, online_charge, vendor_ait, invoice_id, vpay_payment_to, specific_inv_vendors, com_vendor, payment_by, } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.vendorModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 let vpay_acctrxn_id = null;
                 let online_charge_purpuse = 'Vendor payments';
-                const vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(4, 'VP');
+                const vouchar_no = (0, invoice_helpers_1.generateVoucherNumber)(5, 'VP');
                 const totalPayment = Number(payment_amount) + (vendor_ait | 0) + (online_charge | 0);
                 // PAYMENT METHOD
-                let accPayType;
-                if (payment_method_id === 1) {
-                    accPayType = 'CASH';
-                }
-                else if (payment_method_id === 2) {
-                    accPayType = 'BANK';
-                }
-                else if (payment_method_id === 3) {
-                    accPayType = 'MOBILE BANKING';
-                }
-                else {
-                    accPayType = 'CASH';
-                }
+                const accPayType = (0, lib_1.getPaymentType)(payment_method_id);
                 if (![4, 5].includes(payment_method_id)) {
                     const AccTrxnBody = {
                         acctrxn_ac_id: account_id,
@@ -87,6 +76,7 @@ class AddVendorPayment extends abstract_services_1.default {
                     vendor_ait,
                     vpay_payment_to,
                     online_charge_id,
+                    vpay_payment_by: payment_by,
                 };
                 const { combined_id, vendor_id } = (0, common_helper_1.separateCombClientToId)(com_vendor);
                 (paymentData.vpay_vendor_id = vendor_id),

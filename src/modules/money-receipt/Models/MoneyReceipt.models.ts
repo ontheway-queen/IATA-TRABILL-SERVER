@@ -17,11 +17,12 @@ import {
 
 class MoneyReceiptModels extends AbstractModels {
   // @INVOICE_CLIENT_PAYMENT
-  public insertInvoiceClPay = async (insertedData: IInvoiceClPay) => {
-    const id = await this.query()
+  public insertInvoiceClPay = async (
+    insertedData: IInvoiceClPay | IInvoiceClPay[]
+  ) => {
+    await this.query()
       .into('trabill_invoice_client_payments')
       .insert(insertedData);
-    return id[0];
   };
 
   public async deleteMoneyreceipt(
@@ -1054,7 +1055,8 @@ class MoneyReceiptModels extends AbstractModels {
         'cheque_number',
         'cheque_withdraw_date',
         'receipt_trxn_charge as charge_amount',
-        'receipt_trxn_no as trans_no'
+        'receipt_trxn_no as trans_no',
+        'receipt_received_by'
       )
       .leftJoin(
         `${this.trxn}.acc_trxn`,

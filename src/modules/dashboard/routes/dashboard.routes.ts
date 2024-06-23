@@ -1,8 +1,9 @@
 import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
 import DashboardControllers from '../controllers/dashboard.controllers';
-
-const upload = multer({ dest: 'uploads/' });
+// Set up multer to use memory storage
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 class DashboardRoutes extends AbstractRouter {
   private controllers = new DashboardControllers();
@@ -43,11 +44,19 @@ class DashboardRoutes extends AbstractRouter {
     this.routers.get('/best-clients', this.controllers.getBestClients);
     this.routers.get('/best-employee', this.controllers.getBestEmployee);
     this.routers.get('/iata-limit', this.controllers.iataBankGuaranteeLimit);
-    this.routers.post(
-      '/bsp-bill-check',
-      upload.single('file'),
+    this.routers.get(
+      '/bsp-bill-check/:bsp_id',
       this.controllers.bspBillingCrossCheck
     );
+
+    // UPLOAD BSP BILL
+    this.routers
+      .route('/bsp-bill')
+      .post(upload.array('file'), this.controllers.uploadBspFile)
+      .get(this.controllers.selectBspFiles);
+    this.routers.get('/bsp-bill-list', this.controllers.bspFileList);
+
+    this.routers.delete('/bsp-bill/:tbd_id', this.controllers.deleteBSPDocs);
   }
 }
 export default DashboardRoutes;

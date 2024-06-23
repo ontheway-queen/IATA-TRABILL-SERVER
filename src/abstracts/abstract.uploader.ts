@@ -1,6 +1,5 @@
-import { NextFunction, Request, Response } from 'express';
-import Azure from '../common/middlewares/azure/azureUploader';
-
+import { S3Client } from '@aws-sdk/client-s3';
+import config from '../config/config';
 const allowed_file_types = [
   'image/jpeg',
   'image/jpg',
@@ -11,17 +10,19 @@ const allowed_file_types = [
 abstract class AbstractUploader {
   protected allowed_file_types: string[];
   protected error_message: string;
-  protected azure: Azure;
 
   constructor() {
     this.allowed_file_types = allowed_file_types;
-    this.error_message = 'Only .jpg, .jpeg, .webp or .png format allowed!';
-    this.azure = new Azure();
+    this.error_message = `Only .jpg, .jpeg, .webp or .png formate allowed!`;
   }
 
-  abstract rawUpload(
-    folder: string
-  ): (req: Request, res: Response, next: NextFunction) => void;
+  protected s3Client: S3Client = new S3Client({
+    region: 'ap-south-1',
+    credentials: {
+      accessKeyId: config.AWS_S3_ACCESS_KEY,
+      secretAccessKey: config.AWS_S3_SECRET_KEY,
+    },
+  });
 }
 
 export default AbstractUploader;

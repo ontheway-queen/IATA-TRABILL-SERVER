@@ -4,10 +4,11 @@ export interface ENV {
   DB_PORT?: string;
   DB_HOST?: string;
   PORT?: number;
-  COOKIE_SECRET?: string;
   OTP_URL?: string;
   SENDER_ID?: string;
-  AZURE_STORAGE_CONNECTION_STRING?: string;
+  AWS_S3_BUCKET?: string;
+  AWS_S3_ACCESS_KEY?: string;
+  AWS_S3_SECRET_KEY?: string;
 }
 
 export interface Config {
@@ -16,8 +17,9 @@ export interface Config {
   DB_PORT: string;
   DB_HOST: string;
   PORT: number;
-  COOKIE_SECRET: string;
   OTP_URL: string;
   SENDER_ID: string;
-  AZURE_STORAGE_CONNECTION_STRING: string;
+  AWS_S3_BUCKET: string;
+  AWS_S3_ACCESS_KEY: string;
+  AWS_S3_SECRET_KEY: string;
 }

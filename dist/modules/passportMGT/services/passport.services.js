@@ -15,11 +15,10 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const dayjs_1 = __importDefault(require("dayjs"));
 const abstract_services_1 = __importDefault(require("../../../abstracts/abstract.services"));
 const invoice_helpers_1 = require("../../../common/helpers/invoice.helpers");
-const customError_1 = __importDefault(require("../../../common/utils/errors/customError"));
-const deleteFIle_1 = __importDefault(require("../../../common/utils/fileRemover/deleteFIle"));
-const lib_1 = __importDefault(require("../../../common/utils/libraries/lib"));
 const sendEmail_helper_1 = __importDefault(require("../../../common/helpers/sendEmail.helper"));
 const passportEmail_templates_1 = require("../../../common/templates/passportEmail.templates");
+const customError_1 = __importDefault(require("../../../common/utils/errors/customError"));
+const lib_1 = __importDefault(require("../../../common/utils/libraries/lib"));
 class PassportServices extends abstract_services_1.default {
     constructor() {
         super();
@@ -27,21 +26,39 @@ class PassportServices extends abstract_services_1.default {
          * Add/ Upload Passport
          */
         this.addPassport = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { client_id, passport_rec_cl_id, passport_info, passport_created_by, } = req.body;
+            const { client_id, passport_info, passport_created_by } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.passportModel(req, trx);
                 const app_config_conn = this.models.configModel.appConfig(req, trx);
                 const passportParseInfo = JSON.parse(passport_info);
-                const imageList = req.imgUrl;
-                const imageListWithName = imageList.reduce((acc, image) => Object.assign(acc, image), {});
+                const files = req.files;
                 const { org_name, org_address1, org_mobile_number, org_owner_email, org_logo, } = yield conn.getOrganizationInfo();
                 const appConfig = yield app_config_conn.getAppConfig();
-                const PassportData = Object.assign(Object.assign({ passport_person_type: passportParseInfo.passport_person_type, passport_passport_no: passportParseInfo.passport_no, passport_name: passportParseInfo.name, passport_mobile_no: passportParseInfo.mobile_no, passport_date_of_birth: passportParseInfo.date_of_birth &&
-                        (0, dayjs_1.default)(passportParseInfo.date_of_birth).format('YYYY-MM-DD HH:mm:ss.SSS'), passport_date_of_issue: passportParseInfo.date_of_issue &&
-                        (0, dayjs_1.default)(passportParseInfo.date_of_issue).format('YYYY-MM-DD HH:mm:ss.SSS'), passport_date_of_expire: passportParseInfo.date_of_expire &&
-                        (0, dayjs_1.default)(passportParseInfo.date_of_expire).format('YYYY-MM-DD HH:mm:ss.SSS'), passport_email: passportParseInfo.email, passport_nid_no: passportParseInfo.nid, passport_created_by: passport_created_by }, imageListWithName), (passport_rec_cl_id && {
-                    passport_rec_cl_id: passport_rec_cl_id,
-                }));
+                const PassportData = {
+                    passport_person_type: passportParseInfo.passport_person_type,
+                    passport_passport_no: passportParseInfo.passport_no,
+                    passport_name: passportParseInfo.name,
+                    passport_mobile_no: passportParseInfo.mobile_no,
+                    passport_date_of_birth: passportParseInfo.date_of_birth &&
+                        (0, dayjs_1.default)(passportParseInfo.date_of_birth).format('YYYY-MM-DD HH:mm:ss.SSS'),
+                    passport_date_of_issue: passportParseInfo.date_of_issue &&
+                        (0, dayjs_1.default)(passportParseInfo.date_of_issue).format('YYYY-MM-DD HH:mm:ss.SSS'),
+                    passport_date_of_expire: passportParseInfo.date_of_expire &&
+                        (0, dayjs_1.default)(passportParseInfo.date_of_expire).format('YYYY-MM-DD HH:mm:ss.SSS'),
+                    passport_email: passportParseInfo.email,
+                    passport_nid_no: passportParseInfo.nid,
+                    passport_created_by: passport_created_by,
+                };
+                if (files) {
+                    files.map((item) => {
+                        if (item.fieldname === 'passport_scan_copy')
+                            PassportData.passport_scan_copy = item.filename;
+                        if (item.fieldname === 'passport_upload_photo')
+                            PassportData.passport_upload_photo = item.filename;
+                        if (item.fieldname === 'passport_upload_others')
+                            PassportData.passport_upload_others = item.filename;
+                    });
+                }
                 const { email } = passportParseInfo;
                 const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 if ((appConfig === null || appConfig === void 0 ? void 0 : appConfig.tac_auto_email) === 1 && email && regex.test(email)) {
@@ -73,38 +90,44 @@ class PassportServices extends abstract_services_1.default {
          */
         this.editPassport = (req) => __awaiter(this, void 0, void 0, function* () {
             const { passport_no, name, mobile_no, date_of_birth, date_of_issue, date_of_expire, email, nid, passport_created_by, passport_person_type, } = req.body;
-            const imageList = req.imgUrl;
-            const initialMergedImageObject = {
-                passport_scan_copy: '',
-                passport_upload_photo: '',
-                passport_upload_others: '',
-            };
-            const imageListWithName = imageList.reduce((acc, image) => Object.assign(acc, image), initialMergedImageObject);
             const { passport_id } = req.params;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.passportModel(req, trx);
-                if (imageListWithName.passport_scan_copy) {
-                    const data = yield conn.passportScanCopy(passport_id);
-                    yield this.deleteFile.delete_image(data === null || data === void 0 ? void 0 : data.passport_scan_copy);
+                const files = req.files;
+                const { passport_scan_copy, passport_upload_others, passport_upload_photo, } = yield conn.getPassportInfo(passport_id);
+                const passportInfo = {
+                    passport_passport_no: passport_no,
+                    passport_name: name,
+                    passport_mobile_no: mobile_no,
+                    passport_date_of_birth: date_of_birth,
+                    passport_date_of_issue: date_of_issue,
+                    passport_date_of_expire: date_of_expire,
+                    passport_email: email,
+                    passport_nid_no: nid,
+                    passport_person_type,
+                };
+                if (files) {
+                    files.map((item) => {
+                        if (item.fieldname === 'passport_scan_copy') {
+                            passportInfo.passport_scan_copy = item.filename;
+                            if (passport_scan_copy)
+                                this.manageFile.deleteFromCloud([passport_scan_copy]);
+                        }
+                        if (item.fieldname === 'passport_upload_photo') {
+                            passportInfo.passport_upload_photo = item.filename;
+                            if (passport_upload_photo)
+                                this.manageFile.deleteFromCloud([passport_upload_photo]);
+                        }
+                        if (item.fieldname === 'passport_upload_others') {
+                            passportInfo.passport_upload_others = item.filename;
+                            if (passport_upload_others)
+                                this.manageFile.deleteFromCloud([passport_upload_others]);
+                        }
+                    });
                 }
-                if (imageListWithName.passport_upload_photo) {
-                    const data = yield conn.passportScanCopy(passport_id);
-                    yield this.deleteFile.delete_image(data === null || data === void 0 ? void 0 : data.passport_upload_photo);
-                }
-                if (imageListWithName.passport_upload_others) {
-                    const data = yield conn.passportScanCopy(passport_id);
-                    yield this.deleteFile.delete_image(data === null || data === void 0 ? void 0 : data.passport_upload_photo);
-                }
-                const passportInfo = Object.assign(Object.assign(Object.assign({ passport_passport_no: passport_no, passport_name: name, passport_mobile_no: mobile_no, passport_date_of_birth: date_of_birth, passport_date_of_issue: date_of_issue, passport_date_of_expire: date_of_expire, passport_email: email, passport_nid_no: nid, passport_person_type }, (imageListWithName.passport_scan_copy && {
-                    passport_scan_copy: imageListWithName.passport_scan_copy,
-                })), (imageListWithName.passport_upload_photo && {
-                    passport_upload_photo: imageListWithName.passport_upload_photo,
-                })), (imageListWithName.passport_upload_others && {
-                    passport_upload_others: imageListWithName.passport_upload_others,
-                }));
                 const passport_ids = yield conn.editPassport(passportInfo, passport_id);
                 // insert audit
-                const message = `UPDATED PASSPORT, PASSPORT NO ${passport_no}`;
+                const message = `Passport updated successfully`;
                 yield this.insertAudit(req, 'update', message, passport_created_by, 'PASSPORT');
                 return {
                     success: true,
@@ -237,6 +260,8 @@ class PassportServices extends abstract_services_1.default {
             const { passport_id } = req.params;
             const { deleted_by } = req.body;
             const conn = this.models.passportModel(req);
+            const prev_files = yield conn.getPassportFiles(passport_id);
+            prev_files.length && (yield this.manageFile.deleteFromCloud(prev_files));
             yield conn.deletePassport(passport_id, deleted_by);
             return {
                 success: true,
@@ -244,7 +269,6 @@ class PassportServices extends abstract_services_1.default {
                 message: 'Passport no. is unique',
             };
         });
-        this.deleteFile = new deleteFIle_1.default();
     }
 }
 exports.default = PassportServices;

@@ -2,9 +2,14 @@ import dayjs from 'dayjs';
 import { Request } from 'express';
 import AbstractServices from '../../../abstracts/abstract.services';
 import { getClientOrCombId } from '../../../common/helpers/invoice.helpers';
+import SendEmailHelper from '../../../common/helpers/sendEmail.helper';
+import {
+  completePassportStatus,
+  createPassport,
+  updatePassportStatus,
+} from '../../../common/templates/passportEmail.templates';
 import { IPassportDb } from '../../../common/types/common.types';
 import CustomError from '../../../common/utils/errors/customError';
-import DeleteFile from '../../../common/utils/fileRemover/deleteFIle';
 import Lib from '../../../common/utils/libraries/lib';
 import {
   ChangePassport,
@@ -13,32 +18,19 @@ import {
   IPassportReqBody,
   IPassport_info,
   SMSlog,
-  UploadedImage,
 } from '../types/passport.interfaces';
-import SendEmailHelper from '../../../common/helpers/sendEmail.helper';
-import {
-  completePassportStatus,
-  createPassport,
-  updatePassportStatus,
-} from '../../../common/templates/passportEmail.templates';
 
 class PassportServices extends AbstractServices {
   constructor() {
     super();
-
-    this.deleteFile = new DeleteFile();
   }
 
   /**
    * Add/ Upload Passport
    */
   public addPassport = async (req: Request) => {
-    const {
-      client_id,
-      passport_rec_cl_id,
-      passport_info,
-      passport_created_by,
-    } = req.body as IPassportReqBody;
+    const { client_id, passport_info, passport_created_by } =
+      req.body as IPassportReqBody;
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.passportModel(req, trx);
@@ -46,12 +38,7 @@ class PassportServices extends AbstractServices {
 
       const passportParseInfo: IPassport_info = JSON.parse(passport_info);
 
-      const imageList = req.imgUrl as UploadedImage[];
-
-      const imageListWithName = imageList.reduce(
-        (acc, image) => Object.assign(acc, image),
-        {}
-      );
+      const files = req.files as Express.Multer.File[] | [];
 
       const {
         org_name,
@@ -86,11 +73,18 @@ class PassportServices extends AbstractServices {
         passport_email: passportParseInfo.email as string,
         passport_nid_no: passportParseInfo.nid as string,
         passport_created_by: passport_created_by,
-        ...imageListWithName,
-        ...(passport_rec_cl_id && {
-          passport_rec_cl_id: passport_rec_cl_id,
-        }),
       };
+
+      if (files) {
+        files.map((item) => {
+          if (item.fieldname === 'passport_scan_copy')
+            PassportData.passport_scan_copy = item.filename;
+          if (item.fieldname === 'passport_upload_photo')
+            PassportData.passport_upload_photo = item.filename;
+          if (item.fieldname === 'passport_upload_others')
+            PassportData.passport_upload_others = item.filename;
+        });
+      }
 
       const { email } = passportParseInfo;
       const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -154,42 +148,17 @@ class PassportServices extends AbstractServices {
       passport_person_type,
     } = req.body as IPassportEditReqBody;
 
-    const imageList = req.imgUrl as UploadedImage[];
-
-    const initialMergedImageObject = {
-      passport_scan_copy: '',
-      passport_upload_photo: '',
-      passport_upload_others: '',
-    };
-
-    const imageListWithName: UploadedImage = imageList.reduce(
-      (acc, image) => Object.assign(acc, image),
-      initialMergedImageObject
-    );
-
     const { passport_id } = req.params;
 
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.passportModel(req, trx);
 
-      if (imageListWithName.passport_scan_copy) {
-        const data = await conn.passportScanCopy(passport_id);
-        await this.deleteFile.delete_image(data?.passport_scan_copy as string);
-      }
-
-      if (imageListWithName.passport_upload_photo) {
-        const data = await conn.passportScanCopy(passport_id);
-        await this.deleteFile.delete_image(
-          data?.passport_upload_photo as string
-        );
-      }
-
-      if (imageListWithName.passport_upload_others) {
-        const data = await conn.passportScanCopy(passport_id);
-        await this.deleteFile.delete_image(
-          data?.passport_upload_photo as string
-        );
-      }
+      const files = req.files as Express.Multer.File[] | [];
+      const {
+        passport_scan_copy,
+        passport_upload_others,
+        passport_upload_photo,
+      } = await conn.getPassportInfo(passport_id);
 
       const passportInfo: IEditPassport = {
         passport_passport_no: passport_no,
@@ -201,22 +170,32 @@ class PassportServices extends AbstractServices {
         passport_email: email,
         passport_nid_no: nid,
         passport_person_type,
-
-        ...(imageListWithName.passport_scan_copy && {
-          passport_scan_copy: imageListWithName.passport_scan_copy,
-        }),
-        ...(imageListWithName.passport_upload_photo && {
-          passport_upload_photo: imageListWithName.passport_upload_photo,
-        }),
-        ...(imageListWithName.passport_upload_others && {
-          passport_upload_others: imageListWithName.passport_upload_others,
-        }),
       };
+
+      if (files) {
+        files.map((item) => {
+          if (item.fieldname === 'passport_scan_copy') {
+            passportInfo.passport_scan_copy = item.filename;
+            if (passport_scan_copy)
+              this.manageFile.deleteFromCloud([passport_scan_copy]);
+          }
+          if (item.fieldname === 'passport_upload_photo') {
+            passportInfo.passport_upload_photo = item.filename;
+            if (passport_upload_photo)
+              this.manageFile.deleteFromCloud([passport_upload_photo]);
+          }
+          if (item.fieldname === 'passport_upload_others') {
+            passportInfo.passport_upload_others = item.filename;
+            if (passport_upload_others)
+              this.manageFile.deleteFromCloud([passport_upload_others]);
+          }
+        });
+      }
 
       const passport_ids = await conn.editPassport(passportInfo, passport_id);
 
       // insert audit
-      const message = `UPDATED PASSPORT, PASSPORT NO ${passport_no}`;
+      const message = `Passport updated successfully`;
       await this.insertAudit(
         req,
         'update',
@@ -477,6 +456,9 @@ class PassportServices extends AbstractServices {
     const { deleted_by } = req.body;
 
     const conn = this.models.passportModel(req);
+    const prev_files = await conn.getPassportFiles(passport_id);
+
+    prev_files.length && (await this.manageFile.deleteFromCloud(prev_files));
 
     await conn.deletePassport(passport_id, deleted_by);
 

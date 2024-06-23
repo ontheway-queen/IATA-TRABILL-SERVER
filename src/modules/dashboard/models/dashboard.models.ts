@@ -1,7 +1,7 @@
 import moment from 'moment';
 import AbstractModels from '../../../abstracts/abstract.models';
 import { idType } from '../../../common/types/common.types';
-import { IAirTicketSummary } from '../types/dashboard.types';
+import { IAirTicketSummary, IBspDocs } from '../types/dashboard.types';
 
 class DashboardModels extends AbstractModels {
   // @Search Invoices
@@ -466,6 +466,7 @@ class DashboardModels extends AbstractModels {
   ) => {
     const [data] = await this.query()
       .select(
+        'airticket_vendor_id as vendor_id',
         this.db.raw('sum(airticket_gross_fare) as gross_fare'),
         this.db.raw('sum(airticket_tax) as tax'),
         this.db.raw('sum(airticket_base_fare) * 0.07 as iata_commission'),
@@ -571,6 +572,40 @@ class DashboardModels extends AbstractModels {
     return data;
   };
 
+  // BSP IATA PAYMENT
+  getBSPBillingPayment = async (
+    from_date: string | Date,
+    to_date: string | Date
+  ) => {
+    if (!from_date || !to_date) {
+      return [];
+    }
+
+    return await this.db
+      .queryBuilder()
+      .from('trabill_vendor_payments')
+      .select(
+        'vpay_id',
+        'vouchar_no',
+        'payment_method_id',
+        'payment_amount',
+        'payment_date',
+        'vendor_id',
+        'vendor_name',
+        'account_id',
+        'account_name',
+        'user_id',
+        'user_full_name'
+      )
+      .leftJoin('trabill_vendors', 'vendor_id', 'vpay_vendor_id')
+      .leftJoin('trabill_accounts', 'account_id', 'vpay_account_id')
+      .leftJoin('trabill_users', 'user_id', 'created_by')
+      .where('vendor_org_agency', this.org_agency)
+      .andWhereNot('vpay_is_deleted', 1)
+      .andWhere('vendor_type', 'IATA')
+      .andWhereRaw('Date(payment_date) BETWEEN ? AND ?', [from_date, to_date]);
+  };
+
   getBspTicketRefundSummary = async (
     from_date: string | Date,
     to_date: string | Date
@@ -581,16 +616,6 @@ class DashboardModels extends AbstractModels {
       .where('vendor_org_agency', this.org_agency)
       .andWhere('vendor_type', 'IATA')
       .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [from_date, to_date]);
-
-    // const [{ total_ticket_refund }] = (await this.query()
-    //   .sum('vrefund_return_amount as total_ticket_refund')
-    //   .from('v_bsp_ticket_refund')
-    //   .where('vendor_org_agency', this.org_agency)
-    //   .andWhere('vendor_type', 'IATA')
-    //   .andWhereRaw(`DATE(vrefund_date) BETWEEN ? AND ?`, [
-    //     from_date,
-    //     to_date,
-    //   ])) as { total_ticket_refund: string }[];
 
     return { ticket_refund };
   };
@@ -610,7 +635,8 @@ class DashboardModels extends AbstractModels {
       )
       .from('trabill_vendors')
       .whereNot('vendor_is_deleted', 1)
-      .andWhere('vendor_org_agency', this.org_agency);
+      .andWhere('vendor_org_agency', this.org_agency)
+      .limit(3);
 
     return data;
   }
@@ -763,6 +789,162 @@ class DashboardModels extends AbstractModels {
       .andWhereNot('vendor_is_deleted', 1);
 
     return result;
+  };
+
+  getTicketInfoByTicket = async (ticket_no: string) => {
+    const [ticket] = await this.query()
+      .select([
+        'invoice_id as id',
+        this.db.raw("'DB' AS type"),
+        'invoice_no',
+        'invoice_category_id',
+        'airticket_ticket_no as ticket_no',
+        'airticket_sales_date as sales_date',
+        'airticket_gross_fare as gross_fare',
+        'airticket_base_fare as base_fare',
+        'airticket_commission_percent as commission_percent',
+        'airticket_commission_percent_total as commission_percent_total',
+        'airticket_ait as ait',
+        'airticket_purchase_price as purchase_price',
+      ])
+      .from('trabill.v_bsp_ticket_issue')
+      .where('airticket_ticket_no', 'like', `%${ticket_no}%`)
+      .andWhere('vendor_org_agency', this.org_agency);
+
+    return ticket;
+  };
+
+  getTicketInfoByRefund = async (ticket_no: string) => {
+    const [ticket] = await this.query()
+      .select(
+        { refund_id: 'vrefund_refund_id' },
+        this.db.raw("'DB' AS type"),
+        'airticket_ticket_no as ticket_no',
+        'atrefund_vouchar_number as vouchar_number',
+        'client_name',
+        'comb_client',
+        'refund_type',
+        'vrefund_total_amount as total_amount',
+        'vrefund_charge_amount as charge_amount',
+        'vrefund_date as date',
+        'vrefund_return_amount as return_amount',
+        'airline_name'
+      )
+      .from('trabill.v_bsp_ticket_refund')
+      .where('airticket_ticket_no', 'like', `%${ticket_no}%`)
+      .andWhere('vendor_org_agency', this.org_agency);
+
+    return ticket;
+  };
+
+  public async insertBspFile(data: IBspDocs) {
+    await this.query().insert(data).into('trabill_bsp_bill');
+  }
+
+  public async deleteBSPDocs(tbd_id: idType) {
+    const [{ tbd_doc }] = (await this.query()
+      .select('tbd_doc')
+      .from('trabill_bsp_docs')
+      .where({ tbd_id })) as { tbd_doc: string }[];
+
+    await this.query()
+      .update({ tbd_is_deleted: 1 })
+      .into('trabill_bsp_docs')
+      .where({ tbd_id });
+
+    return tbd_doc;
+  }
+
+  public async selectBspFiles(search: string, date?: string) {
+    date = date ? moment(new Date(date)).format('YYYY-MM-DD') : undefined;
+    const data = await this.query()
+      .select('bsp_id', 'bsp_file_name')
+      .from('trabill_bsp_bill')
+      .where('bsp_agency_id', this.org_agency)
+      .andWhereNot('bsp_is_deleted', 1)
+      .modify((builder) => {
+        if (date) {
+          builder.andWhereRaw('Date(bsp_bill_date)', date);
+        }
+        if (search) {
+          builder.andWhereILike('bsp_file_name', `%${search}%`);
+        }
+      })
+      .limit(50);
+
+    return data;
+  }
+
+  public async bspFileList(
+    search: string,
+    page: number = 1,
+    size: number = 50,
+    date?: string
+  ) {
+    date = date ? moment(new Date(date)).format('YYYY-MM-DD') : undefined;
+
+    const offset = (page - 1) * size;
+
+    const data = await this.query()
+      .select(
+        'bsp_id',
+        'bsp_file_name',
+        'bsp_file_url',
+        'bsp_bill_date',
+        'bsp_created_date',
+        'user_full_name as created_by'
+      )
+      .from('trabill_bsp_bill')
+      .leftJoin('trabill_users', { user_id: 'bsp_created_by' })
+      .where('bsp_agency_id', this.org_agency)
+      .andWhereNot('bsp_is_deleted', 1)
+      .modify((builder) => {
+        if (date) {
+          builder.whereRaw('Date(bsp_bill_date) = ?', [date]);
+        }
+        if (search) {
+          builder.andWhereILike('bsp_file_name', `%${search}%`);
+        }
+      })
+      .limit(size)
+      .offset(offset);
+
+    const [{ count }] = await this.query()
+      .count('* as count')
+      .from('trabill_bsp_bill')
+      .where('bsp_agency_id', this.org_agency)
+      .andWhereNot('bsp_is_deleted', 1)
+      .modify((builder) => {
+        if (date) {
+          builder.whereRaw('Date(bsp_bill_date) = ?', [date]);
+        }
+        if (search) {
+          builder.andWhereILike('bsp_file_name', `%${search}%`);
+        }
+      });
+
+    return { data, count };
+  }
+
+  public async getBspFileUrl(id: idType) {
+    const [data] = (await this.query()
+      .select('bsp_file_url')
+      .from('trabill_bsp_bill')
+      .where('bsp_agency_id', this.org_agency)
+      .andWhere('bsp_id', id)) as { bsp_file_url: string }[];
+
+    return data;
+  }
+
+  checkBspFileIsExist = async (fileName: string) => {
+    const [{ count }] = (await this.query()
+      .count('* as count')
+      .from('trabill_bsp_bill')
+      .where('bsp_agency_id', this.org_agency)
+      .andWhere('bsp_file_name', fileName)
+      .andWhereNot('bsp_is_deleted', 1)) as { count: number }[];
+
+    return count;
   };
 }
 

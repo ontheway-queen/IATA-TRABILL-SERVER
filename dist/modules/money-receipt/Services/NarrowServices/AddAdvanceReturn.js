@@ -61,7 +61,7 @@ class AddAdvanceReturn extends abstract_services_1.default {
                         acctrxn_created_by: advr_created_by,
                         acctrxn_note: advr_note,
                         acctrxn_particular_id: 118,
-                        acctrxn_particular_type: 'Money receipt',
+                        acctrxn_particular_type: 'Money Receipt',
                         acctrxn_pay_type: accPayType,
                     };
                     acc_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -85,7 +85,7 @@ class AddAdvanceReturn extends abstract_services_1.default {
                         charge_from_client_id: client_id,
                         charge_from_ccombined_id: combined_id,
                         charge_amount: advr_trxn_charge,
-                        charge_purpose: 'Money receipt advance return',
+                        charge_purpose: 'Money Receipt Advance Return',
                         charge_note: advr_note,
                     };
                     advr_trxn_charge_id = yield this.models

@@ -121,7 +121,7 @@ class AddInvoiceWithPnr extends AbstractServices {
       const clientTransId = await utils.clientTrans(trxns, {
         ctrxn_pnr: invoice_pnr,
         ctrxn_route: route_name,
-        extra_particular: 'Add Invoice Air Ticket(PNR)',
+        extra_particular: 'Air Ticket(PNR)',
         invoice_no,
         ticket_no,
       });

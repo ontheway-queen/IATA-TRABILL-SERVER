@@ -15,9 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_controllers_1 = __importDefault(require("../../../abstracts/abstract.controllers"));
 const adminPanel_services_1 = __importDefault(require("../Services/adminPanel.services"));
 const adminPanel_validators_1 = __importDefault(require("../Validators/adminPanel.validators"));
-const multer = require('multer');
-// Create a Multer instance with the desired configuration
-const upload = multer({ dest: 'uploads/' });
 class AdminPanelControllers extends abstract_controllers_1.default {
     constructor() {
         super();

@@ -21,14 +21,10 @@ class DeleteAgentProfile extends abstract_services_1.default {
             const agentId = req.params.id;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.agentProfileModel(req, trx);
-                // const agnetTransactions = await conn.getAgentTransactions(agentId);
-                /*       if (agnetTransactions[0]) {
-                        throw new CustomError(
-                          "Agent have some transactions you can't delete the agent",
-                          400,
-                          'Bad Request'
-                        );
-                      } */
+                const { image_arr } = yield conn.getPrevImages(agentId);
+                if (image_arr && image_arr.length) {
+                    yield this.manageFile.deleteFromCloud(image_arr);
+                }
                 yield conn.deleteAgentProfile(agentId, agent_deleted_by);
                 const message = `Agent profile has been deleted`;
                 yield this.insertAudit(req, 'delete', message, agent_deleted_by, 'ACCOUNTS');

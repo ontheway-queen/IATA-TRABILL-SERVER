@@ -15,38 +15,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../common/helpers/common.helper");
-const CommonSmsSend_services_1 = __importDefault(require("../../../smsSystem/utils/CommonSmsSend.services"));
 const lib_1 = require("../../../../common/utils/libraries/lib");
+const CommonSmsSend_services_1 = __importDefault(require("../../../smsSystem/utils/CommonSmsSend.services"));
 class AddMoneyReceipt extends abstract_services_1.default {
     constructor() {
         super();
         this.addMoneyReceipt = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { receipt_combclient, receipt_payment_to, receipt_total_amount, receipt_money_receipt_no, receipt_payment_type, receipt_payment_date, receipt_note, cheque_number, cheque_withdraw_date, cheque_bank_name, account_id, receipt_created_by, invoices, tickets, charge_amount, receipt_total_discount, trans_no, receipt_walking_customer_name, } = req.body;
+            const { receipt_combclient, receipt_payment_to, receipt_total_amount, receipt_money_receipt_no, receipt_payment_type, receipt_payment_date, receipt_note, cheque_number, cheque_withdraw_date, cheque_bank_name, account_id, receipt_created_by, invoices, tickets, charge_amount, receipt_total_discount, trans_no, receipt_walking_customer_name, received_by, } = req.body;
             const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(receipt_combclient);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.MoneyReceiptModels(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const receipt_vouchar_no = yield this.generateVoucher(req, 'MR');
-                const receipt_payment_status = receipt_payment_type === 4 ? 'PENDING' : 'SUCCESS';
+                const cheque_status = receipt_payment_type === 4 ? 'PENDING' : 'SUCCESS';
+                const voucher_no = yield this.generateVoucher(req, 'MR');
                 // @RECEIPT_ID
                 let receipt_actransaction_id;
                 let client_trxn_id = null;
                 let online_charge_purpuse = 'Money receipt';
                 const amount_after_discount = Number(receipt_total_amount) - Number(receipt_total_discount) || 0;
-                const note = receipt_total_discount
-                    ? `Paid ${receipt_total_amount} discount ${receipt_total_discount}, ${receipt_note || ''}`
-                    : receipt_note || '';
                 const accPayType = (0, lib_1.getPaymentType)(+receipt_payment_type);
                 if (receipt_payment_type !== 4) {
                     const AccTrxnBody = {
                         acctrxn_ac_id: account_id,
                         acctrxn_type: 'CREDIT',
-                        acctrxn_voucher: receipt_vouchar_no,
+                        acctrxn_voucher: voucher_no,
                         acctrxn_amount: amount_after_discount,
                         acctrxn_created_at: receipt_payment_date,
                         acctrxn_created_by: receipt_created_by,
-                        acctrxn_note: note,
+                        acctrxn_note: receipt_note,
                         acctrxn_particular_id: 2,
                         acctrxn_particular_type: 'Money receipt',
                         acctrxn_pay_type: accPayType,
@@ -56,10 +53,10 @@ class AddMoneyReceipt extends abstract_services_1.default {
                         ctrxn_type: 'CREDIT',
                         ctrxn_amount: receipt_total_amount,
                         ctrxn_cl: receipt_combclient,
-                        ctrxn_voucher: receipt_vouchar_no,
+                        ctrxn_voucher: voucher_no,
                         ctrxn_particular_id: 114,
                         ctrxn_created_at: receipt_payment_date,
-                        ctrxn_note: note,
+                        ctrxn_note: receipt_note,
                         ctrxn_particular_type: 'Money Receipt',
                         ctrxn_pay_type: accPayType,
                     };
@@ -81,7 +78,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                 }
                 const receiptInfo = {
                     receipt_trnxtype_id: 2,
-                    receipt_vouchar_no,
+                    receipt_vouchar_no: voucher_no,
                     receipt_client_id: client_id,
                     receipt_combined_id: combined_id,
                     receipt_actransaction_id,
@@ -95,112 +92,87 @@ class AddMoneyReceipt extends abstract_services_1.default {
                     receipt_note,
                     receipt_account_id: account_id,
                     receipt_created_by,
-                    receipt_payment_status,
+                    receipt_payment_status: cheque_status,
                     receipt_trxn_charge: charge_amount,
                     receipt_trxn_charge_id,
                     receipt_trxn_no: trans_no,
                     receipt_walking_customer_name,
+                    receipt_received_by: received_by,
                 };
                 const receipt_id = yield conn.insertMoneyReceipt(receiptInfo);
-                // money receipt to invoice
-                if (receipt_payment_to === 'INVOICE') {
-                    for (const invoice of invoices) {
-                        const invoiceClientPaymentInfo = {
-                            invclientpayment_moneyreceipt_id: receipt_id,
-                            invclientpayment_invoice_id: invoice.invoice_id,
-                            invclientpayment_client_id: client_id,
-                            invclientpayment_combined_id: combined_id,
-                            invclientpayment_cltrxn_id: client_trxn_id,
-                            invclientpayment_amount: invoice.invoice_amount,
-                            invclientpayment_date: receipt_payment_date,
-                            invclientpayment_collected_by: receipt_created_by,
-                        };
-                        yield conn.insertInvoiceClPay(invoiceClientPaymentInfo);
-                        const history_data = {
-                            history_activity_type: 'INVOICE_PAYMENT_CREATED',
-                            history_invoice_id: invoice.invoice_id,
-                            history_created_by: receipt_created_by,
-                            history_invoice_payment_amount: invoice.invoice_amount,
-                            invoicelog_content: `Payment added to Invoice (Amount = ${invoice.invoice_amount})/-`,
-                        };
-                        yield common_conn.insertInvoiceHistory(history_data);
-                        online_charge_purpuse = 'Money receipt to specific invoice';
-                    }
-                }
-                // money receipt to ticket
-                else if (receipt_payment_to === 'TICKET') {
-                    for (const ticket of tickets) {
-                        const { invoice_amount, invoice_id, ticket_no } = ticket;
-                        const invoiceClientPaymentInfo = {
-                            invclientpayment_moneyreceipt_id: receipt_id,
-                            invclientpayment_invoice_id: invoice_id,
-                            invclientpayment_client_id: client_id,
-                            invclientpayment_combined_id: combined_id,
-                            invclientpayment_cltrxn_id: client_trxn_id,
-                            invclientpayment_amount: invoice_amount,
-                            invclientpayment_date: receipt_payment_date,
-                            invclientpayment_collected_by: receipt_created_by,
-                            invclientpayment_ticket_number: ticket_no,
-                        };
-                        yield conn.insertInvoiceClPay(invoiceClientPaymentInfo);
-                        const history_data = {
-                            history_activity_type: 'INVOICE_PAYMENT_CREATED',
-                            history_invoice_id: invoice_id,
-                            history_created_by: receipt_created_by,
-                            history_invoice_payment_amount: invoice_amount,
-                            invoicelog_content: 'Money receipt hass been deleted',
-                        };
-                        yield common_conn.insertInvoiceHistory(history_data);
-                        online_charge_purpuse = 'Money receipt to specific ticket';
-                    }
-                }
-                // money receipt to overall
-                else if (receipt_payment_to === 'OVERALL') {
-                    const cl_due = yield conn.getInvoicesIdAndAmount(client_id, combined_id);
-                    let paidAmountNow = 0;
-                    for (const item of cl_due) {
-                        const { invoice_id, total_due } = item;
-                        const availableAmount = Number(receipt_total_amount) - paidAmountNow;
-                        const payment_amount = availableAmount >= total_due ? total_due : availableAmount;
-                        const invoiceClientPaymentInfo = {
-                            invclientpayment_moneyreceipt_id: receipt_id,
-                            invclientpayment_invoice_id: invoice_id,
-                            invclientpayment_client_id: client_id,
-                            invclientpayment_cltrxn_id: client_trxn_id,
-                            invclientpayment_amount: payment_amount,
-                            invclientpayment_date: receipt_payment_date,
-                            invclientpayment_collected_by: receipt_created_by,
-                            invclientpayment_combined_id: combined_id,
-                        };
-                        yield conn.insertInvoiceClPay(invoiceClientPaymentInfo);
-                        const history_data = {
-                            history_activity_type: 'INVOICE_PAYMENT_CREATED',
-                            history_invoice_id: invoice_id,
-                            history_created_by: receipt_created_by,
-                            history_invoice_payment_amount: payment_amount,
-                            invoicelog_content: `CLIENT PAYMENT FOR OVERALL BDT ${payment_amount}/-`,
-                        };
-                        yield common_conn.insertInvoiceHistory(history_data);
-                        paidAmountNow += payment_amount;
-                        if (total_due >= availableAmount) {
-                            break;
-                        }
-                        else {
-                            continue;
-                        }
-                    }
-                    online_charge_purpuse = 'Money receipt to overall';
-                }
                 if (receipt_payment_type === 4) {
                     const moneyReceiptChequeData = {
                         cheque_receipt_id: receipt_id,
                         cheque_number,
                         cheque_withdraw_date,
                         cheque_bank_name,
-                        cheque_status: receipt_payment_status,
+                        cheque_status,
                     };
                     yield conn.insertMoneyReceiptChequeInfo(moneyReceiptChequeData);
                 }
+                const commonInvInfo = [];
+                if (receipt_payment_to === 'INVOICE') {
+                    for (const invoice of invoices) {
+                        commonInvInfo.push({
+                            invoice_id: invoice.invoice_id,
+                            pay_amount: invoice.invoice_amount,
+                        });
+                    }
+                }
+                else if (receipt_payment_to === 'TICKET') {
+                    for (const ticket of tickets) {
+                        commonInvInfo.push({
+                            invoice_id: ticket.invoice_id,
+                            pay_amount: ticket.invoice_amount,
+                            ticket_no: ticket.ticket_no,
+                        });
+                    }
+                }
+                else {
+                    const cl_due = yield conn.getInvoicesIdAndAmount(client_id, combined_id);
+                    let paidAmountNow = 0;
+                    for (const { invoice_id, total_due } of cl_due) {
+                        const availableAmount = Number(receipt_total_amount) - paidAmountNow;
+                        const payment_amount = Math.min(availableAmount, total_due);
+                        commonInvInfo.push({
+                            invoice_id: invoice_id,
+                            pay_amount: payment_amount,
+                        });
+                        paidAmountNow += payment_amount;
+                        if (total_due >= availableAmount)
+                            break;
+                    }
+                }
+                let invClPayments = [];
+                let history_data = [];
+                for (const item of commonInvInfo) {
+                    invClPayments.push({
+                        invclientpayment_moneyreceipt_id: receipt_id,
+                        invclientpayment_invoice_id: item.invoice_id,
+                        invclientpayment_client_id: client_id,
+                        invclientpayment_combined_id: combined_id,
+                        invclientpayment_amount: item.pay_amount,
+                        invclientpayment_date: receipt_payment_date,
+                        invclientpayment_collected_by: receipt_created_by,
+                        invclientpayment_ticket_number: item === null || item === void 0 ? void 0 : item.ticket_no,
+                        invclientpayment_cltrxn_id: client_trxn_id,
+                    });
+                    history_data.push({
+                        history_activity_type: 'INVOICE_PAYMENT_CREATED',
+                        history_invoice_id: item.invoice_id,
+                        history_created_by: receipt_created_by,
+                        history_invoice_payment_amount: item.pay_amount,
+                        invoicelog_content: 'Money receipt has been deleted',
+                        history_org_agency: req.agency_id,
+                    });
+                }
+                if (invClPayments.length) {
+                    yield conn.insertInvoiceClPay(invClPayments);
+                }
+                if (history_data.length) {
+                    yield common_conn.insertInvHistory(history_data);
+                }
+                // update voucher, sms send & audit history
                 const smsInvoiceDate = {
                     invoice_client_id: client_id,
                     invoice_combined_id: combined_id,
@@ -209,7 +181,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                     receipt_id,
                 };
                 yield new CommonSmsSend_services_1.default().sendSms(req, smsInvoiceDate, trx);
-                yield this.insertAudit(req, 'create', `ADDED MONEY RECEIPT ,VOUCHER ${receipt_vouchar_no}, BDT ${receipt_total_amount}/- `, receipt_created_by, 'MONEY_RECEIPT');
+                yield this.insertAudit(req, 'create', `ADDED MONEY RECEIPT ,VOUCHER ${voucher_no}, BDT ${receipt_total_amount}/- `, receipt_created_by, 'MONEY_RECEIPT');
                 yield this.updateVoucher(req, 'MR');
                 return {
                     success: true,

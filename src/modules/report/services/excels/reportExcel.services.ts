@@ -1654,287 +1654,32 @@ class ReportExcelServices extends AbstractServices {
     };
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.profitLossReport(req, trx);
-      const user_percentage = await conn.getUserPercentage(req.user_id);
 
-      const { total_sales_price, total_cost_price } = await conn.totalSales(
-        String(from_date),
-        String(to_date),
-        user_percentage
-      );
-
-      const total_refun_profit = await conn.refundProfitAir(
-        String(from_date),
-        String(to_date)
-      );
-      const total_employee_salary = await conn.getEmployeeExpense(
-        String(from_date),
-        String(to_date),
-        user_percentage
-      );
-      const incentive = await conn.allIncentive(
-        String(from_date),
-        String(to_date),
-        user_percentage
-      );
-      const expense_total = await conn.allExpenses(
-        String(from_date),
-        String(to_date),
-        user_percentage
-      );
-      const client_discount = await conn.getAllClientDiscount(
-        String(from_date),
-        String(to_date),
-        user_percentage
-      );
-
-      const service_charge = await conn.getInvoicesServiceCharge(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      // const tour_profit = await conn.getTourProfitLoss(from_date, to_date);
-
-      const total_sales_profit =
-        (total_sales_price - (total_cost_price | 0)) | 0;
-      const gross_profit_loss = total_sales_profit + (total_refun_profit | 0);
-
-      const total_gross_profit_loss =
-        gross_profit_loss + incentive + service_charge + 0;
-
-      const total_discount = client_discount || 0;
-
-      const tour_pakage_profit = 0;
-      const total_service_charge = service_charge || 0;
-
-      const data = {
-        total_sales_price,
-        total_cost_price,
-        total_sales_profit,
-        total_refun_profit,
-        gross_profit_loss,
-        total_incentive_income: incentive,
-        expense_total,
-        total_employee_salary,
-        total_discount,
-        overall_expense: expense_total + (total_employee_salary | 0),
-        total_gross_profit_loss,
-        net_profit_loss:
-          total_gross_profit_loss -
-          (expense_total + (total_employee_salary | 0)),
-        tour_pakage_profit,
-        total_service_charge,
-      };
+      const data = await conn.overallProfitLoss(from_date, to_date);
 
       const workbook = new ExcelJS.Workbook();
       const dirPath = path.join(__dirname, '../files');
-      const filePath = `${dirPath}/OverallProfitLossReport.xlsx`;
-      const worksheet = workbook.addWorksheet('Over All Profit Loss Report');
+      const filePath = `${dirPath}/profit_loss.xlsx`;
+      const worksheet = workbook.addWorksheet('Overall profit loss report');
 
-      /**
-       * Populate the data for the Gross Profit/Loss
-       */
-      worksheet.getCell('A1').value = 'Gross Profit/Loss';
-      const grossMergeCell = worksheet.getCell('A1');
-      if (grossMergeCell.isMerged) {
-        const mergeCellAddress = grossMergeCell.master.address;
-        worksheet.unMergeCells(mergeCellAddress);
-      }
-      worksheet.mergeCells('A1:E1');
-
-      worksheet.getCell('A1').style = {
-        font: { color: { argb: 'FFFFFF' }, bold: true },
-        alignment: { horizontal: 'center', vertical: 'middle' },
-        fill: {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: '18b4e9' },
-        },
-      };
-      worksheet.getColumn('A').width = 20;
-      const columns = ['B', 'C', 'D', 'E', 'F', 'G'];
-      columns.forEach((column) => {
-        worksheet.getColumn(column).width = 15;
-      });
-      const GrossColumnHeader = [
-        { callName: 'A2', value: 'Sales' },
-        { callName: 'B2', value: 'Cost Of Product' },
-        { callName: 'C2', value: 'Sales Profit' },
-        { callName: 'D2', value: 'Refund Profit' },
-        { callName: 'F2', value: 'Tour Pakage Profit' },
-        { callName: 'G2', value: 'Service Charge' },
-        { callName: 'E2', value: 'Gross Profit/Loss' },
-      ];
-      GrossColumnHeader.forEach((head) => {
-        worksheet.getCell(head.callName).value = head.value;
-        worksheet.getCell(head.callName).style = {
-          font: { bold: true },
-        };
-      });
-
-      const grossProfitLossData = [
-        [
-          data.total_sales_price,
-          data.total_cost_price,
-          data.total_sales_profit,
-          data.total_refun_profit,
-          data.total_service_charge,
-          data.tour_pakage_profit,
-          ,
-          data.gross_profit_loss,
-        ],
-      ];
-      grossProfitLossData.forEach((row, rowIndex) => {
-        row.forEach((value, columnIndex) => {
-          worksheet.getCell(rowIndex + 3, columnIndex + 1).value = value;
-          worksheet.getCell(rowIndex + 3, columnIndex + 1).style = {
-            alignment: { horizontal: 'left' },
-          };
-        });
-      });
-
-      /**
-       * Incentive Income REPORT
-       */
-      worksheet.getCell('G1').value = 'Incentive Income';
-      worksheet.getCell('G1').style = {
-        font: { color: { argb: 'FFFFFF' }, bold: true },
-        alignment: { horizontal: 'center', vertical: 'middle' },
-        fill: {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: '18b4e9' },
-        },
-      };
-      worksheet.getColumn('I').width = 20;
-      const incomeColumnHeader = [
-        { callName: 'G2', value: 'Incentive Income' },
-      ];
-      incomeColumnHeader.forEach((head) => {
-        worksheet.getCell(head.callName).value = head.value;
-        worksheet.getCell(head.callName).style = {
-          font: { bold: true },
-        };
-      });
-      const incomeData = [[data.total_incentive_income]];
-      incomeData.forEach((row, rowIndex) => {
-        row.forEach((value, columnIndex) => {
-          worksheet.getCell(rowIndex + 3, columnIndex + 7).value = value;
-          worksheet.getCell(rowIndex + 3, columnIndex + 7).style = {
-            alignment: { horizontal: 'left' },
-          };
-        });
-      });
-
-      /**
-       * Populate the data for the Expense
-       */
-      worksheet.getCell('I1').value = 'Expense';
-      worksheet.getCell('I1').style = {
-        font: { color: { argb: 'FFFFFF' }, bold: true },
-        alignment: { horizontal: 'center', vertical: 'middle' },
-        fill: {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: '18b4e9' },
-        },
-      };
-      // Merge cells and apply styles for Expense
-      const expenseMergeCell = worksheet.getCell('I1');
-      if (expenseMergeCell.isMerged) {
-        const mergeCellAddress = expenseMergeCell.master.address;
-        worksheet.unMergeCells(mergeCellAddress);
-      }
-      worksheet.mergeCells('I1:L1');
-
-      const expenseColumns = ['K', 'L', 'M', 'N'];
-      expenseColumns.forEach((column) => {
-        worksheet.getColumn(column).width = 18;
-      });
-
-      const expenseColumnHeader = [
-        { callName: 'I2', value: 'General Expense' },
-        { callName: 'J2', value: 'Employee Expense' },
-        { callName: 'K2', value: 'Client Discount' },
-        { callName: 'L2', value: 'Total Expenses' },
-      ];
-      expenseColumnHeader.forEach((head) => {
-        worksheet.getCell(head.callName).value = head.value;
-        worksheet.getCell(head.callName).style = {
-          font: { bold: true },
-        };
-      });
-
-      const expenseProfitLossData = [
-        [
-          data.overall_expense,
-          data.total_employee_salary ? data.total_employee_salary : 0,
-          data.total_discount,
-          data.expense_total,
-        ],
+      worksheet.columns = [
+        { header: 'SL', key: 'serial', width: 7 },
+        { header: 'category', key: 'invoice_sales_date', width: 15 },
+        { header: 'Expense', key: 'expense', width: 20 },
+        { header: 'Income', key: 'income', width: 20 },
       ];
 
-      expenseProfitLossData.forEach((row, rowIndex) => {
-        row.forEach((value, columnIndex) => {
-          worksheet.getCell(rowIndex + 3, columnIndex + 9).value = value;
-          worksheet.getCell(rowIndex + 3, columnIndex + 9).style = {
-            alignment: { horizontal: 'left' },
-          };
-        });
+      data.forEach((report: any, index: number) => {
+        report.serial = index + 1;
+        report.expense =
+          report.trxn_type === 'EXPENSE' ? report.total_amount : 0;
+        report.income = report.trxn_type === 'INCOME' ? report.total_amount : 0;
+        worksheet.addRow(report);
+      });
+      worksheet.getRow(1).eachCell((cell) => {
+        cell.font = { bold: true };
       });
 
-      /**
-       * Net Profit/Loss
-       */
-      worksheet.getCell('N1').value = 'Total Gross Profit/Loss';
-      worksheet.getCell('N1').style = {
-        font: { color: { argb: 'FFFFFF' }, bold: true },
-        alignment: { horizontal: 'center', vertical: 'middle' },
-        fill: {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: '18b4e9' },
-        },
-      };
-      // Merge cells and apply styles for Total Gross Profit/Loss
-      const netProfitMergeCell = worksheet.getCell('N1');
-      if (netProfitMergeCell.isMerged) {
-        const mergeCellAddress = netProfitMergeCell.master.address;
-        worksheet.unMergeCells(mergeCellAddress);
-      }
-      worksheet.mergeCells('N1:P1');
-      worksheet.getColumn('N').width = 25;
-      const netProfitColumns = ['R', 'S'];
-      netProfitColumns.forEach((column) => {
-        worksheet.getColumn(column).width = 18;
-      });
-
-      const netProfitLossColumnHeader = [
-        { callName: 'Q2', value: 'Total Gross Profit/Loss' },
-        { callName: 'R2', value: 'Total Expense' },
-        { callName: 'S2', value: 'Net Profit/Loss' },
-      ];
-      netProfitLossColumnHeader.forEach((head) => {
-        worksheet.getCell(head.callName).value = head.value;
-        worksheet.getCell(head.callName).style = {
-          font: { bold: true },
-        };
-      });
-      const netProfitLossData = [
-        [
-          data.total_gross_profit_loss,
-          data.expense_total,
-          data.net_profit_loss,
-        ],
-      ];
-      netProfitLossData.forEach((row, rowIndex) => {
-        row.forEach((value, columnIndex) => {
-          worksheet.getCell(rowIndex + 3, columnIndex + 14).value = value;
-          worksheet.getCell(rowIndex + 3, columnIndex + 15).style = {
-            alignment: { horizontal: 'left' },
-          };
-        });
-      });
       try {
         if (!fs.existsSync(dirPath)) {
           fs.mkdirSync(dirPath);

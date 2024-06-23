@@ -12,6 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const moment_1 = __importDefault(require("moment"));
 const abstract_services_1 = __importDefault(require("../../../abstracts/abstract.services"));
 const common_helper_1 = require("../../../common/helpers/common.helper");
 const customError_1 = __importDefault(require("../../../common/utils/errors/customError"));
@@ -171,33 +172,15 @@ class ReportServices extends abstract_services_1.default {
         });
         // OVERALL PROFIT LOSS
         this.overallProfitLoss = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { from_date, to_date } = req.query;
+            let { from_date, to_date } = req.query;
+            from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
+            to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.profitLossReport(req, trx);
-                const user_percentage = yield conn.getUserPercentage(req.user_id);
-                // sales and purchase
-                const sales_info = yield conn.totalSales(from_date, to_date, user_percentage);
-                const refund_info = yield conn.getClientRefundTotal(from_date, to_date, user_percentage);
-                const service_charge = yield conn.getInvoicesServiceCharge(from_date, to_date, user_percentage);
-                const void_profit_loss = yield conn.getInvoiceVoidProfit(from_date, to_date, user_percentage);
-                const total_employee_salary = yield conn.getEmployeeExpense(from_date, to_date, user_percentage);
-                const expense_total = yield conn.allExpenses(from_date, to_date, user_percentage);
-                const incentive = yield conn.allIncentive(from_date, to_date, user_percentage);
-                const total_discount = yield conn.getAllClientDiscount(from_date, to_date, user_percentage);
-                const online_charge = yield conn.getBankCharge(from_date, to_date, user_percentage);
-                const vendor_ait = yield conn.getVendorAit(from_date, to_date, user_percentage);
-                const non_invoice = yield conn.getNonInvoiceIncomeProfit(from_date, to_date, user_percentage);
-                const agent_payment = yield conn.getAgentPayment(from_date, to_date, user_percentage);
+                const data = yield conn.overallProfitLoss(from_date, to_date);
                 return {
                     success: true,
-                    data: Object.assign(Object.assign(Object.assign({}, sales_info), refund_info), { service_charge,
-                        void_profit_loss, total_incentive_income: incentive, non_invoice,
-                        expense_total,
-                        total_employee_salary,
-                        total_discount,
-                        online_charge,
-                        vendor_ait,
-                        agent_payment }),
+                    data,
                 };
             }));
         });

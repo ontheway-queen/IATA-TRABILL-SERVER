@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import moment from 'moment';
 import AbstractServices from '../../../abstracts/abstract.services';
 import { separateCombClientToId } from '../../../common/helpers/common.helper';
 import { idType } from '../../../common/types/common.types';
@@ -417,106 +418,22 @@ class ReportServices extends AbstractServices {
 
   // OVERALL PROFIT LOSS
   public overallProfitLoss = async (req: Request) => {
-    const { from_date, to_date } = req.query as {
+    let { from_date, to_date } = req.query as {
       from_date: string;
       to_date: string;
     };
 
+    from_date = moment(new Date(from_date)).format('YYYY-MM-DD');
+    to_date = moment(new Date(to_date)).format('YYYY-MM-DD');
+
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.profitLossReport(req, trx);
 
-      const user_percentage = await conn.getUserPercentage(req.user_id);
-
-      // sales and purchase
-      const sales_info = await conn.totalSales(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const refund_info = await conn.getClientRefundTotal(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const service_charge = await conn.getInvoicesServiceCharge(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const void_profit_loss = await conn.getInvoiceVoidProfit(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const total_employee_salary = await conn.getEmployeeExpense(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const expense_total = await conn.allExpenses(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const incentive = await conn.allIncentive(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const total_discount = await conn.getAllClientDiscount(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const online_charge = await conn.getBankCharge(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const vendor_ait = await conn.getVendorAit(
-        from_date,
-        to_date,
-        user_percentage
-      );
-
-      const non_invoice = await conn.getNonInvoiceIncomeProfit(
-        from_date,
-        to_date,
-        user_percentage
-      );
-      const agent_payment = await conn.getAgentPayment(
-        from_date,
-        to_date,
-        user_percentage
-      );
+      const data = await conn.overallProfitLoss(from_date, to_date);
 
       return {
         success: true,
-        data: {
-          ...sales_info,
-          ...refund_info,
-          service_charge,
-          void_profit_loss,
-
-          total_incentive_income: incentive,
-          non_invoice,
-
-          expense_total,
-          total_employee_salary,
-          total_discount,
-          online_charge,
-          vendor_ait,
-          agent_payment,
-        },
+        data,
       };
     });
   };

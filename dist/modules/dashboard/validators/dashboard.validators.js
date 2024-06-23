@@ -19,6 +19,7 @@ class DashboardValidators extends abstract_validators_1.default {
         this.readTotalSales = [
             this.permissions.check(this.resources.sales_report, 'read'),
         ];
+        this.uploadBSP = [];
     }
 }
 exports.default = DashboardValidators;

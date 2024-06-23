@@ -3,13 +3,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const multer_1 = __importDefault(require("multer"));
 const abstract_routers_1 = __importDefault(require("../../../abstracts/abstract.routers"));
-const ImageUploadToAzure_trabill_1 = require("../../../common/helpers/ImageUploadToAzure_trabill");
 const adminConfiguration_controllers_1 = __importDefault(require("../Controllers/adminConfiguration.controllers"));
 const adminPanel_controllers_1 = __importDefault(require("../Controllers/adminPanel.controllers"));
-const storage = multer_1.default.memoryStorage();
-const upload = (0, multer_1.default)({ storage });
 class AdminPanelRouters extends abstract_routers_1.default {
     constructor() {
         super();
@@ -35,13 +31,13 @@ class AdminPanelRouters extends abstract_routers_1.default {
             .delete(this.controllers.deleteModules);
         this.routers
             .route('/agency')
-            .post(this.uploader.imageUpload('logos'), this.controllers.createAgency)
+            .post(this.uploader.cloudUploadRaw(this.fileFolder.LOGO), this.controllers.createAgency)
             .get(this.controllers.getAllAgency);
         this.routers.get('/agency/recent', this.controllers.resentAgency);
         this.routers.get('/agency-excel-download', this.controllers.agencyExcelReport);
         this.routers
             .route('/logo/:agency_id')
-            .put(this.uploader.imageUpload('logos'), this.controllers.updateAgencyLogo);
+            .put(this.uploader.cloudUploadRaw(this.fileFolder.LOGO), this.controllers.updateAgencyLogo);
         this.routers.patch('/agency/sales-info', this.controllers.updatesSalesInfo);
         this.routers
             .route('/agency/:agency_id')
@@ -154,8 +150,8 @@ class AdminPanelRouters extends abstract_routers_1.default {
         this.routers
             .route('/notice')
             .get(this.configControllers.getAllNotice)
-            .post(upload.fields([{ name: 'ntc_bg_img', maxCount: 1 }]), ImageUploadToAzure_trabill_1.uploadImageToAzure_trabill, this.configControllers.addNotice)
-            .patch(upload.fields([{ name: 'ntc_bg_img', maxCount: 1 }]), ImageUploadToAzure_trabill_1.uploadImageToAzure_trabill, this.configControllers.editNotice);
+            .post(this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE), this.configControllers.addNotice)
+            .patch(this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE), this.configControllers.editNotice);
         this.routers
             .route('/active-notice')
             .get(this.configControllers.getActiveNotice);

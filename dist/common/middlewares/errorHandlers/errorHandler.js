@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const customError_1 = __importDefault(require("../../utils/errors/customError"));
-const deleteFIle_1 = __importDefault(require("../../utils/fileRemover/deleteFIle"));
+const manageFile_1 = __importDefault(require("../manageFile/manageFile"));
 class ErrorHandler {
     constructor() {
         /**
@@ -12,16 +12,11 @@ class ErrorHandler {
          */
         this.handleErrors = (err, req, res, _next) => {
             // file removing starts
-            const files = req.upFiles;
-            const folder = req.upFolder;
-            const image_files = req.image_files;
-            if (files) {
-                this.deleteFile.delete(folder, files);
+            const files = req.files;
+            if (files && files.length) {
+                const images = files.map((item) => item.filename);
+                this.manageFile.deleteFromCloud(images);
             }
-            // if (image_files) {
-            //   this.deleteFile.delete_image(image_files);
-            // }
-            // file removing ends
             if (err instanceof customError_1.default) {
                 this.customError.message =
                     err.message || 'Something went wrong, please try again later!';
@@ -40,7 +35,7 @@ class ErrorHandler {
             message: 'Something went wrong :( please try again later!!',
             type: 'Internal server error!',
         };
-        this.deleteFile = new deleteFIle_1.default();
+        this.manageFile = new manageFile_1.default();
     }
 }
 exports.default = ErrorHandler;

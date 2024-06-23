@@ -109,9 +109,9 @@ class AppConfigModels extends AbstractModels {
   };
 
   previousSignature = async (sig_id: idType) => {
-    const [data] = await this.db('trabill_signature_info')
+    const [data] = (await this.db('trabill_signature_info')
       .select('sig_signature')
-      .where('sig_id', sig_id);
+      .where('sig_id', sig_id)) as { sig_signature: string }[];
 
     return data?.sig_signature;
   };
@@ -153,5 +153,17 @@ class AppConfigModels extends AbstractModels {
 
     return { data, count };
   };
+
+  public async getAppConfigInfo() {
+    const [data] = (await this.query()
+      .select('tac_wtr_mark_url', 'tac_sig_url')
+      .from('trabill_app_config')
+      .where('tac_org_id', this.org_agency)) as {
+      tac_wtr_mark_url: string;
+      tac_sig_url: string;
+    }[];
+
+    return data;
+  }
 }
 export default AppConfigModels;

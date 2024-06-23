@@ -1,8 +1,5 @@
-import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
 import SmsControllers from '../controllers/sms.controllers';
-
-const upload = multer({});
 
 class SmsRouter extends AbstractRouter {
   private controllers = new SmsControllers();

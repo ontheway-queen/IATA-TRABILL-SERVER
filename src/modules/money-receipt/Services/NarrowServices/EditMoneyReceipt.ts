@@ -14,6 +14,7 @@ import {
   IClTrxnUpdate,
 } from '../../../../common/interfaces/Trxn.interfaces';
 import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
+import { getPaymentType } from '../../../../common/utils/libraries/lib';
 
 class EditMoneyReceipt extends AbstractServices {
   constructor() {
@@ -41,6 +42,7 @@ class EditMoneyReceipt extends AbstractServices {
       charge_amount,
       trans_no,
       receipt_walking_customer_name,
+      received_by,
     } = req.body as IMoneyReceiptReq;
 
     const { client_id, combined_id } =
@@ -71,16 +73,7 @@ class EditMoneyReceipt extends AbstractServices {
         : receipt_note || '';
 
       if (receipt_payment_type !== 4) {
-        let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-        if (receipt_payment_type === 1) {
-          accPayType = 'CASH';
-        } else if (receipt_payment_type === 2) {
-          accPayType = 'BANK';
-        } else if (receipt_payment_type === 3) {
-          accPayType = 'MOBILE BANKING';
-        } else {
-          accPayType = 'CASH';
-        }
+        let accPayType = getPaymentType(receipt_payment_type);
 
         const AccTrxnBody: IAcTrxnUpdate = {
           acctrxn_ac_id: account_id,
@@ -173,6 +166,7 @@ class EditMoneyReceipt extends AbstractServices {
         receipt_trxn_charge_id,
         receipt_walking_customer_name,
         receipt_account_id: account_id,
+        receipt_received_by: received_by,
       };
       await conn.updateMoneyReceipt(receiptInfo, receipt_id);
 

@@ -6,8 +6,8 @@ refactor code sales purchase report models
 import dayjs from 'dayjs';
 import moment from 'moment';
 import AbstractModels from '../../../abstracts/abstract.models';
-import { idType } from '../../../common/types/common.types';
 import { separateCombClientToId } from '../../../common/helpers/common.helper';
+import { idType } from '../../../common/types/common.types';
 
 class SalesPurchasesReport extends AbstractModels {
   salesPurchaseReport = async (user_id: number) => {
@@ -879,6 +879,7 @@ class SalesPurchasesReport extends AbstractModels {
       .offset(offset);
 
     const [infos] = await this.query()
+      .sum('invoice_sub_total as invoice_sub_total')
       .sum('invoice_net_total as total_sales')
       .sum('cost_price as total_cost')
       .sum('client_pay_amount as total_collection')
@@ -903,44 +904,10 @@ class SalesPurchasesReport extends AbstractModels {
         to_date,
       ]);
 
-    /*     const infos = data.reduce(
-      (
-        acc: {
-          total_sales: number;
-          total_cost: number;
-          total_collection: number;
-          total_due: number;
-          total_service_charge: number;
-          total_discount: number;
-          total_payment: number;
-        },
-        item: any
-      ) => {
-        acc.total_sales += parseFloat(item.invoice_net_total) || 0;
-        acc.total_cost += parseFloat(item.cost_price) || 0;
-        acc.total_collection += parseFloat(item.client_pay_amount) || 0;
-        acc.total_due += parseFloat(item.due_amount) || 0;
-        acc.total_service_charge +=
-          parseFloat(item.invoice_service_charge) || 0;
-        acc.total_discount += parseFloat(item.invoice_discount) || 0;
-        return acc;
-      },
-      {
-        total_sales: 0,
-        total_cost: 0,
-        total_collection: 0,
-        total_due: 0,
-        total_service_charge: 0,
-        total_discount: 0,
-        total_payment: 0,
-      }
-    ); */
-
     return { count: total_count, data: { data, ...infos } };
   }
 
   // OVERALL PROFIT LOSS
-  // sales report summary
   getSalesReportSummary = async (
     from_date: string,
     to_date: string,

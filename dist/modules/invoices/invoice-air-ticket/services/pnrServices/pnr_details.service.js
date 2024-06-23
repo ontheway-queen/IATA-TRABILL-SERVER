@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const axios_1 = __importDefault(require("axios"));
+const dayjs_1 = __importDefault(require("dayjs"));
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const customError_1 = __importDefault(require("../../../../../common/utils/errors/customError"));
 const lib_1 = require("../../../../../common/utils/libraries/lib");
@@ -110,7 +111,7 @@ class PnrDetailsService extends abstract_services_1.default {
                                 taxesCommission = (_g = taxBreakdown === null || taxBreakdown === void 0 ? void 0 : taxBreakdown.taxBreakdown) === null || _g === void 0 ? void 0 : _g.filter((item) => item.taxCode === 'YR');
                             }
                             const baseFareCommission = (0, lib_1.numRound)((_h = ticket === null || ticket === void 0 ? void 0 : ticket.commission) === null || _h === void 0 ? void 0 : _h.commissionAmount);
-                            const countryTaxAit = Number(1 || 0) * 0.003;
+                            const countryTaxAit = Number(totalCountryTax || 0) * 0.003;
                             const grossAit = Number(ticket.payment.total || 0) * 0.003;
                             const airticket_ait = Math.round(grossAit - countryTaxAit);
                             const airticket_net_commssion = baseFareCommission - airticket_ait;
@@ -140,7 +141,7 @@ class PnrDetailsService extends abstract_services_1.default {
                             success: true,
                             data: {
                                 ticket_details,
-                                invoice_sales_date: pnrResponse.flightTickets[0].date,
+                                invoice_sales_date: (0, dayjs_1.default)(pnrResponse.flightTickets[0].date).format('YYYY-MM-DD HH:mm:ss'),
                                 invoice_sales_man_id,
                                 creation_sign: creationDetails === null || creationDetails === void 0 ? void 0 : creationDetails.creationUserSine,
                             },

@@ -13,15 +13,11 @@ class DeleteAgentProfile extends AbstractServices {
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.agentProfileModel(req, trx);
 
-      // const agnetTransactions = await conn.getAgentTransactions(agentId);
+      const { image_arr } = await conn.getPrevImages(agentId);
 
-/*       if (agnetTransactions[0]) {
-        throw new CustomError(
-          "Agent have some transactions you can't delete the agent",
-          400,
-          'Bad Request'
-        );
-      } */
+      if (image_arr && image_arr.length) {
+        await this.manageFile.deleteFromCloud(image_arr);
+      }
 
       await conn.deleteAgentProfile(agentId, agent_deleted_by);
 

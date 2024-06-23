@@ -48,7 +48,7 @@ class UserServices extends abstract_services_1.default {
                 .userModel(req)
                 .checkUserRoleIsExist(role_name);
             if (is_exist) {
-                throw new customError_1.default(`This role name alrady exist, enter unique name`, 400, 'Bad request');
+                throw new customError_1.default(`This role name already exist, enter unique name`, 400, 'Bad request');
             }
             const role_id = yield this.models.configModel
                 .userModel(req)
@@ -62,7 +62,7 @@ class UserServices extends abstract_services_1.default {
                 .checkUserRoleIsExist(role_name);
             return {
                 success: true,
-                message: role ? 'Role name alrady exist' : 'Role name. is uniqe',
+                message: role ? 'Role name already exist' : 'Role name. is unique',
                 data: {
                     is_uniqe: role ? true : false,
                 },
@@ -189,14 +189,14 @@ class UserServices extends abstract_services_1.default {
                     return pattern.test(password);
                 };
                 if (!checkPassword(password)) {
-                    throw new customError_1.default(`Password must be minimum 8 charecter and one special charecter required`, 400, 'Bad request');
+                    throw new customError_1.default(`Password must be minimum 8 character and one special character required`, 400, 'Bad request');
                 }
             }
             const hashedPass = yield lib_1.default.hashPass(password);
             yield conn.resetUserPassword(hashedPass, user_id);
             return {
                 success: true,
-                message: 'Resetting password of super admin was successfull',
+                message: 'Resetting password of super admin was successful',
             };
         });
     }
@@ -212,7 +212,7 @@ class UserServices extends abstract_services_1.default {
                     return pattern.test(password);
                 };
                 if (!checkPassword(new_password)) {
-                    throw new customError_1.default(`Password must be minimum 8 charecter and one special charecter required`, 400, 'Bad request');
+                    throw new customError_1.default(`Password must be minimum 8 character and one special character required`, 400, 'Bad request');
                 }
             }
             const { user_curr_pass } = yield conn.getUserPassword(user_id);
@@ -221,7 +221,7 @@ class UserServices extends abstract_services_1.default {
             yield conn.resetUserPassword(hashedPass, user_id);
             return {
                 success: true,
-                message: 'Changing password of super admin was successfull',
+                message: 'Changing password of super admin was successful',
             };
         });
     }

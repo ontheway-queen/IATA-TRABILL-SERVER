@@ -46,7 +46,7 @@ export class InvoiceUtils {
         | 'Tour Package'
         | 'Hajj'
         | 'Ummrah Package'
-        | 'Add Invoice Air Ticket(PNR)'
+        | 'Air Ticket(PNR)'
         | 'Hajj Pre Reg';
       note?: string;
     }

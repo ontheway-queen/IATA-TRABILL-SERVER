@@ -8,17 +8,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -29,13 +18,23 @@ class CreateAgentProfile extends abstract_services_1.default {
         super();
         this.createAgentProfile = (req) => __awaiter(this, void 0, void 0, function* () {
             const data = req.body;
-            const imageList = req.imgUrl;
-            const { agent_image_copy, agent_nid_front, agent_nid_back } = data, othersInfo = __rest(data, ["agent_image_copy", "agent_nid_front", "agent_nid_back"]);
-            const mergedImageObject = imageList.reduce((acc, image) => Object.assign(acc, image), {});
-            const agentInfo = Object.assign(Object.assign({}, othersInfo), mergedImageObject);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.agentProfileModel(req, trx);
-                const agent_id = yield conn.createAgentProfile(agentInfo);
+                const files = req.files;
+                if (files && files.length) {
+                    files.map((item) => {
+                        if (item.fieldname === 'agent_image_copy') {
+                            data.agent_image_copy = item.filename;
+                        }
+                        if (item.fieldname === 'agent_nid_front') {
+                            data.agent_nid_front = item.filename;
+                        }
+                        if (item.fieldname === 'agent_nid_back') {
+                            data.agent_nid_back = item.filename;
+                        }
+                    });
+                }
+                const agent_id = yield conn.createAgentProfile(data);
                 // insert audit
                 const message = `Agent profile -${data.agent_name}- has been created`;
                 yield this.insertAudit(req, 'create', message, data.agent_created_by, 'ACCOUNTS');

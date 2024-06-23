@@ -12,6 +12,8 @@ export interface IExpense {
   expense_vouchar_no?: string;
   expense_charge_amount: number;
   expense_charge_id: number | null;
+  expense_voucher_url_1?: string;
+  expense_voucher_url_2?: string;
 }
 
 export interface IExpenseDetails {

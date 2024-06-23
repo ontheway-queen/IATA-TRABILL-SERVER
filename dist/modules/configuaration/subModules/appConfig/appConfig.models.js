@@ -38,9 +38,9 @@ class AppConfigModels extends abstract_models_1.default {
                 .where('sig_id', sig_id);
         });
         this.previousSignature = (sig_id) => __awaiter(this, void 0, void 0, function* () {
-            const [data] = yield this.db('trabill_signature_info')
+            const [data] = (yield this.db('trabill_signature_info')
                 .select('sig_signature')
-                .where('sig_id', sig_id);
+                .where('sig_id', sig_id));
             return data === null || data === void 0 ? void 0 : data.sig_signature;
         });
         this.selectSignature = () => __awaiter(this, void 0, void 0, function* () {
@@ -85,6 +85,15 @@ class AppConfigModels extends abstract_models_1.default {
             return yield this.db('trabill_app_config')
                 .update(Object.assign({}, data))
                 .where('tac_org_id', this.org_agency);
+        });
+    }
+    getAppConfigInfo() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [data] = (yield this.query()
+                .select('tac_wtr_mark_url', 'tac_sig_url')
+                .from('trabill_app_config')
+                .where('tac_org_id', this.org_agency));
+            return data;
         });
     }
 }

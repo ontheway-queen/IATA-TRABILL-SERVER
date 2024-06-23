@@ -118,16 +118,16 @@ class AdminPanelModels extends abstract_models_1.default {
             }
         });
         this.updateAgencyLogo = (logo_url, agency_id) => __awaiter(this, void 0, void 0, function* () {
-            const [previous_logo] = yield this.query()
+            const [previous_logo] = (yield this.query()
                 .select('org_logo')
                 .from('trabill_agency_organization_information')
-                .where('org_id', agency_id);
+                .where('org_id', agency_id));
             const is_update = yield this.query()
                 .update('org_logo', logo_url)
                 .into('trabill_agency_organization_information')
                 .where('org_id', agency_id);
             if (!is_update) {
-                throw new customError_1.default('Please provice valid agency id', 400, 'Invalid agency');
+                throw new customError_1.default('Please provide valid agency id', 400, 'Invalid agency');
             }
             return previous_logo.org_logo;
         });
@@ -1000,11 +1000,11 @@ class AdminPanelModels extends abstract_models_1.default {
     }
     getNoticeImageURL(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [data] = yield this.query()
+            const [data] = (yield this.query()
                 .select('ntc_bg_img')
                 .from('trabill_agency_notice')
                 .where('ntc_id', id)
-                .orderBy('ntc_id', 'desc');
+                .orderBy('ntc_id', 'desc'));
             return data;
         });
     }

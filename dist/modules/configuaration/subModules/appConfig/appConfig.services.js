@@ -29,16 +29,24 @@ class AppConfigServices extends abstract_services_1.default {
             return { success: true, message: 'App configuration updated successfully' };
         });
         this.updateAppConfigSignature = (req) => __awaiter(this, void 0, void 0, function* () {
-            const imageList = req.imgUrl;
-            const getImageWithURL = imageList.reduce((acc, image) => Object.assign(acc, image), { tac_sig_url: '', tac_wtr_mark_url: '' });
+            const files = req.files;
             const customBody = {};
-            if (getImageWithURL.tac_sig_url) {
-                customBody.tac_sig_url = getImageWithURL.tac_sig_url;
-            }
-            if (getImageWithURL.tac_wtr_mark_url) {
-                customBody.tac_wtr_mark_url = getImageWithURL.tac_wtr_mark_url;
-            }
             const conn = this.models.configModel.appConfig(req);
+            const { tac_sig_url, tac_wtr_mark_url } = yield conn.getAppConfigInfo();
+            if (files) {
+                files.map((item) => {
+                    if (item.fieldname === 'tac_sig_url') {
+                        customBody.tac_sig_url = item.filename;
+                        if (tac_sig_url)
+                            this.manageFile.deleteFromCloud([tac_sig_url]);
+                    }
+                    if (item.fieldname === 'tac_wtr_mark_url') {
+                        customBody.tac_wtr_mark_url = item.filename;
+                        if (tac_wtr_mark_url)
+                            this.manageFile.deleteFromCloud([tac_wtr_mark_url]);
+                    }
+                });
+            }
             yield conn.updateAppConfigSignature(customBody);
             return { success: true, message: 'App configuration updated successfully' };
         });
@@ -46,12 +54,11 @@ class AppConfigServices extends abstract_services_1.default {
         this.addSignature = (req) => __awaiter(this, void 0, void 0, function* () {
             const conn = this.models.configModel.appConfig(req);
             const body = req.body;
-            const imageList = req.imgUrl;
-            const imageUrlObj = Object.assign({}, ...imageList);
+            const files = req.files;
             if (body.sig_type === 'AUTHORITY') {
                 const count = yield conn.checkSignatureTypeIsExist();
                 if (count) {
-                    yield this.deleteFile.delete_image(imageUrlObj.sig_signature);
+                    yield this.manageFile.deleteFromCloud([files[0].filename]);
                     throw new customError_1.default('An authority signature already exists!', 400, 'Authority exists');
                 }
             }
@@ -67,20 +74,19 @@ class AppConfigServices extends abstract_services_1.default {
                 sig_state: body.sig_state,
                 sig_zip_code: body.sig_zip_code,
                 sig_email: body.sig_email,
-                sig_signature: imageUrlObj.sig_signature,
+                sig_signature: files[0].filename,
                 sig_org_id: req.agency_id,
                 sig_created_by: req.user_id,
                 sig_phone_no: body.sig_phone_no,
             };
             yield conn.insertSignature(sig_data);
-            return { success: true, imageUrlObj };
+            return { success: true, imageUrlObj: files[0].filename };
         });
         this.updateSignature = (req) => __awaiter(this, void 0, void 0, function* () {
             const sig_id = req.params.sig_id;
             const conn = this.models.configModel.appConfig(req);
             const body = req.body;
-            const imageList = req.imgUrl;
-            const imageUrlObj = Object.assign({}, ...imageList);
+            const files = req.files;
             const sig_data = {
                 sig_employee_id: body.sig_employee_id,
                 sig_user_id: body.sig_user_id,
@@ -93,18 +99,19 @@ class AppConfigServices extends abstract_services_1.default {
                 sig_state: body.sig_state,
                 sig_zip_code: body.sig_zip_code,
                 sig_email: body.sig_email,
-                sig_signature: (body === null || body === void 0 ? void 0 : body.sig_signature) || (imageUrlObj === null || imageUrlObj === void 0 ? void 0 : imageUrlObj.sig_signature) || null,
                 sig_org_id: req.agency_id,
                 sig_created_by: req.user_id,
                 sig_phone_no: body.sig_phone_no,
             };
+            if (files[0].filename)
+                sig_data.sig_signature = files[0].filename;
             yield conn.updateSignature(sig_data, sig_id);
             // DELETE PREVIOUS SIGNATURE
-            if (!(body === null || body === void 0 ? void 0 : body.sig_signature)) {
+            if (files[0].filename) {
                 const signature = yield conn.previousSignature(sig_id);
-                yield this.deleteFile.delete_image(signature);
+                signature && (yield this.manageFile.deleteFromCloud([signature]));
             }
-            return { success: true, imageUrlObj };
+            return { success: true, imageUrlObj: files[0].filename };
         });
         this.updateSignatureStatus = (req) => __awaiter(this, void 0, void 0, function* () {
             const sig_id = req.params.sig_id;

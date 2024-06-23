@@ -1,11 +1,6 @@
-import multer from 'multer';
 import AbstractRouter from '../../../abstracts/abstract.routers';
-import { uploadImageToAzure_trabill } from '../../../common/helpers/ImageUploadToAzure_trabill';
 import AdminConfigurationControllers from '../Controllers/adminConfiguration.controllers';
 import AdminPanelControllers from '../Controllers/adminPanel.controllers';
-
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
 
 class AdminPanelRouters extends AbstractRouter {
   private controllers = new AdminPanelControllers();
@@ -38,7 +33,10 @@ class AdminPanelRouters extends AbstractRouter {
 
     this.routers
       .route('/agency')
-      .post(this.uploader.imageUpload('logos'), this.controllers.createAgency)
+      .post(
+        this.uploader.cloudUploadRaw(this.fileFolder.LOGO),
+        this.controllers.createAgency
+      )
       .get(this.controllers.getAllAgency);
 
     this.routers.get('/agency/recent', this.controllers.resentAgency);
@@ -51,7 +49,7 @@ class AdminPanelRouters extends AbstractRouter {
     this.routers
       .route('/logo/:agency_id')
       .put(
-        this.uploader.imageUpload('logos'),
+        this.uploader.cloudUploadRaw(this.fileFolder.LOGO),
         this.controllers.updateAgencyLogo
       );
 
@@ -206,13 +204,11 @@ class AdminPanelRouters extends AbstractRouter {
       .route('/notice')
       .get(this.configControllers.getAllNotice)
       .post(
-        upload.fields([{ name: 'ntc_bg_img', maxCount: 1 }]),
-        uploadImageToAzure_trabill,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.configControllers.addNotice
       )
       .patch(
-        upload.fields([{ name: 'ntc_bg_img', maxCount: 1 }]),
-        uploadImageToAzure_trabill,
+        this.uploader.cloudUploadRaw(this.fileFolder.TRABILL_FILE),
         this.configControllers.editNotice
       );
 

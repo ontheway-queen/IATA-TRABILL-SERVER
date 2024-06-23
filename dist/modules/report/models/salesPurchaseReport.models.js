@@ -208,7 +208,6 @@ class SalesPurchasesReport extends abstract_models_1.default {
             return data;
         });
         // OVERALL PROFIT LOSS
-        // sales report summary
         this.getSalesReportSummary = (from_date, to_date, page, size) => __awaiter(this, void 0, void 0, function* () {
             const offset = (page - 1) * size;
             const data = yield this.query()
@@ -611,6 +610,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 .limit(size)
                 .offset(offset);
             const [infos] = yield this.query()
+                .sum('invoice_sub_total as invoice_sub_total')
                 .sum('invoice_net_total as total_sales')
                 .sum('cost_price as total_cost')
                 .sum('client_pay_amount as total_collection')
@@ -633,38 +633,6 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 from_date,
                 to_date,
             ]);
-            /*     const infos = data.reduce(
-              (
-                acc: {
-                  total_sales: number;
-                  total_cost: number;
-                  total_collection: number;
-                  total_due: number;
-                  total_service_charge: number;
-                  total_discount: number;
-                  total_payment: number;
-                },
-                item: any
-              ) => {
-                acc.total_sales += parseFloat(item.invoice_net_total) || 0;
-                acc.total_cost += parseFloat(item.cost_price) || 0;
-                acc.total_collection += parseFloat(item.client_pay_amount) || 0;
-                acc.total_due += parseFloat(item.due_amount) || 0;
-                acc.total_service_charge +=
-                  parseFloat(item.invoice_service_charge) || 0;
-                acc.total_discount += parseFloat(item.invoice_discount) || 0;
-                return acc;
-              },
-              {
-                total_sales: 0,
-                total_cost: 0,
-                total_collection: 0,
-                total_due: 0,
-                total_service_charge: 0,
-                total_discount: 0,
-                total_payment: 0,
-              }
-            ); */
             return { count: total_count, data: Object.assign({ data }, infos) };
         });
     }

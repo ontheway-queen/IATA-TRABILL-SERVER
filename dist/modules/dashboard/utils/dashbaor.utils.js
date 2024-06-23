@@ -78,7 +78,7 @@ const formatAgentTicket = (text, conn) => __awaiter(void 0, void 0, void 0, func
     for (const [index, item] of filterTickets.entries()) {
         const arrItem = item.split(' ');
         const ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF|FFSF/g, '');
-        const db_ticket = yield conn.getTicketInfoByTicket(ticket_no);
+        const db_ticket = yield conn.getTicketInfoByTicket1(ticket_no);
         const iata_ticket = Object.assign(Object.assign({ invoice_id: index + 1, type: 'IATA', invoice_no: undefined, invoice_category_id: undefined, ticket_no, sales_date: formatDate(arrItem[4]), gross_fare: (0, exports.toNum)(arrItem[1]), base_fare: (0, exports.toNum)(arrItem[2]) }, formattedCommission[index]), { purchase_price: (0, exports.toNum)(arrItem[3]) });
         tickets.push(iata_ticket);
         if (db_ticket) {
@@ -126,9 +126,13 @@ const getAgentBillingSummary = (text, conn) => __awaiter(void 0, void 0, void 0,
     const issues = combinedTotal.includes('ISSUES')
         ? combinedTotal.split('ISSUES\n')[1].split(' ')[8]
         : '';
-    const refunds = combinedTotal.includes('REFUNDS')
-        ? combinedTotal[6].split(/[\s-]+/)[combinedTotal[6].split(/[\s-]+/).length - 1]
-        : '';
+    let refunds = '';
+    if (combinedTotal.includes('REFUNDS')) {
+        const refundTotalText = (0, exports.splitText)(combinedTotal, 'REFUNDS\n', 'GRAND TOTAL\n');
+        let refundTotalAmounts = refundTotalText.replace(/[^\d,-\s]/g, '').trim();
+        const refundTotalArr = refundTotalAmounts.split('-');
+        refunds = refundTotalArr[refundTotalArr.length - 1];
+    }
     const iata_summary = {
         from_date,
         to_date,

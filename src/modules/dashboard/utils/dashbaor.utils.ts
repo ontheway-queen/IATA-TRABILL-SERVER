@@ -87,7 +87,7 @@ export const formatAgentTicket = async (
     const arrItem = item.split(' ');
 
     const ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF|FFSF/g, '');
-    const db_ticket = await conn.getTicketInfoByTicket(ticket_no);
+    const db_ticket = await conn.getTicketInfoByTicket1(ticket_no);
 
     const iata_ticket = {
       invoice_id: index + 1,
@@ -181,11 +181,21 @@ export const getAgentBillingSummary = async (
     ? combinedTotal.split('ISSUES\n')[1].split(' ')[8]
     : '';
 
-  const refunds = combinedTotal.includes('REFUNDS')
-    ? combinedTotal[6].split(/[\s-]+/)[
-        combinedTotal[6].split(/[\s-]+/).length - 1
-      ]
-    : '';
+  let refunds = '';
+
+  if (combinedTotal.includes('REFUNDS')) {
+    const refundTotalText = splitText(
+      combinedTotal,
+      'REFUNDS\n',
+      'GRAND TOTAL\n'
+    );
+
+    let refundTotalAmounts = refundTotalText.replace(/[^\d,-\s]/g, '').trim();
+
+    const refundTotalArr = refundTotalAmounts.split('-');
+
+    refunds = refundTotalArr[refundTotalArr.length - 1];
+  }
 
   const iata_summary = {
     from_date,

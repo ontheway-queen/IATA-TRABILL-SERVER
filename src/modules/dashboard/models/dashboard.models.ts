@@ -814,6 +814,73 @@ class DashboardModels extends AbstractModels {
     return ticket;
   };
 
+  getTicketInfoByTicket1 = async (ticket_no: string) => {
+    const [ticket] = await this.query()
+      .select([
+        'invoice_id as id',
+        this.db.raw("'DB' as type"),
+        'invoice_no',
+        'invoice_category_id',
+        this.db.raw(
+          'COALESCE(iat.airticket_ticket_no, ir.airticket_ticket_no) as ticket_no'
+        ),
+        this.db.raw(
+          'COALESCE(iat.airticket_sales_date, ir.airticket_sales_date) as sales_date'
+        ),
+        this.db.raw(
+          'COALESCE(iat.airticket_gross_fare, ir.airticket_client_price) as gross_fare'
+        ),
+        this.db.raw(
+          'COALESCE(iat.airticket_base_fare, ir.airticket_fare_difference) as base_fare'
+        ),
+        this.db.raw(
+          'COALESCE(iat.airticket_commission_percent, ir.airticket_commission_percent) as commission_percent'
+        ),
+        this.db.raw(
+          'COALESCE(Round(iat.airticket_commission_percent_total), Round(ir.airticket_fare_difference * ir.airticket_commission_percent / 100)) as commission_percent_total'
+        ),
+        this.db.raw('COALESCE(iat.airticket_ait, ir.airticket_ait) as ait'),
+        this.db.raw(
+          'COALESCE(iat.airticket_purchase_price, ir.airticket_purchase_price) as purchase_price'
+        ),
+        'airline_code',
+        'client_name',
+        'invoice_sales_date',
+      ])
+      .from('trabill_invoices')
+
+      .leftJoin('trabill_invoice_airticket_items as iat', (event) => {
+        event
+          .on('iat.airticket_invoice_id', '=', 'invoice_id')
+          .andOn(this.db.raw('invoice_category_id = 1'));
+      })
+      .leftJoin('trabill_invoice_reissue_airticket_items as ir', (event) => {
+        event
+          .on('ir.airticket_invoice_id', '=', 'invoice_id')
+          .andOn(this.db.raw('invoice_category_id = 3'));
+      })
+      .leftJoin('trabill_airlines', function () {
+        this.on('iat.airticket_airline_id', '=', 'airline_id').orOn(
+          'ir.airticket_airline_id',
+          '=',
+          'airline_id'
+        );
+      })
+      .leftJoin('trabill_clients', 'invoice_client_id', 'client_id')
+      .whereIn('invoice_category_id', [1, 3])
+      .andWhere('invoice_org_agency', this.org_agency)
+      .andWhere('invoice_is_deleted', '<>', 1)
+      .andWhere(
+        this.db.raw(
+          'COALESCE(iat.airticket_ticket_no, ir.airticket_ticket_no)'
+        ),
+        'like',
+        `%${ticket_no}%`
+      );
+
+    return ticket;
+  };
+
   getTicketInfoByRefund = async (ticket_no: string) => {
     const [ticket] = await this.query()
       .select(

@@ -67,8 +67,7 @@ class MoneyReceiptServices extends abstract_services_1.default {
                         acctrxn_created_at: receipt_payment_date,
                         acctrxn_created_by: receipt_created_by,
                         acctrxn_note: receipt_note,
-                        acctrxn_particular_id: 62,
-                        acctrxn_particular_type: 'Agent commission',
+                        acctrxn_particular_id: 45,
                         acctrxn_pay_type: accPayType,
                     };
                     receipt_actransaction_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -392,10 +391,9 @@ class MoneyReceiptServices extends abstract_services_1.default {
                     ctrxn_amount: receipt_total_amount,
                     ctrxn_cl: comb_client,
                     ctrxn_voucher: '',
-                    ctrxn_particular_id: 29,
+                    ctrxn_particular_id: 31,
                     ctrxn_created_at: payment_date,
                     ctrxn_note: cheque_note,
-                    ctrxn_particular_type: 'Money receipt',
                 };
                 const clientTrxnId = yield trxns.clTrxnInsert(clTrxnBody);
                 const AccTrxnBody = {
@@ -406,8 +404,7 @@ class MoneyReceiptServices extends abstract_services_1.default {
                     acctrxn_created_at: payment_date,
                     acctrxn_created_by: created_by,
                     acctrxn_note: cheque_note,
-                    acctrxn_particular_id: 2,
-                    acctrxn_particular_type: 'Money receipt cheque',
+                    acctrxn_particular_id: 31,
                     acctrxn_pay_type: 'CASH',
                 };
                 yield trxns.AccTrxnInsert(AccTrxnBody);

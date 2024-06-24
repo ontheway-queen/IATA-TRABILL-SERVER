@@ -48,10 +48,9 @@ class AddClientService extends abstract_services_1.default {
                         ctrxn_amount: opening_balance,
                         ctrxn_cl: `client-${clientId}`,
                         ctrxn_voucher: '',
-                        ctrxn_particular_id: 11,
+                        ctrxn_particular_id: 39,
                         ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                         ctrxn_note: client_designation,
-                        ctrxn_particular_type: 'Client opening balance ',
                     };
                     const clTrxnId = yield trxns.clTrxnInsert(clTrxnBody);
                     yield conn.updateClientOpeningTransactions(clTrxnId, clientId);

@@ -95,8 +95,7 @@ class CommonAddMoneyReceipt extends AbstractServices {
           acctrxn_created_at: receipt_payment_date,
           acctrxn_created_by: invoice_created_by,
           acctrxn_note: note,
-          acctrxn_particular_id: 2,
-          acctrxn_particular_type: 'Money receipt',
+          acctrxn_particular_id: 31,
           acctrxn_pay_type: accPayType,
         };
 
@@ -107,10 +106,9 @@ class CommonAddMoneyReceipt extends AbstractServices {
           ctrxn_amount: receipt_total_amount,
           ctrxn_cl: combClient,
           ctrxn_voucher: receipt_vouchar_no,
-          ctrxn_particular_id: 29,
+          ctrxn_particular_id: 31,
           ctrxn_created_at: receipt_payment_date,
           ctrxn_note: note,
-          ctrxn_particular_type: 'Money Receipt',
         };
 
         client_trxn_id = await trxns.clTrxnInsert(clTrxnBody);

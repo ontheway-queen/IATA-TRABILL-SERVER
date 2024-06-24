@@ -7,6 +7,7 @@ import {
 } from '../../../common/interfaces/Trxn.interfaces';
 import { idType } from '../../../common/types/common.types';
 import CustomError from '../../../common/utils/errors/customError';
+import { getPaymentType } from '../../../common/utils/libraries/lib';
 import { IOnlineTrxnCharge } from '../../accounts/types/account.interfaces';
 import { InserLoanPayCheque } from '../../cheques/types/cheques.interface';
 import {
@@ -270,6 +271,7 @@ class LoanServices extends AbstractServices {
       const trxns = new Trxns(req, trx);
 
       const vouchar_no = await this.generateVoucher(req, 'LNP');
+      const accPayType = getPaymentType(payment_type);
 
       let payment_charge_id: null | number = null;
       if (payment_type === 3 && charge_amount) {
@@ -329,17 +331,6 @@ class LoanServices extends AbstractServices {
         paymentData.payment_accategory_id = accategory_id;
         paymentData.payment_account_id = account_id;
 
-        let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-        if (payment_type === 1) {
-          accPayType = 'CASH';
-        } else if (payment_type === 2) {
-          accPayType = 'BANK';
-        } else if (payment_type === 3) {
-          accPayType = 'MOBILE BANKING';
-        } else {
-          accPayType = 'CASH';
-        }
-
         const AccTrxnBody: IAcTrxn = {
           acctrxn_ac_id: account_id,
           acctrxn_type: 'DEBIT',
@@ -348,8 +339,7 @@ class LoanServices extends AbstractServices {
           acctrxn_created_at: payment_date,
           acctrxn_created_by: created_by,
           acctrxn_note: payment_note,
-          acctrxn_particular_id: 4,
-          acctrxn_particular_type: 'Loan',
+          acctrxn_particular_id: 54,
           acctrxn_pay_type: accPayType,
         };
 
@@ -425,7 +415,6 @@ class LoanServices extends AbstractServices {
     const {
       authority_id,
       loan_id,
-      accategory_id,
       account_id,
       amount,
       payment_type,
@@ -445,9 +434,7 @@ class LoanServices extends AbstractServices {
       const connCheque = this.models.chequesModels(req, trx);
 
       const {
-        prev_paytype,
         prev_payamount,
-        prev_accountid,
         prev_actrxn_id,
         payment_charge_id: prev_payment_charge_id,
       } = await conn.getPrevPaymentData(payment_id);
@@ -520,8 +507,7 @@ class LoanServices extends AbstractServices {
           acctrxn_created_at: payment_date,
           acctrxn_created_by: created_by,
           acctrxn_note: payment_note,
-          acctrxn_particular_id: 88,
-          acctrxn_particular_type: 'Loan payment',
+          acctrxn_particular_id: 54,
           acctrxn_pay_type: 'CASH',
           trxn_id: prev_actrxn_id,
         };
@@ -640,6 +626,8 @@ class LoanServices extends AbstractServices {
 
       const vouchar_no = await this.generateVoucher(req, 'LNR');
 
+      const payMethod = getPaymentType(payment_type);
+
       let received_charge_id: number | null = null;
       if (payment_type === 3) {
         const online_charge_trxn: IOnlineTrxnCharge = {
@@ -689,17 +677,6 @@ class LoanServices extends AbstractServices {
         receivedData.received_accategory_id = accategory_id;
         receivedData.received_account_id = account_id;
 
-        let accPayType: 'CASH' | 'BANK' | 'MOBILE BANKING';
-        if (payment_type === 1) {
-          accPayType = 'CASH';
-        } else if (payment_type === 2) {
-          accPayType = 'BANK';
-        } else if (payment_type === 3) {
-          accPayType = 'MOBILE BANKING';
-        } else {
-          accPayType = 'CASH';
-        }
-
         const AccTrxnBody: IAcTrxn = {
           acctrxn_ac_id: account_id,
           acctrxn_type: 'CREDIT',
@@ -708,9 +685,8 @@ class LoanServices extends AbstractServices {
           acctrxn_created_at: received_date,
           acctrxn_created_by: created_by,
           acctrxn_note: received_note,
-          acctrxn_particular_id: 3,
-          acctrxn_particular_type: 'Money receipt',
-          acctrxn_pay_type: accPayType,
+          acctrxn_particular_id: 55,
+          acctrxn_pay_type: payMethod,
         };
 
         const receipt_acctrxn_id = await trxns.AccTrxnInsert(AccTrxnBody);
@@ -805,6 +781,8 @@ class LoanServices extends AbstractServices {
       const connCheque = this.models.chequesModels(req, trx);
       const vendor_conn = this.models.vendorModel(req, trx);
 
+      const payMethod = getPaymentType(payment_type);
+
       const {
         received_amount,
         received_actransaction_id,
@@ -885,9 +863,8 @@ class LoanServices extends AbstractServices {
           acctrxn_created_at: received_date,
           acctrxn_created_by: created_by,
           acctrxn_note: received_note,
-          acctrxn_particular_id: 89,
-          acctrxn_particular_type: 'Loan Received',
-          acctrxn_pay_type: 'CASH',
+          acctrxn_particular_id: 55,
+          acctrxn_pay_type: payMethod,
           trxn_id: received_actransaction_id,
         };
 

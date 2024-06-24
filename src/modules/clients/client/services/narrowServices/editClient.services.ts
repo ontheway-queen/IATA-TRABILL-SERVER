@@ -2,12 +2,12 @@ import dayjs from 'dayjs';
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
 import Trxns from '../../../../../common/helpers/Trxns';
+import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 import {
   IClTrxnBody,
   IClTrxnUpdate,
 } from '../../../../../common/interfaces/Trxn.interfaces';
 import { IClientBody, IUpdateClient } from '../../types/client.interfaces';
-import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
 
 class EditClientService extends AbstractServices {
   constructor() {
@@ -67,10 +67,9 @@ class EditClientService extends AbstractServices {
             ctrxn_type: opening_balance_type,
             ctrxn_amount: opening_balance,
             ctrxn_cl: req.params.client_id,
-            ctrxn_particular_id: 11,
+            ctrxn_particular_id: 39,
             ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
             ctrxn_note: client_designation as string,
-            ctrxn_particular_type: 'Opening balance',
             ctrxn_trxn_id: clTrxnId,
           };
 
@@ -81,10 +80,9 @@ class EditClientService extends AbstractServices {
             ctrxn_amount: opening_balance,
             ctrxn_cl: req.params.client_id,
             ctrxn_voucher: '',
-            ctrxn_particular_id: 11,
+            ctrxn_particular_id: 39,
             ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
             ctrxn_note: client_designation as string,
-            ctrxn_particular_type: 'Client opening balance ',
           };
 
           const clTrxnId = await trxns.clTrxnInsert(clTrxnBody);

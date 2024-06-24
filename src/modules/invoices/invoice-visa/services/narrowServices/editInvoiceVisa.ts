@@ -101,10 +101,9 @@ class EditInvoiceVisa extends AbstractServices {
           ctrxn_amount: invoice_net_total,
           ctrxn_cl: invoice_combclient_id,
           ctrxn_voucher: invoice_no,
-          ctrxn_particular_id: prevCtrxnId ? 96 : 97,
+          ctrxn_particular_id: 9,
           ctrxn_created_at: invoice_sales_date,
           ctrxn_note: invoice_note || note,
-          ctrxn_particular_type: 'Invoice Visa Fare',
           ctrxn_pax: ctrxn_pax_name,
         };
 

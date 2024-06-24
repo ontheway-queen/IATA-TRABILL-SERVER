@@ -32,10 +32,9 @@ class AddClientBillAdjustment extends abstract_services_1.default {
                     ctrxn_amount: bill_amount,
                     ctrxn_cl: bill_client_id,
                     ctrxn_voucher: voucher_no,
-                    ctrxn_particular_id: 126,
+                    ctrxn_particular_id: 33,
                     ctrxn_created_at: bill_create_date,
                     ctrxn_note: bill_note,
-                    ctrxn_particular_type: 'Client Bill Adjustment',
                 };
                 const cbilladjust_ctrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                 const clientBillInfo = {

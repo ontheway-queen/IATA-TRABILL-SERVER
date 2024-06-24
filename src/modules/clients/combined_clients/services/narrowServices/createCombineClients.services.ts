@@ -73,10 +73,9 @@ class CreateCombineClients extends AbstractServices {
           ctrxn_amount: Number(combine_opening_balance),
           ctrxn_cl: `combined-${combine_id}`,
           ctrxn_voucher: '',
-          ctrxn_particular_id: 11,
+          ctrxn_particular_id: 41,
           ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
           ctrxn_note: combine_designation as string,
-          ctrxn_particular_type: 'Opening balance',
         };
 
         const combine_trxn_id = await new Trxns(req, trx).clTrxnInsert(

@@ -123,8 +123,7 @@ class CreatePayroll extends AbstractServices {
           acctrxn_created_at: payroll_date as string,
           acctrxn_created_by: payroll_created_by as number,
           acctrxn_note: payroll_note,
-          acctrxn_particular_id: 59,
-          acctrxn_particular_type: 'Payroll create',
+          acctrxn_particular_id: 38,
           acctrxn_pay_type: accPayType,
         };
 

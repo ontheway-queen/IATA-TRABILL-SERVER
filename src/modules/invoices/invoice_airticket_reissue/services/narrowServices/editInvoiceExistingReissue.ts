@@ -65,7 +65,7 @@ class EditExistingCl extends AbstractServices {
       const { prevCtrxnId } = await common_conn.getPreviousInvoices(invoice_id);
 
       const clTrxnBody: IClTrxnUpdate = {
-        ctrxn_particular_id: 91,
+        ctrxn_particular_id: 5,
         ctrxn_note: invoice_note,
         ctrxn_trxn_id: prevCtrxnId,
         ctrxn_airticket_no: airticket_ticket_no,
@@ -74,7 +74,6 @@ class EditExistingCl extends AbstractServices {
         ctrxn_cl: invoice_combclient_id,
         ctrxn_voucher: invoice_no,
         ctrxn_created_at: invoice_sales_date,
-        ctrxn_particular_type: 'Reissue Air Ticket',
       };
 
       await trxns.clTrxnUpdate(clTrxnBody);
@@ -114,8 +113,7 @@ class EditExistingCl extends AbstractServices {
         vtrxn_amount: airticket_purchase_price,
         vtrxn_created_at: invoice_sales_date,
         vtrxn_note: invoice_note,
-        vtrxn_particular_id: 148,
-        vtrxn_particular_type: 'Reissue Existing Air Ticket',
+        vtrxn_particular_id: 5,
         vtrxn_type: 'DEBIT',
       };
 

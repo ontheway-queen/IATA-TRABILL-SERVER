@@ -73,10 +73,9 @@ class DeleteInvoiceHajjPreReg extends AbstractServices {
         ctrxn_amount: void_charge,
         ctrxn_cl: comb_client,
         ctrxn_voucher: prevInvoiceNo,
-        ctrxn_particular_id: 161,
+        ctrxn_particular_id: 56,
         ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
         ctrxn_note: '',
-        ctrxn_particular_type: 'reissue void',
       };
 
       await trxns.clTrxnInsert(clTrxnBody);

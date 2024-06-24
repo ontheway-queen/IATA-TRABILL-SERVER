@@ -37,9 +37,8 @@ class AddVendorBillAdjustment extends abstract_services_1.default {
                 const VTrxnBody = {
                     vtrxn_voucher: voucher_no,
                     vtrxn_type: trxType,
-                    vtrxn_particular_type: 'Vendor bill adjustment',
                     vtrxn_amount: bill_amount,
-                    vtrxn_particular_id: 126,
+                    vtrxn_particular_id: 33,
                     vtrxn_note: bill_note,
                     vtrxn_user_id: bill_created_by,
                     vtrxn_created_at: bill_create_date,

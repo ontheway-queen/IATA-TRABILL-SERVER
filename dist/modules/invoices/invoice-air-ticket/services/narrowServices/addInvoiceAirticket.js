@@ -96,8 +96,9 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                 }
                 const clientTransId = yield utils.clientTrans(trxns, {
                     ctrxn_pnr: (0, lib_1.uniqueArrJoin)(ctrxn_pnr),
+                    tr_type: 1,
+                    dis_tr_type: 2,
                     ctrxn_route,
-                    extra_particular: 'Air Ticket',
                     invoice_no,
                     ticket_no,
                 });
@@ -158,8 +159,7 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                         vtrxn_amount: airticket_purchase_price,
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: invoice_note,
-                        vtrxn_particular_id: 146,
-                        vtrxn_particular_type: 'INV AIR TICKET PURCHASE',
+                        vtrxn_particular_id: 1,
                         vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
                         vtrxn_user_id: invoice_created_by,
                         vtrxn_voucher: invoice_no,

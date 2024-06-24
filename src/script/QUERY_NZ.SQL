@@ -1,3 +1,13 @@
+
+
+
+
+
+
+
+
+
+
 -- MOST IMPORTANT / NEED TO MIGRATE ALL IMAGE INTO S3
 set sql_safe_updates = 0;
 UPDATE trabill.trabill_agency_organization_information

@@ -828,10 +828,10 @@ class DashboardModels extends AbstractModels {
           'COALESCE(iat.airticket_sales_date, ir.airticket_sales_date) as sales_date'
         ),
         this.db.raw(
-          'COALESCE(iat.airticket_gross_fare, ir.airticket_client_price) as gross_fare'
+          'ROUND(COALESCE(iat.airticket_gross_fare, ir.airticket_client_price)) as gross_fare'
         ),
         this.db.raw(
-          'COALESCE(iat.airticket_base_fare, ir.airticket_fare_difference) as base_fare'
+          'ROUND(COALESCE(iat.airticket_base_fare, ir.airticket_fare_difference)) as base_fare'
         ),
         this.db.raw(
           'COALESCE(iat.airticket_commission_percent, ir.airticket_commission_percent) as commission_percent'
@@ -839,9 +839,11 @@ class DashboardModels extends AbstractModels {
         this.db.raw(
           'COALESCE(Round(iat.airticket_commission_percent_total), Round(ir.airticket_fare_difference * ir.airticket_commission_percent / 100)) as commission_percent_total'
         ),
-        this.db.raw('COALESCE(iat.airticket_ait, ir.airticket_ait) as ait'),
         this.db.raw(
-          'COALESCE(iat.airticket_purchase_price, ir.airticket_purchase_price) as purchase_price'
+          'ROUND(COALESCE(iat.airticket_ait, ir.airticket_ait)) as ait'
+        ),
+        this.db.raw(
+          'ROUND(COALESCE(iat.airticket_purchase_price, ir.airticket_purchase_price)) as purchase_price'
         ),
         'airline_code',
         'client_name',

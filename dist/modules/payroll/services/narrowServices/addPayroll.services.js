@@ -84,8 +84,7 @@ class CreatePayroll extends abstract_services_1.default {
                         acctrxn_created_at: payroll_date,
                         acctrxn_created_by: payroll_created_by,
                         acctrxn_note: payroll_note,
-                        acctrxn_particular_id: 59,
-                        acctrxn_particular_type: 'Payroll create',
+                        acctrxn_particular_id: 38,
                         acctrxn_pay_type: accPayType,
                     };
                     const payroll_acctrxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);

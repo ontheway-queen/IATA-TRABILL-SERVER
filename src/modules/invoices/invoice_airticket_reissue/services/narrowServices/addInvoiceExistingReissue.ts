@@ -78,10 +78,9 @@ class AddExistingClient extends AbstractServices {
         ctrxn_amount: airticket_client_price,
         ctrxn_cl: invoice_combclient_id,
         ctrxn_voucher: invoice_no,
-        ctrxn_particular_id: 94,
+        ctrxn_particular_id: 5,
         ctrxn_created_at: invoice_sales_date,
         ctrxn_note: invoice_note as string,
-        ctrxn_particular_type: 'Air Ticket Reissue',
         ctrxn_airticket_no: airticket_ticket_no,
       };
 
@@ -133,8 +132,7 @@ class AddExistingClient extends AbstractServices {
         vtrxn_amount: airticket_purchase_price,
         vtrxn_created_at: invoice_sales_date,
         vtrxn_note: invoice_note,
-        vtrxn_particular_id: 148,
-        vtrxn_particular_type: 'Reissue Existing Air Ticket',
+        vtrxn_particular_id: 5,
         vtrxn_type: 'DEBIT',
         vtrxn_user_id: req.user_id,
         vtrxn_voucher: invoice_no,

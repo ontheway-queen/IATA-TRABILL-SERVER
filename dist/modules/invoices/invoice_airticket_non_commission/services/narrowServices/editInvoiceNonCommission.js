@@ -92,7 +92,8 @@ class EditInvoiceNonCommission extends abstract_services_1.default {
                     ctrxn_pnr: ctrxn_pnr,
                     ctrxn_route: ctrxn_route,
                     ticket_no,
-                    extra_particular: 'Air Ticket Non-Com',
+                    tr_type: 3,
+                    dis_tr_type: 4,
                 });
                 const prevBillingInfo = yield conn.getPrevNonComVendor(invoice_id);
                 yield trxns.deleteInvVTrxn(prevBillingInfo);
@@ -168,8 +169,7 @@ class EditInvoiceNonCommission extends abstract_services_1.default {
                         vtrxn_amount: airticket_purchase_price,
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: invoice_note,
-                        vtrxn_particular_id: 147,
-                        vtrxn_particular_type: 'NON COMM AIR TICKET PURCHASE',
+                        vtrxn_particular_id: 3,
                         vtrxn_pax: pax_names,
                         vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
                         vtrxn_user_id: invoice_created_by,

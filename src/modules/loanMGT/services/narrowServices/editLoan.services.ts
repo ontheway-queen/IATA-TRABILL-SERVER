@@ -117,8 +117,7 @@ class EditLoan extends AbstractServices {
           acctrxn_created_at: date as string,
           acctrxn_created_by: loan_created_by,
           acctrxn_note: note,
-          acctrxn_particular_id: takingLoan ? 46 : 47,
-          acctrxn_particular_type: 'Money receipt',
+          acctrxn_particular_id: takingLoan ? 52 : 53,
           acctrxn_pay_type: 'CASH',
           trxn_id: prevAccTrxnId,
         };

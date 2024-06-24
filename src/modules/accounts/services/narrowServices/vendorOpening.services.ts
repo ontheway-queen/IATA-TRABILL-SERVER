@@ -33,9 +33,8 @@ class AddVendorOpeningService extends AbstractServices {
       const VTrxnBody: IVTrxnDb = {
         vtrxn_voucher: '',
         vtrxn_type: transaction_type,
-        vtrxn_particular_type: 'Vendor Opening Balance',
         vtrxn_amount: amount,
-        vtrxn_particular_id: 13,
+        vtrxn_particular_id: 41,
         vtrxn_note: note as string,
         vtrxn_user_id: transaction_created_by,
         vtrxn_created_at: date as string,

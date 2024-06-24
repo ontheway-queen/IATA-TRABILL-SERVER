@@ -11,10 +11,10 @@ export interface IClTrxnBody {
   ctrxn_type: 'DEBIT' | 'CREDIT';
   ctrxn_amount: number;
   ctrxn_particular_id: number;
-  ctrxn_particular_type: string;
   ctrxn_note: string;
   ctrxn_created_at: string;
   ctrxn_pass_id?: number;
+  ctrxn_received_by?: number;
 }
 
 export interface IComTrxn {
@@ -27,12 +27,12 @@ export interface IComTrxn {
   comtrxn_type: string;
   comtrxn_comb_id: number;
   comtrxn_particular_id: number;
-  comtrxn_particular_type: string;
+  // comtrxn_particular_type: string;
   comtrxn_amount: number;
   comtrxn_note: string;
   comtrxn_create_at: string;
   comtrxn_user_id: idType;
-  // comtrxn_pay_type?: string;
+  comtrxn_pay_type?: string;
 }
 
 export interface IClTrxn extends Omit<IClTrxnBody, 'ctrxn_cl'> {
@@ -54,7 +54,7 @@ export interface IUpdateCTrxn {
   p_type: 'DEBIT' | 'CREDIT';
   p_amount: number;
   p_particular_id: number;
-  p_particular_type: string;
+  // p_particular_type: string;
   p_note: string;
   p_pay_type?: string;
   p_created_at: string;
@@ -68,7 +68,7 @@ export interface IVTrxnDb {
   vtrxn_route?: string;
   vtrxn_pnr?: string;
   vtrxn_type: 'CREDIT' | 'DEBIT';
-  vtrxn_particular_type: string;
+  // vtrxn_particular_type: string;
   vtrxn_amount: number;
   vtrxn_particular_id: number;
   vtrxn_note: string;
@@ -98,7 +98,6 @@ export interface IUpdateCombTrxn {
   p_type: 'DEBIT' | 'CREDIT';
   p_comb_id: number;
   p_particular_id: number;
-  p_particular_type: string;
   p_amount: number;
   p_note: string;
   p_create_at: string;
@@ -110,7 +109,6 @@ export interface IAccTrxn {
   acctrxn_ac_id: number;
   acctrxn_pay_type: 'CASH' | 'BANK' | 'MOBILE BANKING';
   acctrxn_particular_id: number;
-  acctrxn_particular_type: string;
   acctrxn_type: 'DEBIT' | 'CREDIT';
   acctrxn_amount: number;
   acctrxn_lbalance: number;
@@ -131,7 +129,7 @@ export interface IUpdateAccTrxn {
   p_ac_id: number;
   p_pay_type: 'CASH' | 'BANK' | 'MOBILE BANKING';
   p_particular_id: number;
-  p_particular_type: string;
+  // p_particular_type: string;
   p_type: 'DEBIT' | 'CREDIT';
   p_amount: number;
   p_note: string;

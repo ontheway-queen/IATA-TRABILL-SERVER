@@ -4,7 +4,6 @@ import {
   IClTrxnUpdate,
 } from '../../../common/interfaces/Trxn.interfaces';
 import CommonInvoiceModel from '../../../common/model/CommonInvoice.models';
-import { InvoiceInfoType } from '../invoice-air-ticket/types/invoiceAirticket.interface';
 
 export class InvoiceUtils {
   protected comm_conn: CommonInvoiceModel;
@@ -34,20 +33,11 @@ export class InvoiceUtils {
     trxns: Trxns,
     value: {
       invoice_no: string;
+      tr_type: number;
+      dis_tr_type: number;
       ctrxn_pnr?: string;
       ctrxn_route?: string;
       ticket_no?: string;
-      extra_particular:
-        | 'Air Ticket'
-        | 'Air Ticket Non-Com'
-        | 'Air Ticket Reissue'
-        | 'Invoice Other'
-        | 'Invoice Visa'
-        | 'Tour Package'
-        | 'Hajj'
-        | 'Ummrah Package'
-        | 'Air Ticket(PNR)'
-        | 'Hajj Pre Reg';
       note?: string;
     }
   ) => {
@@ -61,10 +51,9 @@ export class InvoiceUtils {
       ctrxn_amount: base_fare,
       ctrxn_cl: body.invoice_combclient_id,
       ctrxn_voucher: value.invoice_no,
-      ctrxn_particular_id: 90,
+      ctrxn_particular_id: value.tr_type,
       ctrxn_created_at: body.invoice_sales_date,
       ctrxn_note: body.invoice_note || (value.note as string),
-      ctrxn_particular_type: value.extra_particular + ' Fare',
       ctrxn_pnr: value.ctrxn_pnr,
       ctrxn_route: value.ctrxn_route,
       ctrxn_airticket_no: value.ticket_no,
@@ -75,10 +64,9 @@ export class InvoiceUtils {
       ctrxn_amount: body.invoice_discount || 0,
       ctrxn_cl: body.invoice_combclient_id,
       ctrxn_voucher: value.invoice_no,
-      ctrxn_particular_id: 90,
+      ctrxn_particular_id: value.dis_tr_type,
       ctrxn_created_at: body.invoice_sales_date,
       ctrxn_note: body.invoice_note,
-      ctrxn_particular_type: value.extra_particular + ' Discount',
       ctrxn_pnr: value.ctrxn_pnr,
       ctrxn_route: value.ctrxn_route,
       ctrxn_airticket_no: value.ticket_no,
@@ -100,20 +88,12 @@ export class InvoiceUtils {
     trxns: Trxns,
     value: {
       invoice_no: string;
+      tr_type: number;
+      dis_tr_type: number;
       prevCtrxnId: number;
       prevClChargeTransId: number;
       ctrxn_pnr?: string;
       ticket_no?: string;
-      extra_particular:
-        | 'Air Ticket'
-        | 'Air Ticket Non-Com'
-        | 'Air Ticket Reissue'
-        | 'Invoice Other'
-        | 'Invoice Visa'
-        | 'Tour Package'
-        | 'Hajj'
-        | 'Ummrah Package'
-        | 'Hajj Pre Reg';
       note?: string;
       ctrxn_route?: string;
     }
@@ -129,10 +109,9 @@ export class InvoiceUtils {
       ctrxn_amount: base_fare,
       ctrxn_cl: body.invoice_combclient_id,
       ctrxn_voucher: value.invoice_no,
-      ctrxn_particular_id: 91,
+      ctrxn_particular_id: value.tr_type,
       ctrxn_created_at: body.invoice_sales_date,
       ctrxn_note: body.invoice_note || (value.note as string),
-      ctrxn_particular_type: value.extra_particular + ' Fare',
       ctrxn_airticket_no: value.ticket_no,
       ctrxn_pnr: value.ctrxn_pnr,
       ctrxn_route: value.ctrxn_route,
@@ -144,10 +123,9 @@ export class InvoiceUtils {
       ctrxn_amount: body.invoice_discount,
       ctrxn_cl: body.invoice_combclient_id,
       ctrxn_voucher: value.invoice_no,
-      ctrxn_particular_id: 91,
+      ctrxn_particular_id: value.dis_tr_type,
       ctrxn_created_at: body.invoice_sales_date,
       ctrxn_note: body.invoice_note,
-      ctrxn_particular_type: value.extra_particular + ' Discount',
       ctrxn_airticket_no: value.ticket_no,
       ctrxn_pnr: value.ctrxn_pnr,
       ctrxn_route: value.ctrxn_route,

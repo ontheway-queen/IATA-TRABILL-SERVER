@@ -31,8 +31,7 @@ class AddNonInvoice extends abstract_services_1.default {
                     acctrxn_created_at: date,
                     acctrxn_created_by: noninvoice_created_by,
                     acctrxn_note: note,
-                    acctrxn_particular_id: 10,
-                    acctrxn_particular_type: 'Noninvoice income',
+                    acctrxn_particular_id: 35,
                     acctrxn_pay_type: 'CASH',
                 };
                 const acc_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);

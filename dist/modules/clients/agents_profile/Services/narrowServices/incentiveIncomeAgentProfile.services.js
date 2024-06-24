@@ -45,8 +45,7 @@ class IncentiveIncomeAgentProfile extends abstract_services_1.default {
                     acctrxn_created_at: date,
                     acctrxn_created_by: incentive_created_by,
                     acctrxn_note: note,
-                    acctrxn_particular_id: 26,
-                    acctrxn_particular_type: 'Agent profile',
+                    acctrxn_particular_id: 31,
                     acctrxn_pay_type: 'CASH',
                 };
                 const incentive_acctrxn_id = yield new Trxns_1.default(req, trx).AccTrxnInsert(AccTrxnBody);
@@ -100,8 +99,7 @@ class IncentiveIncomeAgentProfile extends abstract_services_1.default {
                     acctrxn_created_at: date,
                     acctrxn_created_by: incentive_created_by,
                     acctrxn_note: note,
-                    acctrxn_particular_id: 26,
-                    acctrxn_particular_type: 'Money receipt',
+                    acctrxn_particular_id: 31,
                     acctrxn_pay_type: 'CASH',
                     trxn_id: prev_incentive_trxn_id,
                 };

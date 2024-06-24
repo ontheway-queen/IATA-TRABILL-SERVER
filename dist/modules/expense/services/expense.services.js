@@ -67,8 +67,7 @@ class ExpneseService extends abstract_services_1.default {
                         acctrxn_created_at: expense_date,
                         acctrxn_created_by: expense_created_by,
                         acctrxn_note: expense_note,
-                        acctrxn_particular_id: 72,
-                        acctrxn_particular_type: 'Expense create',
+                        acctrxn_particular_id: 39,
                         acctrxn_pay_type: accPayType,
                     };
                     const expense_acctrxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -148,8 +147,7 @@ class ExpneseService extends abstract_services_1.default {
                         acctrxn_created_at: expense_date,
                         acctrxn_created_by: expense_created_by,
                         acctrxn_note: expense_note,
-                        acctrxn_particular_id: 20,
-                        acctrxn_particular_type: 'Expense',
+                        acctrxn_particular_id: 39,
                         acctrxn_pay_type: 'CASH',
                         trxn_id: prevAccTrxnId,
                     };

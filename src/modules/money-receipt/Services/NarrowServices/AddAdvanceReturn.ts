@@ -43,6 +43,7 @@ class AddAdvanceReturn extends AbstractServices {
       const conn_acc = this.models.accountsModel(req, trx);
       const trxns = new Trxns(req, trx);
       const vouchar_no = await this.generateVoucher(req, 'ADR');
+      let trans_particular = 'ADVANCE RETURN';
 
       const cl_last_balance = await conn_cl.selectClientLBalance(
         advr_combclient
@@ -91,8 +92,7 @@ class AddAdvanceReturn extends AbstractServices {
           acctrxn_created_at: advr_payment_date,
           acctrxn_created_by: advr_created_by,
           acctrxn_note: advr_note,
-          acctrxn_particular_id: 118,
-          acctrxn_particular_type: 'Money Receipt',
+          acctrxn_particular_id: 32,
           acctrxn_pay_type: accPayType,
         };
 
@@ -103,10 +103,9 @@ class AddAdvanceReturn extends AbstractServices {
           ctrxn_amount: advr_amount,
           ctrxn_cl: advr_combclient,
           ctrxn_voucher: vouchar_no,
-          ctrxn_particular_id: 118,
+          ctrxn_particular_id: 32,
           ctrxn_created_at: advr_payment_date,
           ctrxn_note: advr_note,
-          ctrxn_particular_type: 'Money Receipt',
           ctrxn_pay_type: accPayType,
         };
 
@@ -120,7 +119,7 @@ class AddAdvanceReturn extends AbstractServices {
           charge_from_client_id: client_id as number,
           charge_from_ccombined_id: combined_id as number,
           charge_amount: advr_trxn_charge,
-          charge_purpose: 'Money Receipt Advance Return',
+          charge_purpose: trans_particular,
           charge_note: advr_note,
         };
 

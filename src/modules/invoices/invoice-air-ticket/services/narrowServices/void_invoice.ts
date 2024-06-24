@@ -42,10 +42,9 @@ class VoidInvoice extends AbstractServices {
         ctrxn_amount: body.net_total,
         ctrxn_cl: body.comb_client,
         ctrxn_voucher: body.invoice_no,
-        ctrxn_particular_id: 114,
+        ctrxn_particular_id: 56,
         ctrxn_created_at: body.invoice_void_date,
         ctrxn_note: content,
-        ctrxn_particular_type: 'TKT VOID',
         ctrxn_airticket_no: ticket_nos,
       };
 
@@ -59,10 +58,9 @@ class VoidInvoice extends AbstractServices {
           ctrxn_amount: body.client_charge,
           ctrxn_cl: body.comb_client,
           ctrxn_voucher: body.invoice_no,
-          ctrxn_particular_id: 161,
+          ctrxn_particular_id: 59,
           ctrxn_created_at: body.invoice_void_date,
           ctrxn_note: '',
-          ctrxn_particular_type: 'TKT VOID CHARGE',
           ctrxn_airticket_no: ticket_nos,
         };
         void_charge_ctrxn_id = await trxns.clTrxnInsert(voidChargeClTrans);
@@ -106,8 +104,7 @@ class VoidInvoice extends AbstractServices {
           vtrxn_amount: item.cost_price,
           vtrxn_created_at: body.invoice_void_date,
           vtrxn_note: `BDT ${item.cost_price}/- \nCHARGE BDT ${item.vendor_charge}/-`,
-          vtrxn_particular_id: 1,
-          vtrxn_particular_type: 'TKT VOID',
+          vtrxn_particular_id: 56,
           vtrxn_type: vendor_id ? 'CREDIT' : 'DEBIT',
           vtrxn_user_id: req.user_id,
           vtrxn_voucher: body.invoice_no,
@@ -122,8 +119,7 @@ class VoidInvoice extends AbstractServices {
             vtrxn_amount: item.vendor_charge,
             vtrxn_created_at: body.invoice_void_date,
             vtrxn_note: ``,
-            vtrxn_particular_id: 1,
-            vtrxn_particular_type: 'TKT VOID CHARGE',
+            vtrxn_particular_id: 59,
             vtrxn_type: vendor_id ? 'DEBIT' : 'CREDIT',
             vtrxn_user_id: req.user_id,
             vtrxn_airticket_no: item.airticket_ticket_no,

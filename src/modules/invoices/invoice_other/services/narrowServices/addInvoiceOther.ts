@@ -109,7 +109,8 @@ class AddInvoiceOther extends AbstractServices {
         invoice_no,
         ctrxn_pnr: ctrxn_pnr as string,
         ctrxn_route: ticketInfo && (ticketInfo[0]?.ticket_route as string),
-        extra_particular: 'Invoice Other',
+        tr_type: 7,
+        dis_tr_type: 8,
         ticket_no: ctrxn_ticket as string,
         note,
       });
@@ -264,16 +265,13 @@ class AddInvoiceOther extends AbstractServices {
             billingInfo.billing_product_id
           );
 
-          let vtrxn_particular_type = `Invoice other (${productName}). \n`;
-
           // VENDOR TRANSACTIONS
           const VTrxnBody: IVTrxn = {
             comb_vendor: billing_comvendor,
             vtrxn_amount: total_cost_price,
             vtrxn_created_at: invoice_sales_date,
-            vtrxn_note: billing_description,
-            vtrxn_particular_id: 150,
-            vtrxn_particular_type: vtrxn_particular_type,
+            vtrxn_note: productName + ' ' + billing_description,
+            vtrxn_particular_id: 7,
             vtrxn_pax: pax_name,
             vtrxn_type: combined_id ? 'CREDIT' : 'DEBIT',
             vtrxn_user_id: invoice_created_by,

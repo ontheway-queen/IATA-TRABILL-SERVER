@@ -1,20 +1,20 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
+import Trxns from '../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../common/helpers/common.helper';
+import {
+  IAcTrxnUpdate,
+  IClTrxnUpdate,
+} from '../../../../common/interfaces/Trxn.interfaces';
 import { InvoiceHistory } from '../../../../common/types/common.types';
+import { getPaymentType } from '../../../../common/utils/libraries/lib';
+import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 import {
   IInvoiceClPay,
   IMoneyReceiptCheques,
   IMoneyReceiptReq,
   IUpdateMoneyReceipt,
 } from '../../Type/MoneyReceipt.Interfaces';
-import Trxns from '../../../../common/helpers/Trxns';
-import {
-  IAcTrxnUpdate,
-  IClTrxnUpdate,
-} from '../../../../common/interfaces/Trxn.interfaces';
-import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
-import { getPaymentType } from '../../../../common/utils/libraries/lib';
 
 class EditMoneyReceipt extends AbstractServices {
   constructor() {
@@ -62,6 +62,7 @@ class EditMoneyReceipt extends AbstractServices {
       let acc_trxn_id;
       let acc_transaction_amount = Number(receipt_total_amount);
       let client_trxn_id;
+      let trans_particular = 'MONEY RECEIPT';
 
       const amount_after_discount =
         Number(receipt_total_amount) - Number(receipt_total_discount) || 0;
@@ -82,8 +83,7 @@ class EditMoneyReceipt extends AbstractServices {
           acctrxn_created_at: receipt_payment_date,
           acctrxn_created_by: receipt_created_by,
           acctrxn_note: note,
-          acctrxn_particular_id: 2,
-          acctrxn_particular_type: 'Money receipt',
+          acctrxn_particular_id: 31,
           acctrxn_pay_type: accPayType,
           trxn_id: previousBillingData?.prevAccTrxnId as number,
         };
@@ -95,12 +95,12 @@ class EditMoneyReceipt extends AbstractServices {
           ctrxn_amount: receipt_total_amount,
           ctrxn_cl: receipt_combclient,
           ctrxn_voucher: previousBillingData?.receipt_vouchar_no as string,
-          ctrxn_particular_id: 14,
+          ctrxn_particular_id: 31,
           ctrxn_created_at: receipt_payment_date,
           ctrxn_note: note,
-          ctrxn_particular_type: 'Money Receipt Update',
           ctrxn_trxn_id: previousBillingData?.prevClTrxn as number,
           ctrxn_pay_type: accPayType,
+          ctrxn_received_by: received_by,
         };
 
         client_trxn_id = await trxns.clTrxnUpdate(clTrxnBody);
@@ -114,7 +114,7 @@ class EditMoneyReceipt extends AbstractServices {
             charge_from_client_id: client_id as number,
             charge_from_ccombined_id: combined_id as number,
             charge_amount: charge_amount,
-            charge_purpose: 'Invoice money receipt update',
+            charge_purpose: trans_particular,
             charge_note: receipt_note,
           };
 
@@ -128,7 +128,7 @@ class EditMoneyReceipt extends AbstractServices {
             charge_from_client_id: client_id as number,
             charge_from_ccombined_id: combined_id as number,
             charge_amount: charge_amount,
-            charge_purpose: 'Invoice money receipt',
+            charge_purpose: trans_particular,
             charge_note: receipt_note,
           };
 
@@ -227,11 +227,11 @@ class EditMoneyReceipt extends AbstractServices {
 
           // @HISTORY
           const history_data: InvoiceHistory = {
-            history_activity_type: 'INVOICE_PAYMENT_CREATED',
+            history_activity_type: 'INVOICE_PAYMENT_UPDATED',
             history_invoice_id: invoice_id,
             history_created_by: receipt_created_by,
             history_invoice_payment_amount: invoice_amount,
-            invoicelog_content: 'Money receipt hass been deleted',
+            invoicelog_content: 'Money receipt has been updated',
           };
 
           await common_conn.insertInvoiceHistory(history_data);
@@ -270,11 +270,11 @@ class EditMoneyReceipt extends AbstractServices {
 
           // @HISTORY
           const history_data: InvoiceHistory = {
-            history_activity_type: 'INVOICE_PAYMENT_CREATED',
+            history_activity_type: 'INVOICE_PAYMENT_UPDATED',
             history_invoice_id: invoice_id,
             history_created_by: receipt_created_by,
             history_invoice_payment_amount: peyment_amount,
-            invoicelog_content: 'Money receipt hass been deleted',
+            invoicelog_content: 'Money receipt has been updated',
           };
 
           await common_conn.insertInvoiceHistory(history_data);
@@ -302,7 +302,7 @@ class EditMoneyReceipt extends AbstractServices {
 
       await this.insertAudit(
         req,
-        'create',
+        'update',
         `Money receipt has been updated, Voucher - ${receipt_payment_to}, Net - ${receipt_total_amount}/-`,
         receipt_created_by,
         'MONEY_RECEIPT'

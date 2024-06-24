@@ -72,10 +72,9 @@ class InvoiceVisaServices extends abstract_services_1.default {
                             ctrxn_amount: prev_sales_price,
                             ctrxn_cl: comb_client,
                             ctrxn_voucher: prevInvoiceNo,
-                            ctrxn_particular_id: 96,
+                            ctrxn_particular_id: 9,
                             ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                             ctrxn_note: prevInvoiceNote,
-                            ctrxn_particular_type: 'invoice visa ',
                         };
                         const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                         yield conn.updateInvoiceClientTrxn(invoice_cltrxn_id, invoice_id);
@@ -86,10 +85,9 @@ class InvoiceVisaServices extends abstract_services_1.default {
                             ctrxn_amount: approvedAmount + prev_sales_price,
                             ctrxn_cl: comb_client,
                             ctrxn_voucher: prevInvoiceNo,
-                            ctrxn_particular_id: 97,
+                            ctrxn_particular_id: 9,
                             ctrxn_created_at: invoice_sales_date,
                             ctrxn_note: prevInvoiceNote,
-                            ctrxn_particular_type: 'invoice visa',
                             ctrxn_trxn_id: prevCtrxnId,
                         };
                         yield trxns.clTrxnUpdate(clTrxnBody);
@@ -101,8 +99,7 @@ class InvoiceVisaServices extends abstract_services_1.default {
                         vtrxn_amount: prev_cost_price,
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: prevInvoiceNote,
-                        vtrxn_particular_id: 149,
-                        vtrxn_particular_type: 'Invoice visa',
+                        vtrxn_particular_id: 9,
                         vtrxn_type: combined_id ? 'CREDIT' : 'DEBIT',
                         vtrxn_user_id: created_by,
                         vtrxn_voucher: prevInvoiceNo,

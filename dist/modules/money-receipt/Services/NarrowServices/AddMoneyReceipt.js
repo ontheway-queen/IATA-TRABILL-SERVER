@@ -32,7 +32,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                 // @RECEIPT_ID
                 let receipt_actransaction_id;
                 let client_trxn_id = null;
-                let online_charge_purpuse = 'Money receipt';
+                let trans_particular = 'MONEY RECEIPT';
                 const amount_after_discount = Number(receipt_total_amount) - Number(receipt_total_discount) || 0;
                 const accPayType = (0, lib_1.getPaymentType)(+receipt_payment_type);
                 if (receipt_payment_type !== 4) {
@@ -44,8 +44,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                         acctrxn_created_at: receipt_payment_date,
                         acctrxn_created_by: receipt_created_by,
                         acctrxn_note: receipt_note,
-                        acctrxn_particular_id: 2,
-                        acctrxn_particular_type: 'Money receipt',
+                        acctrxn_particular_id: 31,
                         acctrxn_pay_type: accPayType,
                     };
                     receipt_actransaction_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -54,11 +53,11 @@ class AddMoneyReceipt extends abstract_services_1.default {
                         ctrxn_amount: receipt_total_amount,
                         ctrxn_cl: receipt_combclient,
                         ctrxn_voucher: voucher_no,
-                        ctrxn_particular_id: 114,
+                        ctrxn_particular_id: 31,
                         ctrxn_created_at: receipt_payment_date,
                         ctrxn_note: receipt_note,
-                        ctrxn_particular_type: 'Money Receipt',
                         ctrxn_pay_type: accPayType,
+                        ctrxn_received_by: received_by,
                     };
                     client_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                 }
@@ -69,7 +68,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                         charge_from_client_id: client_id,
                         charge_from_ccombined_id: combined_id,
                         charge_amount: charge_amount,
-                        charge_purpose: online_charge_purpuse,
+                        charge_purpose: trans_particular,
                         charge_note: receipt_note,
                     };
                     receipt_trxn_charge_id = yield this.models
@@ -162,7 +161,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                         history_invoice_id: item.invoice_id,
                         history_created_by: receipt_created_by,
                         history_invoice_payment_amount: item.pay_amount,
-                        invoicelog_content: 'Money receipt has been deleted',
+                        invoicelog_content: 'Money receipt has been created',
                         history_org_agency: req.agency_id,
                     });
                 }

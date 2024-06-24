@@ -33,10 +33,9 @@ class IncentiveIncomeClientServices extends abstract_services_1.default {
                         ctrxn_amount: amount,
                         ctrxn_cl: comb_client,
                         ctrxn_voucher: vouchar_no,
-                        ctrxn_particular_id: 26,
+                        ctrxn_particular_id: 37,
                         ctrxn_created_at: date,
                         ctrxn_note: note,
-                        ctrxn_particular_type: 'Incentive income',
                     };
                     ctrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                     const clientBillInfo = {
@@ -60,8 +59,7 @@ class IncentiveIncomeClientServices extends abstract_services_1.default {
                         acctrxn_created_at: date,
                         acctrxn_created_by: incentive_created_by,
                         acctrxn_note: note,
-                        acctrxn_particular_id: 26,
-                        acctrxn_particular_type: 'Incentive income detail',
+                        acctrxn_particular_id: 37,
                         acctrxn_pay_type: 'CASH',
                     };
                     incentive_acctrxn_id = yield new Trxns_1.default(req, trx).AccTrxnInsert(AccTrxnBody);
@@ -108,10 +106,9 @@ class IncentiveIncomeClientServices extends abstract_services_1.default {
                         ctrxn_amount: amount,
                         ctrxn_cl: comb_client,
                         ctrxn_voucher: prev_voucher_no,
-                        ctrxn_particular_id: 26,
+                        ctrxn_particular_id: 39,
                         ctrxn_created_at: date,
                         ctrxn_note: note,
-                        ctrxn_particular_type: 'Opening balance',
                         ctrxn_trxn_id: prev_incentive_ctrxn_id,
                     };
                     ctrxn_id = yield new Trxns_1.default(req, trx).clTrxnUpdate(clTrxnBody);
@@ -124,8 +121,7 @@ class IncentiveIncomeClientServices extends abstract_services_1.default {
                         acctrxn_created_at: date,
                         acctrxn_created_by: incentive_created_by,
                         acctrxn_note: note,
-                        acctrxn_particular_id: 26,
-                        acctrxn_particular_type: 'Incentive income client',
+                        acctrxn_particular_id: 37,
                         acctrxn_pay_type: 'CASH',
                         trxn_id: prev_incentive_trxn_id,
                     };

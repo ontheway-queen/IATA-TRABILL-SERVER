@@ -21,7 +21,6 @@ class DeleteInvoiceUmmrah extends abstract_services_1.default {
         super();
         this.deleteInvoiceUmmrah = (req, voidTran) => __awaiter(this, void 0, void 0, function* () {
             const invoice_id = Number(req.params.invoice_id);
-            const { invoice_has_deleted_by } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const common_conn = this.models.CommonInvoiceModel(req, voidTran || trx);
                 const conn = this.models.InvoiceUmmarhModels(req, voidTran || trx);
@@ -56,15 +55,14 @@ class DeleteInvoiceUmmrah extends abstract_services_1.default {
                     ctrxn_amount: void_charge,
                     ctrxn_cl: comb_client,
                     ctrxn_voucher: prevInvoiceNo,
-                    ctrxn_particular_id: 161,
+                    ctrxn_particular_id: 56,
                     ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
-                    ctrxn_note: '',
-                    ctrxn_particular_type: 'reissue void',
+                    ctrxn_note: 'REISSUE VOID',
                 };
                 yield trxns.clTrxnInsert(clTrxnBody);
                 yield this.deleteInvoiceUmmrah(req, trx);
                 yield this.insertAudit(req, 'delete', `Invoice airticket has been voided, inv-id:${invoice_id}`, invoice_has_deleted_by, 'INVOICES');
-                return { success: true, message: 'Invoice airticket has been voided' };
+                return { success: true, message: 'Invoice air ticket has been voided' };
             }));
         });
     }

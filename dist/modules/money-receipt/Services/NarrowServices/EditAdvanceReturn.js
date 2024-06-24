@@ -32,6 +32,7 @@ class EditAdvanceReturn extends abstract_services_1.default {
                 yield trxns.deleteAccTrxn(advr_actransaction_id);
                 let acc_trxn_id;
                 let client_trxn_id;
+                let trans_particular = 'ADVANCE RETURN';
                 // TYPE 4 = CHEQUE
                 if (advr_payment_type !== 4) {
                     let accPayType;
@@ -56,7 +57,6 @@ class EditAdvanceReturn extends abstract_services_1.default {
                         acctrxn_created_by: advr_created_by,
                         acctrxn_note: advr_note,
                         acctrxn_particular_id: 32,
-                        acctrxn_particular_type: 'Advance return',
                         acctrxn_pay_type: accPayType,
                     };
                     acc_trxn_id = yield new Trxns_1.default(req, trx).AccTrxnInsert(AccTrxnBody);
@@ -65,10 +65,9 @@ class EditAdvanceReturn extends abstract_services_1.default {
                         ctrxn_amount: advr_amount,
                         ctrxn_cl: advr_combclient,
                         ctrxn_voucher: previous_billing.advr_vouchar_no,
-                        ctrxn_particular_id: 33,
+                        ctrxn_particular_id: 32,
                         ctrxn_created_at: advr_payment_date,
                         ctrxn_note: advr_note,
-                        ctrxn_particular_type: 'Advance return',
                         ctrxn_trxn_id: advr_ctrxn_id,
                         ctrxn_pay_type: accPayType,
                     };
@@ -82,7 +81,7 @@ class EditAdvanceReturn extends abstract_services_1.default {
                     if (previous_billing.advr_trxn_charge_id) {
                         yield vendor_conn.updateOnlineTrxnCharge({
                             charge_amount: advr_trxn_charge,
-                            charge_purpose: 'Advance Return',
+                            charge_purpose: trans_particular,
                             charge_note: advr_note,
                         }, previous_billing.advr_trxn_charge_id);
                     }
@@ -92,7 +91,7 @@ class EditAdvanceReturn extends abstract_services_1.default {
                             charge_from_client_id: client_id,
                             charge_from_ccombined_id: combined_id,
                             charge_amount: advr_trxn_charge,
-                            charge_purpose: 'Money receipt advance return',
+                            charge_purpose: trans_particular,
                             charge_note: advr_note,
                         };
                         advr_trxn_charge_id = yield vendor_conn.insertOnlineTrxnCharge(online_charge_trxn);

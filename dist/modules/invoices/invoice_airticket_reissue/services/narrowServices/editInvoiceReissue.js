@@ -95,7 +95,8 @@ class EditReissueAirticket extends abstract_services_1.default {
                 // CLIENT TRANSACTIONS
                 const clientTransId = yield utils.updateClientTrans(trxns, {
                     ctrxn_pnr: ctrxn_pnr,
-                    extra_particular: 'Air Ticket Reissue',
+                    tr_type: 5,
+                    dis_tr_type: 6,
                     invoice_no,
                     prevClChargeTransId,
                     prevCtrxnId,
@@ -164,8 +165,7 @@ class EditReissueAirticket extends abstract_services_1.default {
                         vtrxn_amount: airticket_purchase_price,
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: invoice_note,
-                        vtrxn_particular_id: 148,
-                        vtrxn_particular_type: 'Invoice reissue',
+                        vtrxn_particular_id: 5,
                         vtrxn_type: combined_id ? 'CREDIT' : 'DEBIT',
                         vtrxn_user_id: invoice_created_by,
                         vtrxn_voucher: invoice_no,

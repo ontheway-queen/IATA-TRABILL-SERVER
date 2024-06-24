@@ -49,10 +49,9 @@ class DeleteResetInvoiceTour extends abstract_services_1.default {
                     ctrxn_amount: void_charge,
                     ctrxn_cl: comb_client,
                     ctrxn_voucher: prevInvoiceNo,
-                    ctrxn_particular_id: 161,
+                    ctrxn_particular_id: 56,
                     ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                     ctrxn_note: '',
-                    ctrxn_particular_type: 'voice invoice tour',
                 };
                 yield trxns.clTrxnInsert(clTrxnBody);
                 yield this.deleteResetInvoiceTour(req, trx);

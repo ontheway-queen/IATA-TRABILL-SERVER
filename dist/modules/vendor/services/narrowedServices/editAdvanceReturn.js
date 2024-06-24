@@ -52,8 +52,7 @@ class EditAdvanceReturn extends abstract_services_1.default {
                         acctrxn_created_at: date,
                         acctrxn_created_by: advr_created_by,
                         acctrxn_note: note,
-                        acctrxn_particular_id: 33,
-                        acctrxn_particular_type: 'Vendor advance return',
+                        acctrxn_particular_id: 43,
                         acctrxn_pay_type: accPayType,
                     };
                     // VENDOR TRANSACTIONS
@@ -62,8 +61,7 @@ class EditAdvanceReturn extends abstract_services_1.default {
                         vtrxn_amount: Number(advance_amount) - (transaction_charge || 0),
                         vtrxn_created_at: date,
                         vtrxn_note: note,
-                        vtrxn_particular_id: 33,
-                        vtrxn_particular_type: 'Vendor advance return',
+                        vtrxn_particular_id: 43,
                         vtrxn_type: 'DEBIT',
                         vtrxn_user_id: advr_created_by,
                         vtrxn_voucher: prev_voucher_no,

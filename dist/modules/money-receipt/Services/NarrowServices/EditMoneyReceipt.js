@@ -13,8 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
-const common_helper_1 = require("../../../../common/helpers/common.helper");
 const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
+const common_helper_1 = require("../../../../common/helpers/common.helper");
 const lib_1 = require("../../../../common/utils/libraries/lib");
 class EditMoneyReceipt extends abstract_services_1.default {
     constructor() {
@@ -33,6 +33,7 @@ class EditMoneyReceipt extends abstract_services_1.default {
                 let acc_trxn_id;
                 let acc_transaction_amount = Number(receipt_total_amount);
                 let client_trxn_id;
+                let trans_particular = 'MONEY RECEIPT';
                 const amount_after_discount = Number(receipt_total_amount) - Number(receipt_total_discount) || 0;
                 const note = receipt_total_discount
                     ? `Paid ${receipt_total_amount} discount ${receipt_total_discount}, ${receipt_note || ''}`
@@ -46,8 +47,7 @@ class EditMoneyReceipt extends abstract_services_1.default {
                         acctrxn_created_at: receipt_payment_date,
                         acctrxn_created_by: receipt_created_by,
                         acctrxn_note: note,
-                        acctrxn_particular_id: 2,
-                        acctrxn_particular_type: 'Money receipt',
+                        acctrxn_particular_id: 31,
                         acctrxn_pay_type: accPayType,
                         trxn_id: previousBillingData === null || previousBillingData === void 0 ? void 0 : previousBillingData.prevAccTrxnId,
                     };
@@ -57,12 +57,12 @@ class EditMoneyReceipt extends abstract_services_1.default {
                         ctrxn_amount: receipt_total_amount,
                         ctrxn_cl: receipt_combclient,
                         ctrxn_voucher: previousBillingData === null || previousBillingData === void 0 ? void 0 : previousBillingData.receipt_vouchar_no,
-                        ctrxn_particular_id: 14,
+                        ctrxn_particular_id: 31,
                         ctrxn_created_at: receipt_payment_date,
                         ctrxn_note: note,
-                        ctrxn_particular_type: 'Money Receipt Update',
                         ctrxn_trxn_id: previousBillingData === null || previousBillingData === void 0 ? void 0 : previousBillingData.prevClTrxn,
                         ctrxn_pay_type: accPayType,
+                        ctrxn_received_by: received_by,
                     };
                     client_trxn_id = yield trxns.clTrxnUpdate(clTrxnBody);
                 }
@@ -74,7 +74,7 @@ class EditMoneyReceipt extends abstract_services_1.default {
                             charge_from_client_id: client_id,
                             charge_from_ccombined_id: combined_id,
                             charge_amount: charge_amount,
-                            charge_purpose: 'Invoice money receipt update',
+                            charge_purpose: trans_particular,
                             charge_note: receipt_note,
                         };
                         yield vendor_conn.updateOnlineTrxnCharge(online_charge_trxn, previousBillingData.receipt_trxn_charge_id);
@@ -85,7 +85,7 @@ class EditMoneyReceipt extends abstract_services_1.default {
                             charge_from_client_id: client_id,
                             charge_from_ccombined_id: combined_id,
                             charge_amount: charge_amount,
-                            charge_purpose: 'Invoice money receipt',
+                            charge_purpose: trans_particular,
                             charge_note: receipt_note,
                         };
                         receipt_trxn_charge_id = yield vendor_conn.insertOnlineTrxnCharge(online_charge_trxn);
@@ -166,11 +166,11 @@ class EditMoneyReceipt extends abstract_services_1.default {
                         yield conn.insertInvoiceClPay(invoiceClientPaymentInfo);
                         // @HISTORY
                         const history_data = {
-                            history_activity_type: 'INVOICE_PAYMENT_CREATED',
+                            history_activity_type: 'INVOICE_PAYMENT_UPDATED',
                             history_invoice_id: invoice_id,
                             history_created_by: receipt_created_by,
                             history_invoice_payment_amount: invoice_amount,
-                            invoicelog_content: 'Money receipt hass been deleted',
+                            invoicelog_content: 'Money receipt has been updated',
                         };
                         yield common_conn.insertInvoiceHistory(history_data);
                     }
@@ -197,11 +197,11 @@ class EditMoneyReceipt extends abstract_services_1.default {
                         yield conn.insertInvoiceClPay(invoiceClientPaymentInfo);
                         // @HISTORY
                         const history_data = {
-                            history_activity_type: 'INVOICE_PAYMENT_CREATED',
+                            history_activity_type: 'INVOICE_PAYMENT_UPDATED',
                             history_invoice_id: invoice_id,
                             history_created_by: receipt_created_by,
                             history_invoice_payment_amount: peyment_amount,
-                            invoicelog_content: 'Money receipt hass been deleted',
+                            invoicelog_content: 'Money receipt has been updated',
                         };
                         yield common_conn.insertInvoiceHistory(history_data);
                         paidAmountNow += peyment_amount;
@@ -224,7 +224,7 @@ class EditMoneyReceipt extends abstract_services_1.default {
                     };
                     yield conn.insertMoneyReceiptChequeInfo(moneyReceiptChequeData);
                 }
-                yield this.insertAudit(req, 'create', `Money receipt has been updated, Voucher - ${receipt_payment_to}, Net - ${receipt_total_amount}/-`, receipt_created_by, 'MONEY_RECEIPT');
+                yield this.insertAudit(req, 'update', `Money receipt has been updated, Voucher - ${receipt_payment_to}, Net - ${receipt_total_amount}/-`, receipt_created_by, 'MONEY_RECEIPT');
                 return {
                     success: true,
                     data: 'Money receipt updated successfully...',

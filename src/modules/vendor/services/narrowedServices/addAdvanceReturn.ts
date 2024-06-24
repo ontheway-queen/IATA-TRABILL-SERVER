@@ -63,8 +63,7 @@ class AddAdvanceReturn extends AbstractServices {
           acctrxn_created_at: date as string,
           acctrxn_created_by: advr_created_by,
           acctrxn_note: note,
-          acctrxn_particular_id: 32,
-          acctrxn_particular_type: 'Advance return',
+          acctrxn_particular_id: 43,
           acctrxn_pay_type: accPayType,
         };
 
@@ -78,8 +77,7 @@ class AddAdvanceReturn extends AbstractServices {
           vtrxn_amount: Number(advance_amount) - (transaction_charge || 0),
           vtrxn_created_at: date,
           vtrxn_note: note,
-          vtrxn_particular_id: 32,
-          vtrxn_particular_type: 'Advance return',
+          vtrxn_particular_id: 43,
           vtrxn_type: 'DEBIT',
           vtrxn_user_id: advr_created_by,
           vtrxn_voucher: advr_vouchar_no,

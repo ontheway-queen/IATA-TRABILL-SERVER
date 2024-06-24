@@ -48,10 +48,9 @@ class EditClientService extends abstract_services_1.default {
                             ctrxn_type: opening_balance_type,
                             ctrxn_amount: opening_balance,
                             ctrxn_cl: req.params.client_id,
-                            ctrxn_particular_id: 11,
+                            ctrxn_particular_id: 39,
                             ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                             ctrxn_note: client_designation,
-                            ctrxn_particular_type: 'Opening balance',
                             ctrxn_trxn_id: clTrxnId,
                         };
                         yield trxns.clTrxnUpdate(clTrxnBody);
@@ -62,10 +61,9 @@ class EditClientService extends abstract_services_1.default {
                             ctrxn_amount: opening_balance,
                             ctrxn_cl: req.params.client_id,
                             ctrxn_voucher: '',
-                            ctrxn_particular_id: 11,
+                            ctrxn_particular_id: 39,
                             ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                             ctrxn_note: client_designation,
-                            ctrxn_particular_type: 'Client opening balance ',
                         };
                         const clTrxnId = yield trxns.clTrxnInsert(clTrxnBody);
                         yield conn.updateClientOpeningTransactions(clTrxnId, client_id);

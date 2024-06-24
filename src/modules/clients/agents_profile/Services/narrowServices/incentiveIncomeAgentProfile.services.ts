@@ -61,8 +61,7 @@ class IncentiveIncomeAgentProfile extends AbstractServices {
         acctrxn_created_at: date,
         acctrxn_created_by: incentive_created_by,
         acctrxn_note: note,
-        acctrxn_particular_id: 26,
-        acctrxn_particular_type: 'Agent profile',
+        acctrxn_particular_id: 31,
         acctrxn_pay_type: 'CASH',
       };
 
@@ -137,8 +136,6 @@ class IncentiveIncomeAgentProfile extends AbstractServices {
         agtrxn_voucher: '',
       };
 
-
-
       const AccTrxnBody: IAcTrxnUpdate = {
         acctrxn_ac_id: account_id,
         acctrxn_type: 'CREDIT',
@@ -146,8 +143,7 @@ class IncentiveIncomeAgentProfile extends AbstractServices {
         acctrxn_created_at: date,
         acctrxn_created_by: incentive_created_by,
         acctrxn_note: note,
-        acctrxn_particular_id: 26,
-        acctrxn_particular_type: 'Money receipt',
+        acctrxn_particular_id: 31,
         acctrxn_pay_type: 'CASH',
         trxn_id: prev_incentive_trxn_id,
       };
@@ -212,8 +208,6 @@ class IncentiveIncomeAgentProfile extends AbstractServices {
       } = await acc_conn.viewPrevIncentiveInfo(incentive_id);
 
       await trxns.deleteAccTrxn(prev_incentive_trxn_id);
-
-
 
       const message = `Investment has been deleted ${prev_incentive_amount}/-`;
       await this.insertAudit(

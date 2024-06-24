@@ -61,10 +61,9 @@ class AddClientService extends AbstractServices {
           ctrxn_amount: opening_balance,
           ctrxn_cl: `client-${clientId}`,
           ctrxn_voucher: '',
-          ctrxn_particular_id: 11,
+          ctrxn_particular_id: 39,
           ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
           ctrxn_note: client_designation as string,
-          ctrxn_particular_type: 'Client opening balance ',
         };
 
         const clTrxnId = await trxns.clTrxnInsert(clTrxnBody);

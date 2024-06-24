@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../common/helpers/Trxns"));
 const customError_1 = __importDefault(require("../../../common/utils/errors/customError"));
+const lib_1 = require("../../../common/utils/libraries/lib");
 const addLoan_services_1 = __importDefault(require("./narrowServices/addLoan.services"));
 const editLoan_services_1 = __importDefault(require("./narrowServices/editLoan.services"));
 class LoanServices extends abstract_services_1.default {
@@ -151,6 +152,7 @@ class LoanServices extends abstract_services_1.default {
                 const connCheque = this.models.chequesModels(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const vouchar_no = yield this.generateVoucher(req, 'LNP');
+                const accPayType = (0, lib_1.getPaymentType)(payment_type);
                 let payment_charge_id = null;
                 if (payment_type === 3 && charge_amount) {
                     const online_charge_trxn = {
@@ -194,19 +196,6 @@ class LoanServices extends abstract_services_1.default {
                     }
                     paymentData.payment_accategory_id = accategory_id;
                     paymentData.payment_account_id = account_id;
-                    let accPayType;
-                    if (payment_type === 1) {
-                        accPayType = 'CASH';
-                    }
-                    else if (payment_type === 2) {
-                        accPayType = 'BANK';
-                    }
-                    else if (payment_type === 3) {
-                        accPayType = 'MOBILE BANKING';
-                    }
-                    else {
-                        accPayType = 'CASH';
-                    }
                     const AccTrxnBody = {
                         acctrxn_ac_id: account_id,
                         acctrxn_type: 'DEBIT',
@@ -215,8 +204,7 @@ class LoanServices extends abstract_services_1.default {
                         acctrxn_created_at: payment_date,
                         acctrxn_created_by: created_by,
                         acctrxn_note: payment_note,
-                        acctrxn_particular_id: 4,
-                        acctrxn_particular_type: 'Loan',
+                        acctrxn_particular_id: 54,
                         acctrxn_pay_type: accPayType,
                     };
                     const payment_acctrxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -258,13 +246,13 @@ class LoanServices extends abstract_services_1.default {
         });
         this.editPayment = (req) => __awaiter(this, void 0, void 0, function* () {
             const { payment_id } = req.params;
-            const { authority_id, loan_id, accategory_id, account_id, amount, payment_type, cheque_no, bank_name, withdraw_date, created_by, payment_date, payment_note, charge_amount, } = req.body;
+            const { authority_id, loan_id, account_id, amount, payment_type, cheque_no, bank_name, withdraw_date, created_by, payment_date, payment_note, charge_amount, } = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.loanModel(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);
                 const account_conn = this.models.accountsModel(req, trx);
                 const connCheque = this.models.chequesModels(req, trx);
-                const { prev_paytype, prev_payamount, prev_accountid, prev_actrxn_id, payment_charge_id: prev_payment_charge_id, } = yield conn.getPrevPaymentData(payment_id);
+                const { prev_payamount, prev_actrxn_id, payment_charge_id: prev_payment_charge_id, } = yield conn.getPrevPaymentData(payment_id);
                 let payment_charge_id = null;
                 if (prev_payment_charge_id) {
                     yield vendor_conn.updateOnlineTrxnCharge({ charge_amount: charge_amount, charge_purpose: 'Loan payment' }, prev_payment_charge_id);
@@ -317,8 +305,7 @@ class LoanServices extends abstract_services_1.default {
                         acctrxn_created_at: payment_date,
                         acctrxn_created_by: created_by,
                         acctrxn_note: payment_note,
-                        acctrxn_particular_id: 88,
-                        acctrxn_particular_type: 'Loan payment',
+                        acctrxn_particular_id: 54,
                         acctrxn_pay_type: 'CASH',
                         trxn_id: prev_actrxn_id,
                     };
@@ -387,6 +374,7 @@ class LoanServices extends abstract_services_1.default {
                 const connCheque = this.models.chequesModels(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const vouchar_no = yield this.generateVoucher(req, 'LNR');
+                const payMethod = (0, lib_1.getPaymentType)(payment_type);
                 let received_charge_id = null;
                 if (payment_type === 3) {
                     const online_charge_trxn = {
@@ -427,19 +415,6 @@ class LoanServices extends abstract_services_1.default {
                 if (payment_type !== 4 && amount <= Number(loan[0].loan_due_amount)) {
                     receivedData.received_accategory_id = accategory_id;
                     receivedData.received_account_id = account_id;
-                    let accPayType;
-                    if (payment_type === 1) {
-                        accPayType = 'CASH';
-                    }
-                    else if (payment_type === 2) {
-                        accPayType = 'BANK';
-                    }
-                    else if (payment_type === 3) {
-                        accPayType = 'MOBILE BANKING';
-                    }
-                    else {
-                        accPayType = 'CASH';
-                    }
                     const AccTrxnBody = {
                         acctrxn_ac_id: account_id,
                         acctrxn_type: 'CREDIT',
@@ -448,9 +423,8 @@ class LoanServices extends abstract_services_1.default {
                         acctrxn_created_at: received_date,
                         acctrxn_created_by: created_by,
                         acctrxn_note: received_note,
-                        acctrxn_particular_id: 3,
-                        acctrxn_particular_type: 'Money receipt',
-                        acctrxn_pay_type: accPayType,
+                        acctrxn_particular_id: 55,
+                        acctrxn_pay_type: payMethod,
                     };
                     const receipt_acctrxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
                     receivedData.received_actransaction_id = receipt_acctrxn_id;
@@ -496,6 +470,7 @@ class LoanServices extends abstract_services_1.default {
                 const connAccount = this.models.accountsModel(req, trx);
                 const connCheque = this.models.chequesModels(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);
+                const payMethod = (0, lib_1.getPaymentType)(payment_type);
                 const { received_amount, received_actransaction_id, received_charge_id: prev_received_charge_id, } = yield conn.getReceivedInfo(received_id);
                 let received_charge_id = null;
                 if (prev_received_charge_id) {
@@ -552,9 +527,8 @@ class LoanServices extends abstract_services_1.default {
                         acctrxn_created_at: received_date,
                         acctrxn_created_by: created_by,
                         acctrxn_note: received_note,
-                        acctrxn_particular_id: 89,
-                        acctrxn_particular_type: 'Loan Received',
-                        acctrxn_pay_type: 'CASH',
+                        acctrxn_particular_id: 55,
+                        acctrxn_pay_type: payMethod,
                         trxn_id: received_actransaction_id,
                     };
                     yield new Trxns_1.default(req, trx).AccTrxnUpdate(AccTrxnBody);

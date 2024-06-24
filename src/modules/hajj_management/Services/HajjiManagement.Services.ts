@@ -96,10 +96,9 @@ class HajjiManagementServices extends AbstractServices {
             ctrxn_amount: cancel_total_charge,
             ctrxn_cl: comb_client,
             ctrxn_voucher: prevInvoiceNo,
-            ctrxn_particular_id: 44,
+            ctrxn_particular_id: 13,
             ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
             ctrxn_note: '',
-            ctrxn_particular_type: 'Cancel pre reg',
           };
 
           const cancel_track_trxn_id = await trxns.clTrxnInsert(clTrxnBody);
@@ -315,8 +314,7 @@ class HajjiManagementServices extends AbstractServices {
           ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
           ctrxn_note: '',
           ctrxn_voucher: info.invoice_no,
-          ctrxn_particular_id: 152,
-          ctrxn_particular_type: 'Cancel Hajj Registration',
+          ctrxn_particular_id: 11,
           ctrxn_type: 'DEBIT',
         });
 

@@ -67,20 +67,17 @@ class ReissueRefundService extends AbstractServices {
       let refund_client_account_trx_id = null;
       let refund_vendor_account_trx_id = null;
       if (client_refund_type == 'Adjust') {
-        // CLIENT TRANS
         const clTrxnBody: IClTrxnBody = {
           ctrxn_type: 'CREDIT',
           ctrxn_amount: client_total_refund,
           ctrxn_cl: comb_client,
           ctrxn_voucher: voucher,
-          ctrxn_particular_id: 8, // refund to client
+          ctrxn_particular_id: 19,
           ctrxn_created_at: refund_date,
           ctrxn_note: clientContent,
-          ctrxn_particular_type: 'Reissue Refund ' + client_refund_type,
         };
         refund_client_trx_id = await trxns.clTrxnInsert(clTrxnBody);
       } else {
-        // CLIENT ACCOUNT TRANS
         const AccTrxnBody: IAcTrxn = {
           acctrxn_ac_id: client_payment_acc_id,
           acctrxn_type: 'DEBIT',
@@ -89,8 +86,7 @@ class ReissueRefundService extends AbstractServices {
           acctrxn_created_at: refund_date,
           acctrxn_created_by: created_by,
           acctrxn_note: clientContent,
-          acctrxn_particular_id: 8,
-          acctrxn_particular_type: 'Reissue Client Refund Return',
+          acctrxn_particular_id: 20,
           acctrxn_pay_type: getPaymentType(client_payment_method),
         };
 
@@ -107,8 +103,7 @@ class ReissueRefundService extends AbstractServices {
           acctrxn_created_at: refund_date,
           acctrxn_created_by: created_by,
           acctrxn_note: vendorContent,
-          acctrxn_particular_id: 7,
-          acctrxn_particular_type: 'Vendor Refund Return',
+          acctrxn_particular_id: 20,
           acctrxn_pay_type: getPaymentType(client_payment_method),
         };
 
@@ -155,8 +150,7 @@ class ReissueRefundService extends AbstractServices {
             vtrxn_amount: item.vendor_refund,
             vtrxn_created_at: refund_date,
             vtrxn_note: `Purchase price ${item.airticket_purchase_price}/-, Charge ${item.vendor_charge}/-`,
-            vtrxn_particular_id: 7,
-            vtrxn_particular_type: 'Vendor Reissue Refund Adjust',
+            vtrxn_particular_id: 19,
             vtrxn_type: 'CREDIT',
             vtrxn_user_id: created_by,
             vtrxn_voucher: voucher,

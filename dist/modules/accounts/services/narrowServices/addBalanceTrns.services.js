@@ -36,8 +36,7 @@ class AddBalanceTrasnfer extends abstract_services_1.default {
                         acctrxn_created_at: transfer_date,
                         acctrxn_created_by: transfer_created_by,
                         acctrxn_note: transfer_note,
-                        acctrxn_particular_id: 9,
-                        acctrxn_particular_type: 'Balance transfer',
+                        acctrxn_particular_id: 34,
                         acctrxn_pay_type: 'CASH',
                     };
                     const from_acc_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -52,8 +51,7 @@ class AddBalanceTrasnfer extends abstract_services_1.default {
                             acctrxn_created_at: transfer_date,
                             acctrxn_created_by: transfer_created_by,
                             acctrxn_note: transfer_note,
-                            acctrxn_particular_id: 87,
-                            acctrxn_particular_type: 'Balance transfer charge',
+                            acctrxn_particular_id: 60,
                             acctrxn_pay_type: 'CASH',
                         };
                         btransfer_actransaction_id = yield trxns.AccTrxnInsert(AccTrxnChargeBody);
@@ -66,8 +64,7 @@ class AddBalanceTrasnfer extends abstract_services_1.default {
                         acctrxn_created_at: transfer_date,
                         acctrxn_created_by: transfer_created_by,
                         acctrxn_note: transfer_note,
-                        acctrxn_particular_id: 9,
-                        acctrxn_particular_type: 'Balance transfer',
+                        acctrxn_particular_id: 34,
                         acctrxn_pay_type: 'CASH',
                     };
                     const to_acc_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBodyTo);
@@ -100,7 +97,7 @@ class AddBalanceTrasnfer extends abstract_services_1.default {
                     };
                     const data = yield conn.addBalanceTransfer(balanceTInfo);
                     yield this.updateVoucher(req, 'BT');
-                    const message = `Account balance has been transfared ${transfer_amount}/-`;
+                    const message = `Account balance has been transfer ${transfer_amount}/-`;
                     yield this.insertAudit(req, 'create', message, transfer_created_by, 'ACCOUNTS');
                     return {
                         success: true,
@@ -109,7 +106,7 @@ class AddBalanceTrasnfer extends abstract_services_1.default {
                     };
                 }
                 else {
-                    throw new customError_1.default('Insuficient balance', 400, 'Bad request');
+                    throw new customError_1.default('Insufficient balance', 400, 'Bad request');
                 }
             }));
         });

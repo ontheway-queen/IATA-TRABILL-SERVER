@@ -88,7 +88,8 @@ class AddInvoiceHajjpre extends AbstractServices {
       const utils = new InvoiceUtils(req.body, common_conn);
       const clientTransId = await utils.clientTrans(trxns, {
         invoice_no,
-        extra_particular: 'Hajj Pre Reg',
+        tr_type: 13,
+        dis_tr_type: 14,
         note,
       });
 
@@ -189,8 +190,7 @@ class AddInvoiceHajjpre extends AbstractServices {
           vtrxn_amount: total_cost_price,
           vtrxn_created_at: invoice_sales_date,
           vtrxn_note: billing_description,
-          vtrxn_particular_id: 150,
-          vtrxn_particular_type: 'Invoice hajj pre reg Create',
+          vtrxn_particular_id: 13,
           vtrxn_pax: pax_name,
           vtrxn_type: combined_id ? 'CREDIT' : 'DEBIT',
           vtrxn_user_id: invoice_created_by,

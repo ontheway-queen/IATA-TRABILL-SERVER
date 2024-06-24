@@ -14,9 +14,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
-const lib_1 = require("../../../../../common/utils/libraries/lib");
-const invoice_helpers_1 = require("../../../../../common/helpers/invoice.helpers");
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
+const invoice_helpers_1 = require("../../../../../common/helpers/invoice.helpers");
+const lib_1 = require("../../../../../common/utils/libraries/lib");
 class HajjRefundServices extends abstract_services_1.default {
     constructor() {
         super();
@@ -48,8 +48,7 @@ class HajjRefundServices extends abstract_services_1.default {
                         ctrxn_amount: client_total_refund,
                         ctrxn_cl: comb_client,
                         ctrxn_created_at: refund_date,
-                        ctrxn_particular_id: 8,
-                        ctrxn_particular_type: 'Hajj Refund ' + client_refund_type,
+                        ctrxn_particular_id: 57,
                         ctrxn_voucher: voucher_no,
                         ctrxn_type: 'CREDIT',
                         ctrxn_note: clientContent,
@@ -61,8 +60,7 @@ class HajjRefundServices extends abstract_services_1.default {
                         acctrxn_amount: client_total_refund,
                         acctrxn_created_at: refund_date,
                         acctrxn_created_by: created_by,
-                        acctrxn_particular_id: 8,
-                        acctrxn_particular_type: 'Client Refund Return',
+                        acctrxn_particular_id: 57,
                         acctrxn_pay_type: (0, lib_1.getPaymentType)(client_payment_method),
                         acctrxn_type: 'DEBIT',
                         acctrxn_voucher: voucher_no,
@@ -75,8 +73,7 @@ class HajjRefundServices extends abstract_services_1.default {
                         acctrxn_amount: client_total_refund,
                         acctrxn_created_at: refund_date,
                         acctrxn_created_by: created_by,
-                        acctrxn_particular_id: 7,
-                        acctrxn_particular_type: 'Vendor Refund Return',
+                        acctrxn_particular_id: 58,
                         acctrxn_pay_type: (0, lib_1.getPaymentType)(client_payment_method),
                         acctrxn_type: 'CREDIT',
                         acctrxn_voucher: voucher_no,
@@ -112,8 +109,7 @@ class HajjRefundServices extends abstract_services_1.default {
                         ritem_vtrx_id = yield trxn.VTrxnInsert({
                             vtrxn_amount: billing_cost_price,
                             vtrxn_created_at: refund_date,
-                            vtrxn_particular_id: 7,
-                            vtrxn_particular_type: 'Hajj Refund ' + client_refund_type,
+                            vtrxn_particular_id: 57,
                             vtrxn_type: 'CREDIT',
                             vtrxn_user_id: created_by,
                             vtrxn_voucher: voucher_no,

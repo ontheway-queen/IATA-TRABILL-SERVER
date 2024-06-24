@@ -48,10 +48,9 @@ class IncentiveIncomeClientServices extends AbstractServices {
           ctrxn_amount: amount,
           ctrxn_cl: comb_client,
           ctrxn_voucher: vouchar_no,
-          ctrxn_particular_id: 26,
+          ctrxn_particular_id: 37,
           ctrxn_created_at: date,
           ctrxn_note: note,
-          ctrxn_particular_type: 'Incentive income',
         };
 
         ctrxn_id = await trxns.clTrxnInsert(clTrxnBody);
@@ -77,8 +76,7 @@ class IncentiveIncomeClientServices extends AbstractServices {
           acctrxn_created_at: date,
           acctrxn_created_by: incentive_created_by,
           acctrxn_note: note,
-          acctrxn_particular_id: 26,
-          acctrxn_particular_type: 'Incentive income detail',
+          acctrxn_particular_id: 37,
           acctrxn_pay_type: 'CASH',
         };
 
@@ -163,10 +161,9 @@ class IncentiveIncomeClientServices extends AbstractServices {
           ctrxn_amount: amount,
           ctrxn_cl: comb_client,
           ctrxn_voucher: prev_voucher_no,
-          ctrxn_particular_id: 26,
+          ctrxn_particular_id: 39,
           ctrxn_created_at: date,
           ctrxn_note: note as string,
-          ctrxn_particular_type: 'Opening balance',
           ctrxn_trxn_id: prev_incentive_ctrxn_id,
         };
 
@@ -181,8 +178,7 @@ class IncentiveIncomeClientServices extends AbstractServices {
           acctrxn_created_at: date,
           acctrxn_created_by: incentive_created_by,
           acctrxn_note: note,
-          acctrxn_particular_id: 26,
-          acctrxn_particular_type: 'Incentive income client',
+          acctrxn_particular_id: 37,
           acctrxn_pay_type: 'CASH',
           trxn_id: prev_incentive_trxn_id,
         };

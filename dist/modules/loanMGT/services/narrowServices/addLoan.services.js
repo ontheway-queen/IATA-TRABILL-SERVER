@@ -13,8 +13,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../abstracts/abstract.services"));
-const invoice_helpers_1 = require("../../../../common/helpers/invoice.helpers");
 const Trxns_1 = __importDefault(require("../../../../common/helpers/Trxns"));
+const invoice_helpers_1 = require("../../../../common/helpers/invoice.helpers");
 class AddLoan extends abstract_services_1.default {
     constructor() {
         super();
@@ -49,8 +49,7 @@ class AddLoan extends abstract_services_1.default {
                         acctrxn_created_at: date,
                         acctrxn_created_by: loan_created_by,
                         acctrxn_note: note,
-                        acctrxn_particular_id: takingLoan ? 46 : 47,
-                        acctrxn_particular_type: 'Loan create',
+                        acctrxn_particular_id: takingLoan ? 52 : 53,
                         acctrxn_pay_type: accPayType,
                     };
                     loan_actransaction_id = yield trxns.AccTrxnInsert(AccTrxnBody);

@@ -105,7 +105,8 @@ class AddInvoiceHajjServices extends AbstractServices {
       // CLIENT TRANSACTIONS
       const utils = new InvoiceUtils(req.body, common_conn);
       const clientTransId = await utils.clientTrans(trxns, {
-        extra_particular: 'Hajj',
+        tr_type: 11,
+        dis_tr_type: 12,
         invoice_no,
         ticket_no: ctrnx_ticket_no,
         ctrxn_pnr,
@@ -163,7 +164,7 @@ class AddInvoiceHajjServices extends AbstractServices {
       };
       await common_conn.insertInvoiceExtraAmount(invoiceExtraAmount);
 
-      // airticket routes insert
+      // air ticket routes insert
       if (invoice_hajj_routes?.length) {
         const airticketRoutes = invoice_hajj_routes.map(
           (airoute_route_sector_id) => {

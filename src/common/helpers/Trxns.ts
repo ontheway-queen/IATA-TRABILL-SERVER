@@ -39,7 +39,6 @@ class Trxns extends AbstractServices {
       ctrxn_created_at,
       ctrxn_note,
       ctrxn_particular_id,
-      ctrxn_particular_type,
       ctrxn_pax,
       ctrxn_pnr,
       ctrxn_route,
@@ -47,6 +46,7 @@ class Trxns extends AbstractServices {
       ctrxn_voucher,
       ctrxn_airticket_no,
       ctrxn_pay_type,
+      ctrxn_received_by,
     } = body;
 
     const { client_id, combined_id } = separateCombClientToId(ctrxn_cl);
@@ -60,17 +60,15 @@ class Trxns extends AbstractServices {
         ctrxn_created_at,
         ctrxn_note,
         ctrxn_particular_id,
-        ctrxn_particular_type:
-          ctrxn_particular_type +
-          (ctrxn_pay_type ? ` (${ctrxn_pay_type})` : ''),
         ctrxn_pax,
         ctrxn_pnr,
         ctrxn_route,
         ctrxn_type,
         ctrxn_voucher,
         ctrxn_airticket_no,
-        // ctrxn_pay_type,
+        ctrxn_pay_type,
         ctrxn_user_id: this.req.user_id,
+        ctrxn_received_by,
       };
 
       trxnId = await this.conn.insertClTrxn(clTrxnBody);
@@ -84,14 +82,11 @@ class Trxns extends AbstractServices {
         comtrxn_type: ctrxn_type,
         comtrxn_comb_id: combined_id as number,
         comtrxn_particular_id: ctrxn_particular_id,
-        comtrxn_particular_type:
-          ctrxn_particular_type +
-          (ctrxn_pay_type ? ` (${ctrxn_pay_type})` : ''),
         comtrxn_amount: ctrxn_amount,
         comtrxn_note: ctrxn_note,
         comtrxn_create_at: ctrxn_created_at,
         comtrxn_user_id: this.req.user_id,
-        // comtrxn_pay_type: ctrxn_pay_type,
+        comtrxn_pay_type: ctrxn_pay_type,
       };
 
       trxnId = await this.conn.insertComTrxn(comTrxnBody);
@@ -107,7 +102,6 @@ class Trxns extends AbstractServices {
       acctrxn_pay_type,
       acctrxn_particular_id,
       acctrxn_created_at,
-      acctrxn_particular_type,
       acctrxn_type,
       acctrxn_amount,
       acctrxn_note,
@@ -119,7 +113,6 @@ class Trxns extends AbstractServices {
       acctrxn_ac_id: acctrxn_ac_id,
       acctrxn_pay_type,
       acctrxn_particular_id,
-      acctrxn_particular_type,
       acctrxn_voucher,
       acctrxn_type,
       acctrxn_amount,
@@ -139,7 +132,6 @@ class Trxns extends AbstractServices {
       acctrxn_created_at,
       acctrxn_note,
       acctrxn_particular_id,
-      acctrxn_particular_type,
       acctrxn_pay_type,
       acctrxn_type,
       trxn_id,
@@ -151,7 +143,6 @@ class Trxns extends AbstractServices {
       p_created_at: acctrxn_created_at,
       p_note: acctrxn_note as string,
       p_particular_id: acctrxn_particular_id,
-      p_particular_type: acctrxn_particular_type,
       p_pay_type: acctrxn_pay_type,
       p_type: acctrxn_type,
       p_trxn_id: trxn_id,
@@ -182,7 +173,6 @@ class Trxns extends AbstractServices {
       ctrxn_created_at,
       ctrxn_note,
       ctrxn_particular_id,
-      ctrxn_particular_type,
       ctrxn_pax,
       ctrxn_pnr,
       ctrxn_airticket_no,
@@ -202,9 +192,6 @@ class Trxns extends AbstractServices {
         p_note: ctrxn_note,
         p_amount: ctrxn_amount,
         p_particular_id: ctrxn_particular_id,
-        p_particular_type:
-          ctrxn_particular_type +
-          (ctrxn_pay_type ? ` (${ctrxn_pay_type})` : ''),
         p_pax: ctrxn_pax,
         p_pnr: ctrxn_pnr as string,
         p_created_at: ctrxn_created_at,
@@ -223,9 +210,6 @@ class Trxns extends AbstractServices {
         p_type: ctrxn_type,
         p_comb_id: combined_id,
         p_particular_id: ctrxn_particular_id,
-        p_particular_type:
-          ctrxn_particular_type +
-          (ctrxn_pay_type ? ` (${ctrxn_pay_type})` : ''),
         p_amount: ctrxn_amount,
         p_note: ctrxn_note,
         p_create_at: ctrxn_created_at,
@@ -253,7 +237,6 @@ class Trxns extends AbstractServices {
       vtrxn_pnr,
       vtrxn_route,
       vtrxn_type,
-      vtrxn_particular_type,
       vtrxn_amount,
       vtrxn_particular_id,
       vtrxn_note,
@@ -271,7 +254,6 @@ class Trxns extends AbstractServices {
         vtrxn_voucher,
         vtrxn_pax,
         vtrxn_type,
-        vtrxn_particular_type,
         vtrxn_amount,
         vtrxn_particular_id,
         vtrxn_note,
@@ -291,9 +273,6 @@ class Trxns extends AbstractServices {
         comtrxn_type: vtrxn_type,
         comtrxn_comb_id: combined_id as number,
         comtrxn_particular_id: vtrxn_particular_id,
-        comtrxn_particular_type:
-          vtrxn_particular_type +
-          (vtrxn_pay_type ? ` (${vtrxn_pay_type})` : ''),
         comtrxn_amount: vtrxn_amount,
         comtrxn_note: vtrxn_note,
         comtrxn_create_at: vtrxn_created_at,
@@ -317,7 +296,6 @@ class Trxns extends AbstractServices {
       trxn_id,
       vtrxn_pax,
       vtrxn_type,
-      vtrxn_particular_type,
       vtrxn_amount,
       vtrxn_particular_id,
       vtrxn_note,
@@ -342,7 +320,6 @@ class Trxns extends AbstractServices {
         vtrxn_pnr,
         vtrxn_route,
         vtrxn_type,
-        vtrxn_particular_type,
         vtrxn_amount,
         vtrxn_particular_id,
         vtrxn_note,
@@ -363,9 +340,6 @@ class Trxns extends AbstractServices {
         p_type: vtrxn_type,
         p_comb_id: combined_id as number,
         p_particular_id: vtrxn_particular_id,
-        p_particular_type:
-          vtrxn_particular_type +
-          (vtrxn_pay_type ? ` (${vtrxn_pay_type})` : ''),
         p_amount: vtrxn_amount,
         p_note: vtrxn_note,
         p_create_at: vtrxn_created_at,

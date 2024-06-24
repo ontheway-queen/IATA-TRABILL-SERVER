@@ -16,7 +16,6 @@ class DeleteInvoiceUmmrah extends AbstractServices {
     voidTran?: Knex.Transaction<any, any[]>
   ) => {
     const invoice_id = Number(req.params.invoice_id);
-    const { invoice_has_deleted_by } = req.body;
 
     return await this.models.db.transaction(async (trx) => {
       const common_conn = this.models.CommonInvoiceModel(req, voidTran || trx);
@@ -80,10 +79,9 @@ class DeleteInvoiceUmmrah extends AbstractServices {
         ctrxn_amount: void_charge,
         ctrxn_cl: comb_client,
         ctrxn_voucher: prevInvoiceNo,
-        ctrxn_particular_id: 161,
+        ctrxn_particular_id: 56,
         ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
-        ctrxn_note: '',
-        ctrxn_particular_type: 'reissue void',
+        ctrxn_note: 'REISSUE VOID',
       };
 
       await trxns.clTrxnInsert(clTrxnBody);
@@ -98,7 +96,7 @@ class DeleteInvoiceUmmrah extends AbstractServices {
         'INVOICES'
       );
 
-      return { success: true, message: 'Invoice airticket has been voided' };
+      return { success: true, message: 'Invoice air ticket has been voided' };
     });
   };
 }

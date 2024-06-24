@@ -46,8 +46,7 @@ class AddBalanceTrasnfer extends AbstractServices {
           acctrxn_created_at: transfer_date as string,
           acctrxn_created_by: transfer_created_by,
           acctrxn_note: transfer_note,
-          acctrxn_particular_id: 9,
-          acctrxn_particular_type: 'Balance transfer',
+          acctrxn_particular_id: 34,
           acctrxn_pay_type: 'CASH',
         };
 
@@ -65,8 +64,7 @@ class AddBalanceTrasnfer extends AbstractServices {
             acctrxn_created_at: transfer_date as string,
             acctrxn_created_by: transfer_created_by,
             acctrxn_note: transfer_note,
-            acctrxn_particular_id: 87,
-            acctrxn_particular_type: 'Balance transfer charge',
+            acctrxn_particular_id: 60,
             acctrxn_pay_type: 'CASH',
           };
 
@@ -83,8 +81,7 @@ class AddBalanceTrasnfer extends AbstractServices {
           acctrxn_created_at: transfer_date as string,
           acctrxn_created_by: transfer_created_by,
           acctrxn_note: transfer_note,
-          acctrxn_particular_id: 9,
-          acctrxn_particular_type: 'Balance transfer',
+          acctrxn_particular_id: 34,
           acctrxn_pay_type: 'CASH',
         };
 
@@ -124,7 +121,7 @@ class AddBalanceTrasnfer extends AbstractServices {
 
         await this.updateVoucher(req, 'BT');
 
-        const message = `Account balance has been transfared ${transfer_amount}/-`;
+        const message = `Account balance has been transfer ${transfer_amount}/-`;
         await this.insertAudit(
           req,
           'create',
@@ -139,7 +136,7 @@ class AddBalanceTrasnfer extends AbstractServices {
           data,
         };
       } else {
-        throw new CustomError('Insuficient balance', 400, 'Bad request');
+        throw new CustomError('Insufficient balance', 400, 'Bad request');
       }
     });
   };

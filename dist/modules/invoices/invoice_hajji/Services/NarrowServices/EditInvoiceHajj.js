@@ -75,7 +75,8 @@ class EditInvoiceHajj extends abstract_services_1.default {
                 const clientTransId = yield utils.updateClientTrans(trxns, {
                     prevClChargeTransId,
                     prevCtrxnId,
-                    extra_particular: 'Hajj',
+                    tr_type: 11,
+                    dis_tr_type: 12,
                     invoice_no,
                     ticket_no: ctrnx_ticket_no,
                     ctrxn_pnr,

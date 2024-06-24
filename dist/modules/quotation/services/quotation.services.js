@@ -112,10 +112,9 @@ class QuotationServices extends abstract_services_1.default {
                     ctrxn_amount: invoice_net_total,
                     ctrxn_cl: invoice_combclient_id,
                     ctrxn_voucher: invoice_no,
-                    ctrxn_particular_id: 145,
+                    ctrxn_particular_id: 7,
                     ctrxn_created_at: invoice_sales_date,
                     ctrxn_note: invoice_note,
-                    ctrxn_particular_type: 'Confirm Quotation Invoice',
                 };
                 const invoice_cltrxn_id = yield trxns.clTrxnInsert(clTrxnBody);
                 const invoieInfo = {
@@ -157,8 +156,7 @@ class QuotationServices extends abstract_services_1.default {
                         vtrxn_amount: total_cost_price,
                         vtrxn_created_at: invoice_sales_date,
                         vtrxn_note: invoice_note,
-                        vtrxn_particular_id: 154,
-                        vtrxn_particular_type: 'Confirm Quotation Invoice',
+                        vtrxn_particular_id: 7,
                         vtrxn_type: 'DEBIT',
                         vtrxn_user_id: invoice_created_by,
                         vtrxn_voucher: invoice_no,

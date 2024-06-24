@@ -36,8 +36,7 @@ class ChequeCollectionStatusUpdate extends abstract_services_1.default {
                             acctrxn_created_at: date,
                             acctrxn_created_by: user_id,
                             acctrxn_note: note,
-                            acctrxn_particular_id: 47,
-                            acctrxn_particular_type: 'Collection cheque',
+                            acctrxn_particular_id: 40,
                             acctrxn_pay_type: 'CASH',
                         };
                         yield new Trxns_1.default(req, trx).AccTrxnInsert(AccTrxnBody);
@@ -85,8 +84,7 @@ class ChequeCollectionStatusUpdate extends abstract_services_1.default {
                             acctrxn_created_at: date,
                             acctrxn_created_by: user_id,
                             acctrxn_note: note,
-                            acctrxn_particular_id: 32,
-                            acctrxn_particular_type: 'Collection cheques',
+                            acctrxn_particular_id: 31,
                             acctrxn_pay_type: 'CASH',
                         };
                         yield new Trxns_1.default(req, trx).AccTrxnInsert(AccTrxnBody);
@@ -95,10 +93,9 @@ class ChequeCollectionStatusUpdate extends abstract_services_1.default {
                             ctrxn_amount: Number(amount),
                             ctrxn_cl: `client-${client_id}`,
                             ctrxn_voucher: '',
-                            ctrxn_particular_id: 32,
+                            ctrxn_particular_id: 31,
                             ctrxn_created_at: date,
                             ctrxn_note: note,
-                            ctrxn_particular_type: 'Collection cheques',
                         };
                         yield new Trxns_1.default(req, trx).clTrxnInsert(clTrxnBody);
                         const data = {
@@ -141,10 +138,9 @@ class ChequeCollectionStatusUpdate extends abstract_services_1.default {
                             ctrxn_amount: Number(amount),
                             ctrxn_cl: `client-${client_id}`,
                             ctrxn_voucher: '',
-                            ctrxn_particular_id: 8,
+                            ctrxn_particular_id: 50,
                             ctrxn_created_at: date,
                             ctrxn_note: note,
-                            ctrxn_particular_type: 'Client refund',
                         };
                         yield new Trxns_1.default(req, trx).clTrxnInsert(clTrxnBody);
                         const data = {
@@ -186,8 +182,7 @@ class ChequeCollectionStatusUpdate extends abstract_services_1.default {
                             vtrxn_amount: Number(amount),
                             vtrxn_created_at: date,
                             vtrxn_note: note,
-                            vtrxn_particular_id: 7,
-                            vtrxn_particular_type: 'Vendor refund cheque',
+                            vtrxn_particular_id: 51,
                             vtrxn_type: 'CREDIT',
                             vtrxn_user_id: user_id,
                             vtrxn_voucher: '',
@@ -232,11 +227,10 @@ class ChequeCollectionStatusUpdate extends abstract_services_1.default {
                             vtrxn_amount: Number(amount),
                             vtrxn_created_at: date,
                             vtrxn_note: note,
-                            vtrxn_particular_id: 32,
-                            vtrxn_particular_type: 'Vendor advance return',
+                            vtrxn_particular_id: 43,
                             vtrxn_type: 'DEBIT',
                             vtrxn_user_id: user_id,
-                            vtrxn_voucher: '',
+                            vtrxn_voucher: 'CHEQUE',
                         };
                         yield new Trxns_1.default(req, trx).VTrxnInsert(VTrxnBody);
                         const data = {

@@ -31,8 +31,7 @@ class AddInvestment extends abstract_services_1.default {
                     acctrxn_created_at: date,
                     acctrxn_created_by: investment_created_by,
                     acctrxn_note: note,
-                    acctrxn_particular_id: 43,
-                    acctrxn_particular_type: 'Investment',
+                    acctrxn_particular_id: 36,
                     acctrxn_pay_type: 'CASH',
                 };
                 const acc_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);

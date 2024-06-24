@@ -39,8 +39,7 @@ ChequeManagementHelpers.moneyReceiptAdvrChequeStatus = (req, conn, trx) => __awa
             acctrxn_created_at: date,
             acctrxn_created_by: user_id,
             acctrxn_note: cheque_note,
-            acctrxn_particular_id: 118,
-            acctrxn_particular_type: 'Advance return',
+            acctrxn_particular_id: 32,
             acctrxn_pay_type: 'CASH',
         };
         const account_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -52,7 +51,6 @@ ChequeManagementHelpers.moneyReceiptAdvrChequeStatus = (req, conn, trx) => __awa
             ctrxn_particular_id: 32,
             ctrxn_created_at: date,
             ctrxn_note: cheque_note,
-            ctrxn_particular_type: 'Advance return',
         };
         const client_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);
         const advanceReturnInfo = {
@@ -104,8 +102,7 @@ ChequeManagementHelpers.expenseChequeStatus = (req, conn, trx) => __awaiter(void
             acctrxn_created_at: date,
             acctrxn_created_by: user_id,
             acctrxn_note: cheque_note,
-            acctrxn_particular_id: 133,
-            acctrxn_particular_type: 'Expense cheque',
+            acctrxn_particular_id: 39,
             acctrxn_pay_type: 'CASH',
         };
         const account_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -156,8 +153,7 @@ ChequeManagementHelpers.loanChequeStatusUpdate = (req, conn, trx) => __awaiter(v
                 acctrxn_created_at: date,
                 acctrxn_created_by: user_id,
                 acctrxn_note: cheque_note,
-                acctrxn_particular_id: infos.loan_type === 'TAKING' ? 46 : 47,
-                acctrxn_particular_type: 'Loan cheque',
+                acctrxn_particular_id: infos.loan_type === 'TAKING' ? 52 : 53,
                 acctrxn_pay_type: 'CASH',
             };
             const account_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -208,8 +204,7 @@ ChequeManagementHelpers.loanPaymentChequeStatus = (req, conn, trx) => __awaiter(
             acctrxn_created_at: date,
             acctrxn_created_by: user_id,
             acctrxn_note: cheque_note,
-            acctrxn_particular_id: 4,
-            acctrxn_particular_type: 'Loan payment cheque',
+            acctrxn_particular_id: 54,
             acctrxn_pay_type: 'CASH',
         };
         const account_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -259,8 +254,7 @@ ChequeManagementHelpers.loanReceivedChequeStatus = (req, conn, trx) => __awaiter
             acctrxn_created_at: date,
             acctrxn_created_by: user_id,
             acctrxn_note: cheque_note,
-            acctrxn_particular_id: 3,
-            acctrxn_particular_type: 'Loan received cheque',
+            acctrxn_particular_id: 55,
             acctrxn_pay_type: 'CASH',
         };
         const account_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -327,8 +321,7 @@ ChequeManagementHelpers.moneyReceiptChequeUpdate = (req, conn, trx, agent_conn) 
             acctrxn_created_at: date,
             acctrxn_created_by: user_id,
             acctrxn_note: cheque_note,
-            acctrxn_particular_id: 2,
-            acctrxn_particular_type: 'Money receipt cheques',
+            acctrxn_particular_id: 31,
             acctrxn_pay_type: 'CASH',
         };
         const account_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -337,10 +330,9 @@ ChequeManagementHelpers.moneyReceiptChequeUpdate = (req, conn, trx, agent_conn) 
             ctrxn_amount: cheque_amount,
             ctrxn_cl: comb_client,
             ctrxn_voucher: chequeInfo.receipt_vouchar_no,
-            ctrxn_particular_id: 29,
+            ctrxn_particular_id: 31,
             ctrxn_created_at: date,
             ctrxn_note: cheque_note,
-            ctrxn_particular_type: 'Money Receipt cheque',
         };
         const client_trxn_id = yield trxns.clTrxnInsert(clTrxnBody);
         const moneyReceiptAccountInfo = {
@@ -390,8 +382,7 @@ ChequeManagementHelpers.payrollChequeUpdate = (req, conn, trx) => __awaiter(void
             acctrxn_created_at: date,
             acctrxn_created_by: user_id,
             acctrxn_note: cheque_note,
-            acctrxn_particular_id: 59,
-            acctrxn_particular_type: 'Payroll cheques',
+            acctrxn_particular_id: 38,
             acctrxn_pay_type: 'CASH',
         };
         const account_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -443,8 +434,7 @@ ChequeManagementHelpers.vendorAdvanceRetrundCheque = (req, conn, trx) => __await
             acctrxn_created_at: date,
             acctrxn_created_by: user_id,
             acctrxn_note: cheque_note,
-            acctrxn_particular_id: 32,
-            acctrxn_particular_type: 'Vendor advance return cheques',
+            acctrxn_particular_id: 43,
             acctrxn_pay_type: 'CASH',
         };
         const account_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -453,8 +443,7 @@ ChequeManagementHelpers.vendorAdvanceRetrundCheque = (req, conn, trx) => __await
             vtrxn_amount: cheque_amount,
             vtrxn_created_at: date,
             vtrxn_note: cheque_note,
-            vtrxn_particular_id: 32,
-            vtrxn_particular_type: 'Vendor advance return cheque',
+            vtrxn_particular_id: 43,
             vtrxn_type: 'DEBIT',
             vtrxn_user_id: user_id,
             vtrxn_voucher: advr_vouchar_no,
@@ -508,8 +497,7 @@ ChequeManagementHelpers.vendorPaymentCheque = (req, conn, trx) => __awaiter(void
             acctrxn_created_at: date,
             acctrxn_created_by: user_id,
             acctrxn_note: cheque_note,
-            acctrxn_particular_id: 1,
-            acctrxn_particular_type: 'Vendor Payment return cheques',
+            acctrxn_particular_id: 42,
             acctrxn_pay_type: 'CASH',
         };
         const account_trxn_id = yield trxns.AccTrxnInsert(AccTrxnBody);
@@ -518,8 +506,7 @@ ChequeManagementHelpers.vendorPaymentCheque = (req, conn, trx) => __awaiter(void
             vtrxn_amount: cheque_amount,
             vtrxn_created_at: date,
             vtrxn_note: cheque_note,
-            vtrxn_particular_id: 1,
-            vtrxn_particular_type: 'Vendor payment return cheque',
+            vtrxn_particular_id: 42,
             vtrxn_type: 'CREDIT',
             vtrxn_user_id: user_id,
             vtrxn_voucher: '',

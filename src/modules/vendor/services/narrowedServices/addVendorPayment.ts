@@ -4,6 +4,7 @@ import Trxns from '../../../../common/helpers/Trxns';
 import { separateCombClientToId } from '../../../../common/helpers/common.helper';
 import { generateVoucherNumber } from '../../../../common/helpers/invoice.helpers';
 import { IAcTrxn, IVTrxn } from '../../../../common/interfaces/Trxn.interfaces';
+import { getPaymentType } from '../../../../common/utils/libraries/lib';
 import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 import {
   IAddVendorPayReqBody,
@@ -11,7 +12,6 @@ import {
   IVpayChackDetails,
 } from '../../types/vendor.interfaces';
 import { IInvoiceVendorPayment } from '../../types/vendorPayment.interface';
-import { getPaymentType } from '../../../../common/utils/libraries/lib';
 
 class AddVendorPayment extends AbstractServices {
   constructor() {
@@ -66,8 +66,7 @@ class AddVendorPayment extends AbstractServices {
           acctrxn_created_at: payment_date as string,
           acctrxn_created_by: created_by,
           acctrxn_note: note,
-          acctrxn_particular_id: 1,
-          acctrxn_particular_type: 'Vendor Payment',
+          acctrxn_particular_id: 42,
           acctrxn_pay_type: accPayType,
         };
 
@@ -127,8 +126,7 @@ class AddVendorPayment extends AbstractServices {
           vtrxn_amount: payment_amount,
           vtrxn_created_at: payment_date,
           vtrxn_note: note,
-          vtrxn_particular_id: 1,
-          vtrxn_particular_type: 'Vendor Payment',
+          vtrxn_particular_id: 42,
           vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
           vtrxn_user_id: created_by,
           vtrxn_voucher: vouchar_no,
@@ -178,8 +176,7 @@ class AddVendorPayment extends AbstractServices {
               vtrxn_amount: purchase_price,
               vtrxn_created_at: payment_date,
               vtrxn_note: note,
-              vtrxn_particular_id: 1,
-              vtrxn_particular_type: 'Vendor Payment',
+              vtrxn_particular_id: 42,
               vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
               vtrxn_user_id: created_by,
               vtrxn_voucher: vouchar_no,

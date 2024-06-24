@@ -1,10 +1,10 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
+import Trxns from '../../../../common/helpers/Trxns';
 import { generateVoucherNumber } from '../../../../common/helpers/invoice.helpers';
+import { IAcTrxn } from '../../../../common/interfaces/Trxn.interfaces';
 import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 import { ILoans, ILoansReqBody } from '../../types/loan.interfaces';
-import { IAcTrxn } from '../../../../common/interfaces/Trxn.interfaces';
-import Trxns from '../../../../common/helpers/Trxns';
 
 class AddLoan extends AbstractServices {
   constructor() {
@@ -68,8 +68,7 @@ class AddLoan extends AbstractServices {
           acctrxn_created_at: date as string,
           acctrxn_created_by: loan_created_by,
           acctrxn_note: note,
-          acctrxn_particular_id: takingLoan ? 46 : 47,
-          acctrxn_particular_type: 'Loan create',
+          acctrxn_particular_id: takingLoan ? 52 : 53,
           acctrxn_pay_type: accPayType,
         };
 

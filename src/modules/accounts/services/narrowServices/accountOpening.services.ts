@@ -38,8 +38,7 @@ class AddAccountOpeningService extends AbstractServices {
         acctrxn_created_at: date as string,
         acctrxn_created_by: account_created_by,
         acctrxn_note: note,
-        acctrxn_particular_id: 11,
-        acctrxn_particular_type: 'Opening balance',
+        acctrxn_particular_id: 41,
         acctrxn_pay_type: 'CASH',
       };
 

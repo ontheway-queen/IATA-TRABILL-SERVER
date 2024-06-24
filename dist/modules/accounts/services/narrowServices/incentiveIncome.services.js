@@ -41,9 +41,8 @@ class AddIncentiveService extends abstract_services_1.default {
                     const VTrxnBody = {
                         vtrxn_voucher: vouchar_no,
                         vtrxn_type: 'CREDIT',
-                        vtrxn_particular_type: 'Incentive income',
                         vtrxn_amount: amount,
-                        vtrxn_particular_id: 124,
+                        vtrxn_particular_id: 37,
                         vtrxn_note: note,
                         vtrxn_user_id: incentive_created_by,
                         vtrxn_created_at: date,
@@ -71,8 +70,7 @@ class AddIncentiveService extends abstract_services_1.default {
                         acctrxn_created_at: date,
                         acctrxn_created_by: incentive_created_by,
                         acctrxn_note: note,
-                        acctrxn_particular_id: 26,
-                        acctrxn_particular_type: 'Incentive income',
+                        acctrxn_particular_id: 37,
                         acctrxn_pay_type: 'CASH',
                     };
                     const incentive_acctrxn_id = yield trxns.AccTrxnInsert(AccTrxnBodyTo);

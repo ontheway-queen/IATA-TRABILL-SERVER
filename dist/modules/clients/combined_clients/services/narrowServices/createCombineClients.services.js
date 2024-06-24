@@ -53,10 +53,9 @@ class CreateCombineClients extends abstract_services_1.default {
                         ctrxn_amount: Number(combine_opening_balance),
                         ctrxn_cl: `combined-${combine_id}`,
                         ctrxn_voucher: '',
-                        ctrxn_particular_id: 11,
+                        ctrxn_particular_id: 41,
                         ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                         ctrxn_note: combine_designation,
-                        ctrxn_particular_type: 'Opening balance',
                     };
                     const combine_trxn_id = yield new Trxns_1.default(req, trx).clTrxnInsert(clTrxnBody);
                     yield conn.updateCombineClientOpeningTrxnId(combine_trxn_id, combine_id);

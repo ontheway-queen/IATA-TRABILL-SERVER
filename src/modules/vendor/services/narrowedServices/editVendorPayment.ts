@@ -7,6 +7,7 @@ import {
   IVTrxn,
   IVTrxnUpdate,
 } from '../../../../common/interfaces/Trxn.interfaces';
+import { getPaymentType } from '../../../../common/utils/libraries/lib';
 import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 import {
   IAddVendorPayReqBody,
@@ -14,7 +15,6 @@ import {
   IVpayChackDetails,
 } from '../../types/vendor.interfaces';
 import { IInvoiceVendorPayment } from '../../types/vendorPayment.interface';
-import { getPaymentType } from '../../../../common/utils/libraries/lib';
 
 class EditVendorPayment extends AbstractServices {
   constructor() {
@@ -133,8 +133,7 @@ class EditVendorPayment extends AbstractServices {
           acctrxn_created_at: payment_date,
           acctrxn_created_by: created_by,
           acctrxn_note: note,
-          acctrxn_particular_id: 1,
-          acctrxn_particular_type: 'Vendor payment',
+          acctrxn_particular_id: 29,
           acctrxn_pay_type: accPayType,
           trxn_id: prevAccTrxnId,
         };
@@ -150,8 +149,7 @@ class EditVendorPayment extends AbstractServices {
             vtrxn_amount: payment_amount,
             vtrxn_created_at: payment_date,
             vtrxn_note: note,
-            vtrxn_particular_id: 1,
-            vtrxn_particular_type: 'vendor payment',
+            vtrxn_particular_id: 29,
             vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
             vtrxn_user_id: created_by,
             vtrxn_voucher: vouchar_no,
@@ -168,8 +166,7 @@ class EditVendorPayment extends AbstractServices {
           vtrxn_amount: payment_amount,
           vtrxn_created_at: payment_date,
           vtrxn_note: note,
-          vtrxn_particular_id: 1,
-          vtrxn_particular_type: 'vendor payment',
+          vtrxn_particular_id: 29,
           vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
           vtrxn_user_id: created_by,
           vtrxn_voucher: vouchar_no,
@@ -204,8 +201,7 @@ class EditVendorPayment extends AbstractServices {
               vtrxn_amount: purchase_price,
               vtrxn_created_at: payment_date,
               vtrxn_note: note,
-              vtrxn_particular_id: 1,
-              vtrxn_particular_type: 'vendor payment',
+              vtrxn_particular_id: 29,
               vtrxn_type: combined_id ? 'DEBIT' : 'CREDIT',
               vtrxn_user_id: created_by,
               vtrxn_voucher: vouchar_no,

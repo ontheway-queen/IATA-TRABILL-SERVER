@@ -12,8 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const dayjs_1 = __importDefault(require("dayjs"));
+const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 class EditCombineClient extends abstract_services_1.default {
     constructor() {
@@ -65,10 +65,9 @@ class EditCombineClient extends abstract_services_1.default {
                         ctrxn_amount: Number(combine_opening_balance),
                         ctrxn_cl: `combined-${combine_id}`,
                         ctrxn_voucher: '',
-                        ctrxn_particular_id: 11,
+                        ctrxn_particular_id: 41,
                         ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                         ctrxn_note: combine_designation,
-                        ctrxn_particular_type: 'Opening balance',
                         ctrxn_trxn_id: combine_trxn_id,
                     };
                     yield new Trxns_1.default(req, trx).clTrxnUpdate(clTrxnBody);
@@ -79,10 +78,9 @@ class EditCombineClient extends abstract_services_1.default {
                         ctrxn_amount: Number(combine_opening_balance),
                         ctrxn_cl: `combined-${combine_id}`,
                         ctrxn_voucher: '',
-                        ctrxn_particular_id: 11,
+                        ctrxn_particular_id: 41,
                         ctrxn_created_at: (0, dayjs_1.default)().format('YYYY-MM-DD'),
                         ctrxn_note: combine_designation,
-                        ctrxn_particular_type: 'Opening balance',
                     };
                     const combine_trxn_id = yield new Trxns_1.default(req, trx).clTrxnInsert(clTrxnBody);
                     yield conn.updateCombineClientOpeningTrxnId(combine_trxn_id, combine_id);

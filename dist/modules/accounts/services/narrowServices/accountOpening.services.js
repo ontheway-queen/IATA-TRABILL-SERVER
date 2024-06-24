@@ -33,8 +33,7 @@ class AddAccountOpeningService extends abstract_services_1.default {
                     acctrxn_created_at: date,
                     acctrxn_created_by: account_created_by,
                     acctrxn_note: note,
-                    acctrxn_particular_id: 11,
-                    acctrxn_particular_type: 'Opening balance',
+                    acctrxn_particular_id: 41,
                     acctrxn_pay_type: 'CASH',
                 };
                 const op_acctrxn_id = yield trxns.AccTrxnInsert(AccTrxnBodyTo);

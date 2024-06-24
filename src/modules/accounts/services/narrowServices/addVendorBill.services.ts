@@ -1,12 +1,11 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
 import { generateVoucherNumber } from '../../../../common/helpers/invoice.helpers';
-import { IVendorTransactions } from '../../../../common/interfaces/commonInterfaces';
+import { IVTrxnDb } from '../../../../common/interfaces/Trxn.interfaces';
 import {
   IVendorBillAdjust,
   IVendorBillAdjustReqBody,
 } from '../../types/account.interfaces';
-import { IVTrxnDb } from '../../../../common/interfaces/Trxn.interfaces';
 
 class AddVendorBillAdjustment extends AbstractServices {
   constructor() {
@@ -45,9 +44,8 @@ class AddVendorBillAdjustment extends AbstractServices {
       const VTrxnBody: IVTrxnDb = {
         vtrxn_voucher: voucher_no,
         vtrxn_type: trxType,
-        vtrxn_particular_type: 'Vendor bill adjustment',
         vtrxn_amount: bill_amount,
-        vtrxn_particular_id: 126,
+        vtrxn_particular_id: 33,
         vtrxn_note: bill_note as string,
         vtrxn_user_id: bill_created_by,
         vtrxn_created_at: bill_create_date as string,

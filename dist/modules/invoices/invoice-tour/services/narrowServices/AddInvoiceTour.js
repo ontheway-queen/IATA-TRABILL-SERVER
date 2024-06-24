@@ -72,7 +72,8 @@ class AddInvoiceTour extends abstract_services_1.default {
                     invoice_no,
                     ctrxn_pnr: ticket_pnr,
                     ctrxn_route,
-                    extra_particular: 'Tour Package',
+                    tr_type: 17,
+                    dis_tr_type: 18,
                     ticket_no,
                     note,
                 });

@@ -131,7 +131,8 @@ class AddInvoiceNonCommission extends AbstractServices {
           ctrxn_pnr: ctrxn_pnr as string,
           ctrxn_route: ctrxn_route as string,
           ticket_no,
-          extra_particular: 'Air Ticket Non-Com',
+          tr_type: 3,
+          dis_tr_type: 4,
         }
       );
 
@@ -248,8 +249,7 @@ class AddInvoiceNonCommission extends AbstractServices {
           vtrxn_amount: airticket_purchase_price,
           vtrxn_created_at: invoice_sales_date,
           vtrxn_note: invoice_note,
-          vtrxn_particular_id: 147,
-          vtrxn_particular_type: 'NON COMM AIR TICKET PURCHASE',
+          vtrxn_particular_id: 3,
           vtrxn_pax,
           vtrxn_type: airticket_vendor_combine_id ? 'CREDIT' : 'DEBIT',
           vtrxn_user_id: invoice_created_by,

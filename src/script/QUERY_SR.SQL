@@ -9,10 +9,3 @@ CREATE TABLE
         FOREIGN KEY (tbd_agency_id) REFERENCES trabill_agency_organization_information (org_id)
     );
 
-alter table trabill.trabill_vendor_payments
-add column vpay_payment_by INT DEFAULT NULL after vpay_vtrxn_id,
-add FOREIGN key (vpay_payment_by) REFERENCES trabill_employees (employee_id);
-
-alter table trabill.trabill_money_receipts
-add column receipt_received_by INT DEFAULT NULL after receipt_ctrxn_id,
-add FOREIGN key (receipt_received_by) REFERENCES trabill_employees (employee_id);

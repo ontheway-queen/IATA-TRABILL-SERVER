@@ -114,8 +114,7 @@ class EditPayroll extends AbstractServices {
           acctrxn_created_at: payroll_date as string,
           acctrxn_created_by: payroll_updated_by as number,
           acctrxn_note: payroll_note,
-          acctrxn_particular_id: 60,
-          acctrxn_particular_type: 'payroll ',
+          acctrxn_particular_id: 38,
           acctrxn_pay_type: 'CASH',
           trxn_id: prev_acctrxn_id,
         };

@@ -59,10 +59,9 @@ class AirTicketTaxRefund extends AbstractServices {
           ctrxn_type: 'CREDIT',
           ctrxn_amount: client_total_tax_refund,
           ctrxn_cl: comb_client,
-          ctrxn_particular_id: 108,
+          ctrxn_particular_id: 25,
           ctrxn_created_at: refund_date,
           ctrxn_note: '',
-          ctrxn_particular_type: 'AIR TICKET TAX REFUND',
           ctrxn_pay_type: clAccPayType,
           ctrxn_voucher: refund_voucher,
         };
@@ -76,8 +75,7 @@ class AirTicketTaxRefund extends AbstractServices {
           acctrxn_created_at: refund_date,
           acctrxn_created_by: req.user_id,
           acctrxn_note: 'Client Refund',
-          acctrxn_particular_id: 108,
-          acctrxn_particular_type: 'AIR TICKET TAX REFUND',
+          acctrxn_particular_id: 25,
           acctrxn_pay_type: clAccPayType,
           acctrxn_voucher: refund_voucher,
         };
@@ -88,10 +86,9 @@ class AirTicketTaxRefund extends AbstractServices {
           ctrxn_type: 'CREDIT',
           ctrxn_amount: 0,
           ctrxn_cl: comb_client,
-          ctrxn_particular_id: 108,
+          ctrxn_particular_id: 25,
           ctrxn_created_at: refund_date,
           ctrxn_note: `Money return : ${client_total_tax_refund}/-`,
-          ctrxn_particular_type: 'AIR TICKET TAX REFUND',
           ctrxn_pay_type: clAccPayType,
           ctrxn_voucher: refund_voucher,
         };
@@ -108,8 +105,7 @@ class AirTicketTaxRefund extends AbstractServices {
           acctrxn_created_at: refund_date,
           acctrxn_created_by: req.user_id,
           acctrxn_note: 'Vendor Refund',
-          acctrxn_particular_id: 108,
-          acctrxn_particular_type: 'AIR TICKET TAX REFUND',
+          acctrxn_particular_id: 26,
           acctrxn_pay_type: VAccPayType,
           acctrxn_voucher: refund_voucher,
         };
@@ -150,8 +146,7 @@ class AirTicketTaxRefund extends AbstractServices {
         const VTrxnBody: IVTrxn = {
           comb_vendor: item.comb_vendor,
           vtrxn_created_at: refund_date,
-          vtrxn_particular_id: 108,
-          vtrxn_particular_type: 'AIR TICKET TAX REFUND',
+          vtrxn_particular_id: 25,
           vtrxn_type: 'CREDIT',
           vtrxn_user_id: req.user_id,
           vtrxn_voucher: refund_voucher,

@@ -81,9 +81,10 @@ class EditInvoiceUmmrah extends abstract_services_1.default {
                     invoice_no,
                     ctrxn_pnr,
                     ctrxn_route,
-                    extra_particular: 'Ummrah Package',
                     note,
                     ticket_no: tickets_no,
+                    tr_type: 15,
+                    dis_tr_type: 16,
                 });
                 const invoice_information = Object.assign(Object.assign({}, clientTransId), { invoice_client_id,
                     invoice_combined_id,
@@ -142,8 +143,7 @@ class EditInvoiceUmmrah extends abstract_services_1.default {
                             vtrxn_amount: billing_total_cost,
                             vtrxn_created_at: invoice_sales_date,
                             vtrxn_note: item.billing_description,
-                            vtrxn_particular_id: 31,
-                            vtrxn_particular_type: 'Invoice umrah update',
+                            vtrxn_particular_id: 15,
                             vtrxn_pax: item.pax_name,
                             vtrxn_type: combined_id ? 'CREDIT' : 'DEBIT',
                             vtrxn_user_id: invoice_created_by,
@@ -255,7 +255,7 @@ class EditInvoiceUmmrah extends abstract_services_1.default {
                     history_created_by: invoice_created_by,
                     history_invoice_id: invoice_id,
                     history_invoice_payment_amount: invoice_net_total,
-                    invoicelog_content: 'Invoice ummrah has beeen updated',
+                    invoicelog_content: 'Invoice ummrah has been updated',
                 };
                 yield common_conn.insertInvoiceHistory(history_data);
                 yield this.insertAudit(req, 'update', `Invoice ummrah has been updated, Voucher - ${invoice_no}, Net - ${invoice_net_total}/-`, invoice_created_by, 'INVOICES');

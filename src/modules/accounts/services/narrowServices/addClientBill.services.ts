@@ -40,10 +40,9 @@ class AddClientBillAdjustment extends AbstractServices {
         ctrxn_amount: bill_amount,
         ctrxn_cl: bill_client_id,
         ctrxn_voucher: voucher_no,
-        ctrxn_particular_id: 126,
+        ctrxn_particular_id: 33,
         ctrxn_created_at: bill_create_date as string,
         ctrxn_note: bill_note as string,
-        ctrxn_particular_type: 'Client Bill Adjustment',
       };
 
       const cbilladjust_ctrxn_id = await trxns.clTrxnInsert(clTrxnBody);

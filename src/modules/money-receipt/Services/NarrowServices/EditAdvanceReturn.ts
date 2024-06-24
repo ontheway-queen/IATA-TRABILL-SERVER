@@ -53,6 +53,7 @@ class EditAdvanceReturn extends AbstractServices {
 
       let acc_trxn_id;
       let client_trxn_id;
+      let trans_particular = 'ADVANCE RETURN';
 
       // TYPE 4 = CHEQUE
       if (advr_payment_type !== 4) {
@@ -76,7 +77,6 @@ class EditAdvanceReturn extends AbstractServices {
           acctrxn_created_by: advr_created_by,
           acctrxn_note: advr_note,
           acctrxn_particular_id: 32,
-          acctrxn_particular_type: 'Advance return',
           acctrxn_pay_type: accPayType,
         };
 
@@ -86,10 +86,9 @@ class EditAdvanceReturn extends AbstractServices {
           ctrxn_amount: advr_amount,
           ctrxn_cl: advr_combclient,
           ctrxn_voucher: previous_billing.advr_vouchar_no,
-          ctrxn_particular_id: 33,
+          ctrxn_particular_id: 32,
           ctrxn_created_at: advr_payment_date,
           ctrxn_note: advr_note,
-          ctrxn_particular_type: 'Advance return',
           ctrxn_trxn_id: advr_ctrxn_id,
           ctrxn_pay_type: accPayType,
         };
@@ -107,7 +106,7 @@ class EditAdvanceReturn extends AbstractServices {
           await vendor_conn.updateOnlineTrxnCharge(
             {
               charge_amount: advr_trxn_charge,
-              charge_purpose: 'Advance Return',
+              charge_purpose: trans_particular,
               charge_note: advr_note,
             },
             previous_billing.advr_trxn_charge_id
@@ -118,7 +117,7 @@ class EditAdvanceReturn extends AbstractServices {
             charge_from_client_id: client_id as number,
             charge_from_ccombined_id: combined_id as number,
             charge_amount: advr_trxn_charge,
-            charge_purpose: 'Money receipt advance return',
+            charge_purpose: trans_particular,
             charge_note: advr_note,
           };
 

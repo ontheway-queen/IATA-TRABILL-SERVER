@@ -1,16 +1,12 @@
+import dayjs from 'dayjs';
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
-import {
-  ICombineClientsEditReqBody,
-  ICombinedTransaction,
-  IUpdateCombinedTransaction,
-} from '../../types/combineClients.interfaces';
+import Trxns from '../../../../../common/helpers/Trxns';
 import {
   IClTrxnBody,
   IClTrxnUpdate,
 } from '../../../../../common/interfaces/Trxn.interfaces';
-import dayjs from 'dayjs';
-import Trxns from '../../../../../common/helpers/Trxns';
+import { ICombineClientsEditReqBody } from '../../types/combineClients.interfaces';
 
 class EditCombineClient extends AbstractServices {
   constructor() {
@@ -94,10 +90,9 @@ class EditCombineClient extends AbstractServices {
           ctrxn_amount: Number(combine_opening_balance),
           ctrxn_cl: `combined-${combine_id}`,
           ctrxn_voucher: '',
-          ctrxn_particular_id: 11,
+          ctrxn_particular_id: 41,
           ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
           ctrxn_note: combine_designation as string,
-          ctrxn_particular_type: 'Opening balance',
           ctrxn_trxn_id: combine_trxn_id,
         };
 
@@ -108,10 +103,9 @@ class EditCombineClient extends AbstractServices {
           ctrxn_amount: Number(combine_opening_balance),
           ctrxn_cl: `combined-${combine_id}`,
           ctrxn_voucher: '',
-          ctrxn_particular_id: 11,
+          ctrxn_particular_id: 41,
           ctrxn_created_at: dayjs().format('YYYY-MM-DD'),
           ctrxn_note: combine_designation as string,
-          ctrxn_particular_type: 'Opening balance',
         };
 
         const combine_trxn_id = await new Trxns(req, trx).clTrxnInsert(

@@ -70,8 +70,7 @@ class EditPayroll extends abstract_services_1.default {
                         acctrxn_created_at: payroll_date,
                         acctrxn_created_by: payroll_updated_by,
                         acctrxn_note: payroll_note,
-                        acctrxn_particular_id: 60,
-                        acctrxn_particular_type: 'payroll ',
+                        acctrxn_particular_id: 38,
                         acctrxn_pay_type: 'CASH',
                         trxn_id: prev_acctrxn_id,
                     };

@@ -1,14 +1,14 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../../abstracts/abstract.services';
+import Trxns from '../../../../../common/helpers/Trxns';
+import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
+import { generateVoucherNumber } from '../../../../../common/helpers/invoice.helpers';
+import { InvoiceHistory } from '../../../../../common/types/common.types';
+import { getPaymentType } from '../../../../../common/utils/libraries/lib';
 import {
   IHajjRefundItems,
   IHajjRefundReqBody,
 } from '../../Type/InvoiceHajj.Interfaces';
-import Trxns from '../../../../../common/helpers/Trxns';
-import { getPaymentType } from '../../../../../common/utils/libraries/lib';
-import { generateVoucherNumber } from '../../../../../common/helpers/invoice.helpers';
-import { separateCombClientToId } from '../../../../../common/helpers/common.helper';
-import { InvoiceHistory } from '../../../../../common/types/common.types';
 
 class HajjRefundServices extends AbstractServices {
   constructor() {
@@ -63,8 +63,7 @@ class HajjRefundServices extends AbstractServices {
           ctrxn_amount: client_total_refund,
           ctrxn_cl: comb_client,
           ctrxn_created_at: refund_date,
-          ctrxn_particular_id: 8,
-          ctrxn_particular_type: 'Hajj Refund ' + client_refund_type,
+          ctrxn_particular_id: 57,
           ctrxn_voucher: voucher_no,
           ctrxn_type: 'CREDIT',
           ctrxn_note: clientContent,
@@ -75,8 +74,7 @@ class HajjRefundServices extends AbstractServices {
           acctrxn_amount: client_total_refund,
           acctrxn_created_at: refund_date,
           acctrxn_created_by: created_by,
-          acctrxn_particular_id: 8,
-          acctrxn_particular_type: 'Client Refund Return',
+          acctrxn_particular_id: 57,
           acctrxn_pay_type: getPaymentType(client_payment_method),
           acctrxn_type: 'DEBIT',
           acctrxn_voucher: voucher_no,
@@ -90,8 +88,7 @@ class HajjRefundServices extends AbstractServices {
           acctrxn_amount: client_total_refund,
           acctrxn_created_at: refund_date,
           acctrxn_created_by: created_by,
-          acctrxn_particular_id: 7,
-          acctrxn_particular_type: 'Vendor Refund Return',
+          acctrxn_particular_id: 58,
           acctrxn_pay_type: getPaymentType(client_payment_method),
           acctrxn_type: 'CREDIT',
           acctrxn_voucher: voucher_no,
@@ -141,8 +138,7 @@ class HajjRefundServices extends AbstractServices {
           ritem_vtrx_id = await trxn.VTrxnInsert({
             vtrxn_amount: billing_cost_price,
             vtrxn_created_at: refund_date,
-            vtrxn_particular_id: 7,
-            vtrxn_particular_type: 'Hajj Refund ' + client_refund_type,
+            vtrxn_particular_id: 57,
             vtrxn_type: 'CREDIT',
             vtrxn_user_id: created_by,
             vtrxn_voucher: voucher_no,

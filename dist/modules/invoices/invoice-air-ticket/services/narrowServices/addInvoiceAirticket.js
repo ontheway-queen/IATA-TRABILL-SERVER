@@ -119,7 +119,7 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                     yield (0, invoice_helpers_1.addAdvanceMr)(common_conn, invoice_id, invoice_client_id, invoice_combined_id, invoice_net_total, cl_preset_balance);
                 }
                 // AGENT TRANSACTION
-                yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 90, 'INVOICE AIR TICKET');
+                yield invoice_helpers_1.default.invoiceAgentTransactions(this.models.agentProfileModel(req, trx), req.agency_id, invoice_agent_id, invoice_id, invoice_no, invoice_created_by, invoice_agent_com_amount, 'CREATE', 1, 'INVOICE AIR TICKET');
                 const invoiceExtraAmount = {
                     extra_amount_invoice_id: invoice_id,
                     invoice_vat,

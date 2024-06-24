@@ -176,7 +176,7 @@ class AddInvoiceAirticket extends AbstractServices {
         invoice_created_by,
         invoice_agent_com_amount,
         'CREATE',
-        90,
+        1,
         'INVOICE AIR TICKET'
       );
 

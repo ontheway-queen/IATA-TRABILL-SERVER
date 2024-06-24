@@ -13,7 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addAdvanceMr = exports.ValidateCreditLimit = exports.generateVoucherNumber = exports.MoneyReceiptAmountIsValid = exports.InvoiceClientAndVendorValidate = exports.ValidateClientAndVendor = exports.getClientOrCombId = exports.isEmpty = exports.isNotEmpty = exports._ = void 0;
+exports.addAdvanceMr = exports.generateVoucherNumber = exports.MoneyReceiptAmountIsValid = exports.InvoiceClientAndVendorValidate = exports.ValidateClientAndVendor = exports.getClientOrCombId = exports.isEmpty = exports.isNotEmpty = exports._ = void 0;
 const customError_1 = __importDefault(require("../utils/errors/customError"));
 class InvoiceHelpers {
 }
@@ -22,7 +22,6 @@ InvoiceHelpers.invoiceAgentTransactions = (models, agtrxn_agency_id, agent_id, i
     if (!agent_id || !commission_amount || Number(commission_amount) === 0) {
         return;
     }
-    const agent_last_balance = yield models.getAgentLastBalance(agent_id);
     const agentTransactionData = {
         agtrxn_agency_id,
         agtrxn_invoice_id: invoice_id,
@@ -131,15 +130,6 @@ const generateVoucherNumber = (length, title) => {
     return title ? title + '-' + result : result;
 };
 exports.generateVoucherNumber = generateVoucherNumber;
-const ValidateCreditLimit = (vendor_id) => __awaiter(void 0, void 0, void 0, function* () {
-    // throw new CustomError(
-    //   'Vendor and client can not be same combined',
-    //   400,
-    //   'bad request'
-    // );
-    return true;
-});
-exports.ValidateCreditLimit = ValidateCreditLimit;
 // ADD ADVANCE MONEY RECEIPT
 const addAdvanceMr = (common_conn, inv_id, cl_id, com_id, net_total, advance_amount) => __awaiter(void 0, void 0, void 0, function* () {
     const data = yield common_conn.getAdvanceMrById(cl_id, com_id);

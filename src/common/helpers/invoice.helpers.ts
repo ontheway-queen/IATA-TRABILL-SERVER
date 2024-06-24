@@ -25,9 +25,6 @@ class InvoiceHelpers {
     if (!agent_id || !commission_amount || Number(commission_amount) === 0) {
       return;
     }
-
-    const agent_last_balance = await models.getAgentLastBalance(agent_id);
-
     const agentTransactionData: IAgentProfileTransaction = {
       agtrxn_agency_id,
       agtrxn_invoice_id: invoice_id,
@@ -188,15 +185,6 @@ export const generateVoucherNumber = (length: number, title?: string) => {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
   return title ? title + '-' + result : result;
-};
-
-export const ValidateCreditLimit = async (vendor_id: string) => {
-  // throw new CustomError(
-  //   'Vendor and client can not be same combined',
-  //   400,
-  //   'bad request'
-  // );
-  return true;
 };
 
 // ADD ADVANCE MONEY RECEIPT

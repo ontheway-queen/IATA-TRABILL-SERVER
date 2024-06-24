@@ -216,12 +216,17 @@ export interface IVoidReqBody {
   invoice_no: string;
   net_total: number;
   comb_client: string;
-  invoice_vendors: {
-    comb_vendor: string;
-    vendor_charge: number;
-    airticket_ticket_no: string;
-    cost_price: number;
-  }[];
+  cate_id: number;
+  invoice_vendors: IVoidVendorInfo[];
+}
+
+export interface IVoidVendorInfo {
+  airticket_id: number;
+  comb_vendor: string;
+  vendor_charge: number;
+  airticket_ticket_no: string;
+  cost_price: number;
+  sales_price: number;
 }
 
 export interface IFakeInvoiceReqBody

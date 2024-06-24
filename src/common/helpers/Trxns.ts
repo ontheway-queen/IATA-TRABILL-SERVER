@@ -199,7 +199,7 @@ class Trxns extends AbstractServices {
         p_type: ctrxn_type,
         p_voucher: ctrxn_voucher,
         p_airticket_no: ctrxn_airticket_no as string,
-        // p_pay_type: ctrxn_pay_type as string,
+        p_pay_type: ctrxn_pay_type as string,
       };
 
       await this.conn.updateClTrxn(clTrxnBody);

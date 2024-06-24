@@ -910,18 +910,18 @@ class DashboardModels extends AbstractModels {
     await this.query().insert(data).into('trabill_bsp_bill');
   }
 
-  public async deleteBSPDocs(tbd_id: idType) {
-    const [{ tbd_doc }] = (await this.query()
-      .select('tbd_doc')
-      .from('trabill_bsp_docs')
-      .where({ tbd_id })) as { tbd_doc: string }[];
+  public async deleteBSPDocs(bsp_id: idType) {
+    const [{ bsp_file_url }] = (await this.query()
+      .select('bsp_file_url')
+      .from('trabill_bsp_bill')
+      .where({ bsp_id })) as { bsp_file_url: string }[];
 
     await this.query()
-      .update({ tbd_is_deleted: 1 })
-      .into('trabill_bsp_docs')
-      .where({ tbd_id });
+      .update({ bsp_is_deleted: 1 })
+      .into('trabill_bsp_bill')
+      .where({ bsp_id });
 
-    return tbd_doc;
+    return bsp_file_url;
   }
 
   public async selectBspFiles(search: string, date?: string) {

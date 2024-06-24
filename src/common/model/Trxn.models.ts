@@ -22,7 +22,7 @@ class TrxnModels extends AbstractModels {
   }
 
   public async updateVTrxn(b: IUpdateVTrxn) {
-    await this.db.raw('CALL trxn.UpdateVTrxn(?,?,?,?,?,?,?,?,?,?,?,?,?)', [
+    await this.db.raw('CALL trxn.UpdateVTrxn(?,?,?,?,?,?,?,?,?,?,?,?)', [
       b.p_trxn_id,
       b.vtrxn_v_id,
       b.vtrxn_airticket_no || '',
@@ -51,7 +51,7 @@ class TrxnModels extends AbstractModels {
   }
 
   public async updateClTrxn(b: IUpdateCTrxn) {
-    await this.db.raw('CALL trxn.UpdateClTrxn(?,?,?,?,?,?,?,?,?,?,?,?,?)', [
+    await this.db.raw('CALL trxn.UpdateClTrxn(?,?,?,?,?,?,?,?,?,?,?,?)', [
       b.p_trxn_id,
       b.p_client_id,
       b.p_airticket_no || '',
@@ -188,7 +188,7 @@ class TrxnModels extends AbstractModels {
   }
 
   public async updateComTrxn(body: IUpdateCombTrxn) {
-    await this.db.raw(`CALL trxn.UpdateComTrxn(?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+    await this.db.raw(`CALL trxn.UpdateComTrxn(?,?,?,?,?,?,?,?,?,?,?,?)`, [
       body.p_trxn_id,
       body.p_airticket_no || '',
       body.p_route || '',
@@ -233,7 +233,7 @@ class TrxnModels extends AbstractModels {
   };
 
   updateAccTrxn = async (data: IUpdateAccTrxn) => {
-    await this.db.raw(`CALL trxn.UpdateACTrxn(?,?,?,?,?,?,?,?,?)`, [
+    await this.db.raw(`CALL trxn.UpdateACTrxn(?,?,?,?,?,?,?,?)`, [
       data.p_trxn_id,
       data.p_ac_id,
       data.p_pay_type,

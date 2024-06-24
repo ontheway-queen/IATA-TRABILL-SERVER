@@ -67,7 +67,7 @@ class EditPayroll extends AbstractServices {
         prev_payroll_charge_id,
       } = await conn.getPrevTransectionAmount(payrollId);
 
-      if (files[0].filename) {
+      if (files[0]?.filename) {
         const data = await conn.payrollImagesUrl(payrollId);
         data?.payroll_image_url &&
           (await this.manageFile.deleteFromCloud([data?.payroll_image_url]));
@@ -101,7 +101,7 @@ class EditPayroll extends AbstractServices {
         payroll_date,
         payroll_note,
         payroll_updated_by,
-        payroll_image_url: files[0].filename,
+        payroll_image_url: files[0]?.filename,
       };
 
       let payroll_acctrxn_id;

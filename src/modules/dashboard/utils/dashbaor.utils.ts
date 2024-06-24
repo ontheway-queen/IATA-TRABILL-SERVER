@@ -90,6 +90,7 @@ export const formatAgentTicket = async (
     const db_ticket = await conn.getTicketInfoByTicket1(ticket_no);
 
     const iata_ticket = {
+      sl: index + 1,
       invoice_id: index + 1,
       type: 'IATA',
       invoice_no: undefined,
@@ -104,7 +105,7 @@ export const formatAgentTicket = async (
 
     tickets.push(iata_ticket);
     if (db_ticket) {
-      tickets.push(db_ticket);
+      tickets.push({ sl: index + 1, ...db_ticket });
     }
   }
 

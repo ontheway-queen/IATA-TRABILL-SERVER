@@ -432,6 +432,38 @@ class InvoiceAirticketModel extends AbstractModels {
       .where('airticket_invoice_id', invoice_id);
   };
 
+  voidAirticketItems = async (
+    airticket_id: idType,
+    invoice_id: number,
+    deleted_by: idType
+  ) => {
+    // 1. flight details
+    await this.query()
+      .update({ fltdetails_is_deleted: 1, fltdetails_deleted_by: deleted_by })
+      .into('trabill_invoice_airticket_items_flight_details')
+      .where('fltdetails_airticket_id', airticket_id);
+
+    // 2. airticket items
+    await this.query()
+      .update({
+        airticket_is_deleted: 1,
+        airticket_is_void: 1,
+        airticket_deleted_by: deleted_by,
+      })
+      .into('trabill_invoice_airticket_items')
+      .where('airticket_id', airticket_id);
+
+    // 3. airticket pax
+    await this.query()
+      .update({
+        p_is_deleted: 1,
+        p_deleted_by: deleted_by,
+      })
+      .into('trabill_invoice_airticket_pax')
+      .where('p_airticket_id', airticket_id)
+      .andWhere('p_invoice_id', invoice_id);
+  };
+
   // EMAIL SEND QUERYS
   public getInvoiceClientInfo = async (invoice_id: idType) => {
     const [data] = await this.db('trabill_invoices')
@@ -695,6 +727,7 @@ class InvoiceAirticketModel extends AbstractModels {
     const [data] = await this.query()
       .select(
         'invoice_id',
+        'invoice_category_id as cate_id',
         'invoice_no',
         'client_name',
         'comb_client',
@@ -704,8 +737,17 @@ class InvoiceAirticketModel extends AbstractModels {
       .where({ invoice_id });
 
     const vendors = await this.query()
-      .select('vendor_name', 'comb_vendor', 'cost_price', 'airticket_ticket_no')
-      .from('view_invoices_cost')
+      .select(
+        'airticket_id',
+        'vendor_name',
+        this.db.raw(
+          "COALESCE(CONCAT('vendor-', airticket_vendor_id), concat('combined-', airticket_vendor_combine_id)) as comb_vendor"
+        ),
+        'airticket_client_price as sales',
+        'airticket_purchase_price as cost_price',
+        'airticket_ticket_no'
+      )
+      .from('view_all_airticket_details')
       .where({ invoice_id });
 
     return { ...data, vendors };

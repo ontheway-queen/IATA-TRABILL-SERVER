@@ -2,6 +2,8 @@
 
 
 
+ALTER TABLE `trabill`.`trabill_invoice_airticket_items` 
+ADD COLUMN `airticket_is_void` INT NOT NULL DEFAULT 0 AFTER `airticket_is_reissued`;
 
 
 

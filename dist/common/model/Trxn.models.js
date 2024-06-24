@@ -40,7 +40,7 @@ class TrxnModels extends abstract_models_1.default {
             return id;
         });
         this.updateAccTrxn = (data) => __awaiter(this, void 0, void 0, function* () {
-            yield this.db.raw(`CALL trxn.UpdateACTrxn(?,?,?,?,?,?,?,?,?)`, [
+            yield this.db.raw(`CALL trxn.UpdateACTrxn(?,?,?,?,?,?,?,?)`, [
                 data.p_trxn_id,
                 data.p_ac_id,
                 data.p_pay_type,
@@ -65,7 +65,7 @@ class TrxnModels extends abstract_models_1.default {
     }
     updateVTrxn(b) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.raw('CALL trxn.UpdateVTrxn(?,?,?,?,?,?,?,?,?,?,?,?,?)', [
+            yield this.db.raw('CALL trxn.UpdateVTrxn(?,?,?,?,?,?,?,?,?,?,?,?)', [
                 b.p_trxn_id,
                 b.vtrxn_v_id,
                 b.vtrxn_airticket_no || '',
@@ -96,7 +96,7 @@ class TrxnModels extends abstract_models_1.default {
     }
     updateClTrxn(b) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.raw('CALL trxn.UpdateClTrxn(?,?,?,?,?,?,?,?,?,?,?,?,?)', [
+            yield this.db.raw('CALL trxn.UpdateClTrxn(?,?,?,?,?,?,?,?,?,?,?,?)', [
                 b.p_trxn_id,
                 b.p_client_id,
                 b.p_airticket_no || '',
@@ -193,7 +193,7 @@ class TrxnModels extends abstract_models_1.default {
     }
     updateComTrxn(body) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.db.raw(`CALL trxn.UpdateComTrxn(?,?,?,?,?,?,?,?,?,?,?,?,?)`, [
+            yield this.db.raw(`CALL trxn.UpdateComTrxn(?,?,?,?,?,?,?,?,?,?,?,?)`, [
                 body.p_trxn_id,
                 body.p_airticket_no || '',
                 body.p_route || '',

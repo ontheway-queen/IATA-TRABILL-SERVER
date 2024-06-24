@@ -79,10 +79,10 @@ const formatAgentTicket = (text, conn) => __awaiter(void 0, void 0, void 0, func
         const arrItem = item.split(' ');
         const ticket_no = arrItem[0].replace(/TKTT|FFVV|FVVV|FFFF|FFSF/g, '');
         const db_ticket = yield conn.getTicketInfoByTicket1(ticket_no);
-        const iata_ticket = Object.assign(Object.assign({ invoice_id: index + 1, type: 'IATA', invoice_no: undefined, invoice_category_id: undefined, ticket_no, sales_date: formatDate(arrItem[4]), gross_fare: (0, exports.toNum)(arrItem[1]), base_fare: (0, exports.toNum)(arrItem[2]) }, formattedCommission[index]), { purchase_price: (0, exports.toNum)(arrItem[3]) });
+        const iata_ticket = Object.assign(Object.assign({ sl: index + 1, invoice_id: index + 1, type: 'IATA', invoice_no: undefined, invoice_category_id: undefined, ticket_no, sales_date: formatDate(arrItem[4]), gross_fare: (0, exports.toNum)(arrItem[1]), base_fare: (0, exports.toNum)(arrItem[2]) }, formattedCommission[index]), { purchase_price: (0, exports.toNum)(arrItem[3]) });
         tickets.push(iata_ticket);
         if (db_ticket) {
-            tickets.push(db_ticket);
+            tickets.push(Object.assign({ sl: index + 1 }, db_ticket));
         }
     }
     return { tickets };

@@ -296,7 +296,6 @@ class CommonInvoiceModel extends AbstractModels {
       .update({
         invoice_void_charge,
         invoice_is_void: 1,
-        invoice_is_deleted: 1,
         invoice_void_ctrxn_id: void_charge_ctrxn_id,
         invoice_void_date,
       })

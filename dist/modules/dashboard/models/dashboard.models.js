@@ -632,17 +632,17 @@ class DashboardModels extends abstract_models_1.default {
             yield this.query().insert(data).into('trabill_bsp_bill');
         });
     }
-    deleteBSPDocs(tbd_id) {
+    deleteBSPDocs(bsp_id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const [{ tbd_doc }] = (yield this.query()
-                .select('tbd_doc')
-                .from('trabill_bsp_docs')
-                .where({ tbd_id }));
+            const [{ bsp_file_url }] = (yield this.query()
+                .select('bsp_file_url')
+                .from('trabill_bsp_bill')
+                .where({ bsp_id }));
             yield this.query()
-                .update({ tbd_is_deleted: 1 })
-                .into('trabill_bsp_docs')
-                .where({ tbd_id });
-            return tbd_doc;
+                .update({ bsp_is_deleted: 1 })
+                .into('trabill_bsp_bill')
+                .where({ bsp_id });
+            return bsp_file_url;
         });
     }
     selectBspFiles(search, date) {

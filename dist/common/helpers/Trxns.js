@@ -122,7 +122,7 @@ class Trxns extends abstract_services_1.default {
                     p_type: ctrxn_type,
                     p_voucher: ctrxn_voucher,
                     p_airticket_no: ctrxn_airticket_no,
-                    // p_pay_type: ctrxn_pay_type as string,
+                    p_pay_type: ctrxn_pay_type,
                 };
                 yield this.conn.updateClTrxn(clTrxnBody);
             }

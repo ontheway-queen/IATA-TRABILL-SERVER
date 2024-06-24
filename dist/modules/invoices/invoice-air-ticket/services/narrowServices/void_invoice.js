@@ -15,7 +15,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
-const deleteInvoiceOther_1 = __importDefault(require("../../../invoice_other/services/narrowServices/deleteInvoiceOther"));
 class VoidInvoice extends abstract_services_1.default {
     constructor() {
         super();
@@ -25,8 +24,8 @@ class VoidInvoice extends abstract_services_1.default {
             const body = req.body;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
+                const conn = this.models.invoiceAirticketModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const { invoice_category_id } = yield common_conn.getPreviousInvoices(invoice_id);
                 const content = `FARE BDT ${body.net_total}/- \nCHARGE BDT ${body.client_charge || 0}/-`;
                 const ticket_nos = body.invoice_vendors
                     .map((item) => item.airticket_ticket_no)
@@ -57,33 +56,44 @@ class VoidInvoice extends abstract_services_1.default {
                     };
                     void_charge_ctrxn_id = yield trxns.clTrxnInsert(voidChargeClTrans);
                 }
-                // delete invoice;
-                if (invoice_category_id === 1) {
-                    // air ticket
-                    yield this.models
-                        .invoiceAirticketModel(req, trx)
-                        .deleteAirticketItems(invoice_id, req.user_id);
-                }
-                else if (invoice_category_id === 2) {
-                    // non commission
-                    yield this.models
-                        .invoiceNonCommission(req, trx)
-                        .deleteNonCommissionItems(invoice_id, req.user_id);
-                }
-                else if (invoice_category_id === 3) {
-                    // reissue
-                    yield this.models
-                        .reissueAirticket(req, trx)
-                        .deleteAirticketReissueItems(invoice_id, req.user_id);
-                }
-                else if (invoice_category_id === 5) {
-                    // others
-                    new deleteInvoiceOther_1.default().voidInvoiceOther(req, trx);
-                }
                 // UPDATED VOID INFORMATION
                 yield common_conn.updateIsVoid(invoice_id, body.client_charge || 0, void_charge_ctrxn_id, body.invoice_void_date);
+                // ======================= REDUCE VENDOR INFO
+                // Initialize a result object
+                const reducedData = {};
+                // Process each ticket
+                for (const ticket of body.invoice_vendors) {
+                    const vendorId = ticket.comb_vendor;
+                    if (!reducedData[vendorId]) {
+                        reducedData[vendorId] = {
+                            comb_vendor: vendorId,
+                            vendor_charge: 0,
+                            cost_price: 0,
+                            airticket_ticket_no: [],
+                        };
+                    }
+                    reducedData[vendorId].vendor_charge += ticket.vendor_charge;
+                    reducedData[vendorId].cost_price += ticket.cost_price;
+                    reducedData[vendorId].airticket_ticket_no.push(ticket.airticket_ticket_no);
+                    if (body.cate_id === 1) {
+                        yield conn.voidAirticketItems(ticket.airticket_id, invoice_id, req.user_id);
+                    }
+                    else if (body.cate_id === 2) {
+                    }
+                    else if (body.cate_id === 3) {
+                    }
+                    else if (body.cate_id === 5) {
+                    }
+                }
+                // Convert lists to comma-separated strings
+                for (const vendorId in reducedData) {
+                    reducedData[vendorId].airticket_ticket_no =
+                        reducedData[vendorId].airticket_ticket_no.join(', ');
+                }
+                // Convert the object to an array
+                const resultArray = Object.values(reducedData);
                 //   VENDOR TRANSACTIONS
-                for (const item of body.invoice_vendors) {
+                for (const item of resultArray) {
                     const { vendor_id } = (0, common_helper_1.separateCombClientToId)(item.comb_vendor);
                     const vendorPurchaseVoidTrans = {
                         comb_vendor: item.comb_vendor,

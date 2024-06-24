@@ -21,12 +21,13 @@ class EditPayroll extends abstract_services_1.default {
             const { payroll_employee_id, payroll_account_id, payroll_pay_type, payroll_salary, payroll_deductions, payroll_mobile_bill, payroll_food_bill, payroll_bonus, payroll_commission, payroll_fastival_bonus, payroll_ta, payroll_advance, payroll_net_amount, payroll_date, payroll_note, payroll_cheque_no, payroll_bank_name, cheque_withdraw_date, payroll_updated_by, payroll_accommodation, payroll_attendance, payroll_health, payroll_incentive, payroll_provident, payroll_transection_charge, gross_salary, daily_salary, payroll_profit_share, payroll_other1, payroll_other2, payroll_other3, payment_month, } = req.body;
             const payrollId = req.params.id;
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
+                var _a, _b;
                 const conn = this.models.payrollModel(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const files = req.files;
                 let { previous_net_balance, prev_pay_type, prev_acctrxn_id, prev_payroll_charge_id, } = yield conn.getPrevTransectionAmount(payrollId);
-                if (files[0].filename) {
+                if ((_a = files[0]) === null || _a === void 0 ? void 0 : _a.filename) {
                     const data = yield conn.payrollImagesUrl(payrollId);
                     (data === null || data === void 0 ? void 0 : data.payroll_image_url) &&
                         (yield this.manageFile.deleteFromCloud([data === null || data === void 0 ? void 0 : data.payroll_image_url]));
@@ -59,7 +60,7 @@ class EditPayroll extends abstract_services_1.default {
                     payroll_date,
                     payroll_note,
                     payroll_updated_by,
-                    payroll_image_url: files[0].filename,
+                    payroll_image_url: (_b = files[0]) === null || _b === void 0 ? void 0 : _b.filename,
                 };
                 let payroll_acctrxn_id;
                 if (payroll_pay_type !== 4) {

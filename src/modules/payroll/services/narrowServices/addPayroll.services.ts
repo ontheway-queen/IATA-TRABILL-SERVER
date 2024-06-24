@@ -1,6 +1,9 @@
 import { Request } from 'express';
 import AbstractServices from '../../../../abstracts/abstract.services';
+import Trxns from '../../../../common/helpers/Trxns';
 import { generateVoucherNumber } from '../../../../common/helpers/invoice.helpers';
+import { IAcTrxn } from '../../../../common/interfaces/Trxn.interfaces';
+import { getPaymentType } from '../../../../common/utils/libraries/lib';
 import { IOnlineTrxnCharge } from '../../../accounts/types/account.interfaces';
 import {
   ICreatePayroll,
@@ -8,9 +11,6 @@ import {
   IPayrollDeductions,
   IPayrollReqBody,
 } from '../../types/payroll.interfaces';
-import Trxns from '../../../../common/helpers/Trxns';
-import { IAcTrxn } from '../../../../common/interfaces/Trxn.interfaces';
-import { getPaymentType } from '../../../../common/utils/libraries/lib';
 
 class CreatePayroll extends AbstractServices {
   constructor() {
@@ -107,7 +107,7 @@ class CreatePayroll extends AbstractServices {
         payroll_other1,
         payroll_other2,
         payroll_other3,
-        payroll_image_url: files[0].filename,
+        payroll_image_url: files[0]?.filename,
       };
 
       let payroll_id: number = 0;

@@ -102,6 +102,51 @@ class InvoiceAirticketValidators extends abstract_validators_1.default {
             (0, express_validator_1.check)('infos.*.tii_journey_date').toDate().optional(),
             (0, express_validator_1.check)('infos.*.tii_total_room').isInt().optional(),
         ];
+        this.createInvoiceIUR = [
+            this.permissions.check(this.resources.invoice_airticket, 'create'),
+            (0, express_validator_1.check)('issue_date')
+                .optional()
+                .isISO8601()
+                .withMessage('Please provide a valid sales date'),
+            (0, express_validator_1.check)('creation_sign')
+                .optional()
+                .isString()
+                .withMessage('Please provide a valid sales man sign'),
+            (0, express_validator_1.check)('ticket_details.airticket_ticket_no')
+                .optional()
+                .isString()
+                .withMessage('Please provide a valid ticket no'),
+            (0, express_validator_1.check)('ticket_details.airticket_gross_fare')
+                .notEmpty()
+                .withMessage('Please enter ticket gross fare')
+                .isFloat()
+                .withMessage('Please provide a valid gross fare it should be float number'),
+            (0, express_validator_1.check)('ticket_details.airticket_base_fare')
+                .notEmpty()
+                .withMessage('Please enter ticket base fare')
+                .isFloat()
+                .withMessage('Please provide a valid base fare it should be float number'),
+            (0, express_validator_1.check)('ticket_details.airticket_commission_percent')
+                .optional()
+                .isFloat()
+                .withMessage('Please provide a valid commission percent it should be float number'),
+            (0, express_validator_1.check)('ticket_details.airticket_commission_percent_total')
+                .optional()
+                .isFloat()
+                .withMessage('Please provide a valid commission percent total it should be float number'),
+            (0, express_validator_1.check)('ticket_details.airticket_client_price')
+                .optional()
+                .isFloat()
+                .withMessage('Please provide a valid airticket tax it should be float number'),
+            (0, express_validator_1.check)('ticket_details.airticket_classes')
+                .optional()
+                .isString()
+                .withMessage('Please provide a valid air ticket class'),
+            (0, express_validator_1.check)('ticket_details.airticket_pnr')
+                .optional()
+                .isString()
+                .withMessage('Please provide a valid air ticket PNR'),
+        ];
     }
 }
 exports.default = InvoiceAirticketValidators;

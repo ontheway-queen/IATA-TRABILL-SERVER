@@ -287,3 +287,87 @@ export interface IFakeInvoiceInfoItems {
   tii_total_room: number;
   tii_created_by: number;
 }
+
+export interface IInvoiceIURReqBody {
+  creation_sign: string;
+  issue_date: string;
+  ticketInfo: {
+    ticket_details: IInvoiceIUR;
+    flight_details: IFlightIURDetails[];
+    pax_passports: IPaxPassportIURDetails[];
+    taxes_commission: ITaxesIURCommission[];
+    total_taxes_commission: number;
+  }[];
+}
+
+export interface IFlightIURDetails {
+  fltdetails_from_airport: string;
+  fltdetails_to_airport: string;
+  fltdetails_airline: string;
+  fltdetails_flight_no: number;
+  fltdetails_fly_date: string;
+  fltdetails_departure_time: string;
+  fltdetails_arrival_time: string;
+}
+
+export interface IPaxPassportIURDetails {
+  passport_id?: number;
+  passport_name: string;
+  passport_person_type: 'Adult' | 'Child' | 'Infant';
+  passport_passport_no: string;
+  passport_mobile_no: string;
+  passport_email: string;
+  passport_nid_no: string;
+  passport_date_of_birth: string;
+  passport_date_of_issue: string;
+  passport_date_of_expire: string;
+}
+
+export interface IInvoiceIUR {
+  airticket_ticket_no: string; //
+  airticket_gross_fare: number; //
+  airticket_base_fare: number; //
+  airticket_commission_percent: number; //
+  airticket_commission_percent_total: number; //
+  airticket_client_price: number; //
+  airticket_classes: string; //
+  airticket_pnr: string; //
+  airticket_bd_charge: number; //
+  airticket_ut_charge: number; //
+  airticket_e5_charge: number; //
+  airticket_es_charge: number; //
+  airticket_xt_charge: number; //
+  airticket_issue_date: string; //
+  airticket_journey_date: string; //
+  airticket_return_date: string; //
+  airline_name: string; //
+  airticket_routes: string; //
+  airticket_ait: number; //
+  airticket_segment: number; //
+  airticket_tax: number;
+  airticket_ait_from: string;
+  airticket_discount_type: string;
+  airticket_discount_total: number;
+  airticket_extra_fee: number;
+  airticket_other_bonus_total: number;
+  airticket_other_bonus_type: string;
+  airticket_other_expense: number;
+  airticket_vat: number;
+  airticket_purchase_price: number;
+  airticket_profit: number;
+  airticket_net_commssion: number;
+  airticket_tax1: number;
+  airticket_g4_charge: number;
+  airticket_p7_charge: number;
+  airticket_p8_charge: number;
+  airticket_r9_charge: number;
+  airticket_ow_charge: number;
+  airticket_pz_charge: number;
+  airticket_qa_charge: number;
+}
+
+export interface ITaxesIURCommission {
+  airline_taxes: number;
+  airline_commission: number;
+  airline_tax_type: string;
+}

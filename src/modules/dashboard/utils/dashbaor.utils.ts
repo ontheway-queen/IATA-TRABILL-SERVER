@@ -137,6 +137,7 @@ export const formatAgentRefund = async (
     const db_refund = await conn.getTicketInfoByRefund(ticket_no);
 
     const iata_refund = {
+      sl: index + 1,
       refund_id: index + 1,
       type: 'IATA',
       ticket_no,
@@ -151,7 +152,7 @@ export const formatAgentRefund = async (
 
     refunds.push(iata_refund);
     if (db_refund) {
-      refunds.push(db_refund);
+      refunds.push({ sl: index + 1, ...db_refund });
     }
   }
 

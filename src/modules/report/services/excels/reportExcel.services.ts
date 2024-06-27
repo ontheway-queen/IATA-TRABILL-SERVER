@@ -866,7 +866,7 @@ class ReportExcelServices extends AbstractServices {
     req: Request,
     res: Response
   ) => {
-    const { client_id } = req.body;
+    const { client_id, employee_id } = req.body;
     const { from_date, to_date, page, size } = req.query;
     const conn = this.models.salesPurchasesReport(req);
 
@@ -880,6 +880,7 @@ class ReportExcelServices extends AbstractServices {
     const sales = await conn.getClientSales(
       clientId,
       combine_id,
+      employee_id,
       String(from_date),
       String(to_date),
       Number(page) || 1,
@@ -890,6 +891,7 @@ class ReportExcelServices extends AbstractServices {
     const collection = await conn.getClientCollectionClient(
       clientId,
       combine_id,
+      employee_id,
       String(from_date),
       String(to_date),
       Number(page) || 1,
@@ -902,12 +904,14 @@ class ReportExcelServices extends AbstractServices {
     const salesReportWorksheet = workbook.addWorksheet('Sales Report');
     salesReportWorksheet.columns = [
       { header: 'SL', key: 'serial', width: 7 },
-      { header: 'Invoice Date', key: 'sales_date', width: 20 },
+      { header: 'Sales Date', key: 'sales_date', width: 20 },
       { header: 'Invoice No', key: 'invoice_no', width: 15 },
-      { header: 'Client', key: 'client_name', width: 20 },
-      { header: 'PAX Name', key: 'pax_name', width: 20 },
       { header: 'Ticket No', key: 'ticket_no', width: 20 },
-      { header: 'Net Total', key: 'net_total', width: 20 },
+      { header: 'Client Name', key: 'client_name', width: 20 },
+      { header: 'PAX Name', key: 'pax_name', width: 20 },
+      { header: 'Sales By', key: 'employee_full_name', width: 20 },
+      { header: 'Prepared By', key: 'user_full_name', width: 20 },
+      { header: 'Sales Price', key: 'net_total', width: 20 },
     ];
 
     // Loop through data and populate rows
@@ -943,11 +947,13 @@ class ReportExcelServices extends AbstractServices {
     );
     clientReportWorksheet.columns = [
       { header: 'SL', key: 'serial', width: 7 },
-      { header: 'Particular', key: 'trxntype_name', width: 15 },
-      { header: 'Money Receipt No', key: 'receipt_vouchar_no', width: 20 },
       { header: 'Payment Date', key: 'receipt_payment_date', width: 20 },
-      { header: 'Client', key: 'client_name', width: 20 },
-      { header: 'Collection Amount', key: 'receipt_total_amount', width: 20 },
+      { header: 'Receipt No', key: 'receipt_vouchar_no', width: 20 },
+      { header: 'Particular', key: 'trxntype_name', width: 15 },
+      { header: 'Client Name', key: 'client_name', width: 20 },
+      { header: 'Received By', key: 'employee_full_name', width: 20 },
+      { header: 'Prepared By', key: 'user_full_name', width: 20 },
+      { header: 'Received Amount', key: 'receipt_total_amount', width: 20 },
     ];
 
     // Loop through data and populate rows
@@ -4315,6 +4321,95 @@ class ReportExcelServices extends AbstractServices {
       } else {
         report.lbalance_amount = `Balanced : ${formattedBalance}`;
       }
+
+      worksheet.addRow(report);
+    });
+    worksheet.getRow(1).eachCell((cell) => {
+      cell.font = { bold: true };
+    });
+
+    try {
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath);
+      }
+      await workbook.xlsx.writeFile(filePath);
+      // response download
+      res.download(filePath, filePath, (err: string) => {
+        if (err) {
+          throw new Error(
+            `Vendor All Report file not download, error is: ${err}`
+          );
+        } else {
+          fs.unlinkSync(filePath);
+        }
+      });
+    } catch (err: any | unknown) {
+      throw new Error(
+        `Something went wrong! Internal server error, error is: ${err}`
+      );
+    }
+  };
+
+  /**
+   * vendor
+   */
+  public getCollectionsReportExcel = async (req: Request, res: Response) => {
+    const conn = this.models.salesPurchasesReport(req);
+
+    const {
+      from_date,
+      to_date,
+      client,
+      employee_id,
+      user_id,
+      account_id,
+      search,
+    } = req.query as {
+      from_date: string;
+      to_date: string;
+      client: string;
+      employee_id: string;
+      user_id: string;
+      account_id: string;
+      search: string;
+    };
+
+    const { client_id, combined_id } = separateCombClientToId(client);
+
+    const data = await conn.getCollections(
+      1,
+      this.rowSize,
+      search,
+      from_date,
+      to_date,
+      account_id,
+      client_id as number,
+      combined_id as number,
+      employee_id,
+      user_id
+    );
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet('All Vendors');
+    const dirPath = path.join(__dirname, '../files');
+    const filePath = `${dirPath}/vendorAll.xlsx`;
+    worksheet.columns = [
+      { header: 'SL', key: 'serial', width: 7 },
+      { header: 'Received Date', key: 'receipt_payment_date', width: 20 },
+      { header: 'Receipt No', key: 'receipt_vouchar_no', width: 20 },
+      { header: 'Account Name', key: 'account_name', width: 20 },
+      { header: 'Cleint Name', key: 'client_name', width: 20 },
+      { header: 'Pay to', key: 'receipt_payment_to', width: 20 },
+      { header: 'Pay Method', key: 'acctype_name', width: 20 },
+      { header: 'Bank Name', key: 'bank_name', width: 20 },
+      { header: 'Received Amount', key: 'receipt_total_amount', width: 20 },
+      { header: 'Received By', key: 'employee_full_name', width: 20 },
+      { header: 'Preapred By', key: 'user_full_name', width: 20 },
+    ];
+
+    // Loop through data and populate rows
+    data.data.forEach((report: any, index: number) => {
+      report.serial = index + 1;
 
       worksheet.addRow(report);
     });

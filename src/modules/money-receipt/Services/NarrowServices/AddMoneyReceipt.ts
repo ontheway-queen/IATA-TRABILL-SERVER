@@ -114,7 +114,7 @@ class AddMoneyReceipt extends AbstractServices {
       }
 
       const receiptInfo: IMoneyReceiptDb = {
-        receipt_trnxtype_id: 2,
+        receipt_trnxtype_id: 31,
         receipt_vouchar_no: voucher_no,
         receipt_client_id: client_id,
         receipt_combined_id: combined_id,

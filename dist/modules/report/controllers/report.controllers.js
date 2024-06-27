@@ -796,6 +796,28 @@ class ReportController extends abstract_controllers_1.default {
                 this.error('Get Sales Report...');
             }
         }));
+        // COLLECTION REPORT
+        this.collectionReport = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.collectionReport(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('Get Collection Report...');
+            }
+        }));
+        this.getCollectionsReportExcel = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            yield this.excels.getCollectionsReportExcel(req, res);
+        }));
+        this.clientLastBalance = this.assyncWrapper.wrap(this.validator.readReport, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.clientLastBalance(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error('Get Collection Report...');
+            }
+        }));
     }
 }
 exports.default = ReportController;

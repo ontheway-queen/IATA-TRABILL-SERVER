@@ -102,10 +102,10 @@ const formatAgentRefund = (text, conn) => __awaiter(void 0, void 0, void 0, func
             .split(' ');
         const ticket_no = formattedItem[0];
         const db_refund = yield conn.getTicketInfoByRefund(ticket_no);
-        const iata_refund = Object.assign(Object.assign({ refund_id: index + 1, type: 'IATA', ticket_no, vouchar_number: undefined, date: formatDate(formattedItem[4]), iata_purchase: (0, exports.toNum)(formattedItem[1]), iata_fare: (0, exports.toNum)(formattedItem[2]), iata_com_able: (0, exports.toNum)(formattedItem[5]) }, formattedCommission[index]), { return_amount: (0, exports.toNum)(formattedItem[3]) });
+        const iata_refund = Object.assign(Object.assign({ sl: index + 1, refund_id: index + 1, type: 'IATA', ticket_no, vouchar_number: undefined, date: formatDate(formattedItem[4]), iata_purchase: (0, exports.toNum)(formattedItem[1]), iata_fare: (0, exports.toNum)(formattedItem[2]), iata_com_able: (0, exports.toNum)(formattedItem[5]) }, formattedCommission[index]), { return_amount: (0, exports.toNum)(formattedItem[3]) });
         refunds.push(iata_refund);
         if (db_refund) {
-            refunds.push(db_refund);
+            refunds.push(Object.assign({ sl: index + 1 }, db_refund));
         }
     }
     return { refunds };

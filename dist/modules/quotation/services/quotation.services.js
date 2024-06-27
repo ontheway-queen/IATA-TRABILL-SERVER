@@ -99,7 +99,7 @@ class QuotationServices extends abstract_services_1.default {
             const { invoice_net_total, invoice_combclient_id, invoice_created_by, invoice_note, invoice_sales_date, invoice_due_date, invoice_sales_man_id, invoice_sub_total, invoice_vat, invoice_service_charge, invoice_discount, invoice_agent_id, invoice_agent_com_amount, money_receipt, billing_information, invoice_reference, } = req.body;
             const { invoice_total_profit, invoice_total_vendor_price } = yield (0, invoice_helpers_1.InvoiceClientAndVendorValidate)(billing_information, invoice_combclient_id);
             (0, invoice_helpers_1.MoneyReceiptAmountIsValid)(money_receipt, invoice_net_total);
-            const { invoice_client_id, invoice_combined_id } = yield (0, invoice_helpers_1.getClientOrCombId)(invoice_combclient_id);
+            const { invoice_client_id, invoice_combined_id } = (0, invoice_helpers_1.getClientOrCombId)(invoice_combclient_id);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.invoiceOtherModel(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
@@ -249,6 +249,48 @@ class QuotationServices extends abstract_services_1.default {
                     message: 'Quotation deleted successfully',
                 };
             }));
+        });
+        this.getInvoiceByCl = (req) => __awaiter(this, void 0, void 0, function* () {
+            const { client } = req.query;
+            const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(client);
+            const conn = this.models.quotationModel(req);
+            const data = yield conn.getInvoiceByCl(client_id, combined_id);
+            return { success: true, data };
+        });
+        this.getInvoiceBilling = (req) => __awaiter(this, void 0, void 0, function* () {
+            const body = req.body;
+            const conn = this.models.quotationModel(req);
+            const iat_conn = this.models.invoiceAirticketModel(req);
+            const common_conn = this.models.CommonInvoiceModel(req);
+            const authorized_by = yield common_conn.getAuthorizedBySignature();
+            let pax_details = [];
+            let flight_details = [];
+            let air_ticket_billing = [];
+            let other_billing = [];
+            for (const item of body) {
+                if (item.category_id === 5) {
+                    const otherBilling = yield conn.getOtherBilling(item.invoices_id);
+                    other_billing = [...other_billing, ...otherBilling];
+                }
+                else {
+                    const pax = yield common_conn.getInvoiceAirTicketPaxDetails(item.invoices_id);
+                    const billing = yield conn.getAirTicketBilling(item.invoices_id);
+                    const flights = yield iat_conn.getAirTicketFlights(item.invoices_id);
+                    pax_details = [...pax_details, ...pax];
+                    flight_details = [...flight_details, ...flights];
+                    air_ticket_billing = [...air_ticket_billing, ...billing];
+                }
+            }
+            return {
+                success: true,
+                data: {
+                    authorized_by,
+                    pax_details,
+                    flight_details,
+                    air_ticket_billing,
+                    other_billing,
+                },
+            };
         });
     }
 }

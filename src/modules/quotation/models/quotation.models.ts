@@ -1,7 +1,7 @@
-import { IBillInfo, TDB, idType } from '../../../common/types/common.types';
-import { IQuotation } from '../types/quotation.interfaces';
-import AbstractModels from '../../../abstracts/abstract.models';
 import moment from 'moment';
+import AbstractModels from '../../../abstracts/abstract.models';
+import { IBillInfo, idType } from '../../../common/types/common.types';
+import { IQuotation } from '../types/quotation.interfaces';
 
 class QuotationModel extends AbstractModels {
   public async products() {
@@ -291,6 +291,56 @@ class QuotationModel extends AbstractModels {
 
     return billInfos;
   }
+
+  // INVOICE WITH QUOTATION
+  getInvoiceByCl = async (client_id: idType, combine_id: idType) => {
+    return await this.query()
+      .select('invoice_id', 'invoice_no', 'invoice_category_id as category_id')
+      .from('trabill_invoices')
+      .where('invoice_org_agency', this.org_agency)
+      .havingIn('invoice_category_id', [1, 3, 5])
+      .andWhere('invoice_client_id', client_id)
+      .andWhere('invoice_combined_id', combine_id)
+      .andWhereNot('invoice_is_deleted', 1);
+  };
+  getAirTicketBilling = async (invoice_id: idType) => {
+    return await this.query()
+      .select(
+        'invoice_id',
+        'invoice_no',
+        'passport_name',
+        'airline_name',
+        'airticket_pnr',
+        'airticket_ticket_no',
+        'airticket_client_price',
+        'airticket_journey_date',
+        'airticket_return_date',
+        'airticket_routes'
+      )
+      .from('trabill.view_all_airticket_details')
+
+      .where('invoice_id', invoice_id);
+  };
+  getOtherBilling = async (invoice_id: idType) => {
+    return await this.query()
+      .select(
+        'trabill_other_invoices_billing.billing_invoice_id',
+        'trabill_products.product_name',
+        'trabill_other_invoices_billing.pax_name',
+        'trabill_other_invoices_billing.billing_description',
+        'trabill_other_invoices_billing.billing_quantity',
+        'trabill_other_invoices_billing.billing_unit_price',
+        'trabill_other_invoices_billing.billing_subtotal'
+      )
+      .from('trabill.trabill_other_invoices_billing')
+      .leftJoin(
+        'trabill.trabill_products',
+        'trabill.trabill_products.product_id',
+        'trabill.trabill_other_invoices_billing.billing_product_id'
+      )
+
+      .where('trabill_other_invoices_billing.billing_invoice_id', invoice_id);
+  };
 }
 
 export default QuotationModel;

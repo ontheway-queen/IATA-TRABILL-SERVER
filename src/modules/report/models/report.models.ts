@@ -2953,6 +2953,35 @@ class ReportModel extends AbstractModels {
 
     return data;
   };
+  clientLastBalance = async () => {
+    const data = await this.query()
+      .from('trabill_clients as tc')
+      .leftJoin(
+        this.query()
+          .from('trxn.client_trxn')
+          .select('ctrxn_cl_id', 'ctrxn_lbalance')
+          .whereNot('ctrxn_is_delete', 1)
+          .orderBy('ctrxn_id', 'desc')
+          .limit(1)
+          .as('tct'),
+        'tc.client_id',
+        'tct.ctrxn_cl_id'
+      )
+      .select(
+        'tc.client_id',
+        'tc.client_org_agency',
+        'tc.client_entry_id',
+        'tc.client_name',
+        'tc.client_lbalance',
+        this.db.raw('COALESCE(tct.ctrxn_lbalance, 0) as ctrxn_lbalance')
+      )
+      .whereNot(
+        'tc.client_lbalance',
+        this.db.raw('COALESCE(tct.ctrxn_lbalance, 0)')
+      );
+
+    return data;
+  };
 }
 
 export default ReportModel;

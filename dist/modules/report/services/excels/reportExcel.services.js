@@ -710,7 +710,7 @@ class ReportExcelServices extends abstract_services_1.default {
         });
         this.getClientWiseCollectionSalesReportExcel = (req, res) => __awaiter(this, void 0, void 0, function* () {
             var _e, _f;
-            const { client_id } = req.body;
+            const { client_id, employee_id } = req.body;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.salesPurchasesReport(req);
             let separateComb;
@@ -719,20 +719,22 @@ class ReportExcelServices extends abstract_services_1.default {
             }
             const clientId = (separateComb === null || separateComb === void 0 ? void 0 : separateComb.client_id) || 'all';
             const combine_id = (separateComb === null || separateComb === void 0 ? void 0 : separateComb.combined_id) || 'all';
-            const sales = yield conn.getClientSales(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
-            const collection = yield conn.getClientCollectionClient(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
+            const sales = yield conn.getClientSales(clientId, combine_id, employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
+            const collection = yield conn.getClientCollectionClient(clientId, combine_id, employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             const workbook = new exceljs_1.default.Workbook();
             const dirPath = path_1.default.join(__dirname, '../files');
             const filePath = `${dirPath}/clientWiseCollectionSalesReport.xlsx`;
             const salesReportWorksheet = workbook.addWorksheet('Sales Report');
             salesReportWorksheet.columns = [
                 { header: 'SL', key: 'serial', width: 7 },
-                { header: 'Invoice Date', key: 'sales_date', width: 20 },
+                { header: 'Sales Date', key: 'sales_date', width: 20 },
                 { header: 'Invoice No', key: 'invoice_no', width: 15 },
-                { header: 'Client', key: 'client_name', width: 20 },
-                { header: 'PAX Name', key: 'pax_name', width: 20 },
                 { header: 'Ticket No', key: 'ticket_no', width: 20 },
-                { header: 'Net Total', key: 'net_total', width: 20 },
+                { header: 'Client Name', key: 'client_name', width: 20 },
+                { header: 'PAX Name', key: 'pax_name', width: 20 },
+                { header: 'Sales By', key: 'employee_full_name', width: 20 },
+                { header: 'Prepared By', key: 'user_full_name', width: 20 },
+                { header: 'Sales Price', key: 'net_total', width: 20 },
             ];
             // Loop through data and populate rows
             (_e = sales === null || sales === void 0 ? void 0 : sales.sales_data) === null || _e === void 0 ? void 0 : _e.forEach((report, index) => {
@@ -762,11 +764,13 @@ class ReportExcelServices extends abstract_services_1.default {
             const clientReportWorksheet = workbook.addWorksheet('Client Wise Collection');
             clientReportWorksheet.columns = [
                 { header: 'SL', key: 'serial', width: 7 },
-                { header: 'Particular', key: 'trxntype_name', width: 15 },
-                { header: 'Money Receipt No', key: 'receipt_vouchar_no', width: 20 },
                 { header: 'Payment Date', key: 'receipt_payment_date', width: 20 },
-                { header: 'Client', key: 'client_name', width: 20 },
-                { header: 'Collection Amount', key: 'receipt_total_amount', width: 20 },
+                { header: 'Receipt No', key: 'receipt_vouchar_no', width: 20 },
+                { header: 'Particular', key: 'trxntype_name', width: 15 },
+                { header: 'Client Name', key: 'client_name', width: 20 },
+                { header: 'Received By', key: 'employee_full_name', width: 20 },
+                { header: 'Prepared By', key: 'user_full_name', width: 20 },
+                { header: 'Received Amount', key: 'receipt_total_amount', width: 20 },
             ];
             // Loop through data and populate rows
             (_f = collection === null || collection === void 0 ? void 0 : collection.collection_data) === null || _f === void 0 ? void 0 : _f.forEach((report, index) => {
@@ -3479,6 +3483,58 @@ class ReportExcelServices extends abstract_services_1.default {
                 else {
                     report.lbalance_amount = `Balanced : ${formattedBalance}`;
                 }
+                worksheet.addRow(report);
+            });
+            worksheet.getRow(1).eachCell((cell) => {
+                cell.font = { bold: true };
+            });
+            try {
+                if (!fs_1.default.existsSync(dirPath)) {
+                    fs_1.default.mkdirSync(dirPath);
+                }
+                yield workbook.xlsx.writeFile(filePath);
+                // response download
+                res.download(filePath, filePath, (err) => {
+                    if (err) {
+                        throw new Error(`Vendor All Report file not download, error is: ${err}`);
+                    }
+                    else {
+                        fs_1.default.unlinkSync(filePath);
+                    }
+                });
+            }
+            catch (err) {
+                throw new Error(`Something went wrong! Internal server error, error is: ${err}`);
+            }
+        });
+        /**
+         * vendor
+         */
+        this.getCollectionsReportExcel = (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const conn = this.models.salesPurchasesReport(req);
+            const { from_date, to_date, client, employee_id, user_id, account_id, search, } = req.query;
+            const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(client);
+            const data = yield conn.getCollections(1, this.rowSize, search, from_date, to_date, account_id, client_id, combined_id, employee_id, user_id);
+            const workbook = new exceljs_1.default.Workbook();
+            const worksheet = workbook.addWorksheet('All Vendors');
+            const dirPath = path_1.default.join(__dirname, '../files');
+            const filePath = `${dirPath}/vendorAll.xlsx`;
+            worksheet.columns = [
+                { header: 'SL', key: 'serial', width: 7 },
+                { header: 'Received Date', key: 'receipt_payment_date', width: 20 },
+                { header: 'Receipt No', key: 'receipt_vouchar_no', width: 20 },
+                { header: 'Account Name', key: 'account_name', width: 20 },
+                { header: 'Cleint Name', key: 'client_name', width: 20 },
+                { header: 'Pay to', key: 'receipt_payment_to', width: 20 },
+                { header: 'Pay Method', key: 'acctype_name', width: 20 },
+                { header: 'Bank Name', key: 'bank_name', width: 20 },
+                { header: 'Received Amount', key: 'receipt_total_amount', width: 20 },
+                { header: 'Received By', key: 'employee_full_name', width: 20 },
+                { header: 'Preapred By', key: 'user_full_name', width: 20 },
+            ];
+            // Loop through data and populate rows
+            data.data.forEach((report, index) => {
+                report.serial = index + 1;
                 worksheet.addRow(report);
             });
             worksheet.getRow(1).eachCell((cell) => {

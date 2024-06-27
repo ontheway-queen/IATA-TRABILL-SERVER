@@ -13,6 +13,8 @@ class QuotationRouter extends abstract_routers_1.default {
     }
     callRouter() {
         this.routers.route('/products').get(this.controllers.products);
+        this.routers.get('/invoices', this.controllers.getInvoiceByCl);
+        this.routers.post('/get-billing', this.controllers.getInvoiceBilling);
         this.routers
             .route('/')
             .post(this.controllers.createQuotation)

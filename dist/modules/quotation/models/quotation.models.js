@@ -12,8 +12,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const abstract_models_1 = __importDefault(require("../../../abstracts/abstract.models"));
 const moment_1 = __importDefault(require("moment"));
+const abstract_models_1 = __importDefault(require("../../../abstracts/abstract.models"));
 class QuotationModel extends abstract_models_1.default {
     constructor() {
         super(...arguments);
@@ -22,6 +22,30 @@ class QuotationModel extends abstract_models_1.default {
                 .update('quotation_is_confirm', 1)
                 .into('trabill_quotations')
                 .where('quotation_id', quotationId);
+        });
+        // INVOICE WITH QUOTATION
+        this.getInvoiceByCl = (client_id, combine_id) => __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .select('invoice_id', 'invoice_no', 'invoice_category_id as category_id')
+                .from('trabill_invoices')
+                .where('invoice_org_agency', this.org_agency)
+                .havingIn('invoice_category_id', [1, 3, 5])
+                .andWhere('invoice_client_id', client_id)
+                .andWhere('invoice_combined_id', combine_id)
+                .andWhereNot('invoice_is_deleted', 1);
+        });
+        this.getAirTicketBilling = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .select('invoice_id', 'invoice_no', 'passport_name', 'airline_name', 'airticket_pnr', 'airticket_ticket_no', 'airticket_client_price', 'airticket_journey_date', 'airticket_return_date', 'airticket_routes')
+                .from('trabill.view_all_airticket_details')
+                .where('invoice_id', invoice_id);
+        });
+        this.getOtherBilling = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .select('trabill_other_invoices_billing.billing_invoice_id', 'trabill_products.product_name', 'trabill_other_invoices_billing.pax_name', 'trabill_other_invoices_billing.billing_description', 'trabill_other_invoices_billing.billing_quantity', 'trabill_other_invoices_billing.billing_unit_price', 'trabill_other_invoices_billing.billing_subtotal')
+                .from('trabill.trabill_other_invoices_billing')
+                .leftJoin('trabill.trabill_products', 'trabill.trabill_products.product_id', 'trabill.trabill_other_invoices_billing.billing_product_id')
+                .where('trabill_other_invoices_billing.billing_invoice_id', invoice_id);
         });
     }
     products() {

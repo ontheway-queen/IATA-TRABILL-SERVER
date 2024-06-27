@@ -230,6 +230,101 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 .offset(offset);
             return { data, count };
         });
+        // COLLECTION REPORT
+        this.getCollections = (page, size, search, from_date, to_date, account_id, client_id, combined_id, employee_id, user_id) => __awaiter(this, void 0, void 0, function* () {
+            search && search.toLowerCase();
+            const page_number = (page - 1) * size;
+            from_date
+                ? (from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD'))
+                : null;
+            to_date ? (to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD')) : null;
+            const data = yield this.query()
+                .select('receipt_id', 'receipt_received_by', 'account_id', 'client_id', 'combine_id', 'receipt_vouchar_no', 'employee_full_name', 'user_full_name', 'account_name', 'client_name', 'receipt_payment_to', 'receipt_payment_date', 'receipt_total_amount', 'charge_amount', 'acctype_name', 'bank_name', 'receipt_payment_type', 'cheque_status')
+                .from('v_mr')
+                .andWhere((builder) => {
+                builder
+                    .andWhere('receipt_org_agency', this.org_agency)
+                    .modify((event) => {
+                    if (search) {
+                        event
+                            .andWhereRaw(`LOWER(receipt_vouchar_no) LIKE ?`, [
+                            `%${search}%`,
+                        ])
+                            .orWhereRaw(`LOWER(employee_full_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(user_full_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(account_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(receipt_money_receipt_no) LIKE ?`, [
+                            `%${search}%`,
+                        ]);
+                    }
+                    if (from_date && to_date) {
+                        event.andWhereRaw(`DATE_FORMAT(receipt_payment_date,'%Y-%m-%d') BETWEEN ? AND ?`, [from_date, to_date]);
+                    }
+                    if (account_id && account_id !== 'all') {
+                        builder.where('account_id', account_id);
+                    }
+                    if (client_id && client_id !== 'all') {
+                        builder.where('client_id', client_id);
+                    }
+                    if (combined_id && combined_id !== 'all') {
+                        builder.where('combine_id', combined_id);
+                    }
+                    if (employee_id && employee_id !== 'all') {
+                        builder.where('receipt_received_by', employee_id);
+                    }
+                    if (user_id && user_id !== 'all') {
+                        builder.where('receipt_created_by', user_id);
+                    }
+                });
+            })
+                .andWhere('receipt_org_agency', this.org_agency)
+                .andWhereNot('receipt_payment_to', 'AGENT_COMMISSION')
+                .limit(size)
+                .offset(page_number);
+            const [{ row_count }] = yield this.query()
+                .select(this.db.raw(`COUNT(*) AS row_count`))
+                .from('v_mr')
+                .andWhere((builder) => {
+                builder
+                    .andWhere('receipt_org_agency', this.org_agency)
+                    .modify((event) => {
+                    if (search) {
+                        event
+                            .andWhereRaw(`LOWER(receipt_vouchar_no) LIKE ?`, [
+                            `%${search}%`,
+                        ])
+                            .orWhereRaw(`LOWER(employee_full_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(user_full_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(account_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search}%`])
+                            .orWhereRaw(`LOWER(receipt_money_receipt_no) LIKE ?`, [
+                            `%${search}%`,
+                        ]);
+                    }
+                    if (from_date && to_date) {
+                        event.andWhereRaw(`DATE_FORMAT(receipt_payment_date,'%Y-%m-%d') BETWEEN ? AND ?`, [from_date, to_date]);
+                    }
+                    if (account_id && account_id !== 'all') {
+                        builder.where('account_id', account_id);
+                    }
+                    if (client_id && client_id !== 'all') {
+                        builder.where('client_id', client_id);
+                    }
+                    if (combined_id && combined_id !== 'all') {
+                        builder.where('combine_id', combined_id);
+                    }
+                    if (employee_id && employee_id !== 'all') {
+                        builder.where('receipt_received_by', employee_id);
+                    }
+                    if (user_id && user_id !== 'all') {
+                        builder.where('receipt_created_by', user_id);
+                    }
+                });
+            })
+                .andWhere('receipt_org_agency', this.org_agency);
+            return { count: row_count, data };
+        });
     }
     getSalesReport(comb_client, employee_id, from_date, to_date, page, size, user_id) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -364,7 +459,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
             return { count: total_count, data: Object.assign({ result }, total) };
         });
     }
-    getClientSales(client_id, combined_id, from_date, to_date, page, size, user_id) {
+    getClientSales(client_id, combined_id, employee_id, from_date, to_date, page, size, user_id) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
@@ -383,6 +478,9 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 if (combined_id && combined_id !== 'all') {
                     builder.where('invoice_combined_id', combined_id);
                 }
+                if (employee_id && employee_id !== 'all') {
+                    builder.where('invoice_sales_man_id', employee_id);
+                }
             })
                 .andWhere('org_agency_id', this.org_agency));
             const [user] = (yield this.query()
@@ -400,7 +498,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 }
             }
             const sales_data = yield this.query()
-                .select('client_name', 'pax_name', `ticket_no`, 'invoice_no', 'net_total', 'sales_price', 'cost_price', 'invoice_client_id', 'invoice_combined_id', 'sales_date')
+                .select('client_name', 'employee_full_name', 'invoice_sales_man_id', 'pax_name', `ticket_no`, 'invoice_no', 'net_total', 'sales_price', 'cost_price', 'invoice_client_id', 'invoice_combined_id', 'sales_date')
                 .from('view_client_wise_sales')
                 .andWhereRaw('DATE_FORMAT(sales_date,"%Y-%m-%d") BETWEEN ? AND ?', [
                 from_date,
@@ -412,6 +510,9 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 }
                 if (combined_id && combined_id !== 'all') {
                     builder.where('invoice_combined_id', combined_id);
+                }
+                if (employee_id && employee_id !== 'all') {
+                    builder.where('invoice_sales_man_id', employee_id);
                 }
             })
                 .andWhere('org_agency_id', this.org_agency)
@@ -426,7 +527,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
             return Object.assign({ count: total_count, sales_data }, total);
         });
     }
-    getClientCollectionClient(client_id, combined_id, from_date, to_date, page, size, user_id) {
+    getClientCollectionClient(client_id, combined_id, employee_id, from_date, to_date, page, size, user_id) {
         return __awaiter(this, void 0, void 0, function* () {
             from_date = (0, moment_1.default)(new Date(from_date)).format('YYYY-MM-DD');
             to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD');
@@ -445,6 +546,9 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 }
                 if (combined_id && combined_id !== 'all') {
                     builder.where('receipt_combined_id', combined_id);
+                }
+                if (employee_id && employee_id !== 'all') {
+                    builder.where('receipt_received_by', employee_id);
                 }
             })
                 .whereNot('receipt_has_deleted', 1)
@@ -468,19 +572,23 @@ class SalesPurchasesReport extends abstract_models_1.default {
                 }
             }
             const collection_data = yield this.query()
-                .select('receipt_id', 'trxntype_name', 'receipt_vouchar_no', 'receipt_payment_date', 'client_name', 'receipt_total_amount', this.db.raw("concat(user_first_name, ' ', user_last_name) AS user_full_name"), 'receipt_client_id', 'receipt_combined_id')
+                .select('receipt_id', 'trxntype_name', 'receipt_vouchar_no', 'receipt_payment_date', 'client_name', 'receipt_total_amount', 'employee_full_name', this.db.raw("concat(user_first_name, ' ', user_last_name) AS user_full_name"), 'receipt_client_id', 'receipt_combined_id')
                 .from('trabill_money_receipts')
                 .leftJoin('trabill_transaction_type', {
                 trxntype_id: 'receipt_trnxtype_id',
             })
                 .leftJoin('trabill_clients', { client_id: 'receipt_client_id' })
                 .leftJoin('trabill_users', { user_id: 'receipt_created_by' })
+                .leftJoin('trabill_employees', { employee_id: 'receipt_received_by' })
                 .modify((builder) => {
                 if (client_id !== 'all') {
                     builder.where('receipt_client_id', client_id);
                 }
                 if (combined_id && combined_id !== 'all') {
                     builder.where('receipt_combined_id', combined_id);
+                }
+                if (employee_id && employee_id !== 'all') {
+                    builder.where('receipt_received_by', employee_id);
                 }
             })
                 .whereNot('receipt_has_deleted', 1)
@@ -651,10 +759,7 @@ class SalesPurchasesReport extends abstract_models_1.default {
             })
                 .andWhere('view.org_agency_id', this.org_agency)
                 .andWhere('client_due', '>', 0)
-                .groupBy('invoice_sales_man_id'
-            // 'invoice_client_id',
-            // 'invoice_combined_id'
-            )
+                .groupBy('invoice_sales_man_id')
                 .limit(size)
                 .offset(offset);
             return { count: 0, data };

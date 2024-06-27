@@ -502,6 +502,14 @@ class ReportRouter extends AbstractRouter {
      * vendor
      */
     this.routers.get('/vendor-all', this.controllers.getVendorAll);
+
+    /* COLLECTION */
+    this.routers.get('/collection', this.controllers.collectionReport);
+    this.routers.post(
+      '/collection/excel',
+      this.controllers.getCollectionsReportExcel
+    );
+    this.routers.get('/cl-last-balance', this.controllers.clientLastBalance);
   }
 }
 

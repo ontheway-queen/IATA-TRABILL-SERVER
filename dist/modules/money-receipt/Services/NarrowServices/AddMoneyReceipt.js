@@ -76,7 +76,7 @@ class AddMoneyReceipt extends abstract_services_1.default {
                         .insertOnlineTrxnCharge(online_charge_trxn);
                 }
                 const receiptInfo = {
-                    receipt_trnxtype_id: 2,
+                    receipt_trnxtype_id: 31,
                     receipt_vouchar_no: voucher_no,
                     receipt_client_id: client_id,
                     receipt_combined_id: combined_id,

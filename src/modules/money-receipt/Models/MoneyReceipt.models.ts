@@ -332,6 +332,8 @@ class MoneyReceiptModels extends AbstractModels {
                 .andWhereRaw(`LOWER(receipt_vouchar_no) LIKE ?`, [
                   `%${search}%`,
                 ])
+                .orWhereRaw(`LOWER(employee_full_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(user_full_name) LIKE ?`, [`%${search}%`])
                 .orWhereRaw(`LOWER(account_name) LIKE ?`, [`%${search}%`])
                 .orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search}%`])
                 .orWhereRaw(`LOWER(mobile) LIKE ?`, [`%${search}%`])
@@ -367,6 +369,8 @@ class MoneyReceiptModels extends AbstractModels {
                 .andWhereRaw(`LOWER(receipt_vouchar_no) LIKE ?`, [
                   `%${search}%`,
                 ])
+                .orWhereRaw(`LOWER(employee_full_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(user_full_name) LIKE ?`, [`%${search}%`])
                 .orWhereRaw(`LOWER(account_name) LIKE ?`, [`%${search}%`])
                 .orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search}%`])
                 .orWhereRaw(`LOWER(mobile) LIKE ?`, [`%${search}%`])

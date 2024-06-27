@@ -1246,6 +1246,37 @@ class ReportController extends AbstractController {
       }
     }
   );
+  // COLLECTION REPORT
+  public collectionReport = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.collectionReport(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Get Collection Report...');
+      }
+    }
+  );
+  public getCollectionsReportExcel = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      await this.excels.getCollectionsReportExcel(req, res);
+    }
+  );
+  public clientLastBalance = this.assyncWrapper.wrap(
+    this.validator.readReport,
+    async (req: Request, res: Response) => {
+      const data = await this.services.clientLastBalance(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Get Collection Report...');
+      }
+    }
+  );
 }
 
 export default ReportController;

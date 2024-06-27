@@ -165,7 +165,7 @@ class QuotationServices extends AbstractServices {
 
     MoneyReceiptAmountIsValid(money_receipt, invoice_net_total);
 
-    const { invoice_client_id, invoice_combined_id } = await getClientOrCombId(
+    const { invoice_client_id, invoice_combined_id } = getClientOrCombId(
       invoice_combclient_id
     );
 
@@ -426,6 +426,66 @@ class QuotationServices extends AbstractServices {
         message: 'Quotation deleted successfully',
       };
     });
+  };
+
+  public getInvoiceByCl = async (req: Request) => {
+    const { client } = req.query as {
+      client: string;
+    };
+
+    const { client_id, combined_id } = separateCombClientToId(client);
+
+    const conn = this.models.quotationModel(req);
+
+    const data = await conn.getInvoiceByCl(
+      client_id as number,
+      combined_id as number
+    );
+
+    return { success: true, data };
+  };
+
+  public getInvoiceBilling = async (req: Request) => {
+    const body = req.body as { invoices_id: number; category_id: number }[];
+
+    const conn = this.models.quotationModel(req);
+    const iat_conn = this.models.invoiceAirticketModel(req);
+    const common_conn = this.models.CommonInvoiceModel(req);
+
+    const authorized_by = await common_conn.getAuthorizedBySignature();
+
+    let pax_details: any[] = [];
+    let flight_details: any[] = [];
+    let air_ticket_billing: any[] = [];
+    let other_billing: any[] = [];
+
+    for (const item of body) {
+      if (item.category_id === 5) {
+        const otherBilling = await conn.getOtherBilling(item.invoices_id);
+        other_billing = [...other_billing, ...otherBilling];
+      } else {
+        const pax = await common_conn.getInvoiceAirTicketPaxDetails(
+          item.invoices_id
+        );
+        const billing = await conn.getAirTicketBilling(item.invoices_id);
+        const flights = await iat_conn.getAirTicketFlights(item.invoices_id);
+
+        pax_details = [...pax_details, ...pax];
+        flight_details = [...flight_details, ...flights];
+        air_ticket_billing = [...air_ticket_billing, ...billing];
+      }
+    }
+
+    return {
+      success: true,
+      data: {
+        authorized_by,
+        pax_details,
+        flight_details,
+        air_ticket_billing,
+        other_billing,
+      },
+    };
   };
 }
 

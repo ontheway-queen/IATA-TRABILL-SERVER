@@ -335,7 +335,7 @@ class ReportServices extends AbstractServices {
   };
 
   public getClientSales = async (req: Request) => {
-    const { client_id } = req.body;
+    const { client_id, employee_id } = req.body;
     const { from_date, to_date, page, size } = req.query;
 
     const conn = this.models.salesPurchasesReport(req);
@@ -350,6 +350,7 @@ class ReportServices extends AbstractServices {
     const sales = await conn.getClientSales(
       clientId,
       combine_id,
+      employee_id,
       String(from_date),
       String(to_date),
       Number(page) || 1,
@@ -360,6 +361,7 @@ class ReportServices extends AbstractServices {
     const collection = await conn.getClientCollectionClient(
       clientId,
       combine_id,
+      employee_id,
       String(from_date),
       String(to_date),
       Number(page) || 1,
@@ -1431,6 +1433,57 @@ class ReportServices extends AbstractServices {
     );
 
     return { success: true, ...data };
+  };
+
+  // COLLECTION REPORT
+  collectionReport = async (req: Request) => {
+    const conn = this.models.salesPurchasesReport(req);
+
+    const {
+      from_date,
+      to_date,
+      page,
+      size,
+      client,
+      employee_id,
+      user_id,
+      account_id,
+      search,
+    } = req.query as {
+      from_date: string;
+      to_date: string;
+      page: string;
+      size: string;
+      client: string;
+      employee_id: string;
+      user_id: string;
+      account_id: string;
+      search: string;
+    };
+
+    const { client_id, combined_id } = separateCombClientToId(client);
+
+    const data = await conn.getCollections(
+      +page,
+      +size,
+      search,
+      from_date,
+      to_date,
+      account_id,
+      client_id as number,
+      combined_id as number,
+      employee_id,
+      user_id
+    );
+
+    return { success: true, ...data };
+  };
+  clientLastBalance = async (req: Request) => {
+    const conn = this.models.reportModel(req);
+
+    const data = await conn.clientLastBalance();
+
+    return { success: true, data };
   };
 }
 

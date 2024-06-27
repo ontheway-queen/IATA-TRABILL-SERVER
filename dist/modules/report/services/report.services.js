@@ -138,7 +138,7 @@ class ReportServices extends abstract_services_1.default {
             return Object.assign({ success: true }, data);
         });
         this.getClientSales = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { client_id } = req.body;
+            const { client_id, employee_id } = req.body;
             const { from_date, to_date, page, size } = req.query;
             const conn = this.models.salesPurchasesReport(req);
             let separateComb;
@@ -147,8 +147,8 @@ class ReportServices extends abstract_services_1.default {
             }
             const clientId = (separateComb === null || separateComb === void 0 ? void 0 : separateComb.client_id) || 'all';
             const combine_id = (separateComb === null || separateComb === void 0 ? void 0 : separateComb.combined_id) || 'all';
-            const sales = yield conn.getClientSales(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
-            const collection = yield conn.getClientCollectionClient(clientId, combine_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
+            const sales = yield conn.getClientSales(clientId, combine_id, employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
+            const collection = yield conn.getClientCollectionClient(clientId, combine_id, employee_id, String(from_date), String(to_date), Number(page) || 1, Number(size) || 20, req.user_id);
             const count = {
                 collection_count: collection.count,
                 sales_count: sales.count,
@@ -604,6 +604,19 @@ class ReportServices extends abstract_services_1.default {
             const conn = this.models.salesPurchasesReport(req);
             const data = yield conn.salesManWiseClientTotalDue(sales_man_id, Number(page) || 1, Number(size) || 20);
             return Object.assign({ success: true }, data);
+        });
+        // COLLECTION REPORT
+        this.collectionReport = (req) => __awaiter(this, void 0, void 0, function* () {
+            const conn = this.models.salesPurchasesReport(req);
+            const { from_date, to_date, page, size, client, employee_id, user_id, account_id, search, } = req.query;
+            const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(client);
+            const data = yield conn.getCollections(+page, +size, search, from_date, to_date, account_id, client_id, combined_id, employee_id, user_id);
+            return Object.assign({ success: true }, data);
+        });
+        this.clientLastBalance = (req) => __awaiter(this, void 0, void 0, function* () {
+            const conn = this.models.reportModel(req);
+            const data = yield conn.clientLastBalance();
+            return { success: true, data };
         });
     }
 }

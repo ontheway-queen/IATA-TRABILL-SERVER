@@ -114,6 +114,32 @@ class QuotationControllers extends AbstractController {
       }
     }
   );
+
+  public getInvoiceByCl = this.assyncWrapper.wrap(
+    this.validator.quotations,
+    async (req: Request, res: Response) => {
+      const data = await this.services.getInvoiceByCl(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Delete Quotation');
+      }
+    }
+  );
+
+  public getInvoiceBilling = this.assyncWrapper.wrap(
+    this.validator.quotations,
+    async (req: Request, res: Response) => {
+      const data = await this.services.getInvoiceBilling(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error('Delete Quotation');
+      }
+    }
+  );
 }
 
 export default QuotationControllers;

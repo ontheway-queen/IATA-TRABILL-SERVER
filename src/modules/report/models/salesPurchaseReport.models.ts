@@ -353,6 +353,7 @@ class SalesPurchasesReport extends AbstractModels {
   public async getClientSales(
     client_id: idType,
     combined_id: idType,
+    employee_id: idType,
     from_date: string,
     to_date: string,
     page: number,
@@ -378,6 +379,9 @@ class SalesPurchasesReport extends AbstractModels {
         if (combined_id && combined_id !== 'all') {
           builder.where('invoice_combined_id', combined_id);
         }
+        if (employee_id && employee_id !== 'all') {
+          builder.where('invoice_sales_man_id', employee_id);
+        }
       })
       .andWhere('org_agency_id', this.org_agency)) as { count: number }[];
 
@@ -402,6 +406,8 @@ class SalesPurchasesReport extends AbstractModels {
     const sales_data = await this.query()
       .select(
         'client_name',
+        'employee_full_name',
+        'invoice_sales_man_id',
         'pax_name',
         `ticket_no`,
         'invoice_no',
@@ -424,6 +430,9 @@ class SalesPurchasesReport extends AbstractModels {
         }
         if (combined_id && combined_id !== 'all') {
           builder.where('invoice_combined_id', combined_id);
+        }
+        if (employee_id && employee_id !== 'all') {
+          builder.where('invoice_sales_man_id', employee_id);
         }
       })
       .andWhere('org_agency_id', this.org_agency)
@@ -451,6 +460,7 @@ class SalesPurchasesReport extends AbstractModels {
   public async getClientCollectionClient(
     client_id: idType,
     combined_id: idType,
+    employee_id: idType,
     from_date: string,
     to_date: string,
     page: number,
@@ -475,6 +485,9 @@ class SalesPurchasesReport extends AbstractModels {
         }
         if (combined_id && combined_id !== 'all') {
           builder.where('receipt_combined_id', combined_id);
+        }
+        if (employee_id && employee_id !== 'all') {
+          builder.where('receipt_received_by', employee_id);
         }
       })
       .whereNot('receipt_has_deleted', 1)
@@ -510,6 +523,7 @@ class SalesPurchasesReport extends AbstractModels {
         'receipt_payment_date',
         'client_name',
         'receipt_total_amount',
+        'employee_full_name',
         this.db.raw(
           "concat(user_first_name, ' ', user_last_name) AS user_full_name"
         ),
@@ -522,12 +536,16 @@ class SalesPurchasesReport extends AbstractModels {
       })
       .leftJoin('trabill_clients', { client_id: 'receipt_client_id' })
       .leftJoin('trabill_users', { user_id: 'receipt_created_by' })
+      .leftJoin('trabill_employees', { employee_id: 'receipt_received_by' })
       .modify((builder) => {
         if (client_id !== 'all') {
           builder.where('receipt_client_id', client_id);
         }
         if (combined_id && combined_id !== 'all') {
           builder.where('receipt_combined_id', combined_id);
+        }
+        if (employee_id && employee_id !== 'all') {
+          builder.where('receipt_received_by', employee_id);
         }
       })
       .whereNot('receipt_has_deleted', 1)
@@ -982,17 +1000,148 @@ class SalesPurchasesReport extends AbstractModels {
       })
       .andWhere('view.org_agency_id', this.org_agency)
       .andWhere('client_due', '>', 0)
-      .groupBy(
-        'invoice_sales_man_id'
-        // 'invoice_client_id',
-        // 'invoice_combined_id'
-      )
+      .groupBy('invoice_sales_man_id')
 
       .limit(size)
       .offset(offset);
 
     return { count: 0, data };
   }
+
+  // COLLECTION REPORT
+  public getCollections = async (
+    page: number,
+    size: number,
+    search: string,
+    from_date: string,
+    to_date: string,
+    account_id: idType,
+    client_id: idType,
+    combined_id: idType,
+    employee_id: idType,
+    user_id: idType
+  ) => {
+    search && search.toLowerCase();
+    const page_number = (page - 1) * size;
+    from_date
+      ? (from_date = moment(new Date(from_date)).format('YYYY-MM-DD'))
+      : null;
+    to_date ? (to_date = moment(new Date(to_date)).format('YYYY-MM-DD')) : null;
+
+    const data = await this.query()
+      .select(
+        'receipt_id',
+        'receipt_received_by',
+        'account_id',
+        'client_id',
+        'combine_id',
+        'receipt_vouchar_no',
+        'employee_full_name',
+        'user_full_name',
+        'account_name',
+        'client_name',
+        'receipt_payment_to',
+        'receipt_payment_date',
+        'receipt_total_amount',
+        'charge_amount',
+        'acctype_name',
+        'bank_name',
+        'receipt_payment_type',
+        'cheque_status'
+      )
+      .from('v_mr')
+      .andWhere((builder) => {
+        builder
+          .andWhere('receipt_org_agency', this.org_agency)
+          .modify((event) => {
+            if (search) {
+              event
+                .andWhereRaw(`LOWER(receipt_vouchar_no) LIKE ?`, [
+                  `%${search}%`,
+                ])
+                .orWhereRaw(`LOWER(employee_full_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(user_full_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(account_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(receipt_money_receipt_no) LIKE ?`, [
+                  `%${search}%`,
+                ]);
+            }
+            if (from_date && to_date) {
+              event.andWhereRaw(
+                `DATE_FORMAT(receipt_payment_date,'%Y-%m-%d') BETWEEN ? AND ?`,
+                [from_date, to_date]
+              );
+            }
+            if (account_id && account_id !== 'all') {
+              builder.where('account_id', account_id);
+            }
+            if (client_id && client_id !== 'all') {
+              builder.where('client_id', client_id);
+            }
+            if (combined_id && combined_id !== 'all') {
+              builder.where('combine_id', combined_id);
+            }
+            if (employee_id && employee_id !== 'all') {
+              builder.where('receipt_received_by', employee_id);
+            }
+            if (user_id && user_id !== 'all') {
+              builder.where('receipt_created_by', user_id);
+            }
+          });
+      })
+      .andWhere('receipt_org_agency', this.org_agency)
+      .andWhereNot('receipt_payment_to', 'AGENT_COMMISSION')
+      .limit(size)
+      .offset(page_number);
+
+    const [{ row_count }] = await this.query()
+      .select(this.db.raw(`COUNT(*) AS row_count`))
+      .from('v_mr')
+      .andWhere((builder) => {
+        builder
+          .andWhere('receipt_org_agency', this.org_agency)
+          .modify((event) => {
+            if (search) {
+              event
+                .andWhereRaw(`LOWER(receipt_vouchar_no) LIKE ?`, [
+                  `%${search}%`,
+                ])
+                .orWhereRaw(`LOWER(employee_full_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(user_full_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(account_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(client_name) LIKE ?`, [`%${search}%`])
+                .orWhereRaw(`LOWER(receipt_money_receipt_no) LIKE ?`, [
+                  `%${search}%`,
+                ]);
+            }
+            if (from_date && to_date) {
+              event.andWhereRaw(
+                `DATE_FORMAT(receipt_payment_date,'%Y-%m-%d') BETWEEN ? AND ?`,
+                [from_date, to_date]
+              );
+            }
+            if (account_id && account_id !== 'all') {
+              builder.where('account_id', account_id);
+            }
+            if (client_id && client_id !== 'all') {
+              builder.where('client_id', client_id);
+            }
+            if (combined_id && combined_id !== 'all') {
+              builder.where('combine_id', combined_id);
+            }
+            if (employee_id && employee_id !== 'all') {
+              builder.where('receipt_received_by', employee_id);
+            }
+            if (user_id && user_id !== 'all') {
+              builder.where('receipt_created_by', user_id);
+            }
+          });
+      })
+      .andWhere('receipt_org_agency', this.org_agency);
+
+    return { count: row_count, data };
+  };
 }
 
 export default SalesPurchasesReport;

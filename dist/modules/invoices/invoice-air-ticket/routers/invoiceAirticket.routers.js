@@ -44,6 +44,7 @@ class InvoiceAirTicketRouter extends abstract_routers_1.default {
             .get(this.controllers.getInvoiceInfo)
             .delete(this.controllers.deleteInvoiceInfo);
         this.routers.post('/info', this.controllers.addInvoiceInfo);
+        this.routers.post('/invoice-iur', this.controllers.createInvoiceIUR);
     }
 }
 exports.default = InvoiceAirTicketRouter;

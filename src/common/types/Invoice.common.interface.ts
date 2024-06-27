@@ -38,7 +38,7 @@ export interface IExistingInvoiceEdit {
 }
 
 export interface IInvoiceInfoDb {
-  invoice_note: string;
+  invoice_note: string | null;
   invoice_no: string;
   invoice_sales_date: string;
   invoice_due_date?: string;

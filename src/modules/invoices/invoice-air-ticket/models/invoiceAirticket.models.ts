@@ -9,6 +9,7 @@ import {
   IFakeInvoiceInfoItems,
   IFakeInvoicePassport,
   IFlightDetailsDb,
+  IPaxPassportIURDetails,
   ITaxesCommissionDB,
 } from '../types/invoiceAirticket.interface';
 
@@ -908,6 +909,34 @@ class InvoiceAirticketModel extends AbstractModels {
       .andWhere('tip_invoice_id', invoice_id);
 
     return { ...data, infos, passports };
+  }
+
+  public async getRouteByIataCode(route: string) {
+    const [{ airline_id }] = (await this.query()
+      .select('airline_id')
+      .from('trabill_airports')
+      .where('airline_iata_code', route)
+      .andWhereNot('airline_is_deleted', 1)) as { airline_id: number }[];
+
+    return airline_id;
+  }
+
+  public async getAirlineByCode(code: string) {
+    const [{ airline_id }] = (await this.query()
+      .select('airline_id')
+      .from('trabill_airlines')
+      .where('airline_code', code)) as { airline_id: number }[];
+
+    return airline_id;
+  }
+
+  public async getEmployeeBySign(sign: string) {
+    const [{ employee_id }] = (await this.query()
+      .select('employee_id')
+      .from('trabill_employees')
+      .where('employee_creation_sign', sign)) as { employee_id: number }[];
+
+    return employee_id;
   }
 }
 

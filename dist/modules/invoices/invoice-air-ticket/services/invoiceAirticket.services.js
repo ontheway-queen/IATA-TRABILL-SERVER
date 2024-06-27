@@ -22,6 +22,7 @@ const sendMail_services_1 = __importDefault(require("./narrowServices/sendMail.s
 const void_invoice_1 = __importDefault(require("./narrowServices/void_invoice"));
 const add_invoice_pnr_service_1 = __importDefault(require("./pnrServices/add_invoice_pnr.service"));
 const pnr_details_service_1 = __importDefault(require("./pnrServices/pnr_details.service"));
+const createInvoiceIUR_1 = __importDefault(require("./narrowServices/createInvoiceIUR"));
 class InvoiceAirticketService extends abstract_services_1.default {
     constructor() {
         super();
@@ -178,6 +179,7 @@ class InvoiceAirticketService extends abstract_services_1.default {
         this.sendEmail = new sendMail_services_1.default().sendEmail;
         this.addInvoiceInfo = new addInvoiceInfo_services_1.default().add;
         this.deleteInvoiceInfo = new addInvoiceInfo_services_1.default().delete;
+        this.createInvoiceIUR = new createInvoiceIUR_1.default().create;
     }
 }
 exports.default = InvoiceAirticketService;

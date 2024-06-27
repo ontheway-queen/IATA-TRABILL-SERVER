@@ -10,6 +10,7 @@ import SendMail from './narrowServices/sendMail.services';
 import VoidInvoice from './narrowServices/void_invoice';
 import AddInvoiceWithPnr from './pnrServices/add_invoice_pnr.service';
 import PnrDetailsService from './pnrServices/pnr_details.service';
+import createInvoiceIUR from './narrowServices/createInvoiceIUR';
 
 class InvoiceAirticketService extends AbstractServices {
   constructor() {
@@ -260,6 +261,8 @@ class InvoiceAirticketService extends AbstractServices {
 
   public addInvoiceInfo = new AddInvoiceInfo().add;
   public deleteInvoiceInfo = new AddInvoiceInfo().delete;
+
+  public createInvoiceIUR = new createInvoiceIUR().create;
 }
 
 export default InvoiceAirticketService;

@@ -514,6 +514,34 @@ class InvoiceAirticketModel extends abstract_models_1.default {
             return Object.assign(Object.assign({}, data), { infos, passports });
         });
     }
+    getRouteByIataCode(route) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [{ airline_id }] = (yield this.query()
+                .select('airline_id')
+                .from('trabill_airports')
+                .where('airline_iata_code', route)
+                .andWhereNot('airline_is_deleted', 1));
+            return airline_id;
+        });
+    }
+    getAirlineByCode(code) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [{ airline_id }] = (yield this.query()
+                .select('airline_id')
+                .from('trabill_airlines')
+                .where('airline_code', code));
+            return airline_id;
+        });
+    }
+    getEmployeeBySign(sign) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [{ employee_id }] = (yield this.query()
+                .select('employee_id')
+                .from('trabill_employees')
+                .where('employee_creation_sign', sign));
+            return employee_id;
+        });
+    }
 }
 exports.default = InvoiceAirticketModel;
 //# sourceMappingURL=invoiceAirticket.models.js.map

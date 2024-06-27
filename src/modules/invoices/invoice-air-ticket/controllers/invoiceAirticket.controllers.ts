@@ -295,6 +295,17 @@ class InvoiceAirticketController extends AbstractController {
       }
     }
   );
+
+  public createInvoiceIUR = this.assyncWrapper.wrap(
+    [],
+    async (req: Request, res: Response) => {
+      const data = await this.services.createInvoiceIUR(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      }
+    }
+  );
 }
 
 export default InvoiceAirticketController;

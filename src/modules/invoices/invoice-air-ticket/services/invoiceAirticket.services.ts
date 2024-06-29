@@ -6,11 +6,11 @@ import AddInvoiceInfo from './narrowServices/addInvoiceInfo.services';
 import AirTicketTaxRefund from './narrowServices/air_ticket_tax_refund';
 import DeleteAirTicket from './narrowServices/deleteAirTicket';
 import EditInvoiceAirticket from './narrowServices/editInvoiceAirticket';
+import createInvoiceIUR from './narrowServices/importIur';
 import SendMail from './narrowServices/sendMail.services';
 import VoidInvoice from './narrowServices/void_invoice';
 import AddInvoiceWithPnr from './pnrServices/add_invoice_pnr.service';
 import PnrDetailsService from './pnrServices/pnr_details.service';
-import createInvoiceIUR from './narrowServices/createInvoiceIUR';
 
 class InvoiceAirticketService extends AbstractServices {
   constructor() {
@@ -68,12 +68,13 @@ class InvoiceAirticketService extends AbstractServices {
   };
 
   // VIEW INVOICE AIR TICKET BY:ID
-  public viewCommonInvoiceDetails = async (req: Request) => {
+  public viewInvoice = async (req: Request) => {
     const invoice_id = req.params.invoice_id;
     const conn = this.models.invoiceAirticketModel(req);
     const common_conn = this.models.CommonInvoiceModel(req);
 
-    const data = await common_conn.getViewInvoiceInfo(invoice_id);
+    const invoice_summary = await common_conn.getViewInvoiceInfo(invoice_id);
+
     const prepared_by = await common_conn.getInvoicePreparedBy(invoice_id);
     const authorized_by = await common_conn.getAuthorizedBySignature();
 
@@ -83,31 +84,41 @@ class InvoiceAirticketService extends AbstractServices {
 
     const flights = await conn.getAirTicketFlights(invoice_id);
 
-    const airticket_information = await conn.getViewAirticketItems(invoice_id);
-    const taxes_commission = await conn.selectAirTicketAirlineCommissions(
-      invoice_id
-    );
-    const reissued = await common_conn.getReissuedItemByInvId(invoice_id);
-
-    const refunds = await this.models
-      .refundModel(req)
-      .getAirticketRefundItems(invoice_id);
-
-    const tax_refund = await conn.viewAirTicketTaxRefund(invoice_id);
+    const billing_info = await conn.getAirTicketBilling(invoice_id);
 
     return {
       success: true,
       data: {
-        ...data,
+        ...invoice_summary,
+        billing_info,
         authorized_by,
         prepared_by,
-        reissued,
-        refunds,
         pax_details,
         flights,
+      },
+    };
+  };
+
+  public viewInvoiceDetails = async (req: Request) => {
+    const invoice_id = req.params.invoice_id;
+    const conn = this.models.invoiceAirticketModel(req);
+    const common_conn = this.models.CommonInvoiceModel(req);
+
+    const airticket_information = await conn.getViewAirticketItems(invoice_id);
+
+    const reissued = await common_conn.getReissuedItemByInvId(invoice_id);
+    const tax_refund = await conn.viewAirTicketTaxRefund(invoice_id);
+    const refunds = await this.models
+      .refundModel(req)
+      .getAirticketRefundItems(invoice_id);
+
+    return {
+      success: true,
+      data: {
+        reissued,
+        refunds,
         airticket_information,
         tax_refund,
-        taxes_commission,
       },
     };
   };
@@ -133,7 +144,7 @@ class InvoiceAirticketService extends AbstractServices {
     };
   };
 
-  public getInvoiceAcitivity = async (req: Request) => {
+  public getInvoiceActivity = async (req: Request) => {
     const id = Number(req.params.id);
 
     const data = await this.models

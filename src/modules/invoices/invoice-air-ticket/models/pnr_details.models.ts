@@ -30,6 +30,17 @@ class PnrDetailsModels extends AbstractModels {
     return null;
   };
 
+  getIataVendor = async () => {
+    const [{ vendor_id }] = await this.query()
+      .select('vendor_id')
+      .from('trabill_vendors')
+      .where('vendor_type', 'IATA')
+      .andWhere('vendor_org_agency', this.org_agency)
+      .andWhereNot('vendor_is_deleted', 1);
+
+    return vendor_id;
+  };
+
   public async airportIdByCode(airportCode: string) {
     const [data] = await this.query()
       .select('airline_id')

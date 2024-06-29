@@ -1,0 +1,1 @@
+ALTER TABLE trabill_clients ADD INDEX (client_id, client_entry_id);

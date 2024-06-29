@@ -62,6 +62,7 @@ class QuotationServices extends abstract_services_1.default {
                 const conn = this.models.quotationModel(req, trx);
                 const { invoice_client_id, invoice_combined_id } = (0, invoice_helpers_1.getClientOrCombId)(client_id);
                 const quotationInfo = {
+                    quotation_type: 'QUOTATION',
                     quotation_client_id: invoice_client_id,
                     quotation_combined_id: invoice_combined_id,
                     quotation_no: q_number,
@@ -211,6 +212,7 @@ class QuotationServices extends abstract_services_1.default {
                 const conn = this.models.quotationModel(req, trx);
                 const { invoice_client_id, invoice_combined_id } = (0, invoice_helpers_1.getClientOrCombId)(client_id);
                 const quotationInfo = {
+                    quotation_type: 'QUOTATION',
                     quotation_client_id: invoice_client_id,
                     quotation_combined_id: invoice_combined_id,
                     quotation_no: q_number,
@@ -259,11 +261,12 @@ class QuotationServices extends abstract_services_1.default {
         });
         this.getInvoiceBilling = (req) => __awaiter(this, void 0, void 0, function* () {
             const body = req.body;
+            const invoice_ids = body.map((item) => item.invoices_id);
             const conn = this.models.quotationModel(req);
             const iat_conn = this.models.invoiceAirticketModel(req);
             const common_conn = this.models.CommonInvoiceModel(req);
             const authorized_by = yield common_conn.getAuthorizedBySignature();
-            let pax_details = [];
+            const prepared_by = yield common_conn.getPreparedBy(req.user_id);
             let flight_details = [];
             let air_ticket_billing = [];
             let other_billing = [];
@@ -273,23 +276,85 @@ class QuotationServices extends abstract_services_1.default {
                     other_billing = [...other_billing, ...otherBilling];
                 }
                 else {
-                    const pax = yield common_conn.getInvoiceAirTicketPaxDetails(item.invoices_id);
                     const billing = yield conn.getAirTicketBilling(item.invoices_id);
                     const flights = yield iat_conn.getAirTicketFlights(item.invoices_id);
-                    pax_details = [...pax_details, ...pax];
                     flight_details = [...flight_details, ...flights];
                     air_ticket_billing = [...air_ticket_billing, ...billing];
                 }
             }
+            const invoices_total = yield conn.getInvoicesTotal(invoice_ids);
+            const payment_total = yield conn.getInvoicePayment(invoice_ids);
             return {
                 success: true,
-                data: {
-                    authorized_by,
-                    pax_details,
+                data: Object.assign(Object.assign(Object.assign({}, invoices_total), payment_total), { authorized_by,
+                    prepared_by,
                     flight_details,
                     air_ticket_billing,
-                    other_billing,
-                },
+                    other_billing }),
+            };
+        });
+        this.addAccuMulatedInvoice = (req) => __awaiter(this, void 0, void 0, function* () {
+            const body = req.body;
+            const conn = this.models.quotationModel(req);
+            const quotationInfo = {
+                quotation_type: 'ACCUMULATE',
+                quotation_no: body.q_number,
+                quotation_date: body.sales_date,
+                quotation_discount_total: body.discount,
+                quotation_created_by: req.user_id,
+                quotation_inv_payment: body.payment,
+            };
+            const quotationId = yield conn.insertQuotation(quotationInfo);
+            const quotation_billing = body.invoices.map((item) => {
+                return {
+                    billing_quotation_id: quotationId,
+                    billing_invoice_id: item.invoices_id,
+                    billing_category_id: item.category_id,
+                };
+            });
+            yield conn.insertAccumulatedBilling(quotation_billing);
+            const message = `GENERATE ACCUMULATED INVOICE, VOUCHER ${body.q_number}`;
+            yield this.insertAudit(req, 'create', message, req.user_id, 'QUOTATION');
+            return {
+                success: true,
+                message: 'Accumulated Invoice Created Successfully!',
+                data: { id: quotationId },
+            };
+        });
+        this.viewAccuMulatedInvoice = (req) => __awaiter(this, void 0, void 0, function* () {
+            const quotation_id = req.params.id;
+            const conn = this.models.quotationModel(req);
+            const iat_conn = this.models.invoiceAirticketModel(req);
+            const common_conn = this.models.CommonInvoiceModel(req);
+            const data = yield conn.selectQuotation(quotation_id);
+            const body = yield conn.getBilling(quotation_id);
+            const invoice_ids = body.map((item) => item.invoices_id);
+            const authorized_by = yield common_conn.getAuthorizedBySignature();
+            const prepared_by = yield common_conn.getPreparedBy(data.user);
+            let flight_details = [];
+            let air_ticket_billing = [];
+            let other_billing = [];
+            for (const item of body) {
+                if (item.category_id === 5) {
+                    const otherBilling = yield conn.getOtherBilling(item.invoices_id);
+                    other_billing = [...other_billing, ...otherBilling];
+                }
+                else {
+                    const billing = yield conn.getAirTicketBilling(item.invoices_id);
+                    const flights = yield iat_conn.getAirTicketFlights(item.invoices_id);
+                    flight_details = [...flight_details, ...flights];
+                    air_ticket_billing = [...air_ticket_billing, ...billing];
+                }
+            }
+            const invoices_total = yield conn.getInvoicesTotal(invoice_ids);
+            const payment_total = yield conn.getInvoicePayment(invoice_ids);
+            return {
+                success: true,
+                data: Object.assign(Object.assign(Object.assign(Object.assign({}, data), invoices_total), payment_total), { authorized_by,
+                    prepared_by,
+                    flight_details,
+                    air_ticket_billing,
+                    other_billing }),
             };
         });
     }

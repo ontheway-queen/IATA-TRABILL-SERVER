@@ -33,6 +33,27 @@ class QuotationModel extends AbstractModels {
     return quotation;
   }
 
+  public async selectQuotation(quotation_id: idType) {
+    const [quotation] = await this.query()
+      .from('trabill_quotations')
+      .select(
+        'quotation_no as q_number',
+        'quotation_date as sales_date',
+        'quotation_discount_total as discount',
+        'quotation_created_by as user',
+        'quotation_inv_payment as payment'
+      )
+      .where('quotation_id', quotation_id);
+
+    return quotation as {
+      q_number: string;
+      sales_date: string;
+      discount: number;
+      payment: number;
+      user: number;
+    };
+  }
+
   public async deleteQuotation(
     quotation_id: number,
     quotation_deleted_by: idType
@@ -51,6 +72,15 @@ class QuotationModel extends AbstractModels {
       .into('trabill_quotations_billing_infos');
 
     return billInfo[0];
+  }
+  public async insertAccumulatedBilling(
+    data: {
+      billing_quotation_id: number;
+      billing_invoice_id: number;
+      billing_category_id: number;
+    }[]
+  ) {
+    await this.query().insert(data).into('trabill_quotations_billing_infos');
   }
 
   public async deleteBillInfo(
@@ -89,6 +119,7 @@ class QuotationModel extends AbstractModels {
           `COALESCE(client_mobile, company_contact_no, combine_mobile) as client_mobile`
         ),
         'quotation_no',
+        'quotation_type',
         'quotation_net_total',
         'quotation_discount_total',
         'quotation_date',
@@ -291,6 +322,21 @@ class QuotationModel extends AbstractModels {
 
     return billInfos;
   }
+  public async getBilling(quotation_id: idType) {
+    const billInfos = await this.query()
+      .select(
+        'billing_invoice_id as invoices_id',
+        'billing_category_id as category_id'
+      )
+      .from('trabill_quotations_billing_infos')
+      .where('billing_quotation_id', quotation_id)
+      .where('billing_is_deleted', 0);
+
+    return billInfos as {
+      invoices_id: number;
+      category_id: number;
+    }[];
+  }
 
   // INVOICE WITH QUOTATION
   getInvoiceByCl = async (client_id: idType, combine_id: idType) => {
@@ -340,6 +386,31 @@ class QuotationModel extends AbstractModels {
       )
 
       .where('trabill_other_invoices_billing.billing_invoice_id', invoice_id);
+  };
+  getInvoicesTotal = async (invoice_id: number[]) => {
+    const [data] = await this.query()
+      .select(
+        this.db.raw('sum(invoice_sub_total) as total_sub_total'),
+        this.db.raw('sum(invoice_discount) as total_discount'),
+        this.db.raw('sum(invoice_net_total) as total_net_total')
+      )
+      .from('trabill_invoices')
+      .leftJoin('trabill_invoices_extra_amounts', {
+        invoice_id: 'extra_amount_invoice_id',
+      })
+      .whereIn('invoice_id', invoice_id)
+      .andWhereNot('invoice_is_deleted', 1);
+
+    return data;
+  };
+  getInvoicePayment = async (invoice_id: number[]) => {
+    const [data] = await this.query()
+      .select(this.db.raw('sum(invclientpayment_amount) as total_payment'))
+      .from('trabill_invoice_client_payments')
+      .whereIn('invclientpayment_invoice_id', invoice_id)
+      .andWhereNot('invclientpayment_is_deleted', 1);
+
+    return data;
   };
 }
 

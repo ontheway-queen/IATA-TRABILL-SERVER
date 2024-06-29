@@ -29,6 +29,15 @@ class PnrDetailsModels extends abstract_models_1.default {
             }
             return null;
         });
+        this.getIataVendor = () => __awaiter(this, void 0, void 0, function* () {
+            const [{ vendor_id }] = yield this.query()
+                .select('vendor_id')
+                .from('trabill_vendors')
+                .where('vendor_type', 'IATA')
+                .andWhere('vendor_org_agency', this.org_agency)
+                .andWhereNot('vendor_is_deleted', 1);
+            return vendor_id;
+        });
     }
     getOtaInfo(agency_id) {
         return __awaiter(this, void 0, void 0, function* () {

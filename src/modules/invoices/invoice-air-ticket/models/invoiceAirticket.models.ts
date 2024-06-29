@@ -9,7 +9,6 @@ import {
   IFakeInvoiceInfoItems,
   IFakeInvoicePassport,
   IFlightDetailsDb,
-  IPaxPassportIURDetails,
   ITaxesCommissionDB,
 } from '../types/invoiceAirticket.interface';
 
@@ -216,16 +215,56 @@ class InvoiceAirticketModel extends AbstractModels {
 
   public getViewAirticketItems = async (invoiceId: idType) => {
     return await this.query()
-      .select(
-        'view_airticket_details.*',
-        'client_total_tax_refund',
-        'vendor_total_tax_refund',
-        'created_at'
-      )
+      .select('view_airticket_details.*')
       .from('view_airticket_details')
-      .leftJoin('trabill_airticket_tax_refund', {
-        refund_invoice_id: 'airticket_invoice_id',
+      .where('airticket_invoice_id', invoiceId);
+  };
+
+  public getAirTicketBilling = async (invoiceId: idType) => {
+    return await this.query()
+      .select(
+        'airticket_id',
+        'airticket_ticket_no',
+        'passport_passport_no as passport_no',
+        this.db.raw(
+          'COALESCE(p_passport_name, passport_name) as passport_name'
+        ),
+        this.db.raw(
+          'COALESCE(p_passport_type, passport_person_type) as passport_type'
+        ),
+        this.db.raw(
+          'COALESCE(p_mobile_no, passport_mobile_no) as passport_mobile'
+        ),
+        this.db.raw('COALESCE(p_email, passport_email) as passport_email'),
+        'airticket_pnr',
+        'airticket_classes',
+        'airticket_ticket_type',
+        'airticket_routes',
+        'airticket_journey_date',
+        'airticket_return_date',
+        'airticket_gross_fare',
+        'airticket_extra_fee',
+        'airticket_client_price',
+        'airticket_is_refund',
+        'airticket_is_reissued',
+        'airticket_is_void'
+      )
+      .from('trabill_invoice_airticket_items')
+      .leftJoin('view_airticket_routes', function () {
+        this.on('airoute_invoice_id', '=', 'airticket_invoice_id').andOn(
+          'airoute_airticket_id',
+          '=',
+          'airticket_id'
+        );
       })
+      .leftJoin('trabill_invoice_airticket_pax', function () {
+        this.on('p_invoice_id', '=', 'airticket_invoice_id').andOn(
+          'p_airticket_id',
+          '=',
+          'airticket_id'
+        );
+      })
+      .leftJoin('trabill_passport_details', 'passport_id', 'p_passport_id')
       .where('airticket_invoice_id', invoiceId);
   };
 

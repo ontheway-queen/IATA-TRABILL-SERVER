@@ -111,8 +111,13 @@ class PnrDetailsService extends AbstractServices {
               flightsId?.includes(item.itemId)
             );
 
-            const { flight_details, airticket_route_or_sector, route_sectors } =
-              await formatFlightDetailsRoute(flights, conn);
+            const {
+              flight_details,
+              airticket_route_or_sector,
+              route_sectors,
+              airticket_journey_date,
+              airticket_return_date,
+            } = await formatFlightDetailsRoute(flights, conn);
 
             const taxBreakdown =
               pnrResponse.fares?.find((item) => {
@@ -164,8 +169,6 @@ class PnrDetailsService extends AbstractServices {
             const airticket_purchase_price =
               Number(ticket.payment.total || 0) - airticket_net_commssion;
 
-            const airticket_segment = pnrResponse.allSegments.length;
-
             const airticket_commission_percent = numRound(
               (numRound(baseFareCommission) /
                 numRound(ticket.payment.subtotal)) *
@@ -176,10 +179,10 @@ class PnrDetailsService extends AbstractServices {
               flights[0].airlineCode
             );
 
-            const airticket_return_date =
-              airticket_segment > 1
-                ? pnrResponse.allSegments[airticket_segment - 1].endDate
-                : undefined;
+            // const airticket_return_date =
+            //   airticket_segment > 1
+            //     ? pnrResponse.allSegments[airticket_segment - 1].endDate
+            //     : undefined;
 
             const taxes_commission = taxesCommission?.map((item) => {
               return {
@@ -206,9 +209,10 @@ class PnrDetailsService extends AbstractServices {
               airticket_pnr: pnrResponse.bookingId,
               airticket_gds_id: 'Sabre',
               airticket_tax: ticket.payment.taxes,
-              airticket_segment,
+              airticket_segment: flights.length,
               airticket_issue_date: ticket.date,
-              airticket_journey_date: pnrResponse.startDate,
+              // airticket_journey_date: pnrResponse.startDate,
+              airticket_journey_date,
               airticket_return_date,
               airticket_classes: flights[0].cabinTypeName,
 

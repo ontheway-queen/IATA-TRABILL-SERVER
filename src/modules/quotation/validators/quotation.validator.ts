@@ -11,6 +11,29 @@ class QuotationValidator extends AbstractValidator {
     this.permissions.check(this.resources.quotation, 'delete'),
   ];
 
+  accumulateInv = [
+    this.permissions.check(this.resources.quotation, 'create'),
+
+    check('q_number').isString().withMessage('q_number must be a string'),
+    check('sales_date')
+      .isISO8601()
+      .toDate()
+      .withMessage('sales_date must be a valid date in ISO8601 format'),
+    check('discount')
+      .isFloat({ min: 0 })
+      .withMessage('discount must be a positive number'),
+    check('payment')
+      .isFloat({ min: 0 })
+      .withMessage('payment must be a positive number'),
+    check('invoices').isArray().withMessage('invoices must be an array'),
+    check('invoices.*.invoices_id')
+      .isInt({ min: 0 })
+      .withMessage('invoices_id must be a positive integer'),
+    check('invoices.*.category_id')
+      .isInt({ min: 0 })
+      .withMessage('category_id must be a positive integer'),
+  ];
+
   /**
    * validator for `create quotation`
    */

@@ -306,7 +306,7 @@ class ReIssueAirticket extends abstract_models_1.default {
     getReissueAirticketInfo(id) {
         return __awaiter(this, void 0, void 0, function* () {
             return yield this.query()
-                .select('airticket_id', 'airticket_penalties', 'airticket_classes', 'airticket_commission_percent', 'airticket_fare_difference', 'airticket_id', 'airticket_ticket_no', 'airticket_pnr', 'airticket_client_price', 'airticket_extra_fee', 'airticket_purchase_price', 'airticket_profit', 'airticket_journey_date', 'airticket_return_date', 'airticket_issue_date', 'airticket_sales_date', 'airticket_existing_invoiceid', 'airticket_existing_airticket_id', 'airticket_after_reissue_client_price', 'airticket_after_reissue_purchase_price', 'airticket_after_reissue_profit', 'airticket_after_reissue_taxes', 'airticket_ait', 'airticket_tax', this.db.raw('COALESCE(vendor_name, combine_name) vendor_name'), 'airline_name', 'passport_name', 'view_airticket_routes.airticket_routes')
+                .select('airticket_id', 'airticket_penalties', 'airticket_classes', 'airticket_commission_percent', 'airticket_fare_difference', 'airticket_ticket_no', 'airticket_pnr', 'airticket_client_price', 'airticket_extra_fee', 'airticket_purchase_price', 'airticket_profit', 'airticket_journey_date', 'airticket_return_date', 'airticket_issue_date', 'airticket_sales_date', 'airticket_existing_invoiceid', 'airticket_existing_airticket_id', 'airticket_after_reissue_client_price', 'airticket_after_reissue_purchase_price', 'airticket_after_reissue_profit', 'airticket_after_reissue_taxes', 'airticket_ait', 'airticket_tax', this.db.raw('COALESCE(vendor_name, combine_name) vendor_name'), 'airline_name', 'passport_name', 'view_airticket_routes.airticket_routes')
                 .from('trabill_invoice_reissue_airticket_items as airticketitem')
                 .where('airticket_invoice_id', id)
                 .andWhereNot('airticket_is_deleted', 1)
@@ -321,6 +321,15 @@ class ReIssueAirticket extends abstract_models_1.default {
                 .leftJoin('view_airticket_routes', function () {
                 this.on('view_airticket_routes.airoute_invoice_id', '=', 'airticketitem.airticket_invoice_id').andOn('view_airticket_routes.airoute_airticket_id', '=', 'airticketitem.airticket_id');
             });
+        });
+    }
+    getExistingTicket(existing_invoice_id, existing_ticket_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield this.query()
+                .select('invoice_id', 'invoice_no', 'airline_name', 'airticket_pnr', 'airticket_ticket_no', 'airticket_client_price', 'airticket_purchase_price', 'airticket_journey_date', 'airticket_return_date', 'airticket_routes', 'passport_name', 'sales_date')
+                .from('view_all_airticket_details')
+                .where('invoice_id', existing_invoice_id)
+                .andWhere('airticket_id', existing_ticket_id);
         });
     }
     getExistingClientAirticket(client, table_name) {

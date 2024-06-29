@@ -445,7 +445,7 @@ class CommonInvoiceModel extends AbstractModels {
       .leftJoin('trabill_passport_details', {
         p_passport_id: 'passport_id',
       })
-      .groupBy('passport_id');
+      .groupBy('passport_id', 'p_passport_name');
   };
 
   public async getViewInvoiceInfo(invoiceId: idType) {
@@ -891,6 +891,22 @@ class CommonInvoiceModel extends AbstractModels {
       .from('trabill_invoices')
       .leftJoin('trabill_signature_info', { sig_user_id: 'invoice_created_by' })
       .where('invoice_id', invoice_id)
+      .andWhere('sig_type', 'PREPARE');
+
+    return data;
+  };
+
+  getPreparedBy = async (user_id: idType) => {
+    const [data] = await this.query()
+      .select(
+        'sig_signature',
+        'sig_type',
+        'sig_name_title',
+        'sig_position',
+        'sig_phone_no'
+      )
+      .from('trabill_signature_info')
+      .where('sig_user_id', user_id)
       .andWhere('sig_type', 'PREPARE');
 
     return data;

@@ -61,6 +61,11 @@ class ReissueAirticket extends AbstractServices {
       invoice_id
     );
 
+    const existing_ticket = await conn.getExistingTicket(
+      airticket_information[0].airticket_existing_invoiceid,
+      airticket_information[0].airticket_existing_airticket_id
+    );
+
     const flights = await conn.getFlightDetails(invoice_id);
 
     const reissued = await common_conn.getReissuedItemByInvId(invoice_id);
@@ -76,6 +81,7 @@ class ReissueAirticket extends AbstractServices {
         airticket_information,
         flights,
         pax_details,
+        existing_ticket,
       },
     };
   };

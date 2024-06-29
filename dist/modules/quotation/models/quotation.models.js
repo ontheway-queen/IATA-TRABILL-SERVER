@@ -47,6 +47,25 @@ class QuotationModel extends abstract_models_1.default {
                 .leftJoin('trabill.trabill_products', 'trabill.trabill_products.product_id', 'trabill.trabill_other_invoices_billing.billing_product_id')
                 .where('trabill_other_invoices_billing.billing_invoice_id', invoice_id);
         });
+        this.getInvoicesTotal = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .select(this.db.raw('sum(invoice_sub_total) as total_sub_total'), this.db.raw('sum(invoice_discount) as total_discount'), this.db.raw('sum(invoice_net_total) as total_net_total'))
+                .from('trabill_invoices')
+                .leftJoin('trabill_invoices_extra_amounts', {
+                invoice_id: 'extra_amount_invoice_id',
+            })
+                .whereIn('invoice_id', invoice_id)
+                .andWhereNot('invoice_is_deleted', 1);
+            return data;
+        });
+        this.getInvoicePayment = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .select(this.db.raw('sum(invclientpayment_amount) as total_payment'))
+                .from('trabill_invoice_client_payments')
+                .whereIn('invclientpayment_invoice_id', invoice_id)
+                .andWhereNot('invclientpayment_is_deleted', 1);
+            return data;
+        });
     }
     products() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -74,6 +93,15 @@ class QuotationModel extends abstract_models_1.default {
             return quotation;
         });
     }
+    selectQuotation(quotation_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [quotation] = yield this.query()
+                .from('trabill_quotations')
+                .select('quotation_no as q_number', 'quotation_date as sales_date', 'quotation_discount_total as discount', 'quotation_created_by as user', 'quotation_inv_payment as payment')
+                .where('quotation_id', quotation_id);
+            return quotation;
+        });
+    }
     deleteQuotation(quotation_id, quotation_deleted_by) {
         return __awaiter(this, void 0, void 0, function* () {
             const quotation = yield this.query()
@@ -89,6 +117,11 @@ class QuotationModel extends abstract_models_1.default {
                 .insert(data)
                 .into('trabill_quotations_billing_infos');
             return billInfo[0];
+        });
+    }
+    insertAccumulatedBilling(data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.query().insert(data).into('trabill_quotations_billing_infos');
         });
     }
     deleteBillInfo(quotation_id, billing_deleted_by) {
@@ -109,7 +142,7 @@ class QuotationModel extends abstract_models_1.default {
                 : null;
             to_date ? (to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD')) : null;
             const data = yield this.query()
-                .select('quotation_id', this.db.raw(`COALESCE(client_name, company_name, combine_name) as client_name`), this.db.raw(`COALESCE(client_mobile, company_contact_no, combine_mobile) as client_mobile`), 'quotation_no', 'quotation_net_total', 'quotation_discount_total', 'quotation_date', 'quotation_note', 'quotation_is_confirm', 'quotation_is_deleted')
+                .select('quotation_id', this.db.raw(`COALESCE(client_name, company_name, combine_name) as client_name`), this.db.raw(`COALESCE(client_mobile, company_contact_no, combine_mobile) as client_mobile`), 'quotation_no', 'quotation_type', 'quotation_net_total', 'quotation_discount_total', 'quotation_date', 'quotation_note', 'quotation_is_confirm', 'quotation_is_deleted')
                 .from('trabill_quotations')
                 .leftJoin('trabill_clients', 'client_id', 'quotation_client_id')
                 .leftJoin('trabill_client_company_information', 'company_client_id', 'quotation_client_id')
@@ -200,6 +233,16 @@ class QuotationModel extends abstract_models_1.default {
                 .select('product_name', 'billing_quotation_id', 'billing_description', 'billing_quantity', 'billing_unit_price', 'billing_subtotal', 'country_name')
                 .leftJoin('trabill_products', 'trabill_products.product_id', 'trabill_quotations_billing_infos.billing_product_id')
                 .leftJoin('trabill_countries', { country_id: 'billing_country_id' })
+                .from('trabill_quotations_billing_infos')
+                .where('billing_quotation_id', quotation_id)
+                .where('billing_is_deleted', 0);
+            return billInfos;
+        });
+    }
+    getBilling(quotation_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const billInfos = yield this.query()
+                .select('billing_invoice_id as invoices_id', 'billing_category_id as category_id')
                 .from('trabill_quotations_billing_infos')
                 .where('billing_quotation_id', quotation_id)
                 .where('billing_is_deleted', 0);

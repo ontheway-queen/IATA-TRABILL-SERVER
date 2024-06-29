@@ -87,6 +87,14 @@ class ClientModel extends abstract_models_1.default {
                 .where('client_id', clientId);
             return Number(client[0].client_opening_client_trxn_id);
         });
+        this.getClByCateId = (category_id) => __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .select('client_id')
+                .from('trabill_clients')
+                .where('client_org_agency', this.org_agency)
+                .andWhereILike('client_entry_id', `%${category_id}`);
+            return data === null || data === void 0 ? void 0 : data.client_id;
+        });
     }
     // INSERT CLIENT
     insertClient(data) {

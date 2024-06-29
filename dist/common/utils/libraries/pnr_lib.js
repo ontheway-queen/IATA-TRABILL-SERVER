@@ -15,12 +15,18 @@ const formatFlightDetailsRoute = (flights, conn) => __awaiter(void 0, void 0, vo
     const airticket_route_or_sector = [];
     const route_sectors = [];
     const flight_details = [];
+    let airticket_journey_date;
+    let airticket_return_date;
+    let airticket_segment;
     for (const [index, flight] of flights === null || flights === void 0 ? void 0 : flights.entries()) {
+        airticket_segment = flight.length;
         const fltdetails_from_airport_id = yield conn.airportIdByCode(flight.fromAirportCode);
         const fltdetails_to_airport_id = yield conn.airportIdByCode(flight.toAirportCode);
         if (index === 0) {
             airticket_route_or_sector.push(fltdetails_from_airport_id);
             airticket_route_or_sector.push(fltdetails_to_airport_id);
+            airticket_journey_date = flight.departureDate;
+            airticket_return_date = flight.arrivalDate;
             route_sectors.push(flight.fromAirportCode);
             route_sectors.push(flight.toAirportCode);
         }
@@ -30,6 +36,7 @@ const formatFlightDetailsRoute = (flights, conn) => __awaiter(void 0, void 0, vo
                 airticket_route_or_sector.push(from_airport_id);
                 route_sectors.push(flight.fromAirportCode);
             }
+            airticket_return_date = flight.arrivalDate;
             airticket_route_or_sector.push(fltdetails_to_airport_id);
             route_sectors.push(flight.toAirportCode);
         }
@@ -43,7 +50,13 @@ const formatFlightDetailsRoute = (flights, conn) => __awaiter(void 0, void 0, vo
             fltdetails_airline_id: yield conn.airlineIdByCode(flight.airlineCode),
         });
     }
-    return { airticket_route_or_sector, flight_details, route_sectors };
+    return {
+        airticket_route_or_sector,
+        flight_details,
+        route_sectors,
+        airticket_journey_date,
+        airticket_return_date,
+    };
 });
 exports.formatFlightDetailsRoute = formatFlightDetailsRoute;
 const formatTicketDetails = (conn, pnrData, airticket_route_or_sector) => __awaiter(void 0, void 0, void 0, function* () {

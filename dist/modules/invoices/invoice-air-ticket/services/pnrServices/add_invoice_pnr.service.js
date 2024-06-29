@@ -46,7 +46,7 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const combined_conn = this.models.combineClientModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const invoice_note = 'THE INVOICE IS GENERATED AUTOMATICALLY.';
+                const invoice_note = 'THIS IS A SOFTWARE GENERATED INVOICE COPY/PNR';
                 // common invoice assets
                 const invoice_no = yield this.generateVoucher(req, 'AIT');
                 const route_name = pnrResponse === null || pnrResponse === void 0 ? void 0 : pnrResponse.ticket_details[0].route_sectors.join(',');

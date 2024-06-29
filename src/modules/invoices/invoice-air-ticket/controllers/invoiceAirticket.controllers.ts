@@ -111,10 +111,22 @@ class InvoiceAirticketController extends AbstractController {
     }
   );
 
-  viewCommonInvoiceDetails = this.assyncWrapper.wrap(
+  viewInvoice = this.assyncWrapper.wrap(
     this.validator.readInvoiceAirticket,
     async (req: Request, res: Response) => {
-      const data = await this.services.viewCommonInvoiceDetails(req);
+      const data = await this.services.viewInvoice(req);
+
+      if (data.success) {
+        res.status(200).json(data);
+      } else {
+        this.error();
+      }
+    }
+  );
+  viewInvoiceDetails = this.assyncWrapper.wrap(
+    this.validator.readInvoiceAirticket,
+    async (req: Request, res: Response) => {
+      const data = await this.services.viewInvoiceDetails(req);
 
       if (data.success) {
         res.status(200).json(data);
@@ -176,10 +188,10 @@ class InvoiceAirticketController extends AbstractController {
     }
   );
 
-  public getInvoiceAcitivity = this.assyncWrapper.wrap(
+  public getInvoiceActivity = this.assyncWrapper.wrap(
     this.validator.readInvoiceAirticket,
     async (req: Request, res: Response): Promise<void> => {
-      const data = await this.services.getInvoiceAcitivity(req);
+      const data = await this.services.getInvoiceActivity(req);
 
       if (data.success) {
         res.status(200).json(data);

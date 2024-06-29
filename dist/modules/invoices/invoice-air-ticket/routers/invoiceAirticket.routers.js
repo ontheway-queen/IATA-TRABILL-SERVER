@@ -17,8 +17,10 @@ class InvoiceAirTicketRouter extends abstract_routers_1.default {
         this.routers.get('/all-invoiceno-and-id', this.controllers.getAllInvoicesNumAndId);
         this.routers.get('/client-due/:id', this.controllers.getClientDue);
         this.routers.get('/is-exist/:ticket', this.controllers.isTicketAlreadyExist);
-        this.routers.get('/view-invoice-activity/:id', this.controllers.getInvoiceAcitivity);
+        this.routers.get('/view-invoice-activity/:id', this.controllers.getInvoiceActivity);
         // ========= INVOICE AIR TICKET ==============
+        this.routers.get('/invoice/:invoice_id', this.controllers.viewInvoice);
+        this.routers.get('/details/:invoice_id', this.controllers.viewInvoiceDetails);
         this.routers.get('/invoice-details-for-void/:invoice_id', this.controllers.getInvoiceInfoForVoid);
         this.routers.get('/payment/:invoice_id', this.controllers.getInvoiceClientPayment);
         this.routers.put('/void/:invoice_id', this.controllers.voidInvoiceAirticket);
@@ -31,7 +33,6 @@ class InvoiceAirTicketRouter extends abstract_routers_1.default {
             .get(this.controllers.getDataForEdit)
             .patch(this.controllers.eidtInvioceAirticket)
             .delete(this.controllers.deleteInvoiceAirTicket);
-        this.routers.get('/view/:invoice_id', this.controllers.viewCommonInvoiceDetails);
         this.routers.post('/send-email/:invoice_id', this.controllers.sendEmail);
         // AIR TICKET CUSTOM REPORT GENERATE
         this.routers.post('/custom-report', this.controllers.airTicketCustomReport);

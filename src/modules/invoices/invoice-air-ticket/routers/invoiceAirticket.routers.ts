@@ -27,11 +27,16 @@ class InvoiceAirTicketRouter extends AbstractRouter {
 
     this.routers.get(
       '/view-invoice-activity/:id',
-      this.controllers.getInvoiceAcitivity
+      this.controllers.getInvoiceActivity
     );
 
     // ========= INVOICE AIR TICKET ==============
 
+    this.routers.get('/invoice/:invoice_id', this.controllers.viewInvoice);
+    this.routers.get(
+      '/details/:invoice_id',
+      this.controllers.viewInvoiceDetails
+    );
     this.routers.get(
       '/invoice-details-for-void/:invoice_id',
       this.controllers.getInvoiceInfoForVoid
@@ -57,11 +62,6 @@ class InvoiceAirTicketRouter extends AbstractRouter {
       .get(this.controllers.getDataForEdit)
       .patch(this.controllers.eidtInvioceAirticket)
       .delete(this.controllers.deleteInvoiceAirTicket);
-
-    this.routers.get(
-      '/view/:invoice_id',
-      this.controllers.viewCommonInvoiceDetails
-    );
 
     this.routers.post('/send-email/:invoice_id', this.controllers.sendEmail);
 

@@ -1,4 +1,7 @@
-import { InvoiceMoneyReceiptType } from '../../../../common/types/common.types';
+import {
+  InvoiceMoneyReceiptType,
+  idType,
+} from '../../../../common/types/common.types';
 
 // ============= INVOICE AIR TICKET INTERFACE
 
@@ -173,7 +176,7 @@ export interface IFlightDetail {
   fltdetails_from_airport_id: number;
   fltdetails_to_airport_id: number;
   fltdetails_airline_id: number;
-  fltdetails_flight_no: number;
+  fltdetails_flight_no: idType;
   fltdetails_fly_date: string;
   fltdetails_departure_time: string;
   fltdetails_arrival_time: string;

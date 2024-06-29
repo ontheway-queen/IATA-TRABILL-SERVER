@@ -41,6 +41,7 @@ class ReissueAirticket extends abstract_services_1.default {
                 .getAirticketRefundItems(invoice_id);
             const pax_details = yield common_conn.getInvoiceAirTicketPaxDetails(invoice_id);
             const airticket_information = yield conn.getReissueAirticketInfo(invoice_id);
+            const existing_ticket = yield conn.getExistingTicket(airticket_information[0].airticket_existing_invoiceid, airticket_information[0].airticket_existing_airticket_id);
             const flights = yield conn.getFlightDetails(invoice_id);
             const reissued = yield common_conn.getReissuedItemByInvId(invoice_id);
             return {
@@ -51,7 +52,8 @@ class ReissueAirticket extends abstract_services_1.default {
                     refunds,
                     airticket_information,
                     flights,
-                    pax_details }),
+                    pax_details,
+                    existing_ticket }),
             };
         });
         this.getExistingClientAirticket = (req) => __awaiter(this, void 0, void 0, function* () {

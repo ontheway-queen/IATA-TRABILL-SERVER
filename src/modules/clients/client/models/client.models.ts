@@ -427,6 +427,16 @@ class ClientModel extends AbstractModels {
     return data;
   }
 
+  getClByCateId = async (category_id: string) => {
+    const [data] = await this.query()
+      .select('client_id')
+      .from('trabill_clients')
+      .where('client_org_agency', this.org_agency)
+      .andWhereILike('client_entry_id', `%${category_id}`);
+
+    return data?.client_id;
+  };
+
   public async clientOtherRefund(client_id: idType) {
     const data = await this.query()
       .select(

@@ -86,7 +86,7 @@ class PnrDetailsService extends abstract_services_1.default {
                             };
                             // FLIGHT DETAILS
                             const flights = pnrResponse.flights.filter((item) => flightsId === null || flightsId === void 0 ? void 0 : flightsId.includes(item.itemId));
-                            const { flight_details, airticket_route_or_sector, route_sectors } = yield (0, pnr_lib_1.formatFlightDetailsRoute)(flights, conn);
+                            const { flight_details, airticket_route_or_sector, route_sectors, airticket_journey_date, airticket_return_date, } = yield (0, pnr_lib_1.formatFlightDetailsRoute)(flights, conn);
                             const taxBreakdown = ((_c = pnrResponse.fares) === null || _c === void 0 ? void 0 : _c.find((item) => {
                                 return ((item === null || item === void 0 ? void 0 : item.travelerIndices) &&
                                     (item === null || item === void 0 ? void 0 : item.travelerIndices.includes(ticket.travelerIndex)));
@@ -116,14 +116,14 @@ class PnrDetailsService extends abstract_services_1.default {
                             const airticket_ait = Math.round(grossAit - countryTaxAit);
                             const airticket_net_commssion = baseFareCommission - airticket_ait;
                             const airticket_purchase_price = Number(ticket.payment.total || 0) - airticket_net_commssion;
-                            const airticket_segment = pnrResponse.allSegments.length;
                             const airticket_commission_percent = (0, lib_1.numRound)(((0, lib_1.numRound)(baseFareCommission) /
                                 (0, lib_1.numRound)(ticket.payment.subtotal)) *
                                 100);
                             const owningAirline = yield conn.airlineIdByCode(flights[0].airlineCode);
-                            const airticket_return_date = airticket_segment > 1
-                                ? pnrResponse.allSegments[airticket_segment - 1].endDate
-                                : undefined;
+                            // const airticket_return_date =
+                            //   airticket_segment > 1
+                            //     ? pnrResponse.allSegments[airticket_segment - 1].endDate
+                            //     : undefined;
                             const taxes_commission = taxesCommission === null || taxesCommission === void 0 ? void 0 : taxesCommission.map((item) => {
                                 return {
                                     airline_taxes: item.taxAmount.amount,
@@ -133,7 +133,10 @@ class PnrDetailsService extends abstract_services_1.default {
                                 };
                             });
                             const ticketData = Object.assign(Object.assign({}, breakdown), { airticket_ticket_no: ticket.number, airticket_gross_fare: ticket.payment.total, airticket_base_fare: ticket.payment.subtotal, airticket_comvendor: iata_vendor, airticket_commission_percent, airticket_commission_percent_total: baseFareCommission, airticket_ait,
-                                airticket_net_commssion, airticket_airline_id: owningAirline, airticket_route_or_sector, airticket_pnr: pnrResponse.bookingId, airticket_gds_id: 'Sabre', airticket_tax: ticket.payment.taxes, airticket_segment, airticket_issue_date: ticket.date, airticket_journey_date: pnrResponse.startDate, airticket_return_date, airticket_classes: flights[0].cabinTypeName, airticket_client_price: ticket.payment.total, airticket_purchase_price, airticket_profit: airticket_net_commssion, flight_details, pax_passports: [pax_passports], taxes_commission,
+                                airticket_net_commssion, airticket_airline_id: owningAirline, airticket_route_or_sector, airticket_pnr: pnrResponse.bookingId, airticket_gds_id: 'Sabre', airticket_tax: ticket.payment.taxes, airticket_segment: flights.length, airticket_issue_date: ticket.date, 
+                                // airticket_journey_date: pnrResponse.startDate,
+                                airticket_journey_date,
+                                airticket_return_date, airticket_classes: flights[0].cabinTypeName, airticket_client_price: ticket.payment.total, airticket_purchase_price, airticket_profit: airticket_net_commssion, flight_details, pax_passports: [pax_passports], taxes_commission,
                                 route_sectors });
                             ticket_details.push(ticketData);
                         }

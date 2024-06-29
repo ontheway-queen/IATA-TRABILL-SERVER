@@ -132,7 +132,6 @@ class ReIssueAirticket extends AbstractModels {
         'airticket_classes',
         'airticket_commission_percent',
         'airticket_fare_difference',
-        'airticket_id',
         'airticket_ticket_no',
         'airticket_pnr',
         'airticket_client_price',
@@ -178,6 +177,30 @@ class ReIssueAirticket extends AbstractModels {
           'airticketitem.airticket_id'
         );
       });
+  }
+
+  public async getExistingTicket(
+    existing_invoice_id: number,
+    existing_ticket_id: number
+  ) {
+    return await this.query()
+      .select(
+        'invoice_id',
+        'invoice_no',
+        'airline_name',
+        'airticket_pnr',
+        'airticket_ticket_no',
+        'airticket_client_price',
+        'airticket_purchase_price',
+        'airticket_journey_date',
+        'airticket_return_date',
+        'airticket_routes',
+        'passport_name',
+        'sales_date'
+      )
+      .from('view_all_airticket_details')
+      .where('invoice_id', existing_invoice_id)
+      .andWhere('airticket_id', existing_ticket_id);
   }
 
   public getFlightDetails = async (invoiceId: idType) => {

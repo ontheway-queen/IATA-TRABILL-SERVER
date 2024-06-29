@@ -10,8 +10,13 @@ export const formatFlightDetailsRoute = async (
   const route_sectors: string[] = [];
 
   const flight_details: any[] = [];
+  let airticket_journey_date;
+  let airticket_return_date;
+  let airticket_segment;
 
   for (const [index, flight] of flights?.entries()) {
+    airticket_segment = flight.length;
+
     const fltdetails_from_airport_id = await conn.airportIdByCode(
       flight.fromAirportCode
     );
@@ -22,6 +27,9 @@ export const formatFlightDetailsRoute = async (
     if (index === 0) {
       airticket_route_or_sector.push(fltdetails_from_airport_id);
       airticket_route_or_sector.push(fltdetails_to_airport_id);
+
+      airticket_journey_date = flight.departureDate;
+      airticket_return_date = flight.arrivalDate;
 
       route_sectors.push(flight.fromAirportCode);
       route_sectors.push(flight.toAirportCode);
@@ -34,7 +42,7 @@ export const formatFlightDetailsRoute = async (
         airticket_route_or_sector.push(from_airport_id);
         route_sectors.push(flight.fromAirportCode);
       }
-
+      airticket_return_date = flight.arrivalDate;
       airticket_route_or_sector.push(fltdetails_to_airport_id);
       route_sectors.push(flight.toAirportCode);
     }
@@ -50,7 +58,13 @@ export const formatFlightDetailsRoute = async (
     });
   }
 
-  return { airticket_route_or_sector, flight_details, route_sectors };
+  return {
+    airticket_route_or_sector,
+    flight_details,
+    route_sectors,
+    airticket_journey_date,
+    airticket_return_date,
+  };
 };
 
 export const formatTicketDetails = async (

@@ -90,8 +90,17 @@ class InvoiceAirticketController extends abstract_controllers_1.default {
                 this.error();
             }
         }));
-        this.viewCommonInvoiceDetails = this.assyncWrapper.wrap(this.validator.readInvoiceAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.viewCommonInvoiceDetails(req);
+        this.viewInvoice = this.assyncWrapper.wrap(this.validator.readInvoiceAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.viewInvoice(req);
+            if (data.success) {
+                res.status(200).json(data);
+            }
+            else {
+                this.error();
+            }
+        }));
+        this.viewInvoiceDetails = this.assyncWrapper.wrap(this.validator.readInvoiceAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.viewInvoiceDetails(req);
             if (data.success) {
                 res.status(200).json(data);
             }
@@ -136,8 +145,8 @@ class InvoiceAirticketController extends abstract_controllers_1.default {
                 this.error();
             }
         }));
-        this.getInvoiceAcitivity = this.assyncWrapper.wrap(this.validator.readInvoiceAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
-            const data = yield this.services.getInvoiceAcitivity(req);
+        this.getInvoiceActivity = this.assyncWrapper.wrap(this.validator.readInvoiceAirticket, (req, res) => __awaiter(this, void 0, void 0, function* () {
+            const data = yield this.services.getInvoiceActivity(req);
             if (data.success) {
                 res.status(200).json(data);
             }

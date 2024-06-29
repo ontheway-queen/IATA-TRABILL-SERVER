@@ -15,6 +15,11 @@ class QuotationRouter extends AbstractRouter {
 
     this.routers.get('/invoices', this.controllers.getInvoiceByCl);
     this.routers.post('/get-billing', this.controllers.getInvoiceBilling);
+    this.routers.post('/accumulate', this.controllers.addAccuMulatedInvoice);
+    this.routers.get(
+      '/accumulate/:id',
+      this.controllers.viewAccuMulatedInvoice
+    );
     this.routers
       .route('/')
       .post(this.controllers.createQuotation)

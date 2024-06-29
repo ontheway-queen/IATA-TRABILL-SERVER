@@ -33,7 +33,6 @@ class createInvoiceIUR extends abstract_services_1.default {
         super();
         this.create = (req) => __awaiter(this, void 0, void 0, function* () {
             const body = req.body;
-            console.log(body);
             return yield this.models.db.transaction((trx) => __awaiter(this, void 0, void 0, function* () {
                 const conn = this.models.invoiceAirticketModel(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);

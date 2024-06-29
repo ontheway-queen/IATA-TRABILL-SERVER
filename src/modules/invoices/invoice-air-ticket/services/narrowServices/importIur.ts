@@ -21,8 +21,6 @@ class createInvoiceIUR extends AbstractServices {
   public create = async (req: Request) => {
     const body = req.body as IInvoiceIURBody;
 
-    console.log(body);
-
     return await this.models.db.transaction(async (trx) => {
       const conn = this.models.invoiceAirticketModel(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);

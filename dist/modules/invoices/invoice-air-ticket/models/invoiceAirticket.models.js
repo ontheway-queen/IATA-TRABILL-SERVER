@@ -96,7 +96,8 @@ class InvoiceAirticketModel extends abstract_models_1.default {
                 this.on('p_invoice_id', '=', 'airticket_invoice_id').andOn('p_airticket_id', '=', 'airticket_id');
             })
                 .leftJoin('trabill_passport_details', 'passport_id', 'p_passport_id')
-                .where('airticket_invoice_id', invoiceId);
+                .where('airticket_invoice_id', invoiceId)
+                .groupBy('airticket_id');
         });
         this.getAirticketItems = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
             const ticket_details = yield this.query()

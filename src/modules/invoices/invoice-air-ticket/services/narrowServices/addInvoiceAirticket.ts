@@ -150,6 +150,7 @@ class AddInvoiceAirticket extends AbstractServices {
         invoice_reference,
         invoice_total_profit,
         invoice_total_vendor_price,
+        invoice_reissue_client_type: 'MANUAL',
       };
 
       const invoice_id = await common_conn.insertInvoicesInfo(invoiceData);
@@ -291,9 +292,9 @@ class AddInvoiceAirticket extends AbstractServices {
                 invoice_id,
                 airticket_id,
                 passport?.passport_name,
-                passport.passport_person_type,
                 passport.passport_mobile_no,
-                passport.passport_email
+                passport.passport_email,
+                passport.passport_person_type
               );
             }
           }

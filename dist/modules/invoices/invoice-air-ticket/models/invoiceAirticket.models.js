@@ -441,10 +441,22 @@ class InvoiceAirticketModel extends abstract_models_1.default {
             return data;
         });
     }
+    getInvoiceData(invoice_id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const [data] = yield this.query()
+                .from('trabill_invoices')
+                .select('invoice_net_total', 'invoice_sub_total', 'invoice_discount', 'invoice_total_vendor_price', 'invoice_total_profit')
+                .where('invoice_id', invoice_id)
+                .leftJoin('trabill_invoices_extra_amounts', {
+                extra_amount_invoice_id: 'invoice_id',
+            });
+            return data;
+        });
+    }
     getInvoiceInfoForVoid(invoice_id) {
         return __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
-                .select('invoice_id', 'invoice_category_id as cate_id', 'invoice_no', 'client_name', 'comb_client', 'net_total')
+                .select('invoice_id', 'invoice_category_id as cate_id', 'invoice_no', 'client_name', 'invoice_discount', 'comb_client', 'net_total')
                 .from('view_invoices')
                 .where({ invoice_id });
             const vendors = yield this.query()

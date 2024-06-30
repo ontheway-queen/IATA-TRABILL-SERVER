@@ -87,7 +87,7 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                 const invoiceData = Object.assign(Object.assign({}, clientTransId), { invoice_category_id: 1, invoice_client_id: client_id, invoice_combined_id: combined_id, invoice_net_total, invoice_no: invoice_no, invoice_sales_date: pnrResponse.invoice_sales_date, invoice_sales_man_id: pnrResponse.invoice_sales_man_id, invoice_sub_total,
                     invoice_note, invoice_created_by: req.user_id, invoice_client_previous_due: cl_preset_balance, invoice_walking_customer_name,
                     invoice_total_profit,
-                    invoice_total_vendor_price });
+                    invoice_total_vendor_price, invoice_reissue_client_type: 'PNR' });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoiceData);
                 // ADVANCE MR
                 if (cl_preset_balance > 0) {
@@ -181,7 +181,7 @@ class AddInvoiceWithPnr extends abstract_services_1.default {
                                 yield common_conn.insertInvoiceAirticketPax(invoice_id, airticket_id, passport_id);
                             }
                             else {
-                                yield common_conn.insertInvoiceAirticketPaxName(invoice_id, airticket_id, passport === null || passport === void 0 ? void 0 : passport.passport_name, (0, pnr_lib_1.capitalize)(passport.passport_person_type), passport.passport_mobile_no, passport.passport_email);
+                                yield common_conn.insertInvoiceAirticketPaxName(invoice_id, airticket_id, passport === null || passport === void 0 ? void 0 : passport.passport_name, passport.passport_mobile_no, passport.passport_email, (0, pnr_lib_1.capitalize)(passport.passport_person_type));
                             }
                         }
                     }

@@ -112,7 +112,7 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                     invoice_created_by, invoice_client_previous_due: cl_preset_balance, invoice_walking_customer_name,
                     invoice_reference,
                     invoice_total_profit,
-                    invoice_total_vendor_price });
+                    invoice_total_vendor_price, invoice_reissue_client_type: 'MANUAL' });
                 const invoice_id = yield common_conn.insertInvoicesInfo(invoiceData);
                 // ADVANCE MR
                 if (cl_preset_balance > 0) {
@@ -181,7 +181,7 @@ class AddInvoiceAirticket extends abstract_services_1.default {
                                 yield common_conn.insertInvoiceAirticketPax(invoice_id, airticket_id, passport.passport_id);
                             }
                             else if (passport === null || passport === void 0 ? void 0 : passport.passport_name) {
-                                yield common_conn.insertInvoiceAirticketPaxName(invoice_id, airticket_id, passport === null || passport === void 0 ? void 0 : passport.passport_name, passport.passport_person_type, passport.passport_mobile_no, passport.passport_email);
+                                yield common_conn.insertInvoiceAirticketPaxName(invoice_id, airticket_id, passport === null || passport === void 0 ? void 0 : passport.passport_name, passport.passport_mobile_no, passport.passport_email, passport.passport_person_type);
                             }
                         }
                     }

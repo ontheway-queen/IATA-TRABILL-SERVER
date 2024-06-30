@@ -96,7 +96,7 @@ export interface IPassportDb extends IPassportInvoice {
   passport_scan_copy?: string;
   passport_upload_photo?: string;
   passport_upload_others?: string;
-  passport_person_type: 'Infant' | 'Child' | 'Adult';
+  passport_person_type?: string;
 }
 
 export enum Resources {

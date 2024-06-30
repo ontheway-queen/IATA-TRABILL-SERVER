@@ -51,7 +51,7 @@ export interface IInvoiceInfoDb {
   invoice_created_by: number;
   invoice_total_profit?: number;
   invoice_category_id: number;
-  invoice_reissue_client_type?: 'NEW' | 'EXISTING';
+  invoice_reissue_client_type?: 'NEW' | 'EXISTING' | 'IUR' | 'PNR' | 'MANUAL';
   invoice_hajj_session?: string | number;
   invoice_haji_group_id?: number;
   invoice_total_vendor_price?: number;

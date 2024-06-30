@@ -37,6 +37,13 @@ class createInvoiceIUR extends AbstractServices {
         body.creation_sign
       );
 
+      if (!invoice_sales_man_id) {
+        return {
+          success: true,
+          message: `${body.creation_sign} Creation id does not exit in trabill!`,
+        };
+      }
+
       let invoice_sub_total = 0;
       let invoice_profit = 0;
       let invoice_total_vendor_price = 0;
@@ -64,18 +71,18 @@ class createInvoiceIUR extends AbstractServices {
 
         const airticket_ait = Math.round(tkt.airticket_ait - countryTaxAit);
         const airticket_net_commssion =
-          tkt.airticket_commission_percent_total -
+          numRound(tkt.airticket_commission_percent_total) -
           airticket_ait +
           taxesCommission;
 
         const airticket_profit = airticket_net_commssion;
 
         const airticket_purchase_price =
-          tkt.airticket_gross_fare - airticket_net_commssion;
+          numRound(tkt.airticket_gross_fare) - airticket_net_commssion;
 
-        invoice_sub_total += tkt.airticket_client_price;
-        invoice_profit += airticket_profit;
-        invoice_total_vendor_price += airticket_purchase_price;
+        invoice_sub_total += numRound(tkt.airticket_client_price);
+        invoice_profit += numRound(airticket_profit);
+        invoice_total_vendor_price += numRound(airticket_purchase_price);
 
         ticket_nos.push(tkt.airticket_ticket_no);
 
@@ -124,9 +131,8 @@ class createInvoiceIUR extends AbstractServices {
       const invoiceData: IInvoiceInfoDb = {
         ...clientTransId,
         invoice_category_id: 1,
-        invoice_client_id: null,
+        invoice_client_id: client_id,
         invoice_combined_id: null,
-        invoice_cltrxn_id: null,
         invoice_net_total: invoice_sub_total,
         invoice_no: invoice_no,
         invoice_sales_date: body.issue_date,
@@ -135,6 +141,7 @@ class createInvoiceIUR extends AbstractServices {
         invoice_note: 'THIS IS A SOFTWARE GENERATED INVOICE COPY/IUR',
         invoice_created_by: req.user_id,
         invoice_total_vendor_price,
+        invoice_reissue_client_type: 'IUR',
       };
 
       const invoice_id = await common_conn.insertInvoicesInfo(invoiceData);
@@ -196,7 +203,7 @@ class createInvoiceIUR extends AbstractServices {
                 const PassportData: IPassportDb = {
                   passport_person_type: capitalize(
                     passport.passport_person_type
-                  ) as 'Infant' | 'Child' | 'Adult',
+                  ),
                   passport_passport_no: passport.passport_passport_no,
                   passport_name: passport?.passport_name,
                   passport_mobile_no: passport.passport_mobile_no,
@@ -217,9 +224,9 @@ class createInvoiceIUR extends AbstractServices {
                 invoice_id,
                 airticket_id,
                 passport?.passport_name,
-                capitalize(passport.passport_person_type),
                 passport.passport_mobile_no,
-                passport.passport_email
+                passport.passport_email,
+                capitalize(passport.passport_person_type)
               );
             }
           }
@@ -266,6 +273,8 @@ class createInvoiceIUR extends AbstractServices {
         history_invoice_payment_amount: invoice_sub_total,
         invoicelog_content: content,
       };
+
+      await this.updateVoucher(req, 'AIT');
 
       await common_conn.insertInvoiceHistory(history_data);
 

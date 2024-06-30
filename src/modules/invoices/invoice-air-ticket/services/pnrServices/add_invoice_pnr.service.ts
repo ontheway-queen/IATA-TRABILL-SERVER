@@ -144,6 +144,7 @@ class AddInvoiceWithPnr extends AbstractServices {
         invoice_walking_customer_name,
         invoice_total_profit,
         invoice_total_vendor_price,
+        invoice_reissue_client_type: 'PNR',
       };
 
       const invoice_id = await common_conn.insertInvoicesInfo(invoiceData);
@@ -285,9 +286,9 @@ class AddInvoiceWithPnr extends AbstractServices {
                 invoice_id,
                 airticket_id,
                 passport?.passport_name,
-                capitalize(passport.passport_person_type),
                 passport.passport_mobile_no,
-                passport.passport_email
+                passport.passport_email,
+                capitalize(passport.passport_person_type)
               );
             }
           }

@@ -25,6 +25,10 @@ class QuotationValidator extends AbstractValidator {
     check('payment')
       .isFloat({ min: 0 })
       .withMessage('payment must be a positive number'),
+    check('comb_client')
+      .isString()
+      .notEmpty()
+      .withMessage('comb_client cannot be empty'),
     check('invoices').isArray().withMessage('invoices must be an array'),
     check('invoices.*.invoices_id')
       .isInt({ min: 0 })

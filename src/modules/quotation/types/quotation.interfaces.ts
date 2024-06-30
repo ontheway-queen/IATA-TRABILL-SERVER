@@ -22,8 +22,8 @@ export interface IQuotationReqBody {
 
 export interface IQuotation {
   quotation_type: 'QUOTATION' | 'ACCUMULATE';
-  quotation_client_id?: number;
-  quotation_combined_id?: number;
+  quotation_client_id?: number | null;
+  quotation_combined_id?: number | null;
   quotation_no: number;
   quotation_inv_payment?: number;
   quotation_net_total?: number;
@@ -41,5 +41,6 @@ export interface IAccumulateBody {
   sales_date: string;
   discount: number;
   payment: number;
+  comb_client: string;
   invoices: { invoices_id: number; category_id: number }[];
 }

@@ -293,9 +293,9 @@ class EditInvoiceNonCommission extends AbstractServices {
                 invoice_id,
                 airticketId,
                 passport.passport_name,
-                passport.passport_person_type,
                 passport.passport_mobile_no,
-                passport.passport_email
+                passport.passport_email,
+                passport.passport_person_type
               );
             }
           }

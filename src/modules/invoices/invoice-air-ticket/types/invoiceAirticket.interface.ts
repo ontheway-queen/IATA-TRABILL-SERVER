@@ -220,6 +220,8 @@ export interface IVoidReqBody {
   net_total: number;
   comb_client: string;
   cate_id: number;
+  void_discount: number;
+  void_amount: number;
   invoice_vendors: IVoidVendorInfo[];
 }
 

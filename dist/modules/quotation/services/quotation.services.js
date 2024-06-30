@@ -295,6 +295,7 @@ class QuotationServices extends abstract_services_1.default {
         });
         this.addAccuMulatedInvoice = (req) => __awaiter(this, void 0, void 0, function* () {
             const body = req.body;
+            const { client_id, combined_id } = (0, common_helper_1.separateCombClientToId)(body.comb_client);
             const conn = this.models.quotationModel(req);
             const quotationInfo = {
                 quotation_type: 'ACCUMULATE',
@@ -303,6 +304,8 @@ class QuotationServices extends abstract_services_1.default {
                 quotation_discount_total: body.discount,
                 quotation_created_by: req.user_id,
                 quotation_inv_payment: body.payment,
+                quotation_client_id: client_id,
+                quotation_combined_id: combined_id,
             };
             const quotationId = yield conn.insertQuotation(quotationInfo);
             const quotation_billing = body.invoices.map((item) => {

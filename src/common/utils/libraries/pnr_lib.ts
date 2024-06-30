@@ -145,6 +145,10 @@ export const formatTicketDetails = async (
 };
 
 export const capitalize = (str: string) => {
+  if (!str) {
+    return undefined;
+  }
+
   return str.toLowerCase().replace(/(^|\s)\S/g, function (firstLetter) {
     return firstLetter.toUpperCase();
   });

@@ -18,7 +18,7 @@ const addInvoiceInfo_services_1 = __importDefault(require("./narrowServices/addI
 const air_ticket_tax_refund_1 = __importDefault(require("./narrowServices/air_ticket_tax_refund"));
 const deleteAirTicket_1 = __importDefault(require("./narrowServices/deleteAirTicket"));
 const editInvoiceAirticket_1 = __importDefault(require("./narrowServices/editInvoiceAirticket"));
-const importIur_1 = __importDefault(require("./narrowServices/importIur"));
+const importIur_service_1 = __importDefault(require("./IUR/importIur.service"));
 const sendMail_services_1 = __importDefault(require("./narrowServices/sendMail.services"));
 const void_invoice_1 = __importDefault(require("./narrowServices/void_invoice"));
 const add_invoice_pnr_service_1 = __importDefault(require("./pnrServices/add_invoice_pnr.service"));
@@ -189,7 +189,7 @@ class InvoiceAirticketService extends abstract_services_1.default {
         this.sendEmail = new sendMail_services_1.default().sendEmail;
         this.addInvoiceInfo = new addInvoiceInfo_services_1.default().add;
         this.deleteInvoiceInfo = new addInvoiceInfo_services_1.default().delete;
-        this.createInvoiceIUR = new importIur_1.default().create;
+        this.createInvoiceIUR = new importIur_service_1.default().create;
     }
 }
 exports.default = InvoiceAirticketService;

@@ -497,6 +497,8 @@ class QuotationServices extends AbstractServices {
   public addAccuMulatedInvoice = async (req: Request) => {
     const body = req.body as IAccumulateBody;
 
+    const { client_id, combined_id } = separateCombClientToId(body.comb_client);
+
     const conn = this.models.quotationModel(req);
     const quotationInfo: IQuotation = {
       quotation_type: 'ACCUMULATE',
@@ -505,6 +507,8 @@ class QuotationServices extends AbstractServices {
       quotation_discount_total: body.discount,
       quotation_created_by: req.user_id,
       quotation_inv_payment: body.payment,
+      quotation_client_id: client_id,
+      quotation_combined_id: combined_id,
     };
 
     const quotationId = await conn.insertQuotation(quotationInfo);

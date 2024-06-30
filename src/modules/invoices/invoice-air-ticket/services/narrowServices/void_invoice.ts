@@ -6,6 +6,7 @@ import {
   IClTrxnBody,
   IVTrxn,
 } from '../../../../../common/interfaces/Trxn.interfaces';
+import { numRound } from '../../../../../common/utils/libraries/lib';
 import {
   IVoidReqBody,
   IVoidVendorInfo,
@@ -27,7 +28,9 @@ class VoidInvoice extends AbstractServices {
       const conn = this.models.invoiceAirticketModel(req, trx);
       const trxns = new Trxns(req, trx);
 
-      const content = `FARE BDT ${body.net_total}/- \nCHARGE BDT ${
+      const previousInv = await conn.getInvoiceData(invoice_id);
+
+      const content = `VOID TKT FARE BDT ${body.void_amount}/- \nCHARGE BDT ${
         body.client_charge || 0
       }/-`;
 
@@ -38,7 +41,7 @@ class VoidInvoice extends AbstractServices {
       // CLIENT TRANSACTION
       const clientNetTotalTrans: IClTrxnBody = {
         ctrxn_type: 'CREDIT',
-        ctrxn_amount: body.net_total,
+        ctrxn_amount: body.void_amount,
         ctrxn_cl: body.comb_client,
         ctrxn_voucher: body.invoice_no,
         ctrxn_particular_id: 56,
@@ -64,16 +67,6 @@ class VoidInvoice extends AbstractServices {
         };
         void_charge_ctrxn_id = await trxns.clTrxnInsert(voidChargeClTrans);
       }
-
-      // UPDATED VOID INFORMATION
-      await common_conn.updateIsVoid(
-        invoice_id,
-        body.client_charge || 0,
-        void_charge_ctrxn_id,
-        body.invoice_void_date
-      );
-
-      // ======================= REDUCE VENDOR INFO
 
       // Initialize a result object
       const reducedData: any = {};
@@ -116,6 +109,10 @@ class VoidInvoice extends AbstractServices {
       // Convert the object to an array
       const resultArray = Object.values(reducedData) as IVoidVendorInfo[];
 
+      let return_vendor_price = 0;
+      let return_client_price = 0;
+      let return_profit = 0;
+
       //   VENDOR TRANSACTIONS
       for (const item of resultArray) {
         const { vendor_id } = separateCombClientToId(item.comb_vendor);
@@ -149,7 +146,24 @@ class VoidInvoice extends AbstractServices {
 
           await trxns.VTrxnInsert(vendorVoidCharge);
         }
+
+        return_vendor_price += numRound(item.cost_price);
+        return_client_price += numRound(item.sales_price);
+        return_profit += numRound(item.cost_price) - numRound(item.sales_price);
       }
+
+      // UPDATED VOID INFORMATION
+      await common_conn.updateIsVoid(
+        invoice_id,
+        body.client_charge || 0,
+        void_charge_ctrxn_id,
+        body.invoice_void_date,
+        numRound(previousInv.invoice_sub_total) - return_client_price,
+        numRound(previousInv.invoice_discount) - body.void_discount,
+        numRound(previousInv.invoice_net_total) - body.void_discount,
+        numRound(previousInv.invoice_total_vendor_price) - return_vendor_price,
+        numRound(previousInv.invoice_total_profit) - return_profit
+      );
 
       await this.insertAudit(req, 'delete', content, req.user_id, 'INVOICES');
 

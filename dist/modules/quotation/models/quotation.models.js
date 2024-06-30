@@ -97,7 +97,11 @@ class QuotationModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const [quotation] = yield this.query()
                 .from('trabill_quotations')
-                .select('quotation_no as q_number', 'quotation_date as sales_date', 'quotation_discount_total as discount', 'quotation_created_by as user', 'quotation_inv_payment as payment')
+                .select('quotation_no as q_number', 'quotation_date as sales_date', 'quotation_discount_total as discount', 'quotation_created_by as user', 'quotation_inv_payment as payment', this.db.raw(`COALESCE(client_name,  combine_name) as client_name`), this.db.raw(`COALESCE(client_mobile, combine_mobile) as client_mobile`))
+                .leftJoin('trabill_clients', 'client_id', 'quotation_client_id')
+                .leftJoin('trabill_combined_clients', {
+                'trabill_combined_clients.combine_id': 'quotation_combined_id',
+            })
                 .where('quotation_id', quotation_id);
             return quotation;
         });
@@ -142,10 +146,9 @@ class QuotationModel extends abstract_models_1.default {
                 : null;
             to_date ? (to_date = (0, moment_1.default)(new Date(to_date)).format('YYYY-MM-DD')) : null;
             const data = yield this.query()
-                .select('quotation_id', this.db.raw(`COALESCE(client_name, company_name, combine_name) as client_name`), this.db.raw(`COALESCE(client_mobile, company_contact_no, combine_mobile) as client_mobile`), 'quotation_no', 'quotation_type', 'quotation_net_total', 'quotation_discount_total', 'quotation_date', 'quotation_note', 'quotation_is_confirm', 'quotation_is_deleted')
+                .select('quotation_id', this.db.raw(`COALESCE(client_name,  combine_name) as client_name`), this.db.raw(`COALESCE(client_mobile, combine_mobile) as client_mobile`), 'quotation_no', 'quotation_type', 'quotation_net_total', 'quotation_discount_total', 'quotation_date', 'quotation_note', 'quotation_is_confirm', 'quotation_is_deleted')
                 .from('trabill_quotations')
                 .leftJoin('trabill_clients', 'client_id', 'quotation_client_id')
-                .leftJoin('trabill_client_company_information', 'company_client_id', 'quotation_client_id')
                 .leftJoin('trabill_combined_clients', {
                 'trabill_combined_clients.combine_id': 'quotation_combined_id',
             })

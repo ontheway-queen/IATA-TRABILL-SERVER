@@ -216,7 +216,7 @@ class EditInvoiceAirticket extends abstract_services_1.default {
                                 yield common_conn.insertPaxIfNotExist(invoice_id, airticketId, passport.passport_id);
                             }
                             else if ((passport === null || passport === void 0 ? void 0 : passport.passport_name) && passport.is_deleted !== 1) {
-                                yield common_conn.insertInvoiceAirticketPaxName(invoice_id, airticketId, passport === null || passport === void 0 ? void 0 : passport.passport_name, passport.passport_person_type, passport.passport_mobile_no, passport.passport_email);
+                                yield common_conn.insertInvoiceAirticketPaxName(invoice_id, airticketId, passport === null || passport === void 0 ? void 0 : passport.passport_name, passport.passport_mobile_no, passport.passport_email, passport.passport_person_type);
                             }
                         }
                     }

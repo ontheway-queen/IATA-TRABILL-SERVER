@@ -95,6 +95,9 @@ const formatTicketDetails = (conn, pnrData, airticket_route_or_sector) => __awai
 });
 exports.formatTicketDetails = formatTicketDetails;
 const capitalize = (str) => {
+    if (!str) {
+        return undefined;
+    }
     return str.toLowerCase().replace(/(^|\s)\S/g, function (firstLetter) {
         return firstLetter.toUpperCase();
     });

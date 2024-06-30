@@ -31,16 +31,26 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .whereNot('invclientpayment_is_deleted', 1));
             return data.total;
         });
-        this.updateIsVoid = (invoiceId, invoice_void_charge, void_charge_ctrxn_id, invoice_void_date) => __awaiter(this, void 0, void 0, function* () {
+        this.updateIsVoid = (invoiceId, invoice_void_charge, void_charge_ctrxn_id, invoice_void_date, invoice_sub_total, invoice_discount, invoice_net_total, invoice_total_vendor_price, invoice_total_profit) => __awaiter(this, void 0, void 0, function* () {
             yield this.query()
                 .update({
                 invoice_void_charge,
                 invoice_is_void: 1,
                 invoice_void_ctrxn_id: void_charge_ctrxn_id,
                 invoice_void_date,
+                invoice_sub_total,
+                invoice_net_total,
+                invoice_total_vendor_price,
+                invoice_total_profit,
             })
                 .into('trabill_invoices')
-                .where('invoice_id', invoiceId);
+                .where({ invoiceId });
+            yield this.query()
+                .update({
+                invoice_discount,
+            })
+                .into('trabill_invoices_extra_amounts')
+                .where('extra_amount_invoice_id', invoiceId);
         });
         this.getProductsName = (productIds) => __awaiter(this, void 0, void 0, function* () {
             if (productIds.length) {
@@ -401,7 +411,7 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .into('trabill_invoice_airticket_pax');
         });
     }
-    insertInvoiceAirticketPaxName(p_invoice_id, p_airticket_id, p_passport_name, p_passport_type, p_mobile_no, p_email) {
+    insertInvoiceAirticketPaxName(p_invoice_id, p_airticket_id, p_passport_name, p_mobile_no, p_email, p_passport_type) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.query()
                 .insert({

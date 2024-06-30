@@ -473,6 +473,30 @@ class InvoiceAirticketModel extends AbstractModels {
       .where('airticket_invoice_id', invoice_id);
   };
 
+  public async getInvoiceData(invoice_id: idType) {
+    const [data] = await this.query()
+      .from('trabill_invoices')
+      .select(
+        'invoice_net_total',
+        'invoice_sub_total',
+        'invoice_discount',
+        'invoice_total_vendor_price',
+        'invoice_total_profit'
+      )
+      .where('invoice_id', invoice_id)
+      .leftJoin('trabill_invoices_extra_amounts', {
+        extra_amount_invoice_id: 'invoice_id',
+      });
+
+    return data as {
+      invoice_net_total: number;
+      invoice_sub_total: number;
+      invoice_discount: number;
+      invoice_total_vendor_price: number;
+      invoice_total_profit: number;
+    };
+  }
+
   voidAirticketItems = async (
     airticket_id: idType,
     invoice_id: number,
@@ -771,6 +795,7 @@ class InvoiceAirticketModel extends AbstractModels {
         'invoice_category_id as cate_id',
         'invoice_no',
         'client_name',
+        'invoice_discount',
         'comb_client',
         'net_total'
       )

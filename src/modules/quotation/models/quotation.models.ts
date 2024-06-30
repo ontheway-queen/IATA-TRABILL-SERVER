@@ -41,8 +41,14 @@ class QuotationModel extends AbstractModels {
         'quotation_date as sales_date',
         'quotation_discount_total as discount',
         'quotation_created_by as user',
-        'quotation_inv_payment as payment'
+        'quotation_inv_payment as payment',
+        this.db.raw(`COALESCE(client_name,  combine_name) as client_name`),
+        this.db.raw(`COALESCE(client_mobile, combine_mobile) as client_mobile`)
       )
+      .leftJoin('trabill_clients', 'client_id', 'quotation_client_id')
+      .leftJoin('trabill_combined_clients', {
+        'trabill_combined_clients.combine_id': 'quotation_combined_id',
+      })
       .where('quotation_id', quotation_id);
 
     return quotation as {
@@ -112,12 +118,8 @@ class QuotationModel extends AbstractModels {
     const data = await this.query()
       .select(
         'quotation_id',
-        this.db.raw(
-          `COALESCE(client_name, company_name, combine_name) as client_name`
-        ),
-        this.db.raw(
-          `COALESCE(client_mobile, company_contact_no, combine_mobile) as client_mobile`
-        ),
+        this.db.raw(`COALESCE(client_name,  combine_name) as client_name`),
+        this.db.raw(`COALESCE(client_mobile, combine_mobile) as client_mobile`),
         'quotation_no',
         'quotation_type',
         'quotation_net_total',
@@ -129,11 +131,6 @@ class QuotationModel extends AbstractModels {
       )
       .from('trabill_quotations')
       .leftJoin('trabill_clients', 'client_id', 'quotation_client_id')
-      .leftJoin(
-        'trabill_client_company_information',
-        'company_client_id',
-        'quotation_client_id'
-      )
       .leftJoin('trabill_combined_clients', {
         'trabill_combined_clients.combine_id': 'quotation_combined_id',
       })

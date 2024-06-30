@@ -173,9 +173,9 @@ class CommonInvoiceModel extends AbstractModels {
     p_invoice_id: number,
     p_airticket_id: number,
     p_passport_name: string,
-    p_passport_type: 'Adult' | 'Child' | 'Infant' | string,
     p_mobile_no: string,
-    p_email: string
+    p_email: string,
+    p_passport_type?: string
   ) {
     await this.query()
       .insert({
@@ -290,7 +290,12 @@ class CommonInvoiceModel extends AbstractModels {
     invoiceId: idType,
     invoice_void_charge: number,
     void_charge_ctrxn_id: null | number,
-    invoice_void_date: string
+    invoice_void_date: string,
+    invoice_sub_total: number,
+    invoice_discount: number,
+    invoice_net_total: number,
+    invoice_total_vendor_price: number,
+    invoice_total_profit: number
   ) => {
     await this.query()
       .update({
@@ -298,9 +303,20 @@ class CommonInvoiceModel extends AbstractModels {
         invoice_is_void: 1,
         invoice_void_ctrxn_id: void_charge_ctrxn_id,
         invoice_void_date,
+        invoice_sub_total,
+        invoice_net_total,
+        invoice_total_vendor_price,
+        invoice_total_profit,
       })
       .into('trabill_invoices')
-      .where('invoice_id', invoiceId);
+      .where({ invoiceId });
+
+    await this.query()
+      .update({
+        invoice_discount,
+      })
+      .into('trabill_invoices_extra_amounts')
+      .where('extra_amount_invoice_id', invoiceId);
   };
 
   getProductsName = async (productIds: number[]) => {

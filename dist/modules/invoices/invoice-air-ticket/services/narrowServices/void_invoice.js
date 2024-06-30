@@ -15,6 +15,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const abstract_services_1 = __importDefault(require("../../../../../abstracts/abstract.services"));
 const Trxns_1 = __importDefault(require("../../../../../common/helpers/Trxns"));
 const common_helper_1 = require("../../../../../common/helpers/common.helper");
+const lib_1 = require("../../../../../common/utils/libraries/lib");
 class VoidInvoice extends abstract_services_1.default {
     constructor() {
         super();
@@ -26,14 +27,15 @@ class VoidInvoice extends abstract_services_1.default {
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const conn = this.models.invoiceAirticketModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
-                const content = `FARE BDT ${body.net_total}/- \nCHARGE BDT ${body.client_charge || 0}/-`;
+                const previousInv = yield conn.getInvoiceData(invoice_id);
+                const content = `VOID TKT FARE BDT ${body.void_amount}/- \nCHARGE BDT ${body.client_charge || 0}/-`;
                 const ticket_nos = body.invoice_vendors
                     .map((item) => item.airticket_ticket_no)
                     .join(',');
                 // CLIENT TRANSACTION
                 const clientNetTotalTrans = {
                     ctrxn_type: 'CREDIT',
-                    ctrxn_amount: body.net_total,
+                    ctrxn_amount: body.void_amount,
                     ctrxn_cl: body.comb_client,
                     ctrxn_voucher: body.invoice_no,
                     ctrxn_particular_id: 56,
@@ -56,9 +58,6 @@ class VoidInvoice extends abstract_services_1.default {
                     };
                     void_charge_ctrxn_id = yield trxns.clTrxnInsert(voidChargeClTrans);
                 }
-                // UPDATED VOID INFORMATION
-                yield common_conn.updateIsVoid(invoice_id, body.client_charge || 0, void_charge_ctrxn_id, body.invoice_void_date);
-                // ======================= REDUCE VENDOR INFO
                 // Initialize a result object
                 const reducedData = {};
                 // Process each ticket
@@ -92,6 +91,9 @@ class VoidInvoice extends abstract_services_1.default {
                 }
                 // Convert the object to an array
                 const resultArray = Object.values(reducedData);
+                let return_vendor_price = 0;
+                let return_client_price = 0;
+                let return_profit = 0;
                 //   VENDOR TRANSACTIONS
                 for (const item of resultArray) {
                     const { vendor_id } = (0, common_helper_1.separateCombClientToId)(item.comb_vendor);
@@ -121,7 +123,12 @@ class VoidInvoice extends abstract_services_1.default {
                         };
                         yield trxns.VTrxnInsert(vendorVoidCharge);
                     }
+                    return_vendor_price += (0, lib_1.numRound)(item.cost_price);
+                    return_client_price += (0, lib_1.numRound)(item.sales_price);
+                    return_profit += (0, lib_1.numRound)(item.cost_price) - (0, lib_1.numRound)(item.sales_price);
                 }
+                // UPDATED VOID INFORMATION
+                yield common_conn.updateIsVoid(invoice_id, body.client_charge || 0, void_charge_ctrxn_id, body.invoice_void_date, (0, lib_1.numRound)(previousInv.invoice_sub_total) - return_client_price, (0, lib_1.numRound)(previousInv.invoice_discount) - body.void_discount, (0, lib_1.numRound)(previousInv.invoice_net_total) - body.void_discount, (0, lib_1.numRound)(previousInv.invoice_total_vendor_price) - return_vendor_price, (0, lib_1.numRound)(previousInv.invoice_total_profit) - return_profit);
                 yield this.insertAudit(req, 'delete', content, req.user_id, 'INVOICES');
                 return { success: true, message: content };
             }));

@@ -97,6 +97,7 @@ class InvoiceAirticketModel extends abstract_models_1.default {
             })
                 .leftJoin('trabill_passport_details', 'passport_id', 'p_passport_id')
                 .where('airticket_invoice_id', invoiceId)
+                .andWhereNot('airticket_is_deleted', 1)
                 .groupBy('airticket_id');
         });
         this.getAirticketItems = (invoiceId) => __awaiter(this, void 0, void 0, function* () {

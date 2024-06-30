@@ -266,6 +266,7 @@ class InvoiceAirticketModel extends AbstractModels {
       })
       .leftJoin('trabill_passport_details', 'passport_id', 'p_passport_id')
       .where('airticket_invoice_id', invoiceId)
+      .andWhereNot('airticket_is_deleted', 1)
       .groupBy('airticket_id');
   };
 
@@ -481,7 +482,8 @@ class InvoiceAirticketModel extends AbstractModels {
         'invoice_sub_total',
         'invoice_discount',
         'invoice_total_vendor_price',
-        'invoice_total_profit'
+        'invoice_total_profit',
+        'invoice_void_charge'
       )
       .where('invoice_id', invoice_id)
       .leftJoin('trabill_invoices_extra_amounts', {
@@ -494,6 +496,7 @@ class InvoiceAirticketModel extends AbstractModels {
       invoice_discount: number;
       invoice_total_vendor_price: number;
       invoice_total_profit: number;
+      invoice_void_charge: number;
     };
   }
 
@@ -511,7 +514,7 @@ class InvoiceAirticketModel extends AbstractModels {
     // 2. airticket items
     await this.query()
       .update({
-        airticket_is_deleted: 1,
+        // airticket_is_deleted: 1,
         airticket_is_void: 1,
         airticket_deleted_by: deleted_by,
       })
@@ -529,7 +532,7 @@ class InvoiceAirticketModel extends AbstractModels {
       .andWhere('p_invoice_id', invoice_id);
   };
 
-  // EMAIL SEND QUERYS
+  // EMAIL SEND QUERY
   public getInvoiceClientInfo = async (invoice_id: idType) => {
     const [data] = await this.db('trabill_invoices')
       .select(

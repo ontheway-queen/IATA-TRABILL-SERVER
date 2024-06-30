@@ -711,7 +711,7 @@ class RefundModel extends abstract_models_1.default {
     getAitRefundInfo(airticket_id, category_id) {
         return __awaiter(this, void 0, void 0, function* () {
             const [data] = (yield this.query()
-                .select('airticket_pnr', 'passport_name', 'airticket_routes', 'airticket_ticket_no')
+                .select('airticket_pnr', 'passport_name', 'airticket_routes', 'airticket_ticket_no', 'airticket_client_price', 'airticket_purchase_price')
                 .from('view_all_airticket_details')
                 .where('invoice_category_id', category_id)
                 .andWhere('airticket_id', airticket_id));

@@ -97,6 +97,7 @@ class InvoiceAirticketModel extends abstract_models_1.default {
             })
                 .leftJoin('trabill_passport_details', 'passport_id', 'p_passport_id')
                 .where('airticket_invoice_id', invoiceId)
+                .andWhereNot('airticket_is_deleted', 1)
                 .groupBy('airticket_id');
         });
         this.getAirticketItems = (invoiceId) => __awaiter(this, void 0, void 0, function* () {
@@ -178,7 +179,7 @@ class InvoiceAirticketModel extends abstract_models_1.default {
             // 2. airticket items
             yield this.query()
                 .update({
-                airticket_is_deleted: 1,
+                // airticket_is_deleted: 1,
                 airticket_is_void: 1,
                 airticket_deleted_by: deleted_by,
             })
@@ -194,7 +195,7 @@ class InvoiceAirticketModel extends abstract_models_1.default {
                 .where('p_airticket_id', airticket_id)
                 .andWhere('p_invoice_id', invoice_id);
         });
-        // EMAIL SEND QUERYS
+        // EMAIL SEND QUERY
         this.getInvoiceClientInfo = (invoice_id) => __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.db('trabill_invoices')
                 .select('invoice_client_id as client_id', 'invoice_combined_id as combined_id', 'invoice_org_agency', 'invoice_no', 'invoice_sales_date')
@@ -445,7 +446,7 @@ class InvoiceAirticketModel extends abstract_models_1.default {
         return __awaiter(this, void 0, void 0, function* () {
             const [data] = yield this.query()
                 .from('trabill_invoices')
-                .select('invoice_net_total', 'invoice_sub_total', 'invoice_discount', 'invoice_total_vendor_price', 'invoice_total_profit')
+                .select('invoice_net_total', 'invoice_sub_total', 'invoice_discount', 'invoice_total_vendor_price', 'invoice_total_profit', 'invoice_void_charge')
                 .where('invoice_id', invoice_id)
                 .leftJoin('trabill_invoices_extra_amounts', {
                 extra_amount_invoice_id: 'invoice_id',

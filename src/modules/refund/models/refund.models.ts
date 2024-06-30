@@ -423,7 +423,9 @@ class RefundModel extends AbstractModels {
         'airticket_pnr',
         'passport_name',
         'airticket_routes',
-        'airticket_ticket_no'
+        'airticket_ticket_no',
+        'airticket_client_price',
+        'airticket_purchase_price'
       )
       .from('view_all_airticket_details')
       .where('invoice_category_id', category_id)
@@ -432,6 +434,8 @@ class RefundModel extends AbstractModels {
       passport_name: string;
       airticket_pnr: string;
       airticket_ticket_no: string;
+      airticket_client_price: number;
+      airticket_purchase_price: number;
     }[];
 
     return data;

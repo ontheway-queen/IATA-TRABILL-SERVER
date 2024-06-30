@@ -21,7 +21,7 @@ class AddAirTicketRefund extends abstract_services_1.default {
     constructor() {
         super();
         this.addAirTicketRefund = (req) => __awaiter(this, void 0, void 0, function* () {
-            const { client_refund_info, vendor_refund_info, invoice_id, comb_client, created_by, date, note, } = req.body;
+            const { client_refund_info, vendor_refund_info, invoice_id, comb_client, created_by, adjust_discount, date, note, } = req.body;
             const totalVReturnAmount = vendor_refund_info.reduce((total, item) => total + Number(item.vrefund_return_amount || 0), 0);
             const crefund_profit = totalVReturnAmount -
                 Number(client_refund_info.crefund_return_amount || 0);
@@ -32,6 +32,7 @@ class AddAirTicketRefund extends abstract_services_1.default {
                 const mr_conn = this.models.MoneyReceiptModels(req, trx);
                 const common_conn = this.models.CommonInvoiceModel(req, trx);
                 const vendor_conn = this.models.vendorModel(req, trx);
+                const air_tkt_conn = this.models.invoiceAirticketModel(req, trx);
                 const trxns = new Trxns_1.default(req, trx);
                 const { invoice_payment } = yield conn.getInvoiceDuePayment(invoice_id);
                 const { crefund_charge_amount, crefund_payment_type, crefund_total_amount, payment_method, crefund_return_amount, crefund_account_id, trxn_charge_amount, crefund_note, } = client_refund_info;
@@ -40,14 +41,34 @@ class AddAirTicketRefund extends abstract_services_1.default {
                 let airticketRoute = [];
                 let passportName = [];
                 let airticketNo = [];
+                let return_vendor_price = 0;
+                let return_client_price = 0;
+                let return_profit = 0;
                 // Assuming vendor_refund_info is an array
                 yield Promise.all(vendor_refund_info.map((item) => __awaiter(this, void 0, void 0, function* () {
-                    const { airticket_pnr, airticket_routes, passport_name, airticket_ticket_no, } = yield conn.getAitRefundInfo(item.airticket_id, item.invoice_category_id);
+                    const { airticket_pnr, airticket_routes, passport_name, airticket_ticket_no, airticket_client_price, airticket_purchase_price, } = yield conn.getAitRefundInfo(item.airticket_id, item.invoice_category_id);
                     airtickerPnr = airtickerPnr.concat(airticket_pnr);
                     airticketRoute = airticketRoute.concat(airticket_routes);
                     passportName = passportName.concat(passport_name);
                     airticketNo = airticketNo.concat(airticket_ticket_no);
+                    return_vendor_price += (0, lib_1.numRound)(airticket_client_price);
+                    return_client_price += (0, lib_1.numRound)(airticket_purchase_price);
+                    return_profit +=
+                        (0, lib_1.numRound)(airticket_client_price) -
+                            (0, lib_1.numRound)(airticket_purchase_price);
                 })));
+                const previousInv = yield air_tkt_conn.getInvoiceData(invoice_id);
+                // UPDATED VOID INFORMATION
+                const invInfo = {
+                    invoice_id,
+                    invoice_sub_total: (0, lib_1.numRound)(previousInv.invoice_sub_total) - return_client_price,
+                    invoice_discount: (0, lib_1.numRound)(previousInv.invoice_discount) - (0, lib_1.numRound)(adjust_discount),
+                    invoice_net_total: (0, lib_1.numRound)(previousInv.invoice_net_total) - (0, lib_1.numRound)(adjust_discount),
+                    invoice_total_vendor_price: (0, lib_1.numRound)(previousInv.invoice_total_vendor_price) -
+                        return_vendor_price,
+                    invoice_total_profit: (0, lib_1.numRound)(previousInv.invoice_total_profit) - return_profit,
+                };
+                yield common_conn.updateIsVoid(invInfo);
                 let atrefund_trxn_charge_id = null;
                 // TRANSACTION CHARGE FOR MOBILE BANKING
                 if (payment_method === 3 && trxn_charge_amount) {

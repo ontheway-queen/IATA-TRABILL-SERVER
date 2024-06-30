@@ -60,6 +60,7 @@ class VoidInvoice extends abstract_services_1.default {
                 }
                 // Initialize a result object
                 const reducedData = {};
+                let return_vendor_price = 0;
                 // Process each ticket
                 for (const ticket of body.invoice_vendors) {
                     const vendorId = ticket.comb_vendor;
@@ -83,6 +84,7 @@ class VoidInvoice extends abstract_services_1.default {
                     }
                     else if (body.cate_id === 5) {
                     }
+                    return_vendor_price += (0, lib_1.numRound)(ticket.cost_price);
                 }
                 // Convert lists to comma-separated strings
                 for (const vendorId in reducedData) {
@@ -91,9 +93,6 @@ class VoidInvoice extends abstract_services_1.default {
                 }
                 // Convert the object to an array
                 const resultArray = Object.values(reducedData);
-                let return_vendor_price = 0;
-                let return_client_price = 0;
-                let return_profit = 0;
                 //   VENDOR TRANSACTIONS
                 for (const item of resultArray) {
                     const { vendor_id } = (0, common_helper_1.separateCombClientToId)(item.comb_vendor);
@@ -123,12 +122,25 @@ class VoidInvoice extends abstract_services_1.default {
                         };
                         yield trxns.VTrxnInsert(vendorVoidCharge);
                     }
-                    return_vendor_price += (0, lib_1.numRound)(item.cost_price);
-                    return_client_price += (0, lib_1.numRound)(item.sales_price);
-                    return_profit += (0, lib_1.numRound)(item.cost_price) - (0, lib_1.numRound)(item.sales_price);
                 }
                 // UPDATED VOID INFORMATION
-                yield common_conn.updateIsVoid(invoice_id, body.client_charge || 0, void_charge_ctrxn_id, body.invoice_void_date, (0, lib_1.numRound)(previousInv.invoice_sub_total) - return_client_price, (0, lib_1.numRound)(previousInv.invoice_discount) - body.void_discount, (0, lib_1.numRound)(previousInv.invoice_net_total) - body.void_discount, (0, lib_1.numRound)(previousInv.invoice_total_vendor_price) - return_vendor_price, (0, lib_1.numRound)(previousInv.invoice_total_profit) - return_profit);
+                const invInfo = {
+                    invoice_id,
+                    invoice_void_charge: (0, lib_1.numRound)(previousInv.invoice_void_charge) +
+                        (0, lib_1.numRound)(body.client_charge),
+                    invoice_void_ctrxn_id: void_charge_ctrxn_id,
+                    invoice_void_date: body.invoice_void_date,
+                    invoice_sub_total: (0, lib_1.numRound)(previousInv.invoice_sub_total) - body.net_total,
+                    invoice_discount: (0, lib_1.numRound)(previousInv.invoice_discount) - (0, lib_1.numRound)(body.void_discount),
+                    invoice_net_total: (0, lib_1.numRound)(previousInv.invoice_net_total) -
+                        (0, lib_1.numRound)(body.void_discount),
+                    invoice_total_vendor_price: (0, lib_1.numRound)(previousInv.invoice_total_vendor_price) -
+                        return_vendor_price,
+                    invoice_total_profit: (0, lib_1.numRound)(previousInv.invoice_total_profit) -
+                        (body.net_total - return_vendor_price),
+                    invoice_is_void: 1,
+                };
+                yield common_conn.updateIsVoid(invInfo);
                 yield this.insertAudit(req, 'delete', content, req.user_id, 'INVOICES');
                 return { success: true, message: content };
             }));

@@ -8,6 +8,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -31,26 +42,18 @@ class CommonInvoiceModel extends abstract_models_1.default {
                 .whereNot('invclientpayment_is_deleted', 1));
             return data.total;
         });
-        this.updateIsVoid = (invoiceId, invoice_void_charge, void_charge_ctrxn_id, invoice_void_date, invoice_sub_total, invoice_discount, invoice_net_total, invoice_total_vendor_price, invoice_total_profit) => __awaiter(this, void 0, void 0, function* () {
+        this.updateIsVoid = (data) => __awaiter(this, void 0, void 0, function* () {
+            const { invoice_id, invoice_discount } = data, air_tkt_data = __rest(data, ["invoice_id", "invoice_discount"]);
             yield this.query()
-                .update({
-                invoice_void_charge,
-                invoice_is_void: 1,
-                invoice_void_ctrxn_id: void_charge_ctrxn_id,
-                invoice_void_date,
-                invoice_sub_total,
-                invoice_net_total,
-                invoice_total_vendor_price,
-                invoice_total_profit,
-            })
+                .update(air_tkt_data)
                 .into('trabill_invoices')
-                .where({ invoiceId });
+                .where({ invoice_id });
             yield this.query()
                 .update({
                 invoice_discount,
             })
                 .into('trabill_invoices_extra_amounts')
-                .where('extra_amount_invoice_id', invoiceId);
+                .where('extra_amount_invoice_id', invoice_id);
         });
         this.getProductsName = (productIds) => __awaiter(this, void 0, void 0, function* () {
             if (productIds.length) {

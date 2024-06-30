@@ -34,6 +34,7 @@ class AddAirTicketRefund extends AbstractServices {
       invoice_id,
       comb_client,
       created_by,
+      adjust_discount,
       date,
       note,
     } = req.body as IAirTicketRefundReqBody;
@@ -56,6 +57,7 @@ class AddAirTicketRefund extends AbstractServices {
       const mr_conn = this.models.MoneyReceiptModels(req, trx);
       const common_conn = this.models.CommonInvoiceModel(req, trx);
       const vendor_conn = this.models.vendorModel(req, trx);
+      const air_tkt_conn = this.models.invoiceAirticketModel(req, trx);
       const trxns = new Trxns(req, trx);
 
       const { invoice_payment } = await conn.getInvoiceDuePayment(invoice_id);
@@ -77,6 +79,10 @@ class AddAirTicketRefund extends AbstractServices {
       let passportName: string[] = [];
       let airticketNo: string[] = [];
 
+      let return_vendor_price = 0;
+      let return_client_price = 0;
+      let return_profit = 0;
+
       // Assuming vendor_refund_info is an array
       await Promise.all(
         vendor_refund_info.map(async (item) => {
@@ -85,6 +91,8 @@ class AddAirTicketRefund extends AbstractServices {
             airticket_routes,
             passport_name,
             airticket_ticket_no,
+            airticket_client_price,
+            airticket_purchase_price,
           } = await conn.getAitRefundInfo(
             item.airticket_id,
             item.invoice_category_id
@@ -94,8 +102,34 @@ class AddAirTicketRefund extends AbstractServices {
           airticketRoute = airticketRoute.concat(airticket_routes);
           passportName = passportName.concat(passport_name);
           airticketNo = airticketNo.concat(airticket_ticket_no);
+
+          return_vendor_price += numRound(airticket_client_price);
+          return_client_price += numRound(airticket_purchase_price);
+          return_profit +=
+            numRound(airticket_client_price) -
+            numRound(airticket_purchase_price);
         })
       );
+
+      const previousInv = await air_tkt_conn.getInvoiceData(invoice_id);
+
+      // UPDATED VOID INFORMATION
+      const invInfo = {
+        invoice_id,
+        invoice_sub_total:
+          numRound(previousInv.invoice_sub_total) - return_client_price,
+        invoice_discount:
+          numRound(previousInv.invoice_discount) - numRound(adjust_discount),
+        invoice_net_total:
+          numRound(previousInv.invoice_net_total) - numRound(adjust_discount),
+        invoice_total_vendor_price:
+          numRound(previousInv.invoice_total_vendor_price) -
+          return_vendor_price,
+        invoice_total_profit:
+          numRound(previousInv.invoice_total_profit) - return_profit,
+      };
+
+      await common_conn.updateIsVoid(invInfo);
 
       let atrefund_trxn_charge_id: number | null = null;
 

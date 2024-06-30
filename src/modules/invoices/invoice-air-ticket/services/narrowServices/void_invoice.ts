@@ -71,6 +71,8 @@ class VoidInvoice extends AbstractServices {
       // Initialize a result object
       const reducedData: any = {};
 
+      let return_vendor_price = 0;
+
       // Process each ticket
       for (const ticket of body.invoice_vendors) {
         const vendorId = ticket.comb_vendor;
@@ -98,6 +100,8 @@ class VoidInvoice extends AbstractServices {
         } else if (body.cate_id === 3) {
         } else if (body.cate_id === 5) {
         }
+
+        return_vendor_price += numRound(ticket.cost_price);
       }
 
       // Convert lists to comma-separated strings
@@ -108,10 +112,6 @@ class VoidInvoice extends AbstractServices {
 
       // Convert the object to an array
       const resultArray = Object.values(reducedData) as IVoidVendorInfo[];
-
-      let return_vendor_price = 0;
-      let return_client_price = 0;
-      let return_profit = 0;
 
       //   VENDOR TRANSACTIONS
       for (const item of resultArray) {
@@ -146,24 +146,34 @@ class VoidInvoice extends AbstractServices {
 
           await trxns.VTrxnInsert(vendorVoidCharge);
         }
-
-        return_vendor_price += numRound(item.cost_price);
-        return_client_price += numRound(item.sales_price);
-        return_profit += numRound(item.cost_price) - numRound(item.sales_price);
       }
 
       // UPDATED VOID INFORMATION
-      await common_conn.updateIsVoid(
+
+      const invInfo = {
         invoice_id,
-        body.client_charge || 0,
-        void_charge_ctrxn_id,
-        body.invoice_void_date,
-        numRound(previousInv.invoice_sub_total) - return_client_price,
-        numRound(previousInv.invoice_discount) - body.void_discount,
-        numRound(previousInv.invoice_net_total) - body.void_discount,
-        numRound(previousInv.invoice_total_vendor_price) - return_vendor_price,
-        numRound(previousInv.invoice_total_profit) - return_profit
-      );
+        invoice_void_charge:
+          numRound(previousInv.invoice_void_charge) +
+          numRound(body.client_charge),
+        invoice_void_ctrxn_id: void_charge_ctrxn_id,
+        invoice_void_date: body.invoice_void_date,
+        invoice_sub_total:
+          numRound(previousInv.invoice_sub_total) - body.net_total,
+        invoice_discount:
+          numRound(previousInv.invoice_discount) - numRound(body.void_discount),
+        invoice_net_total:
+          numRound(previousInv.invoice_net_total) -
+          numRound(body.void_discount),
+        invoice_total_vendor_price:
+          numRound(previousInv.invoice_total_vendor_price) -
+          return_vendor_price,
+        invoice_total_profit:
+          numRound(previousInv.invoice_total_profit) -
+          (body.net_total - return_vendor_price),
+        invoice_is_void: 1,
+      };
+
+      await common_conn.updateIsVoid(invInfo);
 
       await this.insertAudit(req, 'delete', content, req.user_id, 'INVOICES');
 

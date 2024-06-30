@@ -7,6 +7,7 @@ export interface IAirTicketRefundReqBody {
   client_refund_info: IClientRefundInfo;
   vendor_refund_info: IVendorRefundReq[];
   note: string;
+  adjust_discount: number;
 }
 
 type paymentType = 'MONEY_RETURN' | 'ADJUST';

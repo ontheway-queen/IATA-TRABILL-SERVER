@@ -286,37 +286,31 @@ class CommonInvoiceModel extends AbstractModels {
     };
   }
 
-  updateIsVoid = async (
-    invoiceId: idType,
-    invoice_void_charge: number,
-    void_charge_ctrxn_id: null | number,
-    invoice_void_date: string,
-    invoice_sub_total: number,
-    invoice_discount: number,
-    invoice_net_total: number,
-    invoice_total_vendor_price: number,
-    invoice_total_profit: number
-  ) => {
+  updateIsVoid = async (data: {
+    invoice_id: idType;
+    invoice_void_charge?: number;
+    invoice_void_ctrxn_id?: null | number;
+    invoice_void_date?: string;
+    invoice_sub_total: number;
+    invoice_discount: number;
+    invoice_net_total: number;
+    invoice_total_vendor_price: number;
+    invoice_total_profit: number;
+    invoice_is_void?: number;
+  }) => {
+    const { invoice_id, invoice_discount, ...air_tkt_data } = data;
+
     await this.query()
-      .update({
-        invoice_void_charge,
-        invoice_is_void: 1,
-        invoice_void_ctrxn_id: void_charge_ctrxn_id,
-        invoice_void_date,
-        invoice_sub_total,
-        invoice_net_total,
-        invoice_total_vendor_price,
-        invoice_total_profit,
-      })
+      .update(air_tkt_data)
       .into('trabill_invoices')
-      .where({ invoiceId });
+      .where({ invoice_id });
 
     await this.query()
       .update({
         invoice_discount,
       })
       .into('trabill_invoices_extra_amounts')
-      .where('extra_amount_invoice_id', invoiceId);
+      .where('extra_amount_invoice_id', invoice_id);
   };
 
   getProductsName = async (productIds: number[]) => {
